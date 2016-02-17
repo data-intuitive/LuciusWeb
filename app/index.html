@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ComPass</title>
+
+  <link href='https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium' rel='stylesheet' type='text/css'>
+
+  <!-- build:css styles/main.css -->
+  <link rel="stylesheet" href="styles/main.css">
+  <!-- endbuild-->
+
+  <!-- build:js bower_components/webcomponentsjs/webcomponents.min.js -->
+  <script src="bower_components/webcomponentsjs/webcomponents.js"></script>
+  <script src="bower_components/director/build/director.min.js"></script>
+  <script src="bower_components/d3/d3.js"></script>
+  <!-- endbuild -->
+
+  <!-- will be replaced with elements/elements.vulcanized.html -->
+  <link rel="import" href="elements/elements.html">
+  <!-- endreplace-->
+</head>
+
+<body unresolved fullbleed>
+
+  <template id="app" is="auto-binding">
+
+    <core-drawer-panel id="drawerPanel" forceNarrow>
+
+      <!-- Drawer -->
+      <core-header-panel drawer>
+
+        <!-- Drawer Toolbar -->
+        <core-toolbar>
+          <core-icon icon="hardware:gamepad"></core-icon> ComPass
+        </core-toolbar>
+
+        <!-- Drawer Content -->
+        <core-menu selected="{{route}}" valueattr="data-route" on-core-select="{{closeDrawer}}">
+          <template repeat="{{route in routes}}">
+            <paper-item data-route="{{route.name}}" on-click="{{navigate}}" noink>
+              {{route.menu}}
+            </paper-item>
+          </template>
+        </core-menu>
+
+      </core-header-panel>
+
+      <!-- Main -->
+      <core-header-panel main>
+
+        <!-- Main Toolbar -->
+        <core-toolbar>
+          <paper-icon-button icon="menu" core-drawer-toggle></paper-icon-button>
+          <div id="title">{{pageTitle}}</div>
+          <app-search-bar id="search"></app-search-bar>
+        </core-toolbar>
+
+        <!-- Main Content -->
+        <div id="main" layout horizontal center-center fit>
+          <core-animated-pages id="pages" transitions="cross-fade-all" selected="{{route}}" valueattr="data-route">
+
+            <!-- Null Page -->
+            <section data-route="null" layout horizontal center-center fit>
+              <core-icon icon="hardware:gamepad" class="splash"></core-icon>
+            </section>
+
+            <!-- Dashboard Page -->
+            <section data-route="dashboard" layout vertical fit>
+              <section-dashboard graph></section-dashboard>
+            </section>
+
+            <!-- Settings Page -->
+            <section data-route="settings" fit>
+              <section-settings></section-settings>
+            </section>
+
+          </core-animated-pages>
+        </div>
+
+      </core-header-panel>
+    </core-drawer-panel>
+
+  </template>
+
+  <!-- build:js scripts/app.js -->
+  <script src="scripts/app.js"></script>
+  <!-- endbuild-->
+</body>
+
+</html>

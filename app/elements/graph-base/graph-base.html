@@ -1,0 +1,197 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/core-signals/core-signals.html">
+
+<polymer-element
+  name="graph-base" graph
+  attributes="url"
+  on-graph-active="{{handleActive}}"
+  on-transition-prepare="{{handlePrepare}}">
+
+  <template>
+    <!-- pubsub handler -->
+    <core-signals
+      on-core-signal-ajax-data-ready="{{handleAjaxData}}"
+      on-core-signal-filter-data="{{handleFilterData}}"
+      on-core-signal-unfilter-data="{{handleUnfilterData}}">
+    </core-signals>
+
+    <svg id="graph"></svg>
+  </template>
+
+  <script>
+    (function() {
+      Polymer({
+        // bindings
+        url: '',
+        data: [],
+
+        // checks before drawing graph
+        isActive: false,
+        isInit: false,
+        isDataReady: false,
+        isDataNew: false,
+        isResizing: false,
+
+        // svg
+        svg: {},
+        bg: {},
+        g: {},
+
+        // measurements
+        gWidth: 0,
+        gHeight: 0,
+        gWidthPad: 0,
+        gHeightPad: 0,
+
+        // config
+        margin: {top: 24, right: 24, bottom: 24, left: 24},
+        padding: {top: 24, right: 24, bottom: 24, left: 24},
+        colors: [],
+
+        // ready
+        ready: function() {
+          // init vars
+          this.colors = app.colors;
+
+          // window event listeners // debounced
+          var debounceResizer = this.debounce(function() {
+            this.handleResize.call(this);
+          }.bind(this), 500);
+          window.addEventListener('resize', debounceResizer);
+        },
+
+        // handlers //
+        handleResize: function() {
+          this.isResizing = true;
+          this.update();
+        },
+
+        handleActive: function(e) {
+          this.isActive = e.detail;
+        },
+
+        handlePrepare: function() {
+          if (!this.isInit && this.isActive && this.isDataReady) {
+            this.init();
+          } else if (this.isInit && this.isActive && this.isDataReady) {
+            this.update();
+          }
+        },
+
+        handleAjaxData: function() {
+          this.isDataReady = true;
+          this.isDataNew = true;
+          this.handlePrepare();
+        },
+
+        handleFilterData: function() {
+          this.isDataNew = true;
+          this.handlePrepare();
+        },
+
+        handleUnfilterData: function() {
+          this.isDataNew = true;
+          this.handlePrepare();
+        },
+
+        init: function() {
+          this.svg = d3.select(this.$.graph);
+
+          // NOTE: order of append calls defines z-order of elements
+
+          // append Background // z:1
+          this.bg = this.svg.append('rect')
+            .attr('class', 'bg');
+
+          // append Axis // z:2
+          this.initAxis();
+
+          // append Group // z:3
+          this.g = this.svg.append('g');
+
+          // update
+          this.update();
+
+          // init finished
+          this.isInit = true;
+        },
+
+        initAxis: function() {
+          // add common functionality here
+          // call this.super(); in sub-component
+        },
+
+        update: function() {
+          if (this.isActive && this.isDataReady) {
+            this.updateValues();
+          }
+
+          if (!this.isInit && this.isActive && this.isDataReady) {
+            this.initConfig();
+          }
+
+          if (this.isActive && this.isDataReady) {
+            this.updateScales();
+            this.updateGraph();
+          }
+        },
+
+        updateValues: function() {
+          this.gWidth = this.offsetWidth - this.margin.left - this.margin.right;
+          this.gWidthPad = Math.round(this.gWidth - this.padding.left - this.padding.right);
+          this.gHeight = this.offsetHeight - this.margin.top - this.margin.bottom;
+          this.gHeightPad = Math.round(this.gHeight - this.padding.top - this.padding.bottom);
+
+          this.svg
+            .attr('width', this.offsetWidth)
+            .attr('height', this.offsetHeight);
+        },
+
+        initConfig: function() {
+          // add common functionality here
+          // call this.super(); in sub-component
+        },
+
+        updateScales: function() {
+          // add common functionality here
+          // call this.super(); in sub-component
+        },
+
+        updateGraph: function() {
+          // add common functionality here
+          // call this.super(); in sub-component
+
+          // draw Background
+          this.bg
+            .attr('width', this.gWidth)
+            .attr('height', this.gHeight)
+            .attr('transform', 'translate(' +
+              this.margin.left + ', ' +
+              this.margin.top + ')');
+
+          // draw graph
+          this.g.attr('transform', 'translate(' +
+            (this.margin.left + this.padding.left) + ',' +
+            (this.margin.top + this.padding.top) + ')');
+        },
+
+        //UTILS
+        debounce: function(func, wait, immediate) {
+          var timeout;
+          return function() {
+            var context = this;
+            var args = arguments;
+            var later = function() {
+              timeout = null;
+              if (!immediate) { func.apply(context, args); }
+            };
+            var callNow = immediate && !timeout;
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+            if (callNow) { func.apply(context, args); }
+          };
+        }
+      });
+    })();
+</script>
+</polymer-element>

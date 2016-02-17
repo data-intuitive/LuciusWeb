@@ -1,0 +1,49 @@
+// NOTE: Currently in this folder because of gulp
+//       Should be in /styles
+//       Gulp is not compiling Sass when in that folder
+
+// INDIGO Pallete
+$cl-50: #e8eaf6;
+$cl-100: #c5cae9;
+$cl-200: #9fa8da;
+$cl-300: #7986cb;
+$cl-400: #5c6bc0;
+$cl-500: #3f51b5; // main
+$cl-600: #3949ab;
+$cl-700: #303f9f;
+$cl-800: #283593;
+$cl-900: #1a237e;
+
+// accent
+$cl-a200: #90caf9;
+$cl-a300: #64b5f6;
+$cl-a400: #42a5f5;
+$cl-a500: #2196f3; // main
+$cl-a600: #1e88e5;
+
+// grey
+$cl-txt: #444;
+$cl-white: #fefefe;
+$cl-grey-50: #f3f3f3;
+$cl-grey-100: #eee;
+$cl-grey-200: #ccc;
+$cl-grey-300: #bbb;
+$cl-grey-400: #aaa;
+$cl-grey-500: #999;
+$cl-grey-600: #888;
+$cl-grey-700: #777;
+$cl-grey-800: #666;
+$cl-grey-900: #555;
+$cl-black: #333;
+
+// colorbrewer2.org colors
+$cl-svg-blue: rgb(44,123,182);
+$cl-svg-blue-light: rgb(171,217,233);
+$cl-svg-yellow: rgb(255,255,191);
+$cl-svg-orange: rgb(253,174,97);
+$cl-svg-red: rgb(215,25,28);
+
+// GLOBALS
+$cl-bg: $cl-grey-100;
+
+$container-shadow: 0 1px 2px rgba(0,0,0,.1);

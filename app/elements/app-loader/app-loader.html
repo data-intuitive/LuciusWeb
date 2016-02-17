@@ -1,0 +1,37 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/core-signals/core-signals.html">
+
+
+<polymer-element
+  name="app-loader">
+
+  <template>
+    <!-- pubsub handler -->
+    <core-signals
+      on-core-signal-start-loader="{{handleStartLoader}}"
+      on-core-signal-stop-loader="{{handleStopLoader}}">
+    </core-signals>
+
+    <link rel="stylesheet" href="app-loader.css">
+
+    <div id="container">
+      <div class="loader"></div>
+    </div>
+
+  </template>
+
+
+  <script>
+    (function() {
+      Polymer({
+        handleStartLoader: function() {
+          this.$.container.classList.remove('hidden');
+        },
+
+        handleStopLoader: function() {
+          this.$.container.classList.add('hidden');
+        }
+      });
+    })();
+</script>
+</polymer-element>

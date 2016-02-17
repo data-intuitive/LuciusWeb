@@ -1,0 +1,301 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/core-list/core-list.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-action-dialog.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+
+<polymer-element
+  name="list-compound"
+  attributes="brushdata"
+  flex layout vertical>
+
+  <template>
+    <link rel="stylesheet" href="list-compound.css">
+
+    <!-- pubsub handler -->
+    <core-signals
+      on-core-signal-ajax-data-ready="{{brushdataChanged}}">
+    </core-signals>
+
+    <!-- NOTE: height must be set === to css el.row height -->
+    <!-- <core-list
+      id="list" data="{{data}}"
+      groups="{{groups}}"
+      height="112"
+      flex selectionEnabled="false"> -->
+
+      <!--
+        Zhang Score     : "zhang"
+        Target(s)       : "targets"
+        Well            : "well"
+        Year            : "year"
+        Compound Name   : "compoundname"
+        Protocol Name   : "protocolname"
+        Batch           : "batch"
+        ID              : "id"
+        PlateWell ID    : "plateid"
+        Type            : "Type"
+        JNJB            : "jnjb"
+        JNJS            : "jnjs"
+        Concentration   : "concentration"
+        SMILES          : "smiles"
+        Inchy Key       : "inchikey"
+      -->
+
+    <div id="list" layout horizontal>
+      <template repeat="{{group, groupIndex in data}}">
+        <div class="container" flex>
+          <div layout horizontal class="header {{group.type}}">
+            {{group.title}}
+          </div>
+          <template repeat="{{model, index in group.model}}">
+            <div
+              class="row {{ {selected: selected} | tokenList }}"
+              on-click="{{handleOpenDialog}}"
+              data-id="{{index}}"
+              data-groupid="{{groupIndex}}"
+              layout horizontal>
+              <div class="zhang" style="background-color:{{model.zhang | getColorValue}}">
+                <span class="full block hint--top" data-hint="{{model.zhang | getRoundValue}}"></span>
+              </div>
+              <div flex class="txt">
+                <div class="uppercase txt-big">
+                  <span class="hint--top" data-hint="PlateWell ID">
+                    <span class="ellipsis info">{{model.plateid}}</span>
+                  </span>
+                  <span class="divider"> | </span>
+                  <span class="hint--top" data-hint="Type">
+                    <span class="ellipsis info">{{model.Type}}</span>
+                  </span>
+                </div>
+                <div class="uppercase txt-big">
+                  <template if="{{model.jnjs}}">
+                    <span class="hint--top" data-hint="JNJS">
+                      <span class="ellipsis info">{{model.jnjs}}</span>
+                    </span>
+                  </template>
+                  <template if="{{model.jnjb}}">
+                    <span class="divider"> | </span>
+                    <span class="hint--top" data-hint="JNJB">
+                      <span class="ellipsis info">{{model.jnjb}}</span>
+                    </span>
+                  </template>
+                </div>
+                <div class="txt-small">
+                  <span class="block hint--top" data-hint="Compound Name">
+                    <span class="ellipsis info capitalize">{{model.compoundname}}</span>
+                  </span>
+                </div>
+                <template if="{{model.targets}}">
+                  <div class="txt-small">
+                    <span class="block hint--top" data-hint="Target(s)">
+                      <span class="ellipsis info">{{model.targets}}</span>
+                    </span>
+                  </div>
+                </template>
+              </div>
+              <div flex class="img">
+                <template if="{{model.smiles && model.smiles !== 'NA'}}">
+                  <img src="{{model.smiles | sourireURL}}?render-image-height=104" alt="model.smiles">
+                </template>
+              </div>
+            </div>
+          </template>
+        </div>
+      </template>
+    </div>
+
+    <paper-action-dialog id="detail" backdrop layered="true">
+      <div>
+        <div class="image">
+          <template if="{{dataDetail.smiles}}">
+            <div style="background-image: url('{{dataDetail.smiles | sourireURL}}?render-image-size=600,300');"></div>
+          </template>
+          <template if="{{!dataDetail.smiles}}">
+            <div>NO IMAGE</div>
+          </template>
+        </div>
+
+        <div layout horizontal>
+          <div flex>
+            <p>ID:<br><span class="info">{{dataDetail.id}}&nbsp;</span></p>
+            <p>Protocol Name:<br><span class="info uppercase">{{dataDetail.protocolname}}&nbsp;</span></p>
+            <template if="{{dataDetail.jnjs}}">
+              <p>JNJS:<br><span class="info uppercase">{{dataDetail.jnjs}}&nbsp;</span></p>
+            </template>
+            <template if="{{dataDetail.jnjb}}">
+              <p>JNJB:<br><span class="info uppercase">{{dataDetail.jnjb}}&nbsp;</span></p>
+            </template>
+          </div>
+          <div flex>
+            <p>PlateWell ID:<br><span class="info">{{dataDetail.plateid}}&nbsp;</span></p>
+            <p>Type:<br><span class="info uppercase">{{dataDetail.Type}}&nbsp;</span></p>
+            <template if="{{dataDetail.concentration}}">
+              <p>Concentration:<br><span class="info">{{dataDetail.concentration}}&nbsp;</span></p>
+            </template>
+            <template if="{{dataDetail.well}}">
+              <p>Well:<br><span class="info">{{dataDetail.well}}&nbsp;</span></p>
+            </template>
+          </div>
+          <div flex>
+            <p>Zhang Score:<br><span class="info">{{dataDetail.zhang}}&nbsp;</span></p>
+            <template if="{{dataDetail.year && dataDetail.year !== 'NA'}}">
+              <p>Year:<br><span class="info">{{dataDetail.year}}&nbsp;</span></p>
+            </template>
+            <template if="{{dataDetail.batch}}">
+              <p>Batch:<br><span class="info">{{dataDetail.batch}}&nbsp;</span></p>
+            </template>
+          </div>
+        </div>
+        <hr></hr>
+        <p>Compound Name:<br><span class="info capitalize">{{dataDetail.compoundname}}&nbsp;</span></p>
+        <template if="{{dataDetail.inchikey && dataDetail.inchikey !== 'NA'}}">
+          <p>Inchy Key:<br><span class="info">{{dataDetail.inchikey}}&nbsp;</span></p>
+        </template>
+        <template if="{{dataDetail.targets}}">
+          <p>Target(s):<br><span class="info">{{dataDetail.targets}}&nbsp;</span></p>
+        </template>
+        <template if="{{dataDetail.smiles}}">
+          <p>Smiles:<br><span class="info">{{dataDetail.smiles}}&nbsp;</span></p>
+        </template>
+
+      </div>
+      <paper-button class="blue" affirmative>CLOSE</paper-button>
+    </paper-action-dialog>
+
+    <core-ajax
+      id="ajax"
+      method="POST"
+      handleAs="json"
+      on-core-response="{{handleResponse}}">
+
+  </template>
+
+  <script>
+    (function() {
+      Polymer({
+        isBrushEmpty: true,
+        dataDetail: [],
+        topcomp: 0,
+        colors: [],
+        colorScale: null,
+
+        ready: function() {
+          // init vars
+          this.colors = app.colors;
+
+          this.$.ajax.url = app.settings.url + '?' +
+            app.settings.queryString +
+            '&classPath=' + app.settings.classPath + '.annotatedplatewellids';
+
+          this.colorScale = d3.scale.linear()
+            .domain([1, 0.5, 0, -0.5, -1])
+            .range(this.colors);
+
+          // hide sensitive information
+          if (app.settings.hideInfo) {
+            this.$.list.classList.add('hideinfo');
+            this.$.detail.classList.add('hideinfo');
+          }
+        },
+
+        handleOpenDialog: function(e, n, el) {
+          var dataFlat = [];
+          var id = +el.dataset.id + (+el.dataset.groupid * this.topcomp);
+
+          if (this.isBrushEmpty) {
+            dataFlat = dataFlat.concat(this.data[0].model, this.data[1].model);
+          } else {
+            dataFlat = this.data[0].model;
+          }
+
+          this.dataDetail = dataFlat[id];
+          this.$.detail.open();
+        },
+
+        brushdataChanged: function() {
+          this.$.list.scrollTop = 0;
+
+          var brushPWIDs = '';
+
+          if (this.brushdata && this.brushdata.length) {
+            this.isBrushEmpty = false;
+            this.brushdata.forEach(function(elem) {
+              brushPWIDs += ' ' + elem[3];
+            });
+          } else if (app.dataTop.length) {
+            this.isBrushEmpty = true;
+            app.dataTop.forEach(function(elem) {
+              brushPWIDs += ' ' + elem[3];
+            });
+          }
+
+          if (this.brushdata && this.brushdata.length || app.dataTop.length) {
+            var body = 'pwids =' + brushPWIDs + ', query = ' + app.signature;
+            this.$.ajax.body = body;
+            this.$.ajax.go();
+          }
+        },
+
+        // handle Response from ajax call
+        handleResponse: function(e) {
+          e.stopImmediatePropagation();
+
+          var json = e.detail.response;
+
+          if (json.status === 'ERROR') {
+            console.log(json);
+            console.error('ERROR in the "Feature selection" call');
+          } else {
+            this.topcomp = app.dataTop.length / 2;
+
+            if (!this.isBrushEmpty) {
+              this.data = [
+                {
+                  title: 'Selected coumpounds',
+                  type:'',
+                  // NOTE: result is being capped - performance - core-list!
+                  model: json.result.slice(0, 100)
+                }
+              ];
+
+            } else {
+              this.data = [
+                {
+                  title: 'Top ' + this.topcomp + ' positive correlations',
+                  type: 'positive',
+                  model: json.result.splice(0, this.topcomp)
+                },
+                {
+                  title: 'Top ' + this.topcomp + ' negative correlations',
+                  type: 'negative',
+                  model: json.result.sort(function(a, b) {
+                    return a.zhang - b.zhang;
+                  })
+                }
+              ];
+            }
+          }
+        },
+
+        getColorValue: function(value) {
+          if (value) {
+            return this.colorScale(value);
+          }
+        },
+
+        getRoundValue: function(value) {
+          if (value) {
+            return Number(Math.round(value + 'e3') + 'e-3');
+          }
+        },
+
+        sourireURL: function(value) {
+          if (value) {
+            return app.settings.sourireURL + '/molecule/' + encodeURIComponent(value);
+          }
+        }
+      });
+    })();
+</script>
+</polymer-element>

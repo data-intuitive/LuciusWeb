@@ -1,0 +1,56 @@
+@import "../values";
+
+:host {
+	background-color: $cl-grey-100;
+	overflow-y: auto;
+
+	.content {
+    background-color: $cl-white;
+    width: 520px;
+    padding: 24px;
+    margin: 24px auto;
+
+		section {
+			border: 1px $cl-grey-100 solid;
+			padding: 8px 16px;
+			margin: 0 0 8px;
+			border-radius: 2px;
+		}
+
+		.title {
+			margin: 16px 0 4px;
+			color: $cl-grey-400;
+			font-weight: 300;
+		}
+
+    paper-button {
+      width: 120px;
+      margin: 24px 0 0 0;
+    }
+
+		p	{
+			padding: 8px 8px;
+			background-color: $cl-grey-50;
+			color: $cl-grey-800;
+		}
+
+		paper-toggle-button {
+			padding-top: 4px;
+			float: right;
+		}
+
+		paper-toggle-button::shadow [checked] .toggle {
+		  background-color: $cl-500;
+		}
+
+		paper-toggle-button::shadow [checked] .toggle-ink {
+		  color: $cl-500;
+		}
+
+		.label {
+			width: 120px;
+			font-weight: 400;
+			color: $cl-grey-800;
+		}
+  }
+}

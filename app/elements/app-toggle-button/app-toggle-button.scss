@@ -1,0 +1,112 @@
+// Copyright (c) 2014 The Polymer Authors. All rights reserved.
+
+@import "../values";
+
+:host {
+  display: inline-block;
+}
+
+:host(:focus) {
+  outline: none;
+}
+
+/* Class selectors can be overridden by users. */
+
+.toggle-bar {
+  background-color: #000000;
+}
+
+.toggle-button {
+  background-color: #f1f1f1;
+}
+
+.toggle {
+  background-color: $cl-300;
+}
+
+[checked] .toggle {
+  // background-color: #0f9d58;
+  background-color: $cl-grey-100;
+}
+
+.toggle-ink {
+  //color: #bbb;
+  color: $cl-a500;
+}
+
+[checked] .toggle-ink {
+  //color: #0f9d58;
+  color: $cl-white;
+}
+
+/* ID selectors should not be overriden by users. */
+
+#toggleContainer {
+  position: relative;
+  width: 48px;
+  height: 20px;
+}
+
+#toggleContainer[disabled] {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+#toggleBar {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  border-radius: 10px;
+  pointer-events: none;
+  opacity: 0.4;
+  transition: background-color linear .08s;
+}
+
+[checked] #toggleBar {
+  opacity: 0.6;
+}
+
+#toggleButton {
+  position: absolute;
+  top: -5px;
+  height: 30px;
+  width: 30px;
+  border-radius: 50%;
+  box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.4);
+  transition: -webkit-transform linear .08s, background-color linear .08s;
+  transition: transform linear .08s, background-color linear .08s;
+}
+
+#toggleButton.dragging {
+  -webkit-transition: none;
+  transition: none;
+}
+
+[checked] #toggleButton {
+  -webkit-transform: translate(18px, 0);
+  transform: translate(18px, 0);
+}
+
+#ink {
+  position: absolute;
+  top: -9px;
+  left: -9px;
+  width: 48px;
+  height: 48px;
+  pointer-events: none;
+}
+
+#icon {
+  height: 24px;
+  width: 24px;
+
+  top: 0px;
+  left: 3px;
+
+  color: $cl-grey-200;
+}
+
+[checked] #icon {
+  color: $cl-500;
+}
+

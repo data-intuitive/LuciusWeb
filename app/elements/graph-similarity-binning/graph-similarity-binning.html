@@ -1,0 +1,414 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../graph-base/graph-base.html">
+
+<polymer-element
+  name="graph-similarity-binning"
+  extends="graph-base"
+  attributes="brushable brushdata bindata">
+
+  <template>
+    <link rel="stylesheet" href="graph-similarity-binning.css">
+    <div id="tooltip"><div></div></div>
+    <shadow></shadow>
+    <paper-button id="back" class="hide" on-click="{{handleBackButton}}">
+      <core-icon icon="arrow-back"></core-icon>
+    </paper-button>
+  </template>
+
+  <script src="../../bower_components/d3-plugin-hist2d/d3.hist2d.min.js"></script>
+  <script>
+    (function() {
+      Polymer({
+        // bindings
+        brushable:      false,
+        brushdata:      [],
+        bindata:        [],
+        sort:           true,
+
+        // config
+        margin:         {top: 16, right: 8, bottom: 16, left: 48},
+        padding:        {top: 16, right: 48, bottom: 16, left: 24},
+
+        noise:          2,
+
+        yScale:         null,
+        xScale:         null,
+        yAxis:          null,
+        yAxisGroup:     null,
+        colorScale:     null,
+
+        brush:          null,
+        brushG:         null,
+
+        isBrushInit:    false,
+        isDataFiltered: false,
+        isDrawBin:      false,
+
+        hist2d:         [],
+        histData:       [],
+        histW:          0,
+        histH:          0,
+        histExtent:     [],
+        binG:           {},
+        simG:           {},
+        bins:           20,
+
+        // ready : inherited
+        ready: function() {
+          this.super();
+          this.bins = app.settings.hist2dBins;
+        },
+
+        handleBackButton: function() {
+          this.fire('core-signal', {
+            name: 'unfilter-data',
+            data: null
+          });
+
+          this.bindata = [];
+        },
+
+        handleAjaxData: function(e, data) {
+          this.sort = data.sort;
+          this.data = app.data;
+          this.isDataFiltered = false;
+
+          // super after data is prepared
+          this.super();
+        },
+
+        handleFilterData: function(e, data) {
+          this.data = data.bounds ?
+                      app.data.slice(data.bounds[0], data.bounds[1] + 1) : data;
+          this.isDataFiltered = true;
+
+          // super after data is prepared
+          this.super();
+        },
+
+        handleUnfilterData: function() {
+          this.data = app.data;
+          this.isDataFiltered = false;
+
+          // super after data is prepared
+          this.super();
+        },
+
+        initAxis: function() {
+          this.super();
+
+          this.yAxis = d3.svg.axis();
+          this.yAxisGroup = this.svg.append('g')
+            .attr('class', 'y axis');
+        },
+
+        init: function () {
+          this.super();
+
+          this.binG = this.g.append('g');
+          this.simG = this.g.append('g');
+        },
+
+        updateValues: function() {
+          this.super();
+
+          // 0 = graph noise | 4 = hist2d noise  | 2 = no noise
+          if (this.isDataFiltered) {
+            this.noise = this.sort ? 0 : 2;
+          } else {
+            this.noise = this.sort ? 4 : 2;
+          }
+        },
+
+        updateScales: function() {
+          this.super();
+
+          var _this = this;
+
+          var yDomain = d3.extent(this.data, function(d) {
+            return d[1];
+          });
+          var xDomain = d3.extent(this.data, function(d) {
+            return d[_this.noise];
+          });
+
+          if (this.isDataFiltered && this.data.length === 1) {
+            yDomain = [this.data[0][1] - 0.05, this.data[0][1] + 0.05];
+            xDomain = [this.data[0][_this.noise] - 1, this.data[0][_this.noise] + 1];
+          } else if (!this.isDataFiltered) {
+            yDomain = [-1, 1];
+          }
+
+          this.yScale = d3.scale.linear()
+            .domain(yDomain)
+            .range([this.gHeightPad, 0]);
+
+          this.xScale = d3.scale.linear()
+            .domain(xDomain)
+            .range([0, this.gWidthPad]);
+
+          this.colorScale = d3.scale.linear()
+            .domain([1, 0.5, 0, -0.5, -1])
+            .range(this.colors);
+        },
+
+        updateGraph: function() {
+          this.super();
+
+          // draw Axis
+          this.yAxis
+            .scale(this.yScale)
+            .orient('left')
+            .tickSize(this.gWidth);
+
+          this.yAxisGroup
+            .attr('transform', 'translate(' +
+              (this.gWidth + this.margin.left) + ',' +
+              (this.margin.top + this.padding.top) + ')')
+            .call(this.yAxis);
+
+          if (this.isDataFiltered) {
+            this.updateSimpleGraph();
+          } else {
+            this.updateBinGraph();
+          }
+
+          this.isResizing = false;
+        },
+
+        updateBinGraph: function() {
+          if (this.isDataNew) {
+            // create Hist2D
+            this.hist2d = d3.hist2d()
+              .bins(this.bins)
+              .indices([this.noise, 1])
+              .domain([this.xScale.domain(), this.yScale.domain()])
+              (this.data, this.drawBinGraph.bind(this));
+          } else {
+            this.drawBinGraph(this.histData);
+          }
+        },
+
+        drawBinGraph: function(hist) {
+          var _this = this;
+
+          if (this.isDataNew) {
+            _this.fire('core-signal', { name: 'stop-loader' });
+            this.$.back.classList.add('hide');
+          }
+
+          this.histData = hist;
+
+          this.hist2d.size([this.gWidthPad, this.gHeightPad]);
+          this.histW = this.hist2d.size()[0];
+          this.histH = this.hist2d.size()[1];
+
+          this.histExtent = d3.extent(hist, function(d) {
+            return d.length;
+          });
+
+          var radius = Math.min(this.histW, this.histH) / 2;
+          var rScale = d3.scale.linear()
+            .domain(this.histExtent)
+            .range([radius * 0.4, radius * 1.6]);
+
+          var colorDomain = new Array(this.colors.length);
+          for (var i = 0, ii = colorDomain.length; i < ii; i++) {
+            colorDomain[i] = this.gHeightPad / (colorDomain.length - 1) * i;
+          }
+          this.colorScale.domain(colorDomain.reverse());
+
+          this.binG.attr('transform', 'translate(' +
+            (this.histW * 0.5) + ',' +
+            (-this.histH * 0.5) + ')');
+
+          this.simG.selectAll('circle').remove();
+
+          var circles = this.binG.selectAll('circle')
+            .data(hist);
+
+          circles.enter().append('circle');
+
+          circles
+            .attr('r', function(d) { return rScale(d.length); })
+            .attr('cx', function(d) { return _this.histW * d.x; })
+            .attr('cy', function(d) { return _this.gHeightPad - (_this.histH * d.y); })
+            .attr('fill', function(d) { return _this.colorScale(_this.histH * d.y); });
+
+          circles.exit().remove();
+
+          requestAnimationFrame(this.updateTooltip.bind(this));
+
+          if (this.brush && !this.isDrawBin) {
+            this.brush.clear();
+            this.brushdata = [];
+            this.brushG.remove();
+            this.bindata = [];
+          }
+
+          this.isDataNew = false;
+          this.isDrawBin = true;
+        },
+
+        updateTooltip: function () {
+          var _this = this;
+
+          var ttw = 120;
+          var tth = 120;
+          var ttt = 0;
+          var ttl = 0;
+
+          var tt = d3.select(this.$.tooltip)
+            .style('width', ttw + 'px')
+            .style('height', tth + 'px');
+
+          var ttc = tt.select('div');
+
+          this.binG.selectAll('circle')
+            .on('click', function(d) {
+              _this.fire('core-signal', {
+                name: 'filter-data',
+                data: d
+              });
+              fadeOutTooltip();
+            })
+            .on('mouseover', function(d) {
+              var fn = function(d) {
+                return d[1];
+              };
+              var median = d3.median(d, fn);
+              var extent = d3.extent(d, fn);
+
+              var html = '<p>Count: ' + d.length + '</p>';
+              html += '<p>Med: ' + roundValue(median) + '</p>';
+              html += '<p>Min: ' + roundValue(extent[0]) + '</p>';
+              html += '<p>Max: ' + roundValue(extent[1]) + '</p>';
+
+              ttc.html(html);
+              tt.transition()
+                .duration(100)
+                .style('opacity', 1);
+
+              ttt = _this.gHeight - _this.histH * d.y - tth - _this.histH;
+              ttl = _this.margin.left + _this.padding.left + _this.histW * d.x + _this.histW * 0.5 - ttw * 0.5;
+
+              if (ttt - _this.margin.top > 0) {
+                ttt = ttt - 8;
+                tt.classed({
+                    'bottom': true,
+                    'top': false
+                  })
+                  .style('left', ttl + 'px')
+                  .style('top', ttt + 'px');
+              } else {
+                ttt = ttt + tth + _this.histH + 8;
+                tt.classed({
+                    'bottom': false,
+                    'top': true
+                  })
+                  .style('left', ttl + 'px')
+                  .style('top', ttt + 'px');
+              }
+
+            })
+            .on('mouseout', function() {
+              fadeOutTooltip();
+            });
+
+          var fadeOutTooltip = function() {
+            tt.transition()
+              .duration(300)
+              .style('opacity', 0);
+          };
+
+          var roundValue = function(value) {
+            return Number(Math.round(value + 'e3') + 'e-3');
+          };
+        },
+
+        updateSimpleGraph: function() {
+          var _this = this;
+
+          this.binG.selectAll('circle').remove();
+
+          var circles = this.simG.selectAll('circle')
+            .data(this.data);
+
+          circles.enter().append('circle');
+
+          circles.attr('r', 4)
+            .attr('cy', function(d) { return _this.yScale(d[1]); })
+            .attr('cx', function(d) { return _this.xScale(d[_this.noise]); })
+            .attr('fill', function(d) { return _this.colorScale(d[1]); })
+            .classed('filtered', this.isDataFiltered);
+
+          circles.exit().remove();
+
+          if (this.brushable && !this.brush || this.isDrawBin) {
+            this.brushdata = [];
+            this.initBrush();
+            this.$.back.classList.remove('hide');
+          } else if (this.brushable) {
+            this.updateBrush();
+          }
+
+          this.bindata = this.data;
+          this.isDataNew = false;
+          this.isDrawBin = false;
+        },
+
+        initBrush: function() {
+          this.brush = d3.svg.brush();
+
+          this.brushG = this.g.append('g')
+            .attr('class', 'brush');
+
+          this.updateBrush();
+        },
+
+        updateBrush: function() {
+          var _this = this;
+          var noise = _this.noise;
+
+          this.brush
+            .x(this.xScale)
+            .y(this.yScale)
+            .on('brush', function() {
+              var e = _this.brush.extent();
+
+              // [x0, y0], [x1, y1]​
+              _this.g.selectAll('circle').classed('dimmed', function(d) {
+                return e[0][0] > d[noise] || d[noise] > e[1][0] ||
+                       e[0][1] > d[1]     || d[1]     > e[1][1];
+              });
+            })
+            .on('brushend', function() {
+              var e = _this.brush.extent();
+
+              // [x0, y0], [x1, y1]​
+              _this.brushdata = _this.data.filter(function(d) {
+                return e[0][0] <= d[noise] && d[noise] <= e[1][0] &&
+                       e[0][1] <= d[1]     && d[1]     <= e[1][1];
+              });
+
+              if (_this.brush.empty()) {
+                _this.g.selectAll('.dimmed').classed('dimmed', false);
+                _this.brushdata = [];
+              }
+            });
+
+          if (this.isBrushInit) {
+            this.g.selectAll('.dimmed').classed('dimmed', false);
+            this.brush.clear();
+            this.brushdata = [];
+          } else {
+            this.isBrushInit = true;
+          }
+
+          this.brushG.call(this.brush);
+        }
+
+      });
+    })();
+</script>
+</polymer-element>

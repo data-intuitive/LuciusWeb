@@ -1,37 +1,27 @@
+# Docker deploy of LuciusWeb
 
-# Manual
+## Docker build based on CentOS 7
 
-## Node
+Use the `Dockerfile` in this directory to build the container with the latest sources:
 
-    docker pull node
-    docker run -i -t node bash
+```
+docker build -t luciusweb .
+```
 
-    apt-get update
-    apt-get install ruby -y
-    gem install sass
-    npm install -g bower
-    npm install -g gulp
+In order to use RedHat as a base image, please make sure the correct lines are (un)commented 
 
-    cd /root
-    git clone https://bitbucket.org/vda-lab/luciusweb
-    cd luciusweb/frontend
-    git checkout develop
-    npm install
-    bower install --allow-root
-    gulp serve
+Then the image can be run like so:
 
-## docker commit
+    docker run -d -p 3000:3000 luciusweb
 
-    docker commit .... compass
+By doing this, a new image is made. Multiple apps can run simultaneously on different host ports:
 
-## Run
-
-    docker run -p 3000:3000 compass sh -c 'cd /root/luciusweb/frontend && gulp serve'
+    docker run -d -p 3001:3000 luciusweb
 
 
-# Build
+## Docker build based on latest node
 
-Include `Dockerfile`:
+If you have the liberty of choosing your base image, you can start from the [official `node` image](https://hub.docker.com/_/node/) on the Docker Hub. Something like this should work, then:
 
 ```
 FROM node:onbuild
@@ -44,87 +34,64 @@ RUN gem install sass
 RUN npm install -g bower
 RUN npm install -g gulp
 
-## Repo is password protected, gives issues...
-# RUN cd /root ; git clone https://bitbucket.org/vda-lab/luciusweb
-# RUN cd /root/luciusweb/frontend ; git checkout develop
-## So, copy from local copy
-ADD luciusweb /root/
-RUN ls /root/
-RUN cd /root/frontend ; npm install
-RUN cd /root/frontend ; bower install --allow-root
+## Repo 
+WORKDIR /root
+RUN git clone https://github.com/data-intuitive/LuciusWeb
 
-CMD cd /root/frontend ; gulp serve
+# LuciusWeb
+RUN cd /root/LuciusWeb \
+  && npm install \
+  && bower install --allow-root
+
+# RUN
+CMD cd /root/LuciusWeb && gulp serve
 ```
 
-Include `package.json`:
-
-```
-{
-  "name": "ComPass",
-  "version": "0.1.0",
-  "dependencies": {},
-  "devDependencies": {
-    "apache-server-configs": "^2.7.1",
-    "browser-sync": "^1.3.0",
-    "del": "^0.1.2",
-    "gulp": "^3.8.5",
-    "gulp-autoprefixer": "^0.0.8",
-    "gulp-cache": "^0.2.2",
-    "gulp-changed": "^1.0.0",
-    "gulp-cssmin": "^0.1.6",
-    "gulp-flatten": "^0.0.2",
-    "gulp-if": "^1.2.1",
-    "gulp-imagemin": "^1.0.0",
-    "gulp-jshint": "^1.10.0",
-    "gulp-load-plugins": "^0.5.3",
-    "gulp-minify-html": "^0.1.4",
-    "gulp-rename": "^1.2.0",
-    "gulp-replace": "^0.4.0",
-    "gulp-ruby-sass": "^0.7.1",
-    "gulp-size": "^1.0.0",
-    "gulp-uglify": "^0.3.1",
-    "gulp-uncss": "^0.4.5",
-    "gulp-useref": "^0.6.0",
-    "gulp-vulcanize": "^5.0.0",
-    "jshint-stylish": "^0.4.0",
-    "merge-stream": "^0.1.6",
-    "opn": "^1.0.0",
-    "psi": "^1.0.4",
-    "require-dir": "^0.1.0",
-    "run-sequence": "^0.3.6"
-  },
-  "engines": {
-    "node": ">=0.10.0"
-  }
-}
-```
+The base image requires you to include a `package.json` file. You can simply use the one from the LuciusWeb root directory.
 
 The docker build process picks up the luciusweb sources relative to the build path. Make sure the repo is on the correct branch for this and with the most recent upstream version.
 
-    git clone https://bitbucket.org/vda-lab/luciusweb
-    cd luciusweb
-    git checkout develop
+
+## Manual Procedure for creating a docker container
+
+You can use the following as a template for creating your own docker containers, for instance in case you need to base on a different base image.
+
+### Node
+
+    docker pull node
+    docker run -i -t node bash
+
+    apt-get update
+    apt-get install ruby -y
+    gem install sass
+    npm install -g bower
+    npm install -g gulp
+
+    cd /root
+    git clone ...
+    cd ...
+    npm install
+    bower install --allow-root
+    gulp serve
+
+### docker commit
+
+    docker commit .... luciusweb
+
+### Run
+
+    docker run -p 3000:3000 compass sh -c 'cd ... && gulp serve'
+
+
+# FAQ
+
+## Dependency resolution
 
 In order for dependencies to be resolved automatically by Bower, you need to add this to the `bower.json` file under `luciusweb/frontend`
 
     "resolutions": {
       "webcomponentsjs": "~0.6.0"
     }
-
-
-and run:
-
-    docker build compass-dev .
-
-
-Then the image can be run like so:
-
-    docker run -d -p 3000:3000 compass-dev
-
-By doing this, a new image is made. Multiple apps can run simultaneously on different host ports:
-
-    docker run -d -p 3001:3000 compass-dev
-
 
 
 ## Some more info on using `Boot2Docker` (Mac only)

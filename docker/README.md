@@ -1,11 +1,4 @@
 
-# Boot2Docker (Mac only)
-
-    boot2docker start
-    boot2docker shellinit
-    eval "$(boot2docker shellinit)"
-    docker run hello-world
-
 # Manual
 
 ## Node
@@ -133,6 +126,13 @@ By doing this, a new image is made. Multiple apps can run simultaneously on diff
     docker run -d -p 3001:3000 compass-dev
 
 
+
+## Some more info on using `Boot2Docker` (Mac only)
+
+    boot2docker start
+    boot2docker shellinit
+    eval "$(boot2docker shellinit)"
+    docker run hello-world
 
 
 

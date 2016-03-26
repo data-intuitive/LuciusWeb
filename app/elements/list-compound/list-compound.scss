@@ -59,6 +59,9 @@
 
       .txt > div {
         padding-right: 4px;
+        width:100%;
+        display: table;
+        table-layout: fixed;
       }
 
       .txt > div:last-child {

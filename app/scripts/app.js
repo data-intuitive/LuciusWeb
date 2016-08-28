@@ -28,7 +28,7 @@
     app.settings = localStorage.setItem('settings', JSON.stringify({
         version: version,
         url: 'http://ly-1-09:8090/jobs',
-        queryString: 'context=compassdev&appName=luciusapidev&sync=true',
+        queryString: 'context=compass&appName=luciusapi&sync=true',
         classPath: 'luciusapi',
         sourireURL: 'http://wt-1-00:9999',
         hist2dNoise: 0,

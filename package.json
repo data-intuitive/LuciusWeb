@@ -1,7 +1,7 @@
 {
-  "name": "a2luciusweb",
-  "version": "0.0.0",
-  "license": "MIT",
+  "name": "lucius-web",
+  "version": "2.0.0",
+  "license": "apache-2.0",
   "angular-cli": {},
   "scripts": {
     "start": "ng serve",

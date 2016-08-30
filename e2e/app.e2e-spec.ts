@@ -1,10 +1,10 @@
-import { A2luciuswebPage } from './app.po';
+import { LuciusWebPage } from './app.po';
 
-describe('a2luciusweb App', function() {
-  let page: A2luciuswebPage;
+describe('lucius-web App', function() {
+  let page: LuciusWebPage;
 
   beforeEach(() => {
-    page = new A2luciuswebPage();
+    page = new LuciusWebPage();
   });
 
   it('should display message saying app works', () => {

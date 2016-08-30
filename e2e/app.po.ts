@@ -1,4 +1,4 @@
-export class A2luciuswebPage {
+export class LuciusWebPage {
   navigateTo() {
     return browser.get('/');
   }

@@ -3,7 +3,6 @@ import { ModuleWithProviders } from '@angular/core';
 
 import { DashboardComponent} from './dashboard/dashboard.component';
 import { SettingsComponent} from './settings/settings.component';
-import { PageNotFoundComponent} from './page-not-found/page-not-found.component';
 
 const appRoutes: Routes = [
     {
@@ -16,7 +15,7 @@ const appRoutes: Routes = [
         path: 'settings', component: SettingsComponent
     },
     {
-        path: '**', component: PageNotFoundComponent
+        path: '**', component: DashboardComponent
     }
 ]
 

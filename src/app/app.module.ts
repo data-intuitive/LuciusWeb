@@ -7,14 +7,12 @@ import { routing, appRoutingProviders } from './app.routes';
 
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { SettingsComponent } from './settings/settings.component';
-import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     DashboardComponent,
-    SettingsComponent,
-    PageNotFoundComponent
+    SettingsComponent
   ],
   imports: [
     BrowserModule,

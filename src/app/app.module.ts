@@ -3,7 +3,7 @@ import { NgModule, ApplicationRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AppComponent } from './app.component';
-import { routing, appRoutingProviders } from './app.routes';
+import { routing } from './app.routes';
 
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { SettingsComponent } from './settings/settings.component';
@@ -21,7 +21,7 @@ import { SettingsComponent } from './settings/settings.component';
     routing
   ],
   providers: [
-      appRoutingProviders
+      
   ],
   entryComponents: [AppComponent],
   bootstrap: [AppComponent]

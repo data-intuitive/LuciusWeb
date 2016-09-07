@@ -6,21 +6,20 @@ import { SettingsComponent} from './settings/settings.component';
 
 const appRoutes: Routes = [
     {
-        path: '', component: DashboardComponent
+        path: '', redirectTo: '/dashboard',
+        pathMatch: 'full'
     },
     {
-        path: 'dashboard', component: DashboardComponent
+        path: 'dashboard',
+        component: DashboardComponent
     },
     {
-        path: 'settings', component: SettingsComponent
+        path: 'settings',
+        component: SettingsComponent
     },
     {
         path: '**', component: DashboardComponent
     }
 ]
-
-export const appRoutingProviders: any[] = [
-
-];
 
 export const routing: ModuleWithProviders = RouterModule.forRoot(appRoutes);

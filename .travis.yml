@@ -9,9 +9,11 @@ before_install:
   - sh -e /etc/init.d/xvfb start
   - export CHROME_BIN=chromium-browser
   - echo "--no-sandbox" > ~/.config/chromium-flags.conf;
+  - npm config set spin false
+  - npm config set progress false
 
 install:
-  - npm install
+  - npm install --no-optional
 
 script:
   - npm run lint

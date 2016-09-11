@@ -23,11 +23,4 @@ describe('App: TestLuciusWebApp', () => {
     let app = fixture.debugElement.nativeElement;
     expect(app.querySelector(':host(md-sidenav-layout > md-sidenav)')).toBeTruthy();
   }));
-
-  // it('sidebar should be closed', async(() => {
-  //   let fixture = TestBed.createComponent(AppComponent);
-  //   fixture.detectChanges();
-  //   let compiled = fixture.debugElement.nativeElement;
-  //   expect(compiled.querySelector('h1').textContent).toContain('app works!');
-  // }));
 });

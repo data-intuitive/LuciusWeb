@@ -15,7 +15,6 @@ install:
 
 script:
   - npm run lint
-  - npm run pree2e
   - npm run e2e
   # currently broken
   # - npm run test

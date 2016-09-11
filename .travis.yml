@@ -1,0 +1,21 @@
+dist: trusty
+sudo: required
+language: node_js
+node_js:
+  - "6"
+
+before_install:
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+  - export CHROME_BIN=chromium-browser
+  - echo "--no-sandbox" > ~/.config/chromium-flags.conf;
+
+install:
+  - npm install
+
+script:
+  - npm run lint
+  - npm run pree2e
+  - npm run e2e
+  # currently broken
+  # - npm run test

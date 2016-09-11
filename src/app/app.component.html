@@ -1,5 +1,18 @@
-<h1>
-  {{title}}
-</h1>
+<md-sidenav-layout>
 
-<router-outlet></router-outlet>
+  <md-sidenav
+    (close)="handleSidebarClosed()"
+    [opened]="sidebarOpen$ | async">
+
+    <div>ComPass</div>
+
+    <button md-button (click)="closeSidebar()">Close</button>
+
+  </md-sidenav>
+
+  <router-outlet></router-outlet>
+
+</md-sidenav-layout>
+
+<!-- DEBUG ngrx/store -->
+<ngrx-store-log-monitor toggleCommand="ctrl-h" positionCommand="ctrl-m"></ngrx-store-log-monitor>

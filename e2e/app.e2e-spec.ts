@@ -1,14 +1,14 @@
-import { LuciusWebPage } from './app.po';
+import { TestDashboardPage } from './app.po';
 
-describe('lucius-web App', function() {
-  let page: LuciusWebPage;
+describe('Test LuciusWeb App', function() {
+  let page: TestDashboardPage;
 
   beforeEach(() => {
-    page = new LuciusWebPage();
+    page = new TestDashboardPage();
   });
 
-  it('should display message saying app works', () => {
+  it('sidebar should be present', () => {
     page.navigateTo();
-    expect(page.getParagraphText()).toEqual('app works!');
+    expect(page.getSidebar()).toBe(true);
   });
 });

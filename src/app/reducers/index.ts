@@ -21,6 +21,6 @@ export function getNavState() {
     .select(s => s.nav);
 }
 
-export function getSidebarOpened() {
-  return compose(fromNav.getSidebarOpened(), getNavState());
+export function getSidenavOpened() {
+  return compose(fromNav.getSidenavOpened(), getNavState());
 }

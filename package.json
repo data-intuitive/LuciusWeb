@@ -20,7 +20,6 @@
     "@angular/platform-browser": "2.0.0-rc.6",
     "@angular/platform-browser-dynamic": "2.0.0-rc.6",
     "@angular/router": "^3.0.0-rc.2",
-    "@angular/upgrade": "2.0.0-rc.6",
     "@angular2-material/button": "^2.0.0-alpha.8-1",
     "@angular2-material/core": "^2.0.0-alpha.8-1",
     "@angular2-material/icon": "^2.0.0-alpha.8-1",
@@ -36,28 +35,28 @@
     "hammerjs": "^2.0.8",
     "rxjs": "^5.0.0-beta.12",
     "ts-helpers": "^1.1.1",
-    "zone.js": "^0.6.17"
+    "zone.js": "0.6.12"
   },
   "devDependencies": {
     "@ngrx/store-devtools": "^3.0.1",
     "@ngrx/store-log-monitor": "^3.0.1",
     "@types/d3": "0.0.33",
     "@types/hammerjs": "^2.0.32",
-    "@types/jasmine": "^2.2.30",
-    "@types/protractor": "^1.5.16",
+    "@types/jasmine": "^2.2.33",
+    "@types/protractor": "^1.5.18",
     "angular-cli": "1.0.0-beta.11-webpack.8",
-    "codelyzer": "~0.0.26",
+    "codelyzer": "0.0.28",
     "jasmine-core": "2.4.1",
     "jasmine-spec-reporter": "2.5.0",
     "karma": "0.13.22",
-    "karma-chrome-launcher": "0.2.3",
+    "karma-chrome-launcher": "^2.0.0",
     "karma-jasmine": "0.3.8",
     "karma-remap-istanbul": "^0.2.1",
     "ngrx-store-freeze": "^0.1.0",
     "ngrx-store-logger": "^0.1.7",
     "protractor": "4.0.3",
     "ts-node": "1.2.1",
-    "tslint": "3.13.0",
+    "tslint": "^3.13.0",
     "typescript": "^2.0.2"
   }
 }

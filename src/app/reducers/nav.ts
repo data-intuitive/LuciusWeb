@@ -15,7 +15,7 @@ const initialState: NavState = {
 
 export default function (state = initialState, action: Action): NavState {
   switch (action.type) {
-    case NavActions.TOGGLE_SIDEBAR: {
+    case NavActions.TOGGLE_SIDENAV: {
       return Object.assign({}, state, {
         open: action.payload
       });
@@ -27,7 +27,7 @@ export default function (state = initialState, action: Action): NavState {
   }
 }
 
-export function getSidebarOpened() {
+export function getSidenavOpened() {
   return (state$: Observable<NavState>) => state$
     .select(s => s.open);
 };

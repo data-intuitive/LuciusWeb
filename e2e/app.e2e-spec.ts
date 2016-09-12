@@ -7,8 +7,22 @@ describe('Test LuciusWeb App', function() {
     page = new TestDashboardPage();
   });
 
-  it('sidebar should be present', () => {
+  it('dashboard should be present', () => {
     page.navigateTo();
-    expect(page.getSidebar()).toBe(true);
+    expect(page.getDashboard()).toBe(true);
   });
+
+  it('should open sidenav', () => {
+    page.navigateTo('/dashboard');
+    page.openSidenav();
+    expect(page.isSidenavOpen()).toBe(true);
+  });
+
+  it('should close sidenav', () => {
+    page.navigateTo('/dashboard');
+    page.openSidenav();
+    page.closeSidenav();
+    expect(page.isSidenavOpen()).toBe(false);
+  });
+
 });

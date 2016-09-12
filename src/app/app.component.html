@@ -1,12 +1,12 @@
 <md-sidenav-layout>
 
-  <md-sidenav
-    (close)="handleSidebarClosed()"
-    [opened]="sidebarOpen$ | async">
+  <md-sidenav #sidenav
+    (close)="handleSidenavClosed()"
+    [opened]="sidenavOpen$ | async">
 
     <div>ComPass</div>
 
-    <button md-button (click)="closeSidebar()">Close</button>
+    <button md-button (click)="sidenav.close()">Close</button>
 
   </md-sidenav>
 

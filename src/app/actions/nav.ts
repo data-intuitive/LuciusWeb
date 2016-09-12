@@ -3,10 +3,10 @@ import { Action } from '@ngrx/store';
 
 @Injectable()
 export class NavActions {
-  static TOGGLE_SIDEBAR = '[Nav] TOGGLE Sidebar';
-  toggleSidebar(open: Boolean): Action {
+  static TOGGLE_SIDENAV = '[Nav] TOGGLE Sidenav';
+  toggleSidenav(open: Boolean): Action {
     return {
-      type: NavActions.TOGGLE_SIDEBAR,
+      type: NavActions.TOGGLE_SIDENAV,
       payload: open
     };
   }

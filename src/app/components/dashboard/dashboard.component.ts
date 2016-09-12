@@ -18,7 +18,7 @@ export class DashboardComponent {
 
   }
 
-  openSidebar() {
-    this.store.dispatch(this.navActions.toggleSidebar(true));
+  openSidenav() {
+    this.store.dispatch(this.navActions.toggleSidenav(true));
   }
 }

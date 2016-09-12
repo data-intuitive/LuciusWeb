@@ -18,7 +18,7 @@ describe('App: TestLuciusWebApp', () => {
     expect(app).toBeTruthy();
   }));
 
-  it(`should have a sidebar`, async(() => {
+  it(`should have a sidenav`, async(() => {
     let fixture = TestBed.createComponent(AppComponent);
     let app = fixture.debugElement.nativeElement;
     expect(app.querySelector(':host(md-sidenav-layout > md-sidenav)')).toBeTruthy();

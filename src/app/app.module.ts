@@ -19,8 +19,8 @@ import { reducers } from './reducers';
 import { actions } from './actions';
 
 import { AppComponent } from './app.component';
-import { DashboardComponent } from './components/dashboard/dashboard.component';
-import { SettingsComponent } from './components/settings/settings.component';
+import { DashboardComponent } from './components';
+import { SettingsComponent } from './components';
 
 @NgModule({
   declarations: [

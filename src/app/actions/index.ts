@@ -1,9 +1,12 @@
 import { NavActions } from './nav';
+import { DashActions } from './dash';
 
 export {
-  NavActions
+  NavActions,
+  DashActions
 };
 
 export const actions = [
-  NavActions
+  NavActions,
+  DashActions
 ];

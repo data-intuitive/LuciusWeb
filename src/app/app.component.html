@@ -1,11 +1,21 @@
+<md-toolbar color="primary">
+  <button class="menu-bt app-icon-button" (click)="openSidenav()">
+    <i class="material-icons app-toolbar-menu">menu</i>
+  </button>
+  <div>{{currentComponent}}</div>
+  <span class="app-toolbar-filler"></span>
+</md-toolbar>
+
 <md-sidenav-layout>
 
   <md-sidenav #sidenav
-    (close)="handleSidenavClosed()"
+    (close)="closeSidenav()"
     [opened]="sidenavOpen$ | async">
 
     <div>ComPass</div>
 
+    <button md-button (click)="navToDasboard()">Dashboard</button><br />
+    <button md-button (click)="navToSettings()">Settings</button><br />
     <button md-button (click)="sidenav.close()">Close</button>
 
   </md-sidenav>

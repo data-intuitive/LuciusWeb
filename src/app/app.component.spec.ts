@@ -1,4 +1,5 @@
 /* tslint:disable:no-unused-variable */
+/// <reference path="../../node_modules/@types/jasmine/index.d.ts"/>
 
 import { TestBed, async } from '@angular/core/testing';
 import { AppComponent } from './app.component';
@@ -12,17 +13,25 @@ import { StoreModule } from '@ngrx/store';
 import { reducers } from './reducers';
 import { actions } from './actions';
 
+import { routes } from './app.routes';
+import { DashboardComponent } from './components';
+import { SettingsComponent } from './components';
+import { APP_BASE_HREF } from '@angular/common';
+
 describe('App: LuciusWeb', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
-        AppComponent
+        AppComponent,
+        DashboardComponent,
+        SettingsComponent
       ],
       imports: [
         MdCoreModule,
         MdButtonModule,
         MdSidenavModule,
         MdIconModule,
+        routes,
 
         StoreModule.provideStore(
           reducers

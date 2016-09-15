@@ -6,7 +6,7 @@ import 'rxjs/add/operator/let';
 import { AppState, getSidenavOpened, checkIfDashEnabled } from './reducers';
 import { NavActions } from './actions/nav';
 import { DashActions } from './actions/dash';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -22,7 +22,6 @@ export class AppComponent {
     private store: Store<AppState>,
     private navActions: NavActions,
     private dashActions: DashActions,
-    private route: ActivatedRoute,
     private router: Router
   ) {
     this.currentComponent = 'Dashboard';

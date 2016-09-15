@@ -10,7 +10,7 @@ import { MdIconModule } from '@angular2-material/icon';
 import { MdToolbarModule } from '@angular2-material/toolbar';
 // import { MdCardModule } from '@angular2-material/card';
 
-import { routes } from './app.routes';
+import { routes, appRoutingProviders } from './app.routes';
 
 import { StoreModule } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
@@ -54,7 +54,8 @@ import { SettingsComponent } from './components';
     StoreLogMonitorModule
   ],
   providers: [
-    actions
+    actions,
+    appRoutingProviders
   ],
   bootstrap: [AppComponent]
 })

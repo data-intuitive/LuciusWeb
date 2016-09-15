@@ -8,7 +8,7 @@ import { MdButtonModule } from '@angular2-material/button';
 import { MdSidenavModule } from '@angular2-material/sidenav';
 import { MdIconModule } from '@angular2-material/icon';
 import { MdToolbarModule } from '@angular2-material/toolbar';
-import { MdCardModule } from '@angular2-material/card';
+// import { MdCardModule } from '@angular2-material/card';
 
 import { routes } from './app.routes';
 
@@ -34,11 +34,11 @@ import { SettingsComponent } from './components';
     HttpModule,
     FormsModule,
 
-    MdCoreModule,
-    MdButtonModule,
-    MdSidenavModule,
-    MdIconModule,
-    MdToolbarModule,
+    MdCoreModule.forRoot(),
+    MdButtonModule.forRoot(),
+    MdSidenavModule.forRoot(),
+    MdIconModule.forRoot(),
+    MdToolbarModule.forRoot(),
 
     routes,
 

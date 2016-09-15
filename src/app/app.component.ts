@@ -25,24 +25,24 @@ export class AppComponent {
     private route: ActivatedRoute,
     private router: Router
   ) {
-    this.currentComponent = "Dashboard";
+    this.currentComponent = 'Dashboard';
     this.sidenavOpen$ = store
       .let(getSidenavOpened());
     this.dashEnabled$ = store
       .let(checkIfDashEnabled());
   }
 
-  navToDasboard(){
+  navToDasboard() {
       // call to the store to update activeComponent
-      this.currentComponent = "Dashboard";
+      this.currentComponent = 'Dashboard';
       this.store.dispatch(this.dashActions.activateDashboard(true));
       this.router.navigate(['/dashboard']);
       this.closeSidenav();
   }
 
-  navToSettings(){
+  navToSettings() {
       // call to the store to update activeComponent
-      this.currentComponent = "Settings";
+      this.currentComponent = 'Settings';
       this.store.dispatch(this.dashActions.activateDashboard(false));
       this.router.navigate(['/settings']);
       this.closeSidenav();

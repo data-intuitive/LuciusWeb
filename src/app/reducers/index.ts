@@ -33,6 +33,6 @@ export function getSidenavOpened() {
   return compose(fromNav.getSidenavOpened(), getNavState());
 }
 
-export function checkIfDashEnabled(){
+export function checkIfDashEnabled() {
   return compose(fromDash.DashEnabled(), getDashState());
 }

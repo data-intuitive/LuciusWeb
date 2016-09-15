@@ -1,7 +1,7 @@
 /* tslint:disable:no-unused-variable */
 /// <reference path="../../node_modules/@types/jasmine/index.d.ts"/>
 
-import { TestBed, async } from '@angular/core/testing';
+import { TestBed, async, inject } from '@angular/core/testing';
 import { AppComponent } from './app.component';
 
 import { MdCoreModule } from '@angular2-material/core';
@@ -13,10 +13,14 @@ import { StoreModule } from '@ngrx/store';
 import { reducers } from './reducers';
 import { actions } from './actions';
 
-import { routes } from './app.routes';
+import { Router } from '@angular/router';
+
 import { DashboardComponent } from './components';
 import { SettingsComponent } from './components';
-import { APP_BASE_HREF } from '@angular/common';
+
+class FakeRouter {
+  navigate(url: string) { return url;  }
+}
 
 describe('App: LuciusWeb', () => {
   beforeEach(() => {
@@ -31,14 +35,13 @@ describe('App: LuciusWeb', () => {
         MdButtonModule,
         MdSidenavModule,
         MdIconModule,
-        routes,
-
         StoreModule.provideStore(
           reducers
         )
       ],
       providers: [
-        actions
+        actions,
+        [{provide: Router, useClass: FakeRouter}]
       ],
     });
   });
@@ -49,9 +52,10 @@ describe('App: LuciusWeb', () => {
     expect(element).toBeTruthy();
   }));
 
-  it(`should have a sidenav`, async(() => {
+  it('should have a sidenav', async(() => {
     let fixture = TestBed.createComponent(AppComponent);
     let element = fixture.debugElement.nativeElement;
     expect(element.querySelector('md-sidenav-layout > md-sidenav')).toBeTruthy();
   }));
+
 });

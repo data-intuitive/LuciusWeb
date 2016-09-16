@@ -55,7 +55,7 @@ describe('App: LuciusWeb', () => {
   }));
 
   it('should have a sidenav', async(() => {
-    let fixture = TestBed.createComponent(AppComponent);
+    let fixture = TestBed.createComponent(ToolbarComponent);
     let element = fixture.debugElement.nativeElement;
     expect(element.querySelector('md-sidenav-layout > md-sidenav')).toBeTruthy();
   }));

@@ -22,12 +22,14 @@ import { actions } from './actions';
 import { AppComponent } from './app.component';
 import { DashboardComponent } from './components';
 import { SettingsComponent } from './components';
+import { ToolbarComponent } from './components';
 
 @NgModule({
   declarations: [
     AppComponent,
     DashboardComponent,
     SettingsComponent,
+    ToolbarComponent
   ],
   imports: [
     BrowserModule,

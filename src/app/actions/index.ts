@@ -1,12 +1,9 @@
-import { NavActions } from './nav';
-import { DashActions } from './dash';
+import { LayoutActions } from './layout';
 
 export {
-  NavActions,
-  DashActions
+  LayoutActions,
 };
 
 export const actions = [
-  NavActions,
-  DashActions
+  LayoutActions
 ];

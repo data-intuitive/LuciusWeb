@@ -2,7 +2,7 @@
   <button class="menu-bt app-icon-button" (click)="openSidenav()">
     <i class="material-icons app-toolbar-menu">menu</i>
   </button>
-  <div>{{currentComponent}}</div>
+  <div>{{currentUrl}}</div>
   <span class="app-toolbar-filler"></span>
 </md-toolbar>
 
@@ -14,8 +14,8 @@
 
     <div>ComPass</div>
 
-    <button md-button (click)="navToDasboard()">Dashboard</button><br />
-    <button md-button (click)="navToSettings()">Settings</button><br />
+    <a routerLink="/dasboard">Dashboard</a>
+    <a routerLink="/settings">Settings</a>
     <button md-button (click)="sidenav.close()">Close</button>
 
   </md-sidenav>

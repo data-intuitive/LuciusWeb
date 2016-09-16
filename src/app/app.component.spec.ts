@@ -17,6 +17,7 @@ import { Router } from '@angular/router';
 
 import { DashboardComponent } from './components';
 import { SettingsComponent } from './components';
+import { ToolbarComponent } from './components';
 
 class FakeRouter {
   navigate(url: string) { return url;  }
@@ -28,7 +29,8 @@ describe('App: LuciusWeb', () => {
       declarations: [
         AppComponent,
         DashboardComponent,
-        SettingsComponent
+        SettingsComponent,
+        ToolbarComponent
       ],
       imports: [
         MdCoreModule,

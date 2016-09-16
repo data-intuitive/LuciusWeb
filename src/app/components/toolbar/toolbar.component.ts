@@ -22,8 +22,8 @@ export class ToolbarComponent implements OnInit {
     private router: Router
 ) {
       this.activePage = '';
-      this.sidenavOpen$ = store
-        .let(getSidenavOpened());
+    //   this.sidenavOpen$ = store
+    //     .let(getSidenavOpened());
   }
 
   openSidenav() {

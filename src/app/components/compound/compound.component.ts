@@ -4,11 +4,11 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../reducers';
 
 @Component({
-  selector: 'app-dashboard',
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss']
+  selector: 'app-compound',
+  templateUrl: './compound.component.html',
+  styleUrls: ['./compound.component.scss']
 })
-export class DashboardComponent {
+export class CompoundComponent {
 
   constructor(
     private store: Store<AppState>,

@@ -1,25 +1,25 @@
 import { Routes, RouterModule } from '@angular/router';
 import { ModuleWithProviders } from '@angular/core';
 
-import { DashboardComponent } from './components/dashboard/dashboard.component';
+import { CompoundComponent } from './components/compound/compound.component';
 import { SettingsComponent } from './components/settings/settings.component';
 
 const appRoutes: Routes = [
   {
     path: '',
-    redirectTo: '/dashboard',
+    redirectTo: '/compounds',
     pathMatch: 'full'
   },
   {
-    path: 'dashboard',
-    component: DashboardComponent
+    path: 'compounds',
+    component: CompoundComponent
   },
   {
     path: 'settings',
     component: SettingsComponent
   },
   {
-    path: '**', component: DashboardComponent
+    path: '**', component: CompoundComponent
   }
 ];
 

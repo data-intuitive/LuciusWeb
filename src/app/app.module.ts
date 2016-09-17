@@ -23,14 +23,14 @@ import { reducers } from './reducers';
 import { actions } from './actions';
 
 import { AppComponent } from './app.component';
-import { DashboardComponent } from './components';
+import { CompoundComponent } from './components';
 import { SettingsComponent } from './components';
 import { ToolbarComponent } from './components';
 
 @NgModule({
   declarations: [
     AppComponent,
-    DashboardComponent,
+    CompoundComponent,
     SettingsComponent,
     ToolbarComponent
   ],

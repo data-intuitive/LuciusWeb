@@ -8,7 +8,10 @@ import { MdButtonModule } from '@angular2-material/button';
 import { MdSidenavModule } from '@angular2-material/sidenav';
 import { MdIconModule } from '@angular2-material/icon';
 import { MdToolbarModule } from '@angular2-material/toolbar';
-// import { MdCardModule } from '@angular2-material/card';
+import { MdInputModule } from '@angular2-material/input';
+import { MdCardModule } from '@angular2-material/card';
+import { MdSliderModule } from '@angular2-material/slider';
+import { MdSlideToggleModule } from '@angular2-material/slide-toggle';
 
 import { routes, appRoutingProviders } from './app.routes';
 
@@ -22,12 +25,14 @@ import { actions } from './actions';
 import { AppComponent } from './app.component';
 import { DashboardComponent } from './components';
 import { SettingsComponent } from './components';
+import { ToolbarComponent } from './components';
 
 @NgModule({
   declarations: [
     AppComponent,
     DashboardComponent,
     SettingsComponent,
+    ToolbarComponent
   ],
   imports: [
     BrowserModule,
@@ -39,6 +44,10 @@ import { SettingsComponent } from './components';
     MdSidenavModule.forRoot(),
     MdIconModule.forRoot(),
     MdToolbarModule.forRoot(),
+    MdInputModule.forRoot(),
+    MdCardModule.forRoot(),
+    MdSliderModule.forRoot(),
+    MdSlideToggleModule.forRoot(),
 
     routes,
 

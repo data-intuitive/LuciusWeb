@@ -21,7 +21,6 @@ export class AppComponent {
     private layoutActions: LayoutActions,
     private router: Router
   ) {
-      this.router.events.subscribe(ev => this.closeSidenav());
       this.sidenavOpen$ = store
         .let(getSidenavOpened());
   }

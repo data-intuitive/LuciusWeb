@@ -1,16 +1,16 @@
 import { browser, element, by } from 'protractor/globals';
 
-export class TestDashboardPage {
+export class TestApp {
   navigateTo(address = '/') {
     return browser.get(address);
   }
 
-  getDashboard() {
-    return element(by.css('app-root app-dashboard')).isPresent();
+  getRouteComp(comp: string) {
+    return element(by.css(`app-root app-${comp}`)).isPresent();
   }
 
   openSidenav() {
-    return element(by.css('app-dashboard .menu-bt')).click();
+    return element(by.css('app-toolbar .menu-bt')).click();
   }
 
   closeSidenav() {

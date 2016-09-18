@@ -1,30 +1,37 @@
 /// <reference path="../node_modules/@types/jasmine/index.d.ts"/>
 
-import { TestDashboardPage } from './app.po';
+import { TestApp } from './app.po';
 
-describe('Test LuciusWeb App', function() {
-  let page: TestDashboardPage;
+describe('Test LuciusWeb', function () {
+  let page: TestApp;
 
   beforeEach(() => {
-    page = new TestDashboardPage();
+    page = new TestApp();
   });
 
-  it('dashboard should be present', () => {
-    page.navigateTo();
-    expect(page.getDashboard()).toBe(true);
+  it('compound should be present', () => {
+    let route = 'compound';
+    page.navigateTo('/' + route);
+    expect(page.getRouteComp(route)).toBe(true);
   });
 
   it('should open sidenav', () => {
-    page.navigateTo('/dashboard');
+    page.navigateTo('/');
     page.openSidenav();
     expect(page.isSidenavOpen()).toBe(true);
   });
 
   it('should close sidenav', () => {
-    page.navigateTo('/dashboard');
+    page.navigateTo('/');
     page.openSidenav();
     page.closeSidenav();
     expect(page.isSidenavOpen()).toBe(false);
+  });
+
+  it('settings should be present', () => {
+    let route = 'settings';
+    page.navigateTo('/' + route);
+    expect(page.getRouteComp(route)).toBe(true);
   });
 
 });

@@ -3,7 +3,7 @@
 
 module.exports = function (config) {
   config.set({
-    basePath: './',
+    basePath: '',
     frameworks: ['jasmine', 'angular-cli'],
     plugins: [
       require('karma-jasmine'),
@@ -23,13 +23,16 @@ module.exports = function (config) {
         lcovonly: './coverage/coverage.lcov'
       }
     },
-    angularCliConfig: './angular-cli.json',
+    angularCli: {
+      config: './angular-cli.json',
+      environment: 'dev'
+    },
     reporters: ['progress', 'karma-remap-istanbul'],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
-    autoWatch: false,
+    autoWatch: true,
     browsers: ['Chrome'],
-    singleRun: true
+    singleRun: false
   });
 };

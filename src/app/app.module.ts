@@ -2,7 +2,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
-
 import { MdCoreModule } from '@angular2-material/core';
 import { MdButtonModule } from '@angular2-material/button';
 import { MdSidenavModule } from '@angular2-material/sidenav';
@@ -12,20 +11,14 @@ import { MdInputModule } from '@angular2-material/input';
 import { MdCardModule } from '@angular2-material/card';
 import { MdSliderModule } from '@angular2-material/slider';
 import { MdSlideToggleModule } from '@angular2-material/slide-toggle';
-
-import { routes, appRoutingProviders } from './app.routes';
-
+import { routes } from './app.routes';
 import { StoreModule } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { StoreLogMonitorModule, useLogMonitor } from '@ngrx/store-log-monitor';
-
 import { reducers } from './reducers';
 import { actions } from './actions';
-
 import { AppComponent } from './app.component';
-import { CompoundComponent } from './components';
-import { SettingsComponent } from './components';
-import { ToolbarComponent } from './components';
+import { CompoundComponent, SettingsComponent, ToolbarComponent } from './components';
 
 @NgModule({
   declarations: [
@@ -63,8 +56,7 @@ import { ToolbarComponent } from './components';
     StoreLogMonitorModule
   ],
   providers: [
-    actions,
-    appRoutingProviders
+    actions
   ],
   bootstrap: [AppComponent]
 })

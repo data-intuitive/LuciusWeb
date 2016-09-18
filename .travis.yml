@@ -6,8 +6,6 @@ node_js:
   
 notifications:
   email: false
-  slack:
-    secure: i26NIfMtZc8WHdUIl1Puodrt+A4ZvzbA1jqd7/3IKKHuaoHaEqWxIvsgw+mSIIULHj0nnTrUhCb2GvvlSLpIsw1rMkxLqHMVlshosZDHWLYCfHDaecb4N5dOxdpzEBoO9YJMJv8st5vu3qNxNUTdFRmSi99KbAv8rHjyueEZ+4eJfZSkJ1v0A64Pml1hcAZu1OJ8CwH9WNNyvRNXZZs0zNjWt/VjKl+P0vHOdgXip+gX0igDjFjMcl/e0O9aB5kYYDob31SN5ENs0iaQuOOGcsfzf9vL3PktdFEmpXjZSgw5PtY3RISUxQIjnibVg200mWRxHQC0EBnI4axQBnyWVEVeD3fNBfDmrVXXOCbmVm+KjcE/gQXvy3RSRadEAbQF1kunvRSnmFoH72NYZxHpS7bk7YzMwZBL5NG6SvJwRzhtUx63Pau1Pnje6k7WMNC1HuWSAUR+/GFJA6rRwZAFZPKvJchUpI/S8NdU2NV+MMUbrnbJ+3PdlMOLHBQu4jG9Bs1/ZCSe/PYiKmIE9hQyLW82Zb/cWy2Xx9B2BhrTRa4qp3AZQ0muH2bh/N/KdoPylxmdUW5VDer54ZgLjvCa8Npgl0C1+WTf5IJkMSmQoVvJ2kjp+8gWu1C4wje3zXNwwwGVjKp1pttkxjUPARP6EfHBFZl6DNhUS1foRhjbl6A=
 
 before_install:
   - export DISPLAY=:99.0
@@ -21,5 +19,7 @@ install:
 
 script:
   - npm run lint
-  - npm run e2e
-  - npm run test
+  # TODO: ng serve needs to be running
+  # - npm run e2e
+  # TODO: needs solution for router testing in template
+  # - npm run test

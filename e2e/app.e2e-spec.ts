@@ -1,3 +1,5 @@
+/// <reference path="../node_modules/@types/jasmine/index.d.ts"/>
+
 import { TestDashboardPage } from './app.po';
 
 describe('Test LuciusWeb App', function() {

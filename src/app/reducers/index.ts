@@ -6,21 +6,21 @@ import { storeLogger } from 'ngrx-store-logger';
 import { storeFreeze } from 'ngrx-store-freeze';
 import { combineReducers } from '@ngrx/store';
 
-import navReducer, * as fromNav from './nav';
+import layoutReducer, * as fromLayout from './layout';
 
 export interface AppState {
-  nav: fromNav.NavState;
+  layout: fromLayout.LayoutState;
 }
 
 export const reducers = compose(storeFreeze, storeLogger(), combineReducers)({
-  nav: navReducer
+  layout: layoutReducer
 });
 
-export function getNavState() {
+export function getLayoutState() {
   return (state$: Observable<AppState>) => state$
-    .select(s => s.nav);
+    .select(s => s.layout);
 }
 
 export function getSidenavOpened() {
-  return compose(fromNav.getSidenavOpened(), getNavState());
+  return compose(fromLayout.getSidenavOpened(), getLayoutState());
 }

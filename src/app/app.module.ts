@@ -8,8 +8,12 @@ import { MdButtonModule } from '@angular2-material/button';
 import { MdSidenavModule } from '@angular2-material/sidenav';
 import { MdIconModule } from '@angular2-material/icon';
 import { MdToolbarModule } from '@angular2-material/toolbar';
+import { MdInputModule } from '@angular2-material/input';
+import { MdCardModule } from '@angular2-material/card';
+import { MdSliderModule } from '@angular2-material/slider';
+import { MdSlideToggleModule } from '@angular2-material/slide-toggle';
 
-import { routes } from './app.routes';
+import { routes, appRoutingProviders } from './app.routes';
 
 import { StoreModule } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
@@ -19,25 +23,31 @@ import { reducers } from './reducers';
 import { actions } from './actions';
 
 import { AppComponent } from './app.component';
-import { DashboardComponent } from './components';
+import { CompoundComponent } from './components';
 import { SettingsComponent } from './components';
+import { ToolbarComponent } from './components';
 
 @NgModule({
   declarations: [
     AppComponent,
-    DashboardComponent,
+    CompoundComponent,
     SettingsComponent,
+    ToolbarComponent
   ],
   imports: [
     BrowserModule,
     HttpModule,
     FormsModule,
 
-    MdCoreModule,
-    MdButtonModule,
-    MdSidenavModule,
-    MdIconModule,
-    MdToolbarModule,
+    MdCoreModule.forRoot(),
+    MdButtonModule.forRoot(),
+    MdSidenavModule.forRoot(),
+    MdIconModule.forRoot(),
+    MdToolbarModule.forRoot(),
+    MdInputModule.forRoot(),
+    MdCardModule.forRoot(),
+    MdSliderModule.forRoot(),
+    MdSlideToggleModule.forRoot(),
 
     routes,
 
@@ -53,7 +63,8 @@ import { SettingsComponent } from './components';
     StoreLogMonitorModule
   ],
   providers: [
-    actions
+    actions,
+    appRoutingProviders
   ],
   bootstrap: [AppComponent]
 })

@@ -3,8 +3,10 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/let';
 
+import { Router } from '@angular/router';
+
 import { AppState, getSidenavOpened } from './reducers';
-import { NavActions } from './actions/nav';
+import { LayoutActions } from './actions/layout';
 
 @Component({
   selector: 'app-root',
@@ -16,13 +18,19 @@ export class AppComponent {
 
   constructor(
     private store: Store<AppState>,
-    private navActions: NavActions
+    private layoutActions: LayoutActions,
+    private router: Router
   ) {
-    this.sidenavOpen$ = store
-      .let(getSidenavOpened());
+      this.sidenavOpen$ = store
+        .let(getSidenavOpened());
   }
 
-  handleSidenavClosed() {
-    this.store.dispatch(this.navActions.toggleSidenav(false));
+  openSidenav() {
+    this.store.dispatch(this.layoutActions.toggleSidenav(true));
   }
+
+  closeSidenav() {
+    this.store.dispatch(this.layoutActions.toggleSidenav(false));
+  }
+
 }

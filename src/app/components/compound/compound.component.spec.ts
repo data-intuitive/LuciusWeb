@@ -1,7 +1,7 @@
 /* tslint:disable:no-unused-variable */
 
 import { TestBed, async } from '@angular/core/testing';
-import { DashboardComponent } from './dashboard.component';
+import { CompoundComponent } from './compound.component';
 
 import { MdCoreModule } from '@angular2-material/core';
 import { MdButtonModule } from '@angular2-material/button';
@@ -16,7 +16,7 @@ describe('Component: Dashboard', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
-        DashboardComponent
+        CompoundComponent
       ],
       imports: [
         MdCoreModule,
@@ -35,7 +35,7 @@ describe('Component: Dashboard', () => {
   });
 
   it('should create an instance', async(() => {
-    let fixture = TestBed.createComponent(DashboardComponent);
+    let fixture = TestBed.createComponent(CompoundComponent);
     let element = fixture.debugElement.componentInstance;
     expect(element).toBeTruthy();
   }));

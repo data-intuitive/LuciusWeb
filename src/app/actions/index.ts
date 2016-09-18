@@ -1,9 +1,9 @@
-import { NavActions } from './nav';
+import { LayoutActions } from './layout';
 
 export {
-  NavActions
+  LayoutActions,
 };
 
 export const actions = [
-  NavActions
+  LayoutActions
 ];

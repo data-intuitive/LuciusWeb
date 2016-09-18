@@ -1,7 +1,11 @@
 /* tslint:disable:no-unused-variable */
+/// <reference path="../../node_modules/@types/jasmine/index.d.ts"/>
 
-import { TestBed, async } from '@angular/core/testing';
+import { TestBed, async, inject } from '@angular/core/testing';
 import { AppComponent } from './app.component';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/operator/let';
 
 import { MdCoreModule } from '@angular2-material/core';
 import { MdButtonModule } from '@angular2-material/button';
@@ -12,24 +16,37 @@ import { StoreModule } from '@ngrx/store';
 import { reducers } from './reducers';
 import { actions } from './actions';
 
+import { Router } from '@angular/router';
+
+import { CompoundComponent } from './components';
+import { SettingsComponent } from './components';
+import { ToolbarComponent } from './components';
+
+class FakeRouter {
+  navigate(url: string) {
+      return url;
+  }
+}
+
 describe('App: LuciusWeb', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
-        AppComponent
+        AppComponent,
+        CompoundComponent,
+        SettingsComponent,
+        ToolbarComponent
       ],
       imports: [
         MdCoreModule,
         MdButtonModule,
         MdSidenavModule,
         MdIconModule,
-
-        StoreModule.provideStore(
-          reducers
-        )
+        StoreModule.provideStore(reducers)
       ],
       providers: [
-        actions
+        actions,
+        [{provide: Router, useClass: FakeRouter}]
       ],
     });
   });
@@ -40,9 +57,10 @@ describe('App: LuciusWeb', () => {
     expect(element).toBeTruthy();
   }));
 
-  it(`should have a sidenav`, async(() => {
+  it('should have a sidenav', async(() => {
     let fixture = TestBed.createComponent(AppComponent);
     let element = fixture.debugElement.nativeElement;
     expect(element.querySelector('md-sidenav-layout > md-sidenav')).toBeTruthy();
   }));
+
 });

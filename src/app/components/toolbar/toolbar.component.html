@@ -1,18 +1,20 @@
-<md-toolbar color="primary">
+<md-toolbar>
   <button class="menu-bt app-icon-button" (click)="openSidenav()">
     <i class="material-icons app-toolbar-menu">menu</i>
   </button>
 
-  <div *ngIf="type == 'settings'">Settings</div>
+  <div class="app-toolbar-row"
+       *ngIf="type == 'settings'">Settings</div>
 
-  <div *ngIf="type == 'compound'">
-      <md-toolbar-row>
-          <md-input placeholder="COMPOUND"></md-input>
-          <md-input placeholder="HSPA1A DNAJB1 BAG3 P4HA2 HSPA8 TMEM97 SPR DDIT4 HMOX1 -TSEN2"></md-input>
-          <md-slide-toggle color="dynamic">Slider1</md-slide-toggle>
-          <md-slide-toggle color="dynamic">Slider2</md-slide-toggle>
-      </md-toolbar-row>
+  <div class="app-toolbar-row"
+       *ngIf="type == 'compound'">
+
+    <md-input placeholder="Compound"></md-input>
+    <md-input placeholder="Signature"></md-input>
+
+    <!-- FIXME: Update when MD2 is updated, currently broken -->
+    <md-slide-toggle>ICON</md-slide-toggle>
+    <md-slide-toggle>ICON</md-slide-toggle>
+
   </div>
-
-  <span class="app-toolbar-filler"></span>
 </md-toolbar>

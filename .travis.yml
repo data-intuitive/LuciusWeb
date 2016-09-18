@@ -19,6 +19,7 @@ install:
 
 script:
   - npm run lint
+  - npm run slint
   # TODO: ng serve needs to be running
   # - npm run e2e
   # TODO: needs solution for router testing in template

@@ -1,20 +1,22 @@
 <md-sidenav-layout>
-
   <router-outlet></router-outlet>
 
   <md-sidenav #sidenav
     (close)="closeSidenav()"
     [opened]="sidenavOpen$ | async">
 
-    <div>ComPass</div>
+    <h2>ComPass</h2>
 
-    <a routerLink="/compounds" routerLinkActive="active" (click)="sidenav.close()">Compounds</a>
-    <a routerLink="/settings" routerLinkActive="active" (click)="sidenav.close()">Settings</a>
-    <button md-button (click)="sidenav.close()">Close</button>
+    <a routerLink="/compounds"
+       routerLinkActive="active"
+       (click)="sidenav.close()">Compounds</a>
+
+    <a routerLink="/settings"
+       routerLinkActive="active"
+       (click)="sidenav.close()">Settings</a>
 
   </md-sidenav>
-
 </md-sidenav-layout>
 
 <!-- DEBUG ngrx/store -->
-<ngrx-store-log-monitor toggleCommand="ctrl-h" positionCommand="ctrl-m"></ngrx-store-log-monitor>
+<!--<ngrx-store-log-monitor toggleCommand="ctrl-h" positionCommand="ctrl-m"></ngrx-store-log-monitor>-->

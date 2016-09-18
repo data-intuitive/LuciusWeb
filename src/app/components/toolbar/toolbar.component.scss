@@ -1,47 +1,33 @@
 :host {
-  display: block;
-
-  width: 100%;
-  height: 100%;
-}
-
-md-sidenav-layout {
-  height: 100%;
-}
-
-md-sidenav {
-  width: 250px;
-  padding: 16px;
-}
-
-:host {
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
-
-  width: 100%;
-  height: 100%;
 }
 
-.app-icon-button {
-  margin: 8px 16px 8px 0;
+md-toolbar {
+  background-color: darkslateblue;
+}
+
+.app-toolbar-row {
+  display: flex;
+  align-items: stretch;
 
   color: white;
 }
 
-md-toolbar {
-  flex: 0 0 auto;
+.app-icon-button {
+  margin: 8px 16px 8px 0;
+  padding: 0;
+
+  cursor: pointer;
+  user-select: none;
+
+  color: white;
+  border: none;
+  background: none;
+  box-shadow: none;
 }
 
-.content {
+.app-toolbar-filler {
   flex: 1 1 auto;
-  overflow-x: scroll;
-
-  padding: 16px;
-}
-
-a { display:block; }
-
-a.router-link-active {
- color: #555;
- background-color: #e7e7e7;
 }

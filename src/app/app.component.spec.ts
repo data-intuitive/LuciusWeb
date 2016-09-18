@@ -3,6 +3,9 @@
 
 import { TestBed, async, inject } from '@angular/core/testing';
 import { AppComponent } from './app.component';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/operator/let';
 
 import { MdCoreModule } from '@angular2-material/core';
 import { MdButtonModule } from '@angular2-material/button';
@@ -20,7 +23,9 @@ import { SettingsComponent } from './components';
 import { ToolbarComponent } from './components';
 
 class FakeRouter {
-  navigate(url: string) { return url;  }
+  navigate(url: string) {
+      return url;
+  }
 }
 
 describe('App: LuciusWeb', () => {
@@ -37,9 +42,7 @@ describe('App: LuciusWeb', () => {
         MdButtonModule,
         MdSidenavModule,
         MdIconModule,
-        StoreModule.provideStore(
-          reducers
-        )
+        StoreModule.provideStore(reducers)
       ],
       providers: [
         actions,

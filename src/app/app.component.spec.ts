@@ -43,8 +43,8 @@ describe('App: LuciusWeb', () => {
     expect(el).toBeTruthy();
   }));
 
-  //it('should have md-sidenav in md-sidenav-layout', async(() => {
+  // it('should have md-sidenav in md-sidenav-layout', async(() => {
   //  expect(el.query(By.css('md-sidenav-layout > md-sidenav'))).toBeTruthy();
-  //}));
+  // }));
 
 });

@@ -15,7 +15,7 @@ import { actions } from './actions';
 
 import { Router } from '@angular/router';
 
-import { DashboardComponent } from './components';
+import { CompoundComponent } from './components';
 import { SettingsComponent } from './components';
 import { ToolbarComponent } from './components';
 
@@ -28,7 +28,7 @@ describe('App: LuciusWeb', () => {
     TestBed.configureTestingModule({
       declarations: [
         AppComponent,
-        DashboardComponent,
+        CompoundComponent,
         SettingsComponent,
         ToolbarComponent
       ],

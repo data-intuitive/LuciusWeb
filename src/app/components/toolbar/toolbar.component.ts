@@ -1,10 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
-
 import { AppState } from '../../reducers';
 import { LayoutActions } from '../../actions/layout';
-import { Router } from '@angular/router';
-import { Input } from '@angular/core';
 
 @Component({
   selector: 'app-toolbar',
@@ -12,21 +9,17 @@ import { Input } from '@angular/core';
   styleUrls: ['./toolbar.component.scss']
 })
 
-export class ToolbarComponent implements OnInit {
-    @Input() type: String = '';
+export class ToolbarComponent {
+  @Input() type: String = '';
 
   constructor(
-    private store: Store<AppState>,
-    private layoutActions: LayoutActions,
-    private router: Router
-) {}
+      private store: Store<AppState>,
+      private layoutActions: LayoutActions
+  ) {
+  }
 
   openSidenav() {
     this.store.dispatch(this.layoutActions.toggleSidenav(true));
-  }
-
-  ngOnInit() {
-
   }
 
 }

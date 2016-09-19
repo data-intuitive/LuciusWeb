@@ -1,0 +1,28 @@
+:host {
+  flex: 2 1 auto;
+  display: flex;
+  flex-direction: column;
+
+  box-sizing: border-box;
+  min-width: 200px;
+  margin: 16px;
+
+  background-color: white;
+  box-shadow: 0 1px 1px rgba(black, .3);
+}
+
+.title {
+  font-weight: 300;
+
+  padding: 8px;
+
+  background-color: aquamarine;
+}
+
+.content {
+  padding: 16px;
+
+  & > * {
+    margin-bottom: 16px;
+  }
+}

@@ -7,11 +7,11 @@ import { SettingsComponent } from './components/settings/settings.component';
 const appRoutes: Routes = [
   {
     path: '',
-    redirectTo: '/compounds',
+    redirectTo: '/compound',
     pathMatch: 'full'
   },
   {
-    path: 'compounds',
+    path: 'compound',
     component: CompoundComponent
   },
   {

@@ -11,9 +11,21 @@ app-toolbar {
 
 .content {
   flex: 1 1 auto;
+  display: flex;
   overflow: auto;
+  align-items: flex-start;
 
+  & > *:first-child {
+    margin-right: 0;
+  }
+}
+
+.comp {
+  flex: 6 1 auto;
+
+  margin: 16px;
   padding: 16px;
 
-  background-color: lightgrey;
+  background-color: white;
+  box-shadow: 0 1px 1px rgba(black, .3);
 }

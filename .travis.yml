@@ -19,7 +19,7 @@ install:
 
 before_script:
   - npm start &
-  - sleep 20
+  - sleep 12
 
 script:
   - npm run lint

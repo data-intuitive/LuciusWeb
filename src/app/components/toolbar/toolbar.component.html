@@ -1,20 +1,7 @@
 <md-toolbar>
-  <button class="menu-bt app-icon-button" (click)="openSidenav()">
+  <button class="menu-bt app-icon-button"
+          (click)="openSidenav()">
     <i class="material-icons app-toolbar-menu">menu</i>
   </button>
-
-  <div class="app-toolbar-row"
-       *ngIf="type == 'settings'">Settings</div>
-
-  <div class="app-toolbar-row"
-       *ngIf="type == 'compound'">
-
-    <md-input placeholder="Compound"></md-input>
-    <md-input placeholder="Signature"></md-input>
-
-    <!-- FIXME: Update when MD2 is updated, currently broken -->
-    <md-slide-toggle>ICON</md-slide-toggle>
-    <md-slide-toggle>ICON</md-slide-toggle>
-
-  </div>
+  <div class="row">{{type}}</div>
 </md-toolbar>

@@ -18,14 +18,20 @@ import { StoreLogMonitorModule, useLogMonitor } from '@ngrx/store-log-monitor';
 import { reducers } from './reducers';
 import { actions } from './actions';
 import { AppComponent } from './app.component';
-import { CompoundComponent, SettingsComponent, ToolbarComponent } from './components';
+import {
+  CompoundComponent,
+  SettingsComponent,
+  ToolbarComponent,
+  FilterComponent
+} from './components';
 
 @NgModule({
   declarations: [
     AppComponent,
     CompoundComponent,
     SettingsComponent,
-    ToolbarComponent
+    ToolbarComponent,
+    FilterComponent
   ],
   imports: [
     BrowserModule,
@@ -45,7 +51,7 @@ import { CompoundComponent, SettingsComponent, ToolbarComponent } from './compon
     routes,
 
     StoreModule.provideStore(
-      reducers
+        reducers
     ),
     StoreDevtoolsModule.instrumentStore({
       monitor: useLogMonitor({

@@ -8,15 +8,19 @@ md-toolbar {
   background-color: darkslateblue;
 }
 
-.app-toolbar-row {
+.row {
   display: flex;
   align-items: stretch;
+
+  margin: 0 16px;
+
+  text-transform: capitalize;
 
   color: white;
 }
 
 .app-icon-button {
-  margin: 8px 16px 8px 0;
+  margin: 8px 0;
   padding: 0;
 
   cursor: pointer;

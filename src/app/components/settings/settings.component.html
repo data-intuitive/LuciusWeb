@@ -1,4 +1,43 @@
 <app-toolbar type="settings"></app-toolbar>
 <div class="content">
-  This is the settings component
+    <md-card>
+        <md-card-content>
+            <md-card-subtitle>
+                Visualization
+            </md-card-subtitle>
+            <md-card>
+                <md-card-content>
+                    <div class="mylabel">Plot Noise:</div>
+                    <md-slider min="0" max="20" #slider1></md-slider><span>{{slider1.value}}</span>
+                    <div class="mylabel">Hist2D Bins:</div>
+                    <md-slider min="8" max="80" #slider2></md-slider><span>{{slider2.value}}</span>
+                    <div class="mylabel">Hist2D Noise:</div>
+                    <md-slider min="0" max="20" #slider3></md-slider><span>{{slider3.value}}</span>
+                    <div class="mylabel">Histogram Bins:</div>
+                    <md-slider min="8" max="40" #slider4></md-slider><span>{{slider4.value}}</span>
+                    <div class="mylabel">Top Comps:</div>
+                    <md-slider min="5" max="50" #slider5></md-slider><span>{{slider5.value}}</span>
+                </md-card-content>
+            </md-card>
+            <md-card-subtitle>
+                Server
+            </md-card-subtitle>
+            <md-card>
+                <md-card-content>
+                    <md-input placeholder='URL'></md-input>
+                    <md-input placeholder='Query String'></md-input>
+                    <md-input placeholder='Class Path'></md-input>
+                    <md-input placeholder='Sourire URL'></md-input>
+                </md-card-content>
+            </md-card>
+            <md-card-subtitle>
+                Misc
+            </md-card-subtitle>
+                <md-card-content>
+                    <label>Hide Compounds</label>
+                    <md-slide-toggle></md-slide-toggle>
+                </md-card-content>
+                <button md-raised-button color="primary">Save</button>
+        </md-card-content>
+    </md-card>
 </div>

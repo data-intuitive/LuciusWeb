@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Store } from '@ngrx/store';
+import { AppState } from '../../reducers';
+import { SettingsActions } from '../../actions/settings';
 
 @Component({
   selector: 'app-settings',
@@ -10,7 +13,11 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 export class SettingsComponent implements OnInit {
     settingsForm: FormGroup;
 
-    constructor(private _formBuilder: FormBuilder) {
+    constructor(
+        private _formBuilder: FormBuilder,
+        private store: Store<AppState>,
+        private settingsActions: SettingsActions
+    ) {
     }
 
     ngOnInit() {
@@ -29,6 +36,7 @@ export class SettingsComponent implements OnInit {
     }
 
     onSubmit() {
-            console.log(this.settingsForm.value);
+            // console.log(this.settingsForm.value);
+            this.store.dispatch(this.settingsActions.updateSettingsValues(this.settingsForm.value));
     }
 }

@@ -18,7 +18,7 @@ interface SettingsValues {
 export class SettingsActions {
   static UPDATE_VALUES = '[Set] UPDATE_VALUES';
 
-  updateValues(settingsValues: SettingsValues): Action {
+  updateSettingsValues(settingsValues: SettingsValues): Action {
     return {
       type: SettingsActions.UPDATE_VALUES,
       payload: settingsValues

@@ -1,62 +1,54 @@
 <app-toolbar type="settings"></app-toolbar>
 <div class="content">
-  <form [formGroup]="settingsForm" (submit)="onSubmit()">
     <md-card>
-      <md-card-subtitle>
-        Visualization
-      </md-card-subtitle>
-      <md-card-content>
-        <div class="mylabel">Plot Noise:</div>
-        <md-slider min="0" max="20" formControlName="plotNoise"></md-slider>
-        <span>{{settingsForm.value.plotNoise}}</span>
-        <div class="mylabel">Hist2D Bins:</div>
-        <md-slider min="8" max="80" formControlName="hist2dBins"></md-slider>
-        <span>{{settingsForm.value.hist2dBins}}</span>
-        <div class="mylabel">Hist2D Noise:</div>
-        <md-slider min="0" max="20" formControlName="hist2dNoise"></md-slider>
-        <span>{{settingsForm.value.hist2dNoise}}</span>
-        <div class="mylabel">Histogram Bins:</div>
-        <md-slider min="8" max="40"
-                   formControlName="histogramBins"></md-slider>
-        <span>{{settingsForm.value.histogramBins}}</span>
-        <div class="mylabel">Top Comps:</div>
-        <md-slider min="5" max="50" formControlName="topComps"></md-slider>
-        <span>{{settingsForm.value.topComps}}</span>
-      </md-card-content>
+        <form [formGroup]="settingsForm" (submit)="onSubmit()">
+        <md-card-content>
+            <md-card-subtitle>
+                Visualization
+            </md-card-subtitle>
+            <md-card>
+                <md-card-content>
+                    <div class="mylabel">Plot Noise:</div>
+                    <md-slider min="0" max="20" formControlName="plotNoise"></md-slider>
+                    <span>{{settingsForm.value.plotNoise}}</span>
+                    <div class="mylabel">Hist2D Bins:</div>
+                    <md-slider min="8" max="80" formControlName="hist2dBins"></md-slider>
+                    <span>{{settingsForm.value.hist2dBins}}</span>
+                    <div class="mylabel">Hist2D Noise:</div>
+                    <md-slider min="0" max="20" formControlName="hist2dNoise"></md-slider>
+                    <span>{{settingsForm.value.hist2dNoise}}</span>
+                    <div class="mylabel">Histogram Bins:</div>
+                    <md-slider min="8" max="40" formControlName="histogramBins"></md-slider>
+                    <span>{{settingsForm.value.histogramBins}}</span>
+                    <div class="mylabel">Top Comps:</div>
+                    <md-slider min="5" max="50" formControlName="topComps"></md-slider>
+                    <span>{{settingsForm.value.topComps}}</span>
+                </md-card-content>
+            </md-card>
+            <md-card-subtitle>
+                Server
+            </md-card-subtitle>
+            <md-card>
+                <md-card-content>
+                    <md-input placeholder='URL' formControlName="serverURL" required></md-input>
+                    <!-- <span [hidden]="settingsForm.controls.serverURL.valid">Server URL is required!</span> -->
+                    <md-input placeholder='Query String' formControlName="queryStr" required></md-input>
+                    <!-- <span [hidden]="settingsForm.controls.queryStr.valid">Query String is required!</span> -->
+                    <md-input placeholder='Class Path' formControlName="classPath" required></md-input>
+                    <!-- <span [hidden]="settingsForm.controls.classPath.valid">Class Path is required!</span> -->
+                    <md-input placeholder='Sourire URL' formControlName="sourireURL" required></md-input>
+                    <!-- <span [hidden]="settingsForm.controls.sourireURL.valid">Sourire URL is required!</span> -->
+                </md-card-content>
+            </md-card>
+            <md-card-subtitle>
+                Misc
+            </md-card-subtitle>
+                <md-card-content>
+                    <label>Hide Compounds</label>
+                    <md-slide-toggle formControlName="hiddenComps"></md-slide-toggle>
+                </md-card-content>
+                <button md-raised-button color="primary" type="submit" [disabled]="!settingsForm.valid">Save</button>
+        </md-card-content>
+        </form>
     </md-card>
-
-    <md-card>
-      <md-card-subtitle>
-        Server
-      </md-card-subtitle>
-      <md-card-content>
-        <md-input placeholder='URL' formControlName="serverURL"
-                  required></md-input>
-        <!-- <span [hidden]="settingsForm.controls.serverURL.valid">Server URL is required!</span> -->
-        <md-input placeholder='Query String' formControlName="queryStr"
-                  required></md-input>
-        <!-- <span [hidden]="settingsForm.controls.queryStr.valid">Query String is required!</span> -->
-        <md-input placeholder='Class Path' formControlName="classPath"
-                  required></md-input>
-        <!-- <span [hidden]="settingsForm.controls.classPath.valid">Class Path is required!</span> -->
-        <md-input placeholder='Sourire URL' formControlName="sourireURL"
-                  required></md-input>
-        <!-- <span [hidden]="settingsForm.controls.sourireURL.valid">Sourire URL is required!</span> -->
-      </md-card-content>
-    </md-card>
-
-    <md-card>
-      <md-card-content>
-        <md-card-subtitle>
-          Misc
-        </md-card-subtitle>
-        <label>Hide Compounds</label>
-        <md-slide-toggle formControlName="hiddenComps"></md-slide-toggle>
-      </md-card-content>
-    </md-card>
-
-    <button md-raised-button color="primary" type="submit"
-            [disabled]="!settingsForm.valid">Save
-    </button>
-  </form>
 </div>

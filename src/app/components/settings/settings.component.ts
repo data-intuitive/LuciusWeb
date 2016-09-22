@@ -8,15 +8,13 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 })
 
 export class SettingsComponent implements OnInit {
-  settingsForm: FormGroup;
+    settingsForm: FormGroup;
 
-  constructor(private _formBuilder: FormBuilder) {
-  }
+    constructor(private _formBuilder: FormBuilder) {
+    }
 
-  ngOnInit() {
-    this.settingsForm =
-      this._formBuilder
-          .group({
+    ngOnInit() {
+        this.settingsForm = this._formBuilder.group({
             plotNoise: Number,
             hist2dBins: Number,
             hist2dNoise: Number,
@@ -27,10 +25,10 @@ export class SettingsComponent implements OnInit {
             classPath: ['', Validators.required],
             sourireURL: ['', Validators.required],
             hiddenComps: Boolean
-          });
-  }
+        });
+    }
 
-  onSubmit() {
-    console.log(this.settingsForm.value);
-  }
+    onSubmit() {
+            console.log(this.settingsForm.value);
+    }
 }

@@ -14,16 +14,11 @@ app-toolbar {
   overflow: auto;
 
   padding: 16px;
-
-  background-color: lightgrey;
 }
 
 md-card {
   margin: 10px;
-}
-
-md-card:hover {
-  box-shadow: 0 1px 1px rgba(black, .3);
+  background-color: white;
 }
 
 md-slider {

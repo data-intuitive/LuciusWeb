@@ -3,9 +3,16 @@ sudo: required
 language: node_js
 node_js:
   - "6"
-  
+
 notifications:
   email: false
+
+env:
+  - SCRIPT=lint
+  - SCRIPT=slint
+  - SCRIPT=e2e
+  # TODO: needs solution for router testing in template
+  # - SCRIPT=test
 
 before_install:
   - export DISPLAY=:99.0
@@ -13,17 +20,13 @@ before_install:
   - export CHROME_BIN=chromium-browser
   - npm config set spin false
   - npm config set progress false
-  
+
 install:
   - npm install --no-optional
 
 before_script:
-  - npm start &
-  - sleep 20
+  - if [ "$SCRIPT" == "e2e" ]; then npm start & fi
+  - if [ "$SCRIPT" == "e2e" ]; then sleep 20 fi
 
 script:
-  - npm run lint
-  - npm run slint
-  - npm run e2e
-  # TODO: needs solution for router testing in template
-  # - npm run test
+  - npm run $SCRIPT

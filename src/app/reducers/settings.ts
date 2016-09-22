@@ -18,15 +18,15 @@ export interface SettingsState {
 };
 
 const initialState: SettingsState = {
-    plotNoise: 0,
-    hist2dBins: 8,
+    plotNoise: 3,
+    hist2dBins: 20,
     hist2dNoise: 0,
-    histogramBins: 8,
-    topComps: 5,
-    serverURL: 'someServerURL',
-    queryStr: 'someQueryString',
-    classPath: 'someClassPath',
-    sourireURL: 'someSourireURL',
+    histogramBins: 16,
+    topComps: 25,
+    serverURL: 'http://192.168.1.10:8090/jobs',
+    queryStr: 'context=compass&appName=luciusapi&sync=true',
+    classPath: 'luciusapi',
+    sourireURL: 'http://192.168.1.10:9999',
     hiddenComps: false
 };
 

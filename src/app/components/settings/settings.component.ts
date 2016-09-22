@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../reducers';
-import { SettingsActions, SettingsObject } from '../../actions/settings';
+import { AppState, getSettingsObject } from '../../reducers';
+import { Observable } from 'rxjs/Observable';
+import { SettingsActions } from '../../actions/settings';
+import { SettingsState } from '../../reducers/settings';
 
 @Component({
   selector: 'app-settings',
@@ -12,13 +14,17 @@ import { SettingsActions, SettingsObject } from '../../actions/settings';
 
 export class SettingsComponent implements OnInit {
     settingsForm: FormGroup;
-    setObj: SettingsObject;
+    settings$: Observable<SettingsState>;
+    setObj: SettingsState;
 
     constructor(
         private _formBuilder: FormBuilder,
         private store: Store<AppState>,
         private settingsActions: SettingsActions
     ) {
+      this.settings$ = this.store.let(getSettingsObject());
+      this.settings$.subscribe(s => this.setObj = s);
+      localStorage.setItem('setObj', JSON.stringify(this.setObj));
     }
 
     ngOnInit() {

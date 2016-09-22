@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AppState, getSettingsObject } from '../../reducers';
 import { Observable } from 'rxjs/Observable';
-import { SettingsObject } from '../../actions/settings';
+import { SettingsState } from '../../reducers/settings';
 
 @Component({
   selector: 'app-compound',
@@ -10,7 +10,7 @@ import { SettingsObject } from '../../actions/settings';
   styleUrls: ['./compound.component.scss']
 })
 export class CompoundComponent {
-  settings$: Observable<SettingsObject>;
+  settings$: Observable<SettingsState>;
 
   constructor(private store: Store<AppState>) {
     this.settings$ = this.store.let(getSettingsObject());

@@ -5,11 +5,13 @@ import { AppState, getSettingsObject } from '../../reducers';
 import { Observable } from 'rxjs/Observable';
 import { SettingsActions } from '../../actions/settings';
 import { SettingsState } from '../../reducers/settings';
+import { LocalStorageService } from '../../services/localstorage.service';
 
 @Component({
   selector: 'app-settings',
   templateUrl: './settings.component.html',
-  styleUrls: ['./settings.component.scss']
+  styleUrls: ['./settings.component.scss'],
+  providers: [LocalStorageService]
 })
 
 export class SettingsComponent implements OnInit {
@@ -20,14 +22,17 @@ export class SettingsComponent implements OnInit {
     constructor(
         private _formBuilder: FormBuilder,
         private store: Store<AppState>,
-        private settingsActions: SettingsActions
+        private settingsActions: SettingsActions,
+        private _localStorageService: LocalStorageService
     ) {
       this.settings$ = this.store.let(getSettingsObject());
       this.settings$.subscribe(s => this.setObj = s);
-      localStorage.setItem('setObj', JSON.stringify(this.setObj));
+      // localStorage.setItem('setObj', JSON.stringify(this.setObj));
+      this._localStorageService.setObject('setObj', this.setObj);
     }
 
     ngOnInit() {
+      /* make action to store and install effect to fect data from localstorage */
         this.settingsForm = this._formBuilder.group({
             plotNoise: JSON.parse(localStorage.getItem('setObj')).plotNoise,
             hist2dBins: JSON.parse(localStorage.getItem('setObj')).hist2dBins,

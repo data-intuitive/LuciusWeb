@@ -1,6 +1,7 @@
 :host {
   display: flex;
   flex-direction: column;
+
   height: 100%;
 }
 
@@ -11,12 +12,15 @@ app-toolbar {
 .content {
   flex: 1 1 auto;
   overflow: auto;
+
   padding: 16px;
+
   background-color: lightgrey;
 }
 
 md-card {
   margin: 10px;
+
   background-color: white;
 }
 
@@ -26,6 +30,7 @@ md-card:hover {
 
 md-slider {
   line-height: normal;
+
   width: 30%;
   padding-bottom: 10px;
 }
@@ -33,7 +38,9 @@ md-slider {
 md-input {
   font-size: 16px;
   line-height: normal;
+
   display: block;
+
   width: 50%;
   padding-bottom: 10px;
   padding-left: 10px;
@@ -45,12 +52,15 @@ md-slide-toggle {
 
 label {
   font-size: 16px;
+
   padding-right: 15px;
 }
 
 .mylabel {
   font-size: 16px;
+
   display: block;
+
   width: 150px;
 }
 

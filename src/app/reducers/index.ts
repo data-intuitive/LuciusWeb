@@ -29,8 +29,8 @@ export function getSidenavOpened() {
 }
 
 export function getSettingsState() {
-    return (state$: Observable<AppState>) => state$
-      .select(s => s.settings);
+  return (state$: Observable<AppState>) => state$
+    .select(s => s.settings);
 }
 
 export function getSettingsObject() {

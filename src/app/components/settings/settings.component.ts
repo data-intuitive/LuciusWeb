@@ -13,38 +13,52 @@ import { SettingsState } from '../../reducers/settings';
 })
 
 export class SettingsComponent implements OnInit {
-    settingsForm: FormGroup;
-    settings$: Observable<SettingsState>;
-    setObj: SettingsState;
+  settingsForm: FormGroup;
+  settings$: Observable<SettingsState>;
+  setObj: SettingsState;
 
-    constructor(
-        private _formBuilder: FormBuilder,
-        private store: Store<AppState>,
-        private settingsActions: SettingsActions
-    ) {
-      this.settings$ = this.store.let(getSettingsObject());
-      this.settings$.subscribe(s => this.setObj = s);
-      localStorage.setItem('setObj', JSON.stringify(this.setObj));
-    }
-
-    ngOnInit() {
-        this.settingsForm = this._formBuilder.group({
-            plotNoise: JSON.parse(localStorage.getItem('setObj')).plotNoise,
-            hist2dBins: JSON.parse(localStorage.getItem('setObj')).hist2dBins,
-            hist2dNoise: JSON.parse(localStorage.getItem('setObj')).hist2dNoise,
-            histogramBins: JSON.parse(localStorage.getItem('setObj')).histogramBins,
-            topComps: JSON.parse(localStorage.getItem('setObj')).topComps,
-            serverURL: [JSON.parse(localStorage.getItem('setObj')).serverURL, Validators.required],
-            queryStr: [JSON.parse(localStorage.getItem('setObj')).queryStr, Validators.required],
-            classPath: [JSON.parse(localStorage.getItem('setObj')).classPath, Validators.required],
-            sourireURL: [JSON.parse(localStorage.getItem('setObj')).sourireURL, Validators.required],
-            hiddenComps: JSON.parse(localStorage.getItem('setObj')).hiddenComps
-        });
-    }
-
-    onSubmit() {
-            // console.log(this.settingsForm.value);
-            localStorage.setItem('setObj', JSON.stringify(this.settingsForm.value));
-            this.store.dispatch(this.settingsActions.updateSettingsValues(this.settingsForm.value));
-    }
+  constructor(
+    private formBuilder: FormBuilder,
+    private store: Store<AppState>,
+    private settingsActions: SettingsActions
+  ) {
+    this.settings$ = this.store.let(getSettingsObject());
+    this.settings$.subscribe(s => this.setObj = s);
+    localStorage.setItem('setObj', JSON.stringify(this.setObj));
   }
+
+  ngOnInit() {
+    this.settingsForm = this.formBuilder.group({
+      plotNoise: JSON.parse(localStorage.getItem('setObj')).plotNoise,
+      hist2dBins: JSON.parse(localStorage.getItem('setObj')).hist2dBins,
+      hist2dNoise: JSON.parse(localStorage.getItem('setObj')).hist2dNoise,
+      histogramBins: JSON.parse(localStorage.getItem('setObj')).histogramBins,
+      topComps: JSON.parse(localStorage.getItem('setObj')).topComps,
+      serverURL: [
+        JSON.parse(localStorage.getItem('setObj')).serverURL,
+        Validators.required
+      ],
+      queryStr: [
+        JSON.parse(localStorage.getItem('setObj')).queryStr,
+        Validators.required
+      ],
+      classPath: [
+        JSON.parse(localStorage.getItem('setObj')).classPath,
+        Validators.required
+      ],
+      sourireURL: [
+        JSON.parse(localStorage.getItem('setObj')).sourireURL,
+        Validators.required
+      ],
+      hiddenComps: JSON.parse(localStorage.getItem('setObj')).hiddenComps
+    });
+  }
+
+  onSubmit() {
+    // console.log(this.settingsForm.value);
+    localStorage.setItem('setObj', JSON.stringify(this.settingsForm.value));
+    this.store.dispatch(
+      this.settingsActions.updateSettingsValues(this.settingsForm.value)
+    );
+  }
+}

@@ -12,9 +12,9 @@ import { SettingsState } from '../../reducers/settings';
 export class CompoundComponent {
   settings$: Observable<SettingsState>;
 
-  constructor(private store: Store<AppState>) {
+  constructor(
+    private store: Store<AppState>
+  ) {
     this.settings$ = this.store.let(getSettingsObject());
-    // this.foo$.subscribe(x => console.log(x));
   }
-
 }

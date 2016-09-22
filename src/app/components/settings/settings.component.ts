@@ -41,4 +41,4 @@ export class SettingsComponent implements OnInit {
             localStorage.setItem('setObj', JSON.stringify(this.settingsForm.value));
             this.store.dispatch(this.settingsActions.updateSettingsValues(this.settingsForm.value));
     }
-}
+  }

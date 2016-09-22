@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { AppState } from '../../reducers';
 
 @Component({
   selector: 'app-compound',
@@ -7,7 +9,8 @@ import { Component } from '@angular/core';
 })
 export class CompoundComponent {
 
-  constructor() {
+  constructor(private store: Store<AppState>) {
 
   }
+
 }

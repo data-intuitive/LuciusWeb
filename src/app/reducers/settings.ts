@@ -1,4 +1,4 @@
-// import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs/Observable';
 import { Action } from '@ngrx/store';
 import '@ngrx/core/add/operator/select';
 
@@ -23,10 +23,10 @@ const initialState: SettingsState = {
     hist2dNoise: 0,
     histogramBins: 8,
     topComps: 5,
-    serverURL: '',
-    queryStr: '',
-    classPath: '',
-    sourireURL: '',
+    serverURL: 'someServerURL',
+    queryStr: 'someQueryString',
+    classPath: 'someClassPath',
+    sourireURL: 'someSourireURL',
     hiddenComps: false
 };
 
@@ -53,7 +53,7 @@ export default function (state = initialState, action: Action): SettingsState {
   }
 }
 
-// export function getSidenavOpened() {
-//   return (state$: Observable<LayoutState>) => state$
-//     .select(s => s.sidenavOpen);
-// };
+export function getSettingsObject() {
+  return (state$: Observable<SettingsState>) => state$
+    .select(s => s);
+};

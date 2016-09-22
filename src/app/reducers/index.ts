@@ -19,11 +19,6 @@ export const reducers = compose(storeFreeze, storeLogger(), combineReducers)({
   settings: settingsReducer
 });
 
-export function getSettingsState() {
-    return (state$: Observable<AppState>) => state$
-      .select(s => s.settings);
-}
-
 export function getLayoutState() {
   return (state$: Observable<AppState>) => state$
     .select(s => s.layout);
@@ -31,4 +26,13 @@ export function getLayoutState() {
 
 export function getSidenavOpened() {
   return compose(fromLayout.getSidenavOpened(), getLayoutState());
+}
+
+export function getSettingsState() {
+    return (state$: Observable<AppState>) => state$
+      .select(s => s.settings);
+}
+
+export function getSettingsObject() {
+  return compose(fromSettings.getSettingsObject(), getSettingsState());
 }

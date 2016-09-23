@@ -49,7 +49,7 @@ export class SettingsComponent implements OnInit {
 
     onSubmit() {
             // console.log(this.settingsForm.value);
-            localStorage.setItem('setObj', JSON.stringify(this.settingsForm.value));
+            // localStorage.setItem('setObj', JSON.stringify(this.settingsForm.value));
             this.store.dispatch(this.settingsActions.updateSettingsValues(this.settingsForm.value));
     }
   }

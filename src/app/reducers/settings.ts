@@ -18,7 +18,7 @@ export interface SettingsState {
 };
 
 /* initialize from localstorage
-   check if there is object in LS else use mock 
+   check if there is object in LS else use mock
 */
 const initialState: SettingsState = {
     plotNoise: 3,

@@ -2,6 +2,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
+import { LocalStorageService } from './services/localstorage.service';
 import { MdCoreModule } from '@angular2-material/core';
 import { MdButtonModule } from '@angular2-material/button';
 import { MdSidenavModule } from '@angular2-material/sidenav';
@@ -15,8 +16,10 @@ import { routes } from './app.routes';
 import { StoreModule } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { StoreLogMonitorModule, useLogMonitor } from '@ngrx/store-log-monitor';
+import { EffectsModule } from '@ngrx/effects';
 import { reducers } from './reducers';
 import { actions } from './actions';
+import { SettingsEffects } from './effects/settings';
 import { AppComponent } from './app.component';
 import {
   CompoundComponent,
@@ -50,6 +53,7 @@ import {
     MdSlideToggleModule.forRoot(),
 
     routes,
+    EffectsModule.run(SettingsEffects),
 
     StoreModule.provideStore(
         reducers
@@ -63,7 +67,8 @@ import {
     StoreLogMonitorModule
   ],
   providers: [
-    actions
+    actions,
+    LocalStorageService
   ],
   bootstrap: [AppComponent]
 })

@@ -18,6 +18,11 @@ app-toolbar {
   background-color: lightgrey;
 }
 
+.wrapper {
+  max-width: 640px;
+  margin: auto;
+}
+
 md-card {
   margin: 10px;
 
@@ -56,7 +61,7 @@ label {
   padding-right: 15px;
 }
 
-.mylabel {
+.label {
   font-size: 16px;
 
   display: block;

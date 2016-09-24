@@ -1,22 +1,39 @@
 import { Injectable } from '@angular/core';
 import { Action } from '@ngrx/store';
+
 import { SettingsState } from '../reducers/settings';
 
 @Injectable()
 export class SettingsActions {
-  static UPDATE_VALUES = '[Set] UPDATE_VALUES';
-  static INITIALIZE_VALUES = '[Set] INITIALIZE_VALUES';
+  static INIT = '[Setttings] Init';
+  static INIT_COMPLETE = '[Settings] Init Complete';
+  static UPDATE = '[Setttings] Update';
+  static UPDATE_COMPLETE = '[Setttings] Update Complete';
 
-  updateSettingsValues(settingsValues: SettingsState): Action {
+  init(): Action {
     return {
-      type: SettingsActions.UPDATE_VALUES,
-      payload: settingsValues
+      type: SettingsActions.INIT
     };
   }
 
-  initializeSettingsValues( ): Action {
+  initComplete(state: SettingsState): Action {
     return {
-      type: SettingsActions.INITIALIZE_VALUES
+      type: SettingsActions.INIT_COMPLETE,
+      payload: state
+    };
+  }
+
+  update(state: SettingsState): Action {
+    return {
+      type: SettingsActions.UPDATE,
+      payload: state
+    };
+  }
+
+  updateComplete(state: SettingsState): Action {
+    return {
+      type: SettingsActions.UPDATE_COMPLETE,
+      payload: state
     };
   }
 }

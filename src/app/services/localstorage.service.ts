@@ -1,8 +1,5 @@
 import { Injectable } from '@angular/core';
 import { SettingsState } from '../reducers/settings';
-import { Store } from '@ngrx/store';
-import { AppState } from '../reducers';
-import { SettingsActions } from '../actions/settings';
 
 const initialValues: SettingsState = {
   plotNoise: 3,
@@ -19,30 +16,29 @@ const initialValues: SettingsState = {
 
 @Injectable()
 export class LocalStorageService {
+  key: string = 'settings';
 
-  constructor(
-    private store: Store<AppState>,
-    private settingsActions: SettingsActions
-  ) { }
+  constructor() {
+  }
 
-  setObject(objectName: string, objectBody: SettingsState): void {
+  setSettings(state: SettingsState): SettingsState {
     console.log('local storage service[set]!');
-    localStorage.setItem(objectName, JSON.stringify(objectBody));
+    localStorage.setItem(this.key, JSON.stringify(state));
+    return state;
   }
 
-  getObject(objectName: string): string {
+  getSettings(): string {
     console.log('local storage service[get]!');
-    return localStorage.getItem(objectName);
+    return localStorage.getItem(this.key);
   }
 
-  InitSettings(): void {
-    let exists = this.getObject('setObj');
-    if (exists === null || exists === 'undefined') {
+  init(): SettingsState {
+    let settings = this.getSettings();
+    if (!settings) {
       console.log('setting to LS');
-      this.setObject('setObj', initialValues);
+      this.setSettings(initialValues);
     }
-    let setObj = JSON.parse(this.getObject('setObj'));
-    console.log('getting from LS - updating store');
-    this.store.dispatch(this.settingsActions.updateSettingsValues(setObj));
+    console.log('getting from LS ', settings);
+    return JSON.parse(settings);
   }
 }

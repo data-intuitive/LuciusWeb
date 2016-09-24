@@ -13,8 +13,8 @@ export class ToolbarComponent {
   @Input() type: String = '';
 
   constructor(
-      private store: Store<AppState>,
-      private layoutActions: LayoutActions
+    private store: Store<AppState>,
+    private layoutActions: LayoutActions
   ) {
   }
 

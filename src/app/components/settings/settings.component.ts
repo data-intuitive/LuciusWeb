@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+
 import { Store } from '@ngrx/store';
-import { AppState, getSettingsObject } from '../../reducers';
 import { Observable } from 'rxjs/Observable';
-import { SettingsActions } from '../../actions/settings';
+
+import { SettingsActions } from '../../actions';
+import { AppState, getSettings } from '../../reducers';
 import { SettingsState } from '../../reducers/settings';
 
 @Component({
@@ -15,34 +17,36 @@ import { SettingsState } from '../../reducers/settings';
 export class SettingsComponent implements OnInit {
   settingsForm: FormGroup;
   settings$: Observable<SettingsState>;
-  setObj: SettingsState;
+  settings: SettingsState;
 
-    constructor(
-        private _formBuilder: FormBuilder,
-        private store: Store<AppState>,
-        private settingsActions: SettingsActions,
-    ) { }
+  constructor(
+    private formBuilder: FormBuilder,
+    private store: Store<AppState>,
+    private settingsActions: SettingsActions,
+  ) {
+  }
 
-    ngOnInit() {
-        this.store.dispatch(this.settingsActions.initializeSettingsValues());
+  ngOnInit() {
+    this.settings$ = this.store.let(getSettings());
+    this.settings$.subscribe(s => this.settings = s);
 
-        this.settings$ = this.store.let(getSettingsObject());
-        this.settings$.subscribe(s => this.setObj = s);
-        this.settingsForm = this._formBuilder.group({
-            plotNoise: this.setObj.plotNoise,
-            hist2dBins: this.setObj.hist2dBins,
-            hist2dNoise: this.setObj.hist2dNoise,
-            histogramBins: this.setObj.histogramBins,
-            topComps: this.setObj.hiddenComps,
-            serverURL: [this.setObj.serverURL, Validators.required],
-            queryStr: [this.setObj.queryStr, Validators.required],
-            classPath: [this.setObj.classPath, Validators.required],
-            sourireURL: [this.setObj.sourireURL, Validators.required],
-            hiddenComps: this.setObj.hiddenComps
-        });
-    }
+    this.settingsForm = this.formBuilder.group({
+      plotNoise: this.settings.plotNoise,
+      hist2dBins: this.settings.hist2dBins,
+      hist2dNoise: this.settings.hist2dNoise,
+      histogramBins: this.settings.histogramBins,
+      topComps: this.settings.hiddenComps,
+      serverURL: [this.settings.serverURL, Validators.required],
+      queryStr: [this.settings.queryStr, Validators.required],
+      classPath: [this.settings.classPath, Validators.required],
+      sourireURL: [this.settings.sourireURL, Validators.required],
+      hiddenComps: this.settings.hiddenComps
+    });
+  }
 
-    onSubmit() {
-            this.store.dispatch(this.settingsActions.updateSettingsValues(this.settingsForm.value));
-    }
+  onSubmit() {
+    this.store.dispatch(
+      this.settingsActions.update(this.settingsForm.value)
+    );
+  }
 }

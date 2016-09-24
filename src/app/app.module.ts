@@ -19,7 +19,7 @@ import { StoreLogMonitorModule, useLogMonitor } from '@ngrx/store-log-monitor';
 import { EffectsModule } from '@ngrx/effects';
 import { reducers } from './reducers';
 import { actions } from './actions';
-import { SettingsEffects } from './effects/settings';
+import { SettingsEffects } from './effects';
 import { AppComponent } from './app.component';
 import {
   CompoundComponent,
@@ -53,11 +53,10 @@ import {
     MdSlideToggleModule.forRoot(),
 
     routes,
-    EffectsModule.run(SettingsEffects),
 
-    StoreModule.provideStore(
-        reducers
-    ),
+    StoreModule.provideStore(reducers),
+    EffectsModule.runAfterBootstrap(SettingsEffects),
+
     StoreDevtoolsModule.instrumentStore({
       monitor: useLogMonitor({
         position: 'right',

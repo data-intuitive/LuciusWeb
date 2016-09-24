@@ -1,6 +1,7 @@
 import { Observable } from 'rxjs/Observable';
 import { Action } from '@ngrx/store';
 import '@ngrx/core/add/operator/select';
+
 import { SettingsActions } from '../actions';
 
 export interface SettingsState {
@@ -18,7 +19,11 @@ export interface SettingsState {
 
 export default function (state: SettingsState, action: Action) {
   switch (action.type) {
-    case SettingsActions.UPDATE_VALUES: {
+    case SettingsActions.INIT_COMPLETE: {
+      return Object.assign({}, state, action.payload);
+    }
+
+    case SettingsActions.UPDATE: {
       return Object.assign({}, state, {
         plotNoise: action.payload.plotNoise,
         hist2dBins: action.payload.hist2dBins,
@@ -39,7 +44,7 @@ export default function (state: SettingsState, action: Action) {
   }
 }
 
-export function getSettingsObject() {
+export function getSettings() {
   return (state$: Observable<SettingsState>) => state$
     .select(s => s);
 }

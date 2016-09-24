@@ -33,6 +33,6 @@ export function getSettingsState() {
     .select(s => s.settings);
 }
 
-export function getSettingsObject() {
-  return compose(fromSettings.getSettingsObject(), getSettingsState());
+export function getSettings() {
+  return compose(fromSettings.getSettings(), getSettingsState());
 }

@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
+
 import { Store } from '@ngrx/store';
-import { AppState, getSettingsObject } from '../../reducers';
 import { Observable } from 'rxjs/Observable';
+
+import { AppState, getSettings } from '../../reducers';
 import { SettingsState } from '../../reducers/settings';
 
 @Component({
@@ -15,6 +17,6 @@ export class CompoundComponent {
   constructor(
     private store: Store<AppState>
   ) {
-    this.settings$ = this.store.let(getSettingsObject());
+    this.settings$ = this.store.let(getSettings());
   }
 }

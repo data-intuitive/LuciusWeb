@@ -5,13 +5,11 @@ import { AppState, getSettingsObject } from '../../reducers';
 import { Observable } from 'rxjs/Observable';
 import { SettingsActions } from '../../actions/settings';
 import { SettingsState } from '../../reducers/settings';
-import { LocalStorageService } from '../../services/localstorage.service';
 
 @Component({
   selector: 'app-settings',
   templateUrl: './settings.component.html',
-  styleUrls: ['./settings.component.scss'],
-  providers: [LocalStorageService]
+  styleUrls: ['./settings.component.scss']
 })
 
 export class SettingsComponent implements OnInit {
@@ -23,14 +21,13 @@ export class SettingsComponent implements OnInit {
         private _formBuilder: FormBuilder,
         private store: Store<AppState>,
         private settingsActions: SettingsActions,
-        private _localStorageService: LocalStorageService
     ) { }
 
     ngOnInit() {
         this.store.dispatch(this.settingsActions.initializeSettingsValues());
+
         this.settings$ = this.store.let(getSettingsObject());
         this.settings$.subscribe(s => this.setObj = s);
-
         this.settingsForm = this._formBuilder.group({
             plotNoise: this.setObj.plotNoise,
             hist2dBins: this.setObj.hist2dBins,

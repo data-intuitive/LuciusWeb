@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { SettingsState } from '../reducers/settings';
 
 const initialValues: SettingsState = {
+  version: 1,
   plotNoise: 3,
   hist2dBins: 20,
   hist2dNoise: 0,
@@ -34,7 +35,11 @@ export class LocalStorageService {
 
   init(): SettingsState {
     let settings: SettingsState = this.getSettings();
-    if (!settings) {
+    if (
+      !settings
+      || !settings.version
+      || settings.version !== initialValues.version
+    ) {
       console.log('setting to LS');
       settings = this.setSettings(initialValues);
     }

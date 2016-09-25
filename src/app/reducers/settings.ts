@@ -5,6 +5,7 @@ import '@ngrx/core/add/operator/select';
 import { SettingsActions } from '../actions';
 
 export interface SettingsState {
+  version: Number;
   plotNoise: Number;
   hist2dBins: Number;
   hist2dNoise: Number;

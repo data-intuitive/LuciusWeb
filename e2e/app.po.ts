@@ -1,5 +1,3 @@
-import { browser, element, by } from 'protractor/globals';
-
 export class TestApp {
   navigateTo(address = '/') {
     return browser.get(address);

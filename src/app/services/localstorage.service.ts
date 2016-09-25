@@ -27,18 +27,18 @@ export class LocalStorageService {
     return state;
   }
 
-  getSettings(): string {
+  getSettings(): SettingsState {
     console.log('local storage service[get]!');
-    return localStorage.getItem(this.key);
+    return JSON.parse(localStorage.getItem(this.key));
   }
 
   init(): SettingsState {
-    let settings = this.getSettings();
+    let settings: SettingsState = this.getSettings();
     if (!settings) {
       console.log('setting to LS');
-      this.setSettings(initialValues);
+      settings = this.setSettings(initialValues);
     }
     console.log('getting from LS ', settings);
-    return JSON.parse(settings);
+    return settings;
   }
 }

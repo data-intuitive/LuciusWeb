@@ -15,6 +15,19 @@ import { LocalStorageService } from '../services/localstorage.service';
 @Injectable()
 export class SettingsEffects {
 
+  constructor(
+    private actions$: Actions,
+    private settingsActions: SettingsActions,
+    private localStorageService: LocalStorageService
+  ) {
+  }
+
+  @Effect() initializeSettings$ = this.actions$
+    .ofType(settings.SettingsActions.INIT)
+    .map(_ => this.settingsActions.initComplete(
+      this.localStorageService.init()
+    ));
+
   @Effect() updateSettings$ = this.actions$
     .ofType(settings.SettingsActions.UPDATE)
     .map<SettingsState>(action => action.payload)
@@ -23,16 +36,4 @@ export class SettingsEffects {
         this.localStorageService.setSettings(payload)))
     );
 
-  @Effect() initializeSettings$ = this.actions$
-    .ofType(settings.SettingsActions.INIT)
-    .map(_ => this.settingsActions.initComplete(
-      this.localStorageService.init()
-    ));
-
-  constructor(
-    private actions$: Actions,
-    private settingsActions: SettingsActions,
-    private localStorageService: LocalStorageService
-  ) {
-  }
 }

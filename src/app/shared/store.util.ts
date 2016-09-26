@@ -13,7 +13,11 @@ export class StoreUtil {
   }
 
   getState(): AppState {
-    this.store.take(1).subscribe(s => this.state = s);
+    this.store
+      .take(1)
+      .subscribe(s => this.state = s)
+      .unsubscribe();
+
     return this.state;
   }
 }

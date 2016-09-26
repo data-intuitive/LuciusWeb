@@ -3,6 +3,7 @@ import { SettingsState } from '../reducers/settings';
 
 const initialValues: SettingsState = {
   version: 1,
+  complete: false,
   plotNoise: 3,
   hist2dBins: 20,
   hist2dNoise: 0,
@@ -23,7 +24,7 @@ export class LocalStorageService {
   }
 
   setSettings(state: SettingsState): SettingsState {
-    console.log('local storage service[set]!');
+    console.log('local storage service[set]!', state);
     localStorage.setItem(this.key, JSON.stringify(state));
     return state;
   }

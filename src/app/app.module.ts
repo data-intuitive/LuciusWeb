@@ -19,6 +19,7 @@ import { StoreLogMonitorModule, useLogMonitor } from '@ngrx/store-log-monitor';
 import { EffectsModule } from '@ngrx/effects';
 import { reducers } from './reducers';
 import { actions } from './actions';
+import { StoreUtil } from './shared';
 import { SettingsEffects } from './effects';
 import { AppComponent } from './app.component';
 import {
@@ -67,6 +68,7 @@ import {
   ],
   providers: [
     actions,
+    StoreUtil,
     LocalStorageService
   ],
   bootstrap: [AppComponent]

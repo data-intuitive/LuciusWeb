@@ -11,12 +11,14 @@ import * as settings from '../actions/settings';
 import { SettingsActions } from '../actions/settings';
 import { SettingsState } from '../reducers/settings';
 import { LocalStorageService } from '../services/localstorage.service';
+import { StoreUtil } from '../shared';
 
 @Injectable()
 export class SettingsEffects {
 
   constructor(
     private actions$: Actions,
+    private storeUtil: StoreUtil,
     private settingsActions: SettingsActions,
     private localStorageService: LocalStorageService
   ) {
@@ -30,7 +32,9 @@ export class SettingsEffects {
 
   @Effect() updateSettings$ = this.actions$
     .ofType(settings.SettingsActions.UPDATE)
-    .map<SettingsState>(action => action.payload)
+    .map<SettingsState>(action => Object.assign({},
+      this.storeUtil.getState().settings, action.payload
+    ))
     .switchMap(payload => Observable.of(
       this.settingsActions.updateComplete(
         this.localStorageService.setSettings(payload)))

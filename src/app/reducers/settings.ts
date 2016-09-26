@@ -6,6 +6,7 @@ import { SettingsActions } from '../actions';
 
 export interface SettingsState {
   version: Number;
+  complete: Boolean;
   plotNoise: Number;
   hist2dBins: Number;
   hist2dNoise: Number;
@@ -20,12 +21,15 @@ export interface SettingsState {
 
 export default function (state: SettingsState, action: Action) {
   switch (action.type) {
+    case SettingsActions.UPDATE_COMPLETE:
     case SettingsActions.INIT_COMPLETE: {
-      return Object.assign({}, state, action.payload);
+      return Object.assign({}, state, action.payload, {complete: true});
     }
 
     case SettingsActions.UPDATE: {
+      console.log('UPDATE', state);
       return Object.assign({}, state, {
+        complete: false,
         plotNoise: action.payload.plotNoise,
         hist2dBins: action.payload.hist2dBins,
         hist2dNoise: action.payload.hist2dNoise,

@@ -3,15 +3,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { LocalStorageService } from './services/localstorage.service';
-import { MdCoreModule } from '@angular2-material/core';
-import { MdButtonModule } from '@angular2-material/button';
-import { MdSidenavModule } from '@angular2-material/sidenav';
-import { MdIconModule } from '@angular2-material/icon';
-import { MdToolbarModule } from '@angular2-material/toolbar';
-import { MdInputModule } from '@angular2-material/input';
-import { MdCardModule } from '@angular2-material/card';
-import { MdSliderModule } from '@angular2-material/slider';
-import { MdSlideToggleModule } from '@angular2-material/slide-toggle';
+import { MaterialModule } from '@angular/material';
 import { routes } from './app.routes';
 import { StoreModule } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
@@ -43,15 +35,7 @@ import {
     FormsModule,
     ReactiveFormsModule,
 
-    MdCoreModule.forRoot(),
-    MdButtonModule.forRoot(),
-    MdSidenavModule.forRoot(),
-    MdIconModule.forRoot(),
-    MdToolbarModule.forRoot(),
-    MdInputModule.forRoot(),
-    MdCardModule.forRoot(),
-    MdSliderModule.forRoot(),
-    MdSlideToggleModule.forRoot(),
+    MaterialModule,
 
     routes,
 

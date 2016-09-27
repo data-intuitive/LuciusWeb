@@ -1,3 +1,5 @@
+@import '../../../styles/variables';
+
 :host {
   display: flex;
   flex-direction: column;
@@ -13,67 +15,52 @@ app-toolbar {
   flex: 1 1 auto;
   overflow: auto;
 
-  padding: 16px;
-
-  background-color: lightgrey;
+  padding: unit();
 }
 
 .wrapper {
-  max-width: 640px;
+  max-width: unit(40);
   margin: auto;
 }
 
 md-card {
-  margin: 10px;
+  margin: unit();
 
-  background-color: white;
-}
-
-md-card:hover {
-  box-shadow: 0 1px 1px rgba(black, .3);
-}
-
-md-slider {
-  line-height: normal;
-
-  width: 30%;
-  padding-bottom: 10px;
-}
-
-md-input {
-  font-size: 16px;
-  line-height: normal;
-
-  display: block;
-
-  width: 50%;
-  padding-bottom: 10px;
-  padding-left: 10px;
-}
-
-md-slide-toggle {
-  display: inline-block;
+  background-color: $bg-color;
 }
 
 label {
-  font-size: 16px;
-
-  padding-right: 15px;
+  margin-top: unit(.5);
 }
 
-.label {
-  font-size: 16px;
+.slider {
+  display: flex;
+  align-items: center;
 
-  display: block;
-
-  width: 150px;
+  span {
+    display: block;
+    width: unit(1.5);
+    text-align: right;
+  }
 }
 
-.ng-valid[required],
-.ng-valid.required {
-  border-left: 5px solid #42a948; /* green */
+md-slider {
+  flex: 1 0 auto;
 }
 
-.ng-invalid:not(form) {
-  border-left: 5px solid #a94442; /* red */
+md-input {
+  width: 100%;
+  margin-bottom: unit(1.5);
+
+  &.ng-valid[required] md-hint {
+    display: none;
+  }
+
+  &.ng-invalid md-hint {
+    color: md-color($warn);
+  }
+}
+
+button {
+  margin: 0 unit();
 }

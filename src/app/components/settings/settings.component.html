@@ -8,22 +8,39 @@
           Visualization
         </md-card-subtitle>
         <md-card-content>
-          <div class="label">Plot Noise:</div>
-          <md-slider min="0" max="20" formControlName="plotNoise"></md-slider>
-          <span>{{settingsForm.value.plotNoise}}</span>
-          <div class="label">Hist2D Bins:</div>
-          <md-slider min="8" max="80" formControlName="hist2dBins"></md-slider>
-          <span>{{settingsForm.value.hist2dBins}}</span>
-          <div class="label">Hist2D Noise:</div>
-          <md-slider min="0" max="20" formControlName="hist2dNoise"></md-slider>
-          <span>{{settingsForm.value.hist2dNoise}}</span>
-          <div class="label">Histogram Bins:</div>
-          <md-slider min="8" max="40"
-                     formControlName="histogramBins"></md-slider>
-          <span>{{settingsForm.value.histogramBins}}</span>
-          <div class="label">Top Comps:</div>
-          <md-slider min="5" max="50" formControlName="topComps"></md-slider>
-          <span>{{settingsForm.value.topComps}}</span>
+          <label>Plot Noise:</label>
+          <div class="slider">
+            <md-slider min="0" max="20" formControlName="plotNoise"></md-slider>
+            <span>{{settingsForm.value.plotNoise}}</span>
+          </div>
+
+          <label>Hist2D Bins:</label>
+          <div class="slider">
+            <md-slider min="8" max="80"
+                       formControlName="hist2dBins"></md-slider>
+            <span>{{settingsForm.value.hist2dBins}}</span>
+          </div>
+
+          <label>Hist2D Noise:</label>
+          <div class="slider">
+            <md-slider min="0" max="20"
+                       formControlName="hist2dNoise"></md-slider>
+            <span>{{settingsForm.value.hist2dNoise}}</span>
+          </div>
+
+          <label>Histogram Bins:</label>
+          <div class="slider">
+            <md-slider min="8" max="40"
+                       formControlName="histogramBins"></md-slider>
+            <span>{{settingsForm.value.histogramBins}}</span>
+          </div>
+
+          <label>Top Comps:</label>
+          <div class="slider">
+            <md-slider min="5" max="50" formControlName="topComps"></md-slider>
+            <span>{{settingsForm.value.topComps}}</span>
+          </div>
+
         </md-card-content>
       </md-card>
 
@@ -32,18 +49,25 @@
           Server
         </md-card-subtitle>
         <md-card-content>
-          <md-input placeholder="URL" formControlName="serverURL"
-                    required></md-input>
-          <!-- <span [hidden]="settingsForm.controls.serverURL.valid">Server URL is required!</span> -->
-          <md-input placeholder="Query String" formControlName="queryStr"
-                    required></md-input>
-          <!-- <span [hidden]="settingsForm.controls.queryStr.valid">Query String is required!</span> -->
-          <md-input placeholder="Class Path" formControlName="classPath"
-                    required></md-input>
-          <!-- <span [hidden]="settingsForm.controls.classPath.valid">Class Path is required!</span> -->
-          <md-input placeholder="Sourire URL" formControlName="sourireURL"
-                    required></md-input>
-          <!-- <span [hidden]="settingsForm.controls.sourireURL.valid">Sourire URL is required!</span> -->
+          <md-input placeholder="URL"
+                    formControlName="serverURL" required>
+            <md-hint>Server URL is required</md-hint>
+          </md-input>
+
+          <md-input placeholder="Query String"
+                    formControlName="queryStr" required>
+            <md-hint>Query String is required</md-hint>
+          </md-input>
+
+          <md-input placeholder="Class Path"
+                    formControlName="classPath" required>
+            <md-hint>Class Path is required</md-hint>
+          </md-input>
+
+          <md-input placeholder="Sourire URL"
+                    formControlName="sourireURL" required>
+            <md-hint>Sourire URL is required</md-hint>
+          </md-input>
         </md-card-content>
       </md-card>
 
@@ -52,12 +76,14 @@
           <md-card-subtitle>
             Misc
           </md-card-subtitle>
-          <label>Hide Compounds</label>
-          <md-slide-toggle formControlName="hiddenComps"></md-slide-toggle>
+          <md-slide-toggle formControlName="hiddenComps">
+            Hide Compounds
+          </md-slide-toggle>
         </md-card-content>
       </md-card>
 
-      <button md-raised-button color="primary" type="submit"
+      <button md-raised-button
+              color="primary" type="submit"
               [disabled]="!settingsForm.valid">
         Save
       </button>

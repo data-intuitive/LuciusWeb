@@ -1,0 +1,29 @@
+@import 'variables';
+@import 'theme';
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+
+  background-color: $body-bg-color;
+  color: $primary-text-color;
+}
+
+p {
+  margin: 16px;
+}
+
+// COMPONENTS //
+md-slide-toggle {
+  .md-slide-toggle-content {
+    color: $primary-text-color;
+    // FIXME: Remove when md-slide-toggle is properly styled
+    font-weight: normal !important;
+  }
+}

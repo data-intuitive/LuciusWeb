@@ -11,8 +11,8 @@ body {
 body {
   font-family: 'Roboto', sans-serif;
 
-  background-color: $body-bg-color;
   color: $primary-text-color;
+  background-color: $body-bg-color;
 }
 
 p {
@@ -22,8 +22,9 @@ p {
 // COMPONENTS //
 md-slide-toggle {
   .md-slide-toggle-content {
-    color: $primary-text-color;
     // FIXME: Remove when md-slide-toggle is properly styled
     font-weight: normal !important;
+
+    color: $primary-text-color;
   }
 }

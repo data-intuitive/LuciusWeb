@@ -10,7 +10,7 @@ const initialValues: SettingsState = {
   histogramBins: 16,
   topComps: 25,
   serverURL: 'http://192.168.1.10:8090/jobs',
-  queryStr: 'context=compass&appName=luciusapi&sync=tårue',
+  queryStr: 'context=compass&appName=luciusapi&sync=true',
   classPath: 'luciusapi',
   sourireURL: 'http://192.168.1.10:9999',
   hiddenComps: false

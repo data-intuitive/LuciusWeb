@@ -25,17 +25,8 @@ md-toolbar {
   color: $primary-color-text;
 }
 
-.app-icon-button {
-  margin: unit(.5) 0;
-  padding: 0;
-
-  cursor: pointer;
-  user-select: none;
-
+md-icon {
   color: $primary-color-text;
-  border: none;
-  background: none;
-  box-shadow: none;
 }
 
 .app-toolbar-filler {

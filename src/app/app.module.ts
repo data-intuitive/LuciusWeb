@@ -34,8 +34,7 @@ import {
     HttpModule,
     FormsModule,
     ReactiveFormsModule,
-
-    MaterialModule,
+    MaterialModule.forRoot(),
 
     routes,
 

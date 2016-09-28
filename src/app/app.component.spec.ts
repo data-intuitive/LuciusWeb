@@ -1,50 +1,50 @@
 /* tslint:disable:no-unused-variable */
-/// <reference path="../../node_modules/@types/jasmine/index.d.ts"/>
 
 import { TestBed, async, ComponentFixture } from '@angular/core/testing';
-import { DebugElement } from '@angular/core';
+import { DebugElement, NO_ERRORS_SCHEMA } from '@angular/core';
 import { AppComponent } from './app.component';
-import 'rxjs/add/operator/let';
-import { AppModule } from './';
-import { APP_BASE_HREF } from '@angular/common';
-import { Router } from '@angular/router';
-
-class FakeRouter {
-  navigateByUrl(url: string) {
-    return url;
-  }
-}
+import { By } from '@angular/platform-browser';
+import { RouterTestingModule } from '@angular/router/testing';
+import { StoreModule } from '@ngrx/store';
+import { reducers } from './reducers';
+import { SettingsActions, LayoutActions } from './actions';
+import { MaterialModule } from '@angular/material';
 
 let comp: AppComponent;
 let fixture: ComponentFixture<AppComponent>;
 let el: DebugElement;
 
 describe('App: LuciusWeb', () => {
-  // FIXME: not working because of "<a routerLink=" in template
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [
-        AppModule
-      ],
-      providers: [
-        {provide: Router, useClass: FakeRouter},
-        {provide: APP_BASE_HREF, useValue: '/'}
-      ]
-    })
-    .compileComponents()
-    .then(() => {
-      fixture = TestBed.createComponent(AppComponent);
-      comp = fixture.debugElement.componentInstance;
-      el = fixture.debugElement;
-    });
+        imports: [
+          RouterTestingModule.withRoutes([]),
+          StoreModule.provideStore(reducers),
+          MaterialModule
+        ],
+        declarations: [
+          AppComponent
+        ],
+        providers: [
+          SettingsActions,
+          LayoutActions
+        ],
+        schemas: [NO_ERRORS_SCHEMA]
+      })
+      .compileComponents()
+      .then(() => {
+        fixture = TestBed.createComponent(AppComponent);
+        comp = fixture.componentInstance;
+        el = fixture.debugElement;
+      });
   }));
 
   it('should create the app', async(() => {
-    expect(el).toBeTruthy();
+    expect(comp).toBeTruthy();
   }));
 
-  // it('should have md-sidenav in md-sidenav-layout', async(() => {
-  //  expect(el.query(By.css('md-sidenav-layout > md-sidenav'))).toBeTruthy();
-  // }));
+  it('should have md-sidenav in md-sidenav-layout', async(() => {
+    expect(el.query(By.css('md-sidenav-layout > md-sidenav'))).toBeTruthy();
+  }));
 
 });

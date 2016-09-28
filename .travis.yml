@@ -11,7 +11,7 @@ env:
   - SCRIPT=lint
   - SCRIPT=slint
   - SCRIPT=e2e
-  - SCRIPT=test
+  - SCRIPT=test:ci
 
 before_install:
   - export DISPLAY=:99.0

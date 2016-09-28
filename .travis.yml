@@ -11,8 +11,7 @@ env:
   - SCRIPT=lint
   - SCRIPT=slint
   - SCRIPT=e2e
-  # TODO: needs solution for router testing in template
-  # - SCRIPT=test
+  - SCRIPT=test
 
 before_install:
   - export DISPLAY=:99.0

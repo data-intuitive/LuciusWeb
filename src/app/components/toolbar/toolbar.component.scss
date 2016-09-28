@@ -1,35 +1,32 @@
+@import '../../../styles/variables';
+
 :host {
+  z-index: 1;
+
   flex: 0 0 auto;
   display: flex;
   flex-direction: column;
 }
 
 md-toolbar {
-  background-color: darkslateblue;
+  @include md-elevation(3);
+
+  background-color: md-color($primary);
 }
 
 .row {
   display: flex;
   align-items: stretch;
 
-  margin: 0 16px;
+  margin: 0 unit();
 
   text-transform: capitalize;
 
-  color: white;
+  color: $primary-color-text;
 }
 
-.app-icon-button {
-  margin: 8px 0;
-  padding: 0;
-
-  cursor: pointer;
-  user-select: none;
-
-  color: white;
-  border: none;
-  background: none;
-  box-shadow: none;
+md-icon {
+  color: $primary-color-text;
 }
 
 .app-toolbar-filler {

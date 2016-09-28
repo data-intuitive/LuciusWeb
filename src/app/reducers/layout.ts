@@ -6,7 +6,7 @@ import { LayoutActions } from '../actions';
 
 export interface LayoutState {
   sidenavOpen: Boolean;
-};
+}
 
 const initialState: LayoutState = {
   sidenavOpen: false
@@ -29,4 +29,4 @@ export default function (state = initialState, action: Action): LayoutState {
 export function getSidenavOpened() {
   return (state$: Observable<LayoutState>) => state$
     .select(s => s.sidenavOpen);
-};
+}

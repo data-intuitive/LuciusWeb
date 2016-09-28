@@ -18,6 +18,7 @@ describe('Test LuciusWeb', function () {
   it('should open sidenav', () => {
     page.navigateTo('/');
     page.openSidenav();
+    browser.sleep(500);
     expect(page.isSidenavOpen()).toBe(true);
   });
 
@@ -25,6 +26,7 @@ describe('Test LuciusWeb', function () {
     page.navigateTo('/');
     page.openSidenav();
     page.closeSidenav();
+    browser.sleep(500);
     expect(page.isSidenavOpen()).toBe(false);
   });
 

@@ -1,3 +1,5 @@
+@import '../../../styles/variables';
+
 :host {
   display: flex;
   flex-direction: column;
@@ -13,7 +15,54 @@ app-toolbar {
   flex: 1 1 auto;
   overflow: auto;
 
-  padding: 16px;
+  padding: unit();
+}
 
-  background-color: lightgrey;
+.wrapper {
+  max-width: unit(40);
+  margin: auto;
+}
+
+md-card {
+  margin: unit();
+
+  background-color: $bg-color;
+}
+
+label {
+  margin-top: unit(.5);
+}
+
+.slider {
+  display: flex;
+  align-items: center;
+
+  span {
+    display: block;
+
+    width: unit(1.5);
+
+    text-align: right;
+  }
+}
+
+md-slider {
+  flex: 1 0 auto;
+}
+
+md-input {
+  width: 100%;
+  margin-bottom: unit(1.5);
+
+  &.ng-valid[required] md-hint {
+    display: none;
+  }
+
+  &.ng-invalid md-hint {
+    color: md-color($warn);
+  }
+}
+
+button {
+  margin: 0 unit();
 }

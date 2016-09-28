@@ -1,9 +1,10 @@
 import { LayoutActions } from './layout';
+import { SettingsActions } from './settings';
 
 export {
-  LayoutActions,
+  LayoutActions, SettingsActions
 };
 
 export const actions = [
-  LayoutActions
+  LayoutActions, SettingsActions
 ];

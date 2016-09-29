@@ -23,7 +23,7 @@ export default function (state: SettingsState, action: Action) {
   switch (action.type) {
 
     case SettingsActions.INIT_COMPLETE: {
-      return Object.assign({}, state, action.payload, {complete: true});
+      return Object.assign({}, action.payload, {complete: true});
     }
 
     case SettingsActions.UPDATE: {

@@ -3,6 +3,7 @@ import '@ngrx/core/add/operator/select';
 
 import { SettingsActions } from '../actions';
 
+/* the settings object, as saved inside the store */
 export interface SettingsState {
   version: Number;
   complete: Boolean;
@@ -21,28 +22,14 @@ export interface SettingsState {
 export default function (state: SettingsState, action: Action) {
   switch (action.type) {
 
+    /* action to initialize the settings values in the store */
     case SettingsActions.INIT_COMPLETE: {
       return Object.assign({}, action.payload, {complete: true});
     }
 
-    case SettingsActions.UPDATE: {
-      return Object.assign({}, state, {
-        complete: false,
-        plotNoise: action.payload.plotNoise,
-        hist2dBins: action.payload.hist2dBins,
-        hist2dNoise: action.payload.hist2dNoise,
-        histogramBins: action.payload.histogramBins,
-        topComps: action.payload.topComps,
-        serverURL: action.payload.serverURL,
-        queryStr: action.payload.queryStr,
-        classPath: action.payload.classPath,
-        sourireURL: action.payload.sourireURL,
-        hiddenComps: action.payload.hiddenComps,
-      });
-    }
-
+    /* action to update the settings values in the store */
     case SettingsActions.UPDATE_COMPLETE: {
-      return Object.assign({}, state, {complete: true});
+      return Object.assign({}, action.payload, {complete: true});
     }
 
     default: {

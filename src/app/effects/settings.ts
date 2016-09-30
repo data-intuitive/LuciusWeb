@@ -26,16 +26,16 @@ export class SettingsEffects {
 
   /* effect triggered on settings initialization - uses localStorageService
      to retrieve SettingsState from LS and then triggers initComplete() action
-     on the store to complete the initialization.
+     on the store to complete the initialization
   */
   @Effect() initializeSettings$ = this.actions$
     .ofType(settings.SettingsActions.INIT)
-    .map(_ => this.settingsActions.initComplete(
+    .mapTo(this.settingsActions.initComplete(
       this.localStorageService.init()
     ));
 
-  /* effect triggered on settings update - uses localStorageService
-     to save the new SettingsState to LS and then triggers updateComplete() action
+  /* effect triggered on settings update - uses localStorageService to save
+     the new SettingsState in LS and then triggers updateComplete() action
      on the store to complete the update
   */
   @Effect() updateSettings$ = this.actions$

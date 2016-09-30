@@ -25,8 +25,8 @@ export class AppComponent implements OnInit {
       store.let(getSidenavOpened());
   }
 
-  /*  on app load, initialize settings values by updating the store,
-      so other components can use them */
+  /* on app load, initialize settings values by updating the store,
+     so other components can use them */
   ngOnInit() {
     this.store.dispatch(this.settingsActions.init());
   }

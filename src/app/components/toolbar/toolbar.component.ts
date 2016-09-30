@@ -18,6 +18,7 @@ export class ToolbarComponent {
   ) {
   }
 
+  /* open side navigation bar by updating store, when menu button is pressed */
   openSidenav() {
     this.store.dispatch(this.layoutActions.toggleSidenav(true));
   }

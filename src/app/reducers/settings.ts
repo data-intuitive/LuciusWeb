@@ -1,4 +1,3 @@
-import { Observable } from 'rxjs/Observable';
 import { Action } from '@ngrx/store';
 import '@ngrx/core/add/operator/select';
 
@@ -50,9 +49,4 @@ export default function (state: SettingsState, action: Action) {
       return state;
     }
   }
-}
-
-export function getSettings() {
-  return (state$: Observable<SettingsState>) => state$
-    .select(s => s);
 }

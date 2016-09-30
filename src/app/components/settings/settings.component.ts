@@ -37,7 +37,7 @@ export class SettingsComponent implements OnInit {
       hist2dBins: this.settings.hist2dBins,
       hist2dNoise: this.settings.hist2dNoise,
       histogramBins: this.settings.histogramBins,
-      topComps: this.settings.hiddenComps,
+      topComps: this.settings.topComps,
       serverURL: [this.settings.serverURL, Validators.required],
       queryStr: [this.settings.queryStr, Validators.required],
       classPath: [this.settings.classPath, Validators.required],

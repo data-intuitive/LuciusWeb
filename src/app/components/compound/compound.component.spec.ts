@@ -4,10 +4,10 @@ import { TestBed, async, ComponentFixture } from '@angular/core/testing';
 import { DebugElement, NO_ERRORS_SCHEMA } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { StoreModule } from '@ngrx/store';
+
 import { CompoundComponent } from './compound.component';
-import { reducers } from '../../reducers';
 import { ToolbarComponent } from '../toolbar/toolbar.component';
-import { LayoutActions } from '../../actions';
+import { reducer } from '../../reducers';
 
 let comp: CompoundComponent;
 let fixture: ComponentFixture<CompoundComponent>;
@@ -17,14 +17,11 @@ describe('App: LuciusWeb', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
         imports: [
-          StoreModule.provideStore(reducers)
+          StoreModule.provideStore(reducer)
         ],
         declarations: [
           CompoundComponent,
           ToolbarComponent
-        ],
-        providers: [
-          LayoutActions
         ],
         schemas: [NO_ERRORS_SCHEMA]
       })

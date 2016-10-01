@@ -1,39 +1,40 @@
-import { Injectable } from '@angular/core';
 import { Action } from '@ngrx/store';
 
-import { SettingsState } from '../reducers/settings';
+import * as fromSettings from '../reducers/settings';
 
-@Injectable()
-export class SettingsActions {
-  static INIT = '[Setttings] Init';
-  static INIT_COMPLETE = '[Settings] Init Complete';
-  static UPDATE = '[Setttings] Update';
-  static UPDATE_COMPLETE = '[Setttings] Update Complete';
+export const SettingsActionTypes = {
+  INIT: '[Setttings] Init',
+  INIT_COMPLETE: '[Settings] Init Complete',
+  UPDATE: '[Setttings] Update',
+  UPDATE_COMPLETE: '[Setttings] Update Complete',
+};
 
-  init(): Action {
-    return {
-      type: SettingsActions.INIT
-    };
-  }
+export class Init implements Action {
+  type = SettingsActionTypes.INIT;
+}
 
-  initComplete(state: SettingsState): Action {
-    return {
-      type: SettingsActions.INIT_COMPLETE,
-      payload: state
-    };
-  }
+export class InitComplete implements Action {
+  type = SettingsActionTypes.INIT_COMPLETE;
 
-  update(state: SettingsState): Action {
-    return {
-      type: SettingsActions.UPDATE,
-      payload: state
-    };
-  }
-
-  updateComplete(state: SettingsState): Action {
-    return {
-      type: SettingsActions.UPDATE_COMPLETE,
-      payload: state
-    };
+  constructor(public payload: fromSettings.State) {
   }
 }
+
+export class Update implements Action {
+  type = SettingsActionTypes.UPDATE;
+
+  constructor(public payload: fromSettings.State) {
+  }
+}
+
+export class UpdateComplete implements Action {
+  type = SettingsActionTypes.UPDATE_COMPLETE;
+
+  constructor(public payload: fromSettings.State) {
+  }
+}
+
+export type SettingsActions = Init
+  | InitComplete
+  | Update
+  | UpdateComplete;

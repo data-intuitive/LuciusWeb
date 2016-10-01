@@ -4,12 +4,12 @@ import { TestBed, async, ComponentFixture } from '@angular/core/testing';
 import { DebugElement, NO_ERRORS_SCHEMA } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { StoreModule } from '@ngrx/store';
-import { SettingsComponent } from './settings.component';
-import { reducers } from '../../reducers';
-import { ToolbarComponent } from '../toolbar/toolbar.component';
-import { LayoutActions, SettingsActions } from '../../actions';
 import { FormBuilder } from '@angular/forms';
-import { StoreUtil } from '../../shared';
+
+import { SettingsComponent } from './settings.component';
+import { ToolbarComponent } from '../toolbar/toolbar.component';
+import { reducer } from '../../reducers';
+
 
 let comp: SettingsComponent;
 let fixture: ComponentFixture<SettingsComponent>;
@@ -19,17 +19,14 @@ describe('App: LuciusWeb', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
         imports: [
-          StoreModule.provideStore(reducers)
+          StoreModule.provideStore(reducer)
         ],
         declarations: [
           SettingsComponent,
           ToolbarComponent
         ],
         providers: [
-          LayoutActions,
-          SettingsActions,
-          FormBuilder,
-          StoreUtil
+          FormBuilder
         ],
         schemas: [NO_ERRORS_SCHEMA]
       })

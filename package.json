@@ -23,7 +23,7 @@
     "@angular/platform-browser": "2.0.1",
     "@angular/platform-browser-dynamic": "2.0.1",
     "@angular/router": "3.0.1",
-    "@angular/material": "^2.0.0-alpha.8-2",
+    "@angular/material": "^2.0.0-alpha.9",
     "@ngrx/core": "^1.2.0",
     "@ngrx/effects": "^2.0.0",
     "@ngrx/store": "^2.2.0",
@@ -35,8 +35,7 @@
     "zone.js": "^0.6.23"
   },
   "devDependencies": {
-    "@ngrx/store-devtools": "^3.0.2",
-    "@ngrx/store-log-monitor": "^3.0.2",
+    "@ngrx/store-devtools": "^3.1.0",
     "@types/d3": "^3.5.35",
     "@types/hammerjs": "^2.0.32",
     "@types/jasmine": "^2.2.33",

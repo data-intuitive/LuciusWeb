@@ -1,14 +1,17 @@
-import { Injectable } from '@angular/core';
 import { Action } from '@ngrx/store';
 
-@Injectable()
-export class LayoutActions {
-  static TOGGLE_SIDENAV = '[Nav] TOGGLE Sidenav';
+export const LayoutActionTypes = {
+  OPEN_SIDENAV: '[Layout] Open Sidenav',
+  CLOSE_SIDENAV: '[Layout] Close Sidenav'
+};
 
-  toggleSidenav(opened: Boolean): Action {
-    return {
-      type: LayoutActions.TOGGLE_SIDENAV,
-      payload: opened
-    };
-  }
+export class OpenSidenavAction implements Action {
+  type = LayoutActionTypes.OPEN_SIDENAV;
 }
+
+export class CloseSidenavAction implements Action {
+  type = LayoutActionTypes.CLOSE_SIDENAV;
+}
+
+export type LayoutActions = OpenSidenavAction
+  | CloseSidenavAction;

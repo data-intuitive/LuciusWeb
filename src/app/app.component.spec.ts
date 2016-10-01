@@ -2,14 +2,13 @@
 
 import { TestBed, async, ComponentFixture } from '@angular/core/testing';
 import { DebugElement, NO_ERRORS_SCHEMA } from '@angular/core';
-import { AppComponent } from './app.component';
 import { By } from '@angular/platform-browser';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
-import { reducers } from './reducers';
-import { SettingsActions, LayoutActions } from './actions';
+
 import { MaterialModule } from '@angular/material';
-import { StoreUtil } from './shared';
+import { AppComponent } from './app.component';
+import { reducer } from './reducers';
 
 let comp: AppComponent;
 let fixture: ComponentFixture<AppComponent>;
@@ -20,16 +19,11 @@ describe('App: LuciusWeb', () => {
     TestBed.configureTestingModule({
         imports: [
           RouterTestingModule.withRoutes([]),
-          StoreModule.provideStore(reducers),
+          StoreModule.provideStore(reducer),
           MaterialModule
         ],
         declarations: [
           AppComponent
-        ],
-        providers: [
-          SettingsActions,
-          LayoutActions,
-          StoreUtil
         ],
         schemas: [NO_ERRORS_SCHEMA]
       })

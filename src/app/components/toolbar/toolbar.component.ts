@@ -1,7 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../reducers';
-import { LayoutActions } from '../../actions/layout';
+
+import * as fromRoot from '../../reducers';
+import * as layoutActions from '../../actions/layout';
 
 @Component({
   selector: 'app-toolbar',
@@ -13,14 +14,13 @@ export class ToolbarComponent {
   @Input() type: String = '';
 
   constructor(
-    private store: Store<AppState>,
-    private layoutActions: LayoutActions
+    private store: Store<fromRoot.State>
   ) {
   }
 
   // open side navigation bar by updating store, when menu button is pressed
   openSidenav() {
-    this.store.dispatch(this.layoutActions.toggleSidenav(true));
+    this.store.dispatch(new layoutActions.OpenSidenavAction());
   }
 
 }

@@ -1,24 +1,23 @@
-import { Injectable } from '@angular/core';
-import { Actions, Effect } from '@ngrx/effects';
-
-import { Observable } from 'rxjs';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/switchMap';
 import 'rxjs/add/operator/filter';
 import 'rxjs/add/operator/do';
+import { Observable } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { Actions, Effect } from '@ngrx/effects';
+import { Store } from '@ngrx/store';
 
-import * as settings from '../actions/settings';
-import { SettingsActions } from '../actions/settings';
-import { SettingsState } from '../reducers/settings';
 import { LocalStorageService } from '../services/localstorage.service';
 import { StoreUtil } from '../shared';
+import { Settings } from '../models/settings';
+import * as settings from '../actions/settings';
+import * as fromRoot from '../reducers';
 
 @Injectable()
 export class SettingsEffects {
   constructor(
     private actions$: Actions,
-    private storeUtil: StoreUtil,
-    private settingsActions: SettingsActions,
+    private store: Store<fromRoot.State>,
     private localStorageService: LocalStorageService
   ) {
   }
@@ -27,8 +26,8 @@ export class SettingsEffects {
   // to retrieve SettingsState from LS and then triggers initComplete() action
   // on the store to complete the initialization
   @Effect() initializeSettings$ = this.actions$
-    .ofType(settings.SettingsActions.INIT)
-    .mapTo(this.settingsActions.initComplete(
+    .ofType(settings.SettingsActionTypes.INIT)
+    .mapTo(new settings.InitComplete(
       this.localStorageService.init()
     ));
 
@@ -36,12 +35,12 @@ export class SettingsEffects {
   // the new SettingsState in LS and then triggers updateComplete() action
   // on the store to complete the update
   @Effect() updateSettings$ = this.actions$
-    .ofType(settings.SettingsActions.UPDATE)
-    .map<SettingsState>(action => Object.assign({},
-      this.storeUtil.getState().settings, action.payload
+    .ofType(settings.SettingsActionTypes.UPDATE)
+    .map<Settings>(action => Object.assign({},
+      StoreUtil.getState(this.store).settings, action.payload
     ))
     .switchMap(payload => Observable.of(
-      this.settingsActions.updateComplete(
+      new settings.UpdateComplete(
         this.localStorageService.setSettings(payload)))
     );
 

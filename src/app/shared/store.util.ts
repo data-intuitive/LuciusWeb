@@ -1,24 +1,20 @@
 import { Injectable } from '@angular/core';
-
 import { Store } from '@ngrx/store';
-import { AppState } from '../reducers';
+
+import * as fromRoot from '../reducers';
 
 @Injectable()
 export class StoreUtil {
-  state: AppState;
-
-  constructor(
-    private store: Store<AppState>
-  ) {
-  }
 
   // method to synchronously return current state of the store
-  getState(): AppState {
-    this.store
+  static getState(store: Store<fromRoot.State>): fromRoot.State {
+    let state: fromRoot.State;
+
+    store
       .take(1)
-      .subscribe(s => this.state = s)
+      .subscribe(s => state = s)
       .unsubscribe();
 
-    return this.state;
+    return state;
   }
 }

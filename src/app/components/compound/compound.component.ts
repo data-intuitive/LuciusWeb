@@ -1,10 +1,9 @@
 import { Component } from '@angular/core';
-
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 
-import { AppState } from '../../reducers';
-import { SettingsState } from '../../reducers/settings';
+import * as fromRoot from '../../reducers';
+import * as fromSettings from '../../reducers/settings';
 
 @Component({
   selector: 'app-compound',
@@ -12,10 +11,10 @@ import { SettingsState } from '../../reducers/settings';
   styleUrls: ['./compound.component.scss']
 })
 export class CompoundComponent {
-  settings$: Observable<SettingsState>;
+  settings$: Observable<fromSettings.State>;
 
   constructor(
-    private store: Store<AppState>
+    private store: Store<fromRoot.State>
   ) {
 
     // subscribe to settings state

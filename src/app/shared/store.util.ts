@@ -12,7 +12,7 @@ export class StoreUtil {
   ) {
   }
 
-  /* method to return current state of the store */
+  // method to synchronously return current state of the store
   getState(): AppState {
     this.store
       .take(1)

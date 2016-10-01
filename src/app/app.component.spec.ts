@@ -9,6 +9,7 @@ import { StoreModule } from '@ngrx/store';
 import { reducers } from './reducers';
 import { SettingsActions, LayoutActions } from './actions';
 import { MaterialModule } from '@angular/material';
+import { StoreUtil } from './shared';
 
 let comp: AppComponent;
 let fixture: ComponentFixture<AppComponent>;
@@ -27,7 +28,8 @@ describe('App: LuciusWeb', () => {
         ],
         providers: [
           SettingsActions,
-          LayoutActions
+          LayoutActions,
+          StoreUtil
         ],
         schemas: [NO_ERRORS_SCHEMA]
       })

@@ -5,7 +5,6 @@ import { Observable } from 'rxjs/Observable';
 
 import { AppState } from '../../reducers';
 import { SettingsState } from '../../reducers/settings';
-import { StoreUtil } from '../../shared';
 
 @Component({
   selector: 'app-compound',
@@ -14,14 +13,12 @@ import { StoreUtil } from '../../shared';
 })
 export class CompoundComponent {
   settings$: Observable<SettingsState>;
-  settings: SettingsState;
 
   constructor(
-    private store: Store<AppState>,
-    private storeUtil: StoreUtil,
+    private store: Store<AppState>
   ) {
 
-    /* gain access to settings values through the store util */
-    this.settings = this.storeUtil.getState().settings;
+    // subscribe to settings state
+    // this.settings$ = ...
   }
 }

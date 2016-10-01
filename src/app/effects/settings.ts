@@ -15,7 +15,6 @@ import { StoreUtil } from '../shared';
 
 @Injectable()
 export class SettingsEffects {
-
   constructor(
     private actions$: Actions,
     private storeUtil: StoreUtil,
@@ -24,20 +23,18 @@ export class SettingsEffects {
   ) {
   }
 
-  /* effect triggered on settings initialization - uses localStorageService
-     to retrieve SettingsState from LS and then triggers initComplete() action
-     on the store to complete the initialization
-  */
+  // effect triggered on settings initialization - uses localStorageService
+  // to retrieve SettingsState from LS and then triggers initComplete() action
+  // on the store to complete the initialization
   @Effect() initializeSettings$ = this.actions$
     .ofType(settings.SettingsActions.INIT)
     .mapTo(this.settingsActions.initComplete(
       this.localStorageService.init()
     ));
 
-  /* effect triggered on settings update - uses localStorageService to save
-     the new SettingsState in LS and then triggers updateComplete() action
-     on the store to complete the update
-  */
+  // effect triggered on settings update - uses localStorageService to save
+  // the new SettingsState in LS and then triggers updateComplete() action
+  // on the store to complete the update
   @Effect() updateSettings$ = this.actions$
     .ofType(settings.SettingsActions.UPDATE)
     .map<SettingsState>(action => Object.assign({},

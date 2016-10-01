@@ -27,12 +27,3 @@ export function getLayoutState() {
 export function getSidenavOpened() {
   return compose(fromLayout.getSidenavOpened(), getLayoutState());
 }
-
-export function getSettingsState() {
-  return (state$: Observable<AppState>) => state$
-    .select(s => s.settings);
-}
-
-export function getSettings() {
-  return compose(fromSettings.getSettings(), getSettingsState());
-}

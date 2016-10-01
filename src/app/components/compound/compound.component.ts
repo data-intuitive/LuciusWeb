@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 
-import { AppState, getSettings } from '../../reducers';
+import { AppState } from '../../reducers';
 import { SettingsState } from '../../reducers/settings';
 
 @Component({
@@ -17,6 +17,8 @@ export class CompoundComponent {
   constructor(
     private store: Store<AppState>
   ) {
-    this.settings$ = this.store.let(getSettings());
+
+    // subscribe to settings state
+    // this.settings$ = ...
   }
 }

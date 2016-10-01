@@ -9,6 +9,7 @@ import { reducers } from '../../reducers';
 import { ToolbarComponent } from '../toolbar/toolbar.component';
 import { LayoutActions, SettingsActions } from '../../actions';
 import { FormBuilder } from '@angular/forms';
+import { StoreUtil } from '../../shared';
 
 let comp: SettingsComponent;
 let fixture: ComponentFixture<SettingsComponent>;
@@ -27,7 +28,8 @@ describe('App: LuciusWeb', () => {
         providers: [
           LayoutActions,
           SettingsActions,
-          FormBuilder
+          FormBuilder,
+          StoreUtil
         ],
         schemas: [NO_ERRORS_SCHEMA]
       })

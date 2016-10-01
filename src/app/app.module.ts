@@ -7,7 +7,6 @@ import { MaterialModule } from '@angular/material';
 import { routes } from './app.routes';
 import { StoreModule } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
-import { StoreLogMonitorModule } from '@ngrx/store-log-monitor';
 import { EffectsModule } from '@ngrx/effects';
 import { reducer } from './reducers';
 import { SettingsEffects } from './effects/settings';
@@ -40,8 +39,7 @@ import {
     EffectsModule.runAfterBootstrap(SettingsEffects),
 
     // DEBUG: remove Devtools in production
-    StoreDevtoolsModule.instrumentOnlyWithExtension(),
-    StoreLogMonitorModule
+    StoreDevtoolsModule.instrumentOnlyWithExtension()
   ],
   providers: [
     LocalStorageService

@@ -3,7 +3,7 @@
 
   <md-sidenav #sidenav
     (close)="closeSidenav()"
-    [opened]="sidenavOpen$ | async">
+    [opened]="showSidenav$ | async">
 
     <h2>ComPass</h2>
 
@@ -17,6 +17,3 @@
 
   </md-sidenav>
 </md-sidenav-layout>
-
-<!-- DEBUG ngrx/store -->
-<!--<ngrx-store-log-monitor toggleCommand="ctrl-h" positionCommand="ctrl-m"></ngrx-store-log-monitor>-->

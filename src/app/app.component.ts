@@ -1,12 +1,11 @@
-import { Component, OnInit } from '@angular/core';
-
-import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/let';
-
+import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs/Observable';
 import { Store } from '@ngrx/store';
-import { LayoutActions, SettingsActions } from './actions';
 
-import { AppState, getSidenavOpened } from './reducers';
+import * as fromRoot from './reducers';
+import * as layoutActions from './actions/layout';
+import * as settingsActions from './actions/settings';
 
 @Component({
   selector: 'app-root',
@@ -14,26 +13,24 @@ import { AppState, getSidenavOpened } from './reducers';
   styleUrls: ['app.component.scss']
 })
 export class AppComponent implements OnInit {
-  sidenavOpen$: Observable<Boolean>;
+  showSidenav$: Observable<Boolean>;
 
   constructor(
-    private store: Store<AppState>,
-    private settingsActions: SettingsActions,
-    private layoutActions: LayoutActions
+    private store: Store<fromRoot.State>,
   ) {
-    this.sidenavOpen$ =
-      store.let(getSidenavOpened());
+    this.showSidenav$ =
+      store.let(fromRoot.getShowSidenav);
   }
 
   // on app load, initialize settings values by updating the store,
   // so other components can use them
   ngOnInit() {
-    this.store.dispatch(this.settingsActions.init());
+    this.store.dispatch(new settingsActions.Init());
   }
 
   // close side navigation bar by updating the store
   closeSidenav() {
-    this.store.dispatch(this.layoutActions.toggleSidenav(false));
+    this.store.dispatch(new layoutActions.CloseSidenavAction());
   }
 
 }

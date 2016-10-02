@@ -1,29 +1,51 @@
+import { environment } from '../../environments/environment';
+
 import '@ngrx/core/add/operator/select';
 import { Observable } from 'rxjs/Observable';
-
 import { compose } from '@ngrx/core/compose';
-import { storeLogger } from 'ngrx-store-logger';
 import { storeFreeze } from 'ngrx-store-freeze';
 import { combineReducers } from '@ngrx/store';
 
-import layoutReducer, * as fromLayout from './layout';
-import settingsReducer, * as fromSettings from './settings';
+import * as fromLayout from './layout';
+import * as fromSettings from './settings';
 
-export interface AppState {
-  layout: fromLayout.LayoutState;
-  settings: fromSettings.SettingsState;
+export interface State {
+  settings: fromSettings.State;
+  layout: fromLayout.State;
 }
 
-export const reducers = compose(storeFreeze, storeLogger(), combineReducers)({
-  layout: layoutReducer,
-  settings: settingsReducer
-});
+const reducers = {
+  settings: fromSettings.reducer,
+  layout: fromLayout.reducer
+};
 
-export function getLayoutState() {
-  return (state$: Observable<AppState>) => state$
-    .select(s => s.layout);
+const developmentReducer: Function = compose(storeFreeze, combineReducers)(reducers);
+const productionReducer = combineReducers(reducers);
+
+export function reducer(state: any, action: any) {
+  if (environment.production) {
+    return productionReducer(state, action);
+  } else {
+    return developmentReducer(state, action);
+  }
 }
 
-export function getSidenavOpened() {
-  return compose(fromLayout.getSidenavOpened(), getLayoutState());
-}
+/**
+ * Settings Reducers
+ */
+export const getSettingsState = (state$: Observable<State>) =>
+  state$.select(state => state.settings);
+
+export const getSettings = compose(
+  fromSettings.getSettings, getSettingsState
+);
+
+/**
+ * Layout Reducers
+ */
+export const getLayoutState = (state$: Observable<State>) =>
+  state$.select(state => state.layout);
+
+export const getShowSidenav = compose(
+  fromLayout.getShowSidenav, getLayoutState
+);

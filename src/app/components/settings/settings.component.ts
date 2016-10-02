@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-
 import { Store } from '@ngrx/store';
 
-import { SettingsActions } from '../../actions';
-import { AppState } from '../../reducers';
-import { SettingsState } from '../../reducers/settings';
 import { StoreUtil } from '../../shared';
+import { Settings } from '../../models/settings';
+
+import * as fromRoot from '../../reducers';
+import * as settingsActions from '../../actions/settings';
 
 @Component({
   selector: 'app-settings',
@@ -16,20 +16,18 @@ import { StoreUtil } from '../../shared';
 
 export class SettingsComponent implements OnInit {
   settingsForm: FormGroup;
-  settings: SettingsState;
+  settings: Settings;
 
   constructor(
     private formBuilder: FormBuilder,
-    private store: Store<AppState>,
-    private settingsActions: SettingsActions,
-    private storeUtil: StoreUtil,
+    private store: Store<fromRoot.State>
   ) {
   }
 
   ngOnInit() {
     // get initial values using the store util and
     // assign them to a local variable
-    this.settings = this.storeUtil.getState().settings;
+    this.settings = StoreUtil.getState(this.store).settings;
 
     // set initial values in the settings form
     this.settingsForm = this.formBuilder.group({
@@ -49,7 +47,8 @@ export class SettingsComponent implements OnInit {
   // set new settings values by updating the store,
   // when 'Save' button is pressed
   onSubmit() {
-    this.store.dispatch(this.settingsActions.update(this.settingsForm.value)
+    this.store.dispatch(
+      new settingsActions.Update(this.settingsForm.value)
     );
   }
 }

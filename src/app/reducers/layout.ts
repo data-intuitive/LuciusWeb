@@ -1,32 +1,33 @@
-import { Observable } from 'rxjs/Observable';
-import { Action } from '@ngrx/store';
 import '@ngrx/core/add/operator/select';
+import { Observable } from 'rxjs/Observable';
+import { LayoutActions, LayoutActionTypes } from '../actions/layout';
 
-import { LayoutActions } from '../actions';
-
-export interface LayoutState {
-  sidenavOpen: Boolean;
+export interface State {
+  showSidenav: boolean;
 }
 
-const initialState: LayoutState = {
-  sidenavOpen: false
+const initialState: State = {
+  showSidenav: false,
 };
 
-export default function (state = initialState, action: Action): LayoutState {
+export function reducer(state = initialState, action: LayoutActions): State {
   switch (action.type) {
-    case LayoutActions.TOGGLE_SIDENAV: {
-      return Object.assign({}, state, {
-        sidenavOpen: action.payload
-      });
-    }
+    case LayoutActionTypes.CLOSE_SIDENAV:
+      return {
+        showSidenav: false
+      };
 
-    default: {
+    case LayoutActionTypes.OPEN_SIDENAV:
+      return {
+        showSidenav: true
+      };
+
+    default:
       return state;
-    }
   }
 }
 
-export function getSidenavOpened() {
-  return (state$: Observable<LayoutState>) => state$
-    .select(s => s.sidenavOpen);
+export function getShowSidenav(state$: Observable<State>) {
+  return state$.select(state => state.showSidenav);
 }
+

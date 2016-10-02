@@ -3,9 +3,9 @@
 import { TestBed, async, ComponentFixture } from '@angular/core/testing';
 import { DebugElement, NO_ERRORS_SCHEMA } from '@angular/core';
 import { StoreModule } from '@ngrx/store';
+
 import { ToolbarComponent } from './toolbar.component';
-import { reducers } from '../../reducers';
-import { LayoutActions } from '../../actions';
+import { reducer } from '../../reducers';
 
 let comp: ToolbarComponent;
 let fixture: ComponentFixture<ToolbarComponent>;
@@ -15,13 +15,10 @@ describe('App: LuciusWeb', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
         imports: [
-          StoreModule.provideStore(reducers)
+          StoreModule.provideStore(reducer)
         ],
         declarations: [
           ToolbarComponent
-        ],
-        providers: [
-          LayoutActions
         ],
         schemas: [NO_ERRORS_SCHEMA]
       })

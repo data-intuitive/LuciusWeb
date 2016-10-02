@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { SettingsState } from '../reducers/settings';
+import { Settings } from '../models/settings';
 
 // desired initial values for settings
-const initialValues: SettingsState = {
+const initialValues: Settings = {
   version: 1,
   complete: false,
   plotNoise: 3,
@@ -25,31 +25,27 @@ export class LocalStorageService {
   }
 
   // method to save object in LS and return it to the caller
-  setSettings(state: SettingsState): SettingsState {
-    console.log('local storage service[set]!', state);
-    localStorage.setItem(this.key, JSON.stringify(state));
-    return state;
+  setSettings(settings: Settings): Settings {
+    localStorage.setItem(this.key, JSON.stringify(settings));
+    return settings;
   }
 
   // method to load object from LS and return it to the caller
-  getSettings(): SettingsState {
-    console.log('local storage service[get]!');
+  getSettings(): Settings {
     return JSON.parse(localStorage.getItem(this.key));
   }
 
   // method to check if settings object exists in LS - if yes it returns this
   // object, if no it initializes one with the desired values and returns it
-  init(): SettingsState {
-    let settings: SettingsState = this.getSettings();
+  init(): Settings {
+    let settings: Settings = this.getSettings();
     if (
       !settings
       || !settings.version
       || settings.version !== initialValues.version
     ) {
-      console.log('setting to LS');
       settings = this.setSettings(initialValues);
     }
-    console.log('getting from LS ', settings);
     return settings;
   }
 }

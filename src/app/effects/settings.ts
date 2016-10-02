@@ -25,7 +25,7 @@ export class SettingsEffects {
   // effect triggered on settings initialization - uses localStorageService
   // to retrieve SettingsState from LS and then triggers initComplete() action
   // on the store to complete the initialization
-  @Effect() initializeSettings$ = this.actions$
+  @Effect() init$ = this.actions$
     .ofType(settings.SettingsActionTypes.INIT)
     .mapTo(new settings.InitComplete(
       this.localStorageService.init()
@@ -34,7 +34,7 @@ export class SettingsEffects {
   // effect triggered on settings update - uses localStorageService to save
   // the new SettingsState in LS and then triggers updateComplete() action
   // on the store to complete the update
-  @Effect() updateSettings$ = this.actions$
+  @Effect() update$ = this.actions$
     .ofType(settings.SettingsActionTypes.UPDATE)
     .map<Settings>(action => Object.assign({},
       StoreUtil.getState(this.store).settings, action.payload

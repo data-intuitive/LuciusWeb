@@ -11,12 +11,9 @@ export interface State extends Settings {}
 export function reducer(state = {}, action: Action) {
   switch (action.type) {
 
-    // action to initialize the settings values in the store
-    case SettingsActionTypes.INIT_COMPLETE: {
-      return Object.assign({}, action.payload, {complete: true});
-    }
-
-    // action to update the settings values in the store
+    // 1. action to initialize the settings state
+    // 2. action to update the settings state
+    case SettingsActionTypes.INIT_COMPLETE:
     case SettingsActionTypes.UPDATE_COMPLETE: {
       return Object.assign({}, action.payload, {complete: true});
     }

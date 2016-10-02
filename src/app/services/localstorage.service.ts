@@ -26,14 +26,12 @@ export class LocalStorageService {
 
   // method to save object in LS and return it to the caller
   setSettings(settings: Settings): Settings {
-    console.log('local storage service[set]!', settings);
     localStorage.setItem(this.key, JSON.stringify(settings));
     return settings;
   }
 
   // method to load object from LS and return it to the caller
   getSettings(): Settings {
-    console.log('local storage service[get]!');
     return JSON.parse(localStorage.getItem(this.key));
   }
 
@@ -46,10 +44,8 @@ export class LocalStorageService {
       || !settings.version
       || settings.version !== initialValues.version
     ) {
-      console.log('setting to LS');
       settings = this.setSettings(initialValues);
     }
-    console.log('getting from LS ', settings);
     return settings;
   }
 }

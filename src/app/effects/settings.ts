@@ -8,7 +8,6 @@ import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 
 import { LocalStorageService } from '../services/localstorage.service';
-import { StoreUtil } from '../shared';
 import { Settings } from '../models/settings';
 import * as settings from '../actions/settings';
 import * as fromRoot from '../reducers';
@@ -36,8 +35,9 @@ export class SettingsEffects {
   // on the store to complete the update
   @Effect() update$ = this.actions$
     .ofType(settings.SettingsActionTypes.UPDATE)
-    .map<Settings>(action => Object.assign({},
-      StoreUtil.getState(this.store).settings, action.payload
+    .withLatestFrom(this.store)
+    .map<Settings>(([action, store]) => Object.assign({},
+      store.settings, action.payload
     ))
     .switchMap(payload => Observable.of(
       new settings.UpdateComplete(

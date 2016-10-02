@@ -41,7 +41,7 @@
     "@types/jasmine": "^2.2.33",
     "@types/protractor": "^1.5.20",
     "@types/selenium-webdriver": "2.44.26",
-    "angular-cli": "1.0.0-beta.15",
+    "angular-cli": "1.0.0-beta.16",
     "codelyzer": "~1.0.0-beta.0",
     "csscomb": "^4.0.0-alpha",
     "jasmine-core": "2.5.2",

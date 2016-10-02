@@ -4,10 +4,10 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { LocalStorageService } from './services/localstorage.service';
 import { MaterialModule } from '@angular/material';
-import { routes } from './app.routes';
 import { StoreModule } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { EffectsModule } from '@ngrx/effects';
+import { LuciusWebRoutingModule } from './app-routing.module';
 import { reducer } from './reducers';
 import { SettingsEffects } from './effects/settings';
 import { AppComponent } from './app.component';
@@ -33,7 +33,7 @@ import {
     ReactiveFormsModule,
     MaterialModule.forRoot(),
 
-    routes,
+    LuciusWebRoutingModule,
 
     StoreModule.provideStore(reducer),
     EffectsModule.runAfterBootstrap(SettingsEffects),

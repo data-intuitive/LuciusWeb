@@ -1,10 +1,10 @@
+import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { ModuleWithProviders } from '@angular/core';
 
 import { CompoundComponent } from './components/compound/compound.component';
 import { SettingsComponent } from './components/settings/settings.component';
 
-const appRoutes: Routes = [
+const routes: Routes = [
   {
     path: '',
     redirectTo: '/compound',
@@ -23,4 +23,9 @@ const appRoutes: Routes = [
   }
 ];
 
-export const routes: ModuleWithProviders = RouterModule.forRoot(appRoutes);
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule],
+  providers: []
+})
+export class LuciusWebRoutingModule {}

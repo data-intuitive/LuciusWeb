@@ -16,8 +16,7 @@ export class CompoundComponent {
   constructor(
     private store: Store<fromRoot.State>
   ) {
-
     // subscribe to settings state
-    // this.settings$ = ...
+    this.settings$ = this.store.let(fromRoot.getSettings);
   }
 }

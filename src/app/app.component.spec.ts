@@ -1,4 +1,5 @@
 /* tslint:disable:no-unused-variable */
+/// <reference path="../../node_modules/@types/jasmine/index.d.ts" />
 
 import { TestBed, async, ComponentFixture } from '@angular/core/testing';
 import { DebugElement, NO_ERRORS_SCHEMA } from '@angular/core';

@@ -8,15 +8,18 @@ import { combineReducers } from '@ngrx/store';
 
 import * as fromLayout from './layout';
 import * as fromSettings from './settings';
+import * as fromServer from './server';
 
 export interface State {
   settings: fromSettings.State;
   layout: fromLayout.State;
+  server: fromServer.State;
 }
 
 const reducers = {
   settings: fromSettings.reducer,
-  layout: fromLayout.reducer
+  layout: fromLayout.reducer,
+  server: fromServer.reducer
 };
 
 const developmentReducer: Function = compose(storeFreeze, combineReducers)(reducers);
@@ -49,3 +52,13 @@ export const getLayoutState = (state$: Observable<State>) =>
 export const getShowSidenav = compose(
   fromLayout.getShowSidenav, getLayoutState
 );
+
+/**
+ * Server Reducers
+ */
+ export const getServerState = (state$: Observable<State>) =>
+   state$.select(state => state.server);
+
+ export const getServerCompleted = compose(
+   fromServer.getServerCompleted, getServerState
+ );

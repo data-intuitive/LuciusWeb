@@ -12,4 +12,3 @@ export interface Settings {
   sourireURL: String;
   hiddenComps: Boolean;
 }
-

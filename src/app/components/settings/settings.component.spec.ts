@@ -42,11 +42,13 @@ describe('App: LuciusWeb', () => {
     expect(comp).toBeTruthy();
   }));
 
+  it('should have a filter area', async(() => {
+    expect(el.query(By.css('app-filter'))).toBeTruthy();
+  }));
+
   it('toolbar type should be settings', async(() => {
     let toolbar = el.query(By.css('app-toolbar'));
     expect(toolbar.attributes['type']).toBe('settings');
   }));
 
 });
-
-

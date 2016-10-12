@@ -36,7 +36,7 @@ export class SettingsEffects {
   @Effect() update$ = this.actions$
     .ofType(settings.SettingsActionTypes.UPDATE)
     .withLatestFrom(this.store)
-    .map<Settings>(([action, store]) => Object.assign({},
+    .map(([action, store]) => Object.assign({},
       store.settings, action.payload
     ))
     .switchMap(payload => Observable.of(

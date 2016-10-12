@@ -8,7 +8,6 @@ import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 
 import { LocalStorageService } from '../services/localstorage.service';
-import { Settings } from '../models/settings';
 import * as settings from '../actions/settings';
 import * as fromRoot from '../reducers';
 

@@ -16,6 +16,7 @@ app-toolbar {
   display: flex;
   overflow: auto;
   align-items: flex-start;
+  flex-direction: column;
 
   & > *:first-child {
     margin-right: 0;
@@ -25,10 +26,21 @@ app-toolbar {
 .comp {
   @include md-elevation(1);
 
-  flex: 6 1 auto;
+  flex: 0 1 auto;
 
   margin: unit();
   padding: unit();
 
   background-color: $bg-color;
+}
+
+.myclass {
+  flex: 1 2;
+  flex-shrink: 1;
+  flex-grow: 1;
+  padding: unit(1);
+
+  & > *:first-child {
+    margin-right: 0;
+  }
 }

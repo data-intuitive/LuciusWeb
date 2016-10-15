@@ -1,7 +1,9 @@
 <div class="title">Search</div>
 <div class="content">
-  <md-input placeholder="Compound"></md-input>
-  <md-input placeholder="Signature"></md-input>
+  <md-input #comp (keyup.enter)="updateCompound(comp.value)"
+            placeholder="Compound"></md-input>
+  <md-input #sign (keyup.enter)="updateSignature(sign.value)"
+            placeholder="Signature"></md-input>
 
   <!-- FIXME: Update when MD2 is updated, currently broken -->
   <md-slide-toggle>Slider</md-slide-toggle>

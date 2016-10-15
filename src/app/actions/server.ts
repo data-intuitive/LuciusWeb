@@ -5,17 +5,19 @@ export const ServerActionTypes = {
   FETCH_COMPLETE: '[Server] Fetch Server Data Complete'
 };
 
-export class Fetch implements Action {
+export class FetchAction implements Action {
   type = ServerActionTypes.FETCH;
 
-}
-
-export class FetchComplete implements Action {
-  type = ServerActionTypes.FETCH_COMPLETE;
-
-  constructor(public payload: boolean) {
+  constructor(public payload: string) {
   }
 }
 
-export type SettingsActions = Fetch
-  | FetchComplete;
+export class FetchCompleteAction implements Action {
+  type = ServerActionTypes.FETCH_COMPLETE;
+
+  constructor(public payload: string) {
+  }
+}
+
+export type SettingsActions = FetchAction
+  | FetchCompleteAction;

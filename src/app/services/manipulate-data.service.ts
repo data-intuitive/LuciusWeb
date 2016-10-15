@@ -1,25 +1,37 @@
-import { Injectable, Output, EventEmitter } from '@angular/core';
+import { Injectable } from '@angular/core';
+import { Signature } from '../models/signature';
+import { Compound } from '../models/compound';
 
 @Injectable()
 export class ManipulateDataService {
-  serverdata: JSON;
-  @Output() dataSaved: EventEmitter<any> = new EventEmitter();
+  signatureData: Signature;
+  compoundData: Compound;
 
   constructor() {
   }
 
-  // setter function to save server data and emit it to components
-  setData(data: JSON): boolean {
-    console.log('[manipulate service] set');
-    this.serverdata = data;
-    this.dataSaved.emit(event);
-    return true;
+  // setter function to save data and update the store flag
+  setData(data: any, type: string): string {
+    console.log('[manipulate service] set' + ' ' + type);
+    switch (type) {
+      case 'signature':
+            this.signatureData = data;
+            break;
+      case 'compounds':
+          this.compoundData = data;
+          break;
+    }
+    return type;
   }
 
-  // getter function to get server data for any use
-  getData(): JSON {
-    console.log('[manipulate service] get');
-    return this.serverdata;
+  // getter function to get data
+  getData(type: string): any {
+    console.log('[manipulate service] get' + ' ' + type);
+    switch (type) {
+      case 'signature':
+        return this.signatureData;
+      case 'compounds':
+        return this.compoundData;
+    }
   }
-
 }

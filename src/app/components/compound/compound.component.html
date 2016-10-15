@@ -1,10 +1,16 @@
 <app-toolbar type="compound"></app-toolbar>
-<div class="content">
+<div class="comp">
   <app-filter></app-filter>
-  <div class="comp">
-    {{settings$ | async | json}}
-    <br />
-    <strong>Server Results</strong>
-    {{data | json }}
-  </div>
+    <div class="myclass">
+      <button md-raised-button
+              color="primary" (click)="fetchData('compounds')">
+              Update Compounds
+      </button>
+      <button md-raised-button
+              color="primary" (click)="fetchData('signature')">
+              Update Signature
+      </button>
+    </div>
+    <app-plot [compound]="compoundFetched" [signature]="signatureFetched"></app-plot>
+    <app-histogram [compound]="compoundFetched" [signature]="signatureFetched"></app-histogram>
 </div>

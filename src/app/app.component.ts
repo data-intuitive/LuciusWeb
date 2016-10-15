@@ -16,7 +16,7 @@ export class AppComponent implements OnInit {
   showSidenav$: Observable<Boolean>;
 
   constructor(
-    private store: Store<fromRoot.State>,
+    private store: Store<fromRoot.State>
   ) {
     this.showSidenav$ =
       store.let(fromRoot.getShowSidenav);

@@ -1,16 +1,16 @@
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/switchMap';
-import 'rxjs/add/operator/filter';
-import 'rxjs/add/operator/do';
-// import { Observable } from 'rxjs';
+
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { FetchDataService } from '../services/fetch-data.service';
 import { ManipulateDataService } from '../services/manipulate-data.service';
-import { Settings } from '../models/settings';
+import { Parser } from '../shared/url-parser';
+import { Observable } from 'rxjs';
 
 import * as server from '../actions/server';
+import * as data from '../actions/data';
 import * as fromRoot from '../reducers';
 
 @Injectable()
@@ -23,16 +23,32 @@ export class ServerEffects {
   ) {
   }
 
-  // TODO: change according to classPath, not hardcoded as below
-  parseURL(settings: Settings) {
-    return (settings.serverURL + '?' + settings.queryStr
-            + '&classPath=' + settings.classPath + '.signature');
-  }
-
   @Effect() fetch$ = this.actions$
     .ofType(server.ServerActionTypes.FETCH)
     .withLatestFrom(this.store)
-    .map(([ , store]) => this.parseURL(store.settings))
-    .switchMap(payload => this.fetchDataService.getData(payload))
-    .map(result => new server.FetchComplete(this.manipulateDataService.setData(result)));
+    .map(([action, store]) => ({
+      url: Parser.parseURL(store.settings, action.payload),
+      data: store.data}
+    ))
+    .switchMap(payload => this.fetchDataService.fetchData(
+      payload.url, payload.data
+    ))
+    .map(result => new server.FetchCompleteAction(
+      this.manipulateDataService.setData(
+        result.data, result.type)
+    ));
+
+  @Effect() fetchNotSaved$ = this.actions$
+    .ofType(server.ServerActionTypes.FETCH)
+    .map(action => action.payload)
+    .switchMap(payload => Observable.of(
+      new data.NotSavedAction(payload)
+    ));
+
+  @Effect() fetchComplete$ = this.actions$
+    .ofType(server.ServerActionTypes.FETCH_COMPLETE)
+    .map(action => action.payload)
+    .switchMap(payload => Observable.of(
+      new data.SavedAction(payload)
+    ));
 }

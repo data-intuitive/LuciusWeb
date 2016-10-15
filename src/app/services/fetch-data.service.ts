@@ -1,30 +1,37 @@
 import { Injectable } from '@angular/core';
-import { Http } from '@angular/http';
+import { Http, Headers, RequestOptions } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
+import { Data } from '../models/data';
+import { Parser } from '../shared/url-parser';
 
 @Injectable()
 export class FetchDataService {
 
   constructor(private http: Http) { }
 
-  getData(serverURL: String): Observable<any> {
+  fetchData(URL: string, data: Data): Observable<any> {
     console.log('[http service] fetch');
-    let url = serverURL.toString();
+    let url = URL;
+    let classPath = Parser.parseClassPath(url);
+    let headers = new Headers({ 'Content-Type': 'text/plain' });
+    let options = new RequestOptions({ headers: headers });
 
-    // let headers = new Headers({ 'Content-Type': 'text/plain' });
-    // let options = new RequestOptions({ headers: headers });
+    switch (classPath) {
+      case 'signature': {
+        let body = 'compound = ' + data.signature;
+        console.log(url);
+        return this.http.post(url, body, options)
+          .map(res => ({'data': res.json(), 'type': classPath}))
+          .catch((error: any) => Observable.throw(error.json().error || 'Server error'));
+      }
 
-    // TODO: get the body of the request from the user input
-    // let body = 'query = 397';
-
-    return this.http.get(url)
-      .map(res => res.json())
-      .catch((error: any) => Observable.throw(error.json().error || 'Server error'));
-
-    // return this.http.post(url, body, options)
-    //   .map(res => res.json())
-    //   .catch((error: any) => Observable.throw(error.json().error || 'Server error'));
-
+      case 'compounds': {
+        let body = 'query = ' + data.compound;
+        console.log(url);
+        return this.http.post(url, body, options)
+          .map(res => ({'data': res.json(), 'type': classPath}))
+          .catch((error: any) => Observable.throw(error.json().error || 'Server error'));
+      }
+    }
   }
-
 }

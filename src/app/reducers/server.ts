@@ -6,26 +6,44 @@ import { ServerActionTypes } from '../actions/server';
 
 // the settings object, as saved inside the store
 export interface State {
-  completed: boolean;
+  signatureFetched: boolean;
+  compoundFetched: boolean;
 }
 
 const initialState: State = {
-  completed: false
+  signatureFetched: false,
+  compoundFetched: false
 };
 
 export function reducer(state = initialState, action: Action) {
+
   switch (action.type) {
-
-    case ServerActionTypes.FETCH_COMPLETE: {
-       return Object.assign({}, {completed: action.payload});
+    case ServerActionTypes.FETCH: {
+      switch (action.payload) {
+        case 'signature':
+          return Object.assign({}, state, {signatureFetched: false});
+        case 'compounds':
+          return Object.assign({}, state, {compoundFetched: false});
+      }
     }
-
+    case ServerActionTypes.FETCH_COMPLETE: {
+      switch (action.payload) {
+        case 'signature':
+          return Object.assign({}, state, {signatureFetched: true});
+        case 'compounds':
+          return Object.assign({}, state, {compoundFetched: true});
+     }
+    }
     default: {
       return state;
     }
   }
 }
 
-export function getServerCompleted(state$: Observable<State>) {
-  return state$.select(state => state.completed);
+export function getSignatureFetched(state$: Observable<State>) {
+  return state$.select(state => state.signatureFetched);
+}
+
+export function getCompoundFetched(state$: Observable<State>) {
+  return state$.select(state => state.compoundFetched);
 }

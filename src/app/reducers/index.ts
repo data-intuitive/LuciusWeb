@@ -9,17 +9,20 @@ import { combineReducers } from '@ngrx/store';
 import * as fromLayout from './layout';
 import * as fromSettings from './settings';
 import * as fromServer from './server';
+import * as fromData from './data';
 
 export interface State {
   settings: fromSettings.State;
   layout: fromLayout.State;
   server: fromServer.State;
+  data: fromData.State;
 }
 
 const reducers = {
   settings: fromSettings.reducer,
   layout: fromLayout.reducer,
-  server: fromServer.reducer
+  server: fromServer.reducer,
+  data: fromData.reducer
 };
 
 const developmentReducer: Function = compose(storeFreeze, combineReducers)(reducers);
@@ -59,6 +62,33 @@ export const getShowSidenav = compose(
  export const getServerState = (state$: Observable<State>) =>
    state$.select(state => state.server);
 
- export const getServerCompleted = compose(
-   fromServer.getServerCompleted, getServerState
+ export const getSignatureFetched = compose(
+   fromServer.getSignatureFetched, getServerState
  );
+
+ export const getCompoundFetched = compose(
+   fromServer.getCompoundFetched, getServerState
+ );
+
+
+ /**
+  * Data Reducers
+  */
+  export const getDataState = (state$: Observable<State>) =>
+    state$.select(state => state.data);
+
+  export const getSignatureSaved = compose(
+    fromData.getSignatureSaved, getDataState
+  );
+
+  export const getCompoundSaved = compose(
+    fromData.getCompoundSaved, getDataState
+  );
+
+  export const getSignature = compose(
+    fromData.getSignature, getDataState
+  );
+
+  export const getCompound = compose(
+    fromData.getCompound, getDataState
+  );

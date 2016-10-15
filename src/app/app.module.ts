@@ -18,7 +18,9 @@ import {
   CompoundComponent,
   SettingsComponent,
   ToolbarComponent,
-  FilterComponent
+  FilterComponent,
+  PlotComponent,
+  HistogramComponent
 } from './components';
 
 @NgModule({
@@ -27,7 +29,9 @@ import {
     CompoundComponent,
     SettingsComponent,
     ToolbarComponent,
-    FilterComponent
+    FilterComponent,
+    PlotComponent,
+    HistogramComponent
   ],
   imports: [
     BrowserModule,

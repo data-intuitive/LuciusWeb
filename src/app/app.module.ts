@@ -20,7 +20,8 @@ import {
   ToolbarComponent,
   FilterComponent,
   PlotComponent,
-  HistogramComponent
+  HistogramComponent,
+  Top25Component
 } from './components';
 
 @NgModule({
@@ -31,7 +32,8 @@ import {
     ToolbarComponent,
     FilterComponent,
     PlotComponent,
-    HistogramComponent
+    HistogramComponent,
+    Top25Component
   ],
   imports: [
     BrowserModule,

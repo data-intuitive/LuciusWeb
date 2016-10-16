@@ -32,6 +32,14 @@ export class FetchDataService {
           .map(res => ({'data': res.json(), 'type': classPath}))
           .catch((error: any) => Observable.throw(error.json().error || 'Server error'));
       }
+
+      case 'zhang': {
+        let body = 'query = ' + data.signature + ', sorted = false';
+        console.log(url);
+        return this.http.post(url, body, options)
+          .map(res => ({'data': res.json(), 'type': classPath}))
+          .catch((error: any) => Observable.throw(error.json().error || 'Server error'));
+      }
     }
   }
 }

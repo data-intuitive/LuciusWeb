@@ -20,12 +20,8 @@ export class CompoundComponent implements OnInit {
   settings$: Observable<fromSettings.State>;
   signatureFetched$: Observable<boolean>;
   compoundFetched$: Observable<boolean>;
-  compoundFetched: Compound;
-  signatureFetched: Signature;
-  compound$: Observable<string>;
-  signature$: Observable<string>;
-  compound: string;
-  signature: string;
+  currentCompound: Compound;
+  currentSignature: Signature;
 
   constructor(
     private store: Store<fromRoot.State>,
@@ -37,21 +33,17 @@ export class CompoundComponent implements OnInit {
       // observe data for changes
       this.signatureFetched$ = this.store.let(fromRoot.getSignatureFetched);
       this.compoundFetched$ = this.store.let(fromRoot.getCompoundFetched);
-      this.compound$ = this.store.let(fromRoot.getCompound);
-      this.signature$ = this.store.let(fromRoot.getSignature);
     }
 
   ngOnInit() {
     this.signatureFetched$.
-      subscribe(ev => this.signatureFetched = this.manipulateDataService.getData('signature'));
+      subscribe(ev => this.currentSignature = this.manipulateDataService.getData('signature'));
     this.compoundFetched$.
-      subscribe(ev => this.compoundFetched = this.manipulateDataService.getData('compounds'));
-    this.compound$.subscribe(com => this.compound = com);
-    this.signature$.subscribe(sign => this.signature = sign);
+      subscribe(ev => this.currentCompound = this.manipulateDataService.getData('compounds'));
   }
 
   fetchData(queryClass: string) {
-        this.store.dispatch(new serverActions.FetchAction(queryClass));
+    this.store.dispatch(new serverActions.FetchAction(queryClass));
   }
 
 }

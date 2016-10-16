@@ -12,7 +12,7 @@ export interface State {
 const initialState: State = {
   signatureSaved: false,
   compoundSaved: false,
-  signature: '',
+  signature: 'HSPA1A DNAJB1 BAG3 P4HA2 HSPA8 TMEM97 SPR DDIT4 HMOX1 -TSEN2',
   compound: ''
 };
 

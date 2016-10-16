@@ -4,13 +4,14 @@
     <div class="myclass">
       <button md-raised-button
               color="primary" (click)="fetchData('compounds')">
-              Update Compounds
+              Search for Compounds
       </button>
       <button md-raised-button
               color="primary" (click)="fetchData('signature')">
-              Update Signature
+              Search for Signature
       </button>
     </div>
-    <app-plot [compound]="compoundFetched" [signature]="signatureFetched"></app-plot>
-    <app-histogram [compound]="compoundFetched" [signature]="signatureFetched"></app-histogram>
+    <app-plot [compound]="currentCompound" [signature]="currentSignature"></app-plot>
+    <app-histogram [compound]="currentCompound" [signature]="currentSignature"></app-histogram>
+    <app-top25></app-top25>
 </div>

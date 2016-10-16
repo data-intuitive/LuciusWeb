@@ -1,25 +1,20 @@
 @import '~@angular/material/core/theming/all-theme';
 @import '~@angular/material/core/style/elevation';
-
 $primary: md-palette($md-indigo);
 $accent: md-palette($md-pink, A200, A100, A400);
 $warn: md-palette($md-red);
 $theme: md-light-theme($primary, $accent, $warn);
-
 $body-bg-color: #eee;
 $bg-color: #fff;
-
 $primary-color-text: #fff;
 $primary-text-color: #212121;
 $secondary-text-color: #757575;
 $divider-color: #bdbdbd;
-
 $font-xs: 12px;
 $font-sm: 14px;
 $font-base: 16px;
 $font-l: 20px;
 $font-xl: 28px;
-
 $unit: 16px;
 
 // FUNCTIONS //

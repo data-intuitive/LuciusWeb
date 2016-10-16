@@ -15,8 +15,8 @@ app-toolbar {
   flex: 1 1 auto;
   display: flex;
   overflow: auto;
-  align-items: flex-start;
   flex-direction: column;
+  align-items: flex-start;
 
   & > *:first-child {
     margin-right: 0;
@@ -36,9 +36,11 @@ app-toolbar {
 
 .myclass {
   flex: 1 2;
+
+  padding: unit(1);
+
   flex-shrink: 1;
   flex-grow: 1;
-  padding: unit(1);
 
   & > *:first-child {
     margin-right: 0;

@@ -37,6 +37,7 @@ export class FilterComponent implements OnInit {
   updateSignature(value: string) {
     this.signature = value;
     this.store.dispatch(new dataActions.UpdateSignatureAction(value));
+    this.store.dispatch(new dataActions.UpdateCompoundAction(''));
   }
 
 }

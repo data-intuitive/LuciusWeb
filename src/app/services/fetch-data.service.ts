@@ -18,7 +18,7 @@ export class FetchDataService {
 
     switch (classPath) {
       case 'signature': {
-        let body = 'compound = ' + data.signature;
+        let body = 'compound = ' + data.compound;
         console.log(url);
         return this.http.post(url, body, options)
           .map(res => ({'data': res.json(), 'type': classPath}))

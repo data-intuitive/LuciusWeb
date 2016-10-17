@@ -21,7 +21,8 @@ import {
   FilterComponent,
   PlotComponent,
   HistogramComponent,
-  Top25Component
+  Top25Component,
+  KnownTargetsComponent
 } from './components';
 
 @NgModule({
@@ -33,7 +34,8 @@ import {
     FilterComponent,
     PlotComponent,
     HistogramComponent,
-    Top25Component
+    Top25Component,
+    KnownTargetsComponent
   ],
   imports: [
     BrowserModule,

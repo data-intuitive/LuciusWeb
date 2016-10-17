@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Signature } from '../models/signature';
 import { Compound } from '../models/compound';
+import { Zhang } from '../models/zhang';
+
 import { Store } from '@ngrx/store';
 
 import * as fromRoot from '../reducers';
@@ -8,8 +10,9 @@ import * as dataActions from '../actions/data';
 
 @Injectable()
 export class ManipulateDataService {
-  signatureData: Signature;
-  compoundData: Compound;
+  signatureOfCompound: Signature;
+  relatedCompounds: Compound;
+  zhangData: Zhang;
 
   constructor(private store: Store<fromRoot.State>) {
   }
@@ -19,13 +22,15 @@ export class ManipulateDataService {
     console.log('[manipulate service] set' + ' ' + classPath);
     switch (classPath) {
       case 'signature':
-          this.signatureData = data;
-          this.store.dispatch(new dataActions.UpdateCompoundAction(''));
-          break;
+        this.signatureOfCompound = data;
+        this.store.dispatch(new dataActions.UpdateSignatureAction(data.result));
+        break;
       case 'compounds':
-          this.compoundData = data;
-          this.store.dispatch(new dataActions.UpdateSignatureAction(data.result));
-          break;
+        this.relatedCompounds = data;
+        break;
+      case 'zhang':
+        this.zhangData = data;
+        break;
     }
     return classPath;
   }
@@ -35,9 +40,11 @@ export class ManipulateDataService {
     console.log('[manipulate service] get' + ' ' + classPath);
     switch (classPath) {
       case 'signature':
-        return this.signatureData;
+        return this.signatureOfCompound;
       case 'compounds':
-        return this.compoundData;
+        return this.relatedCompounds;
+      case 'zhang':
+        return this.zhangData;
     }
   }
 }

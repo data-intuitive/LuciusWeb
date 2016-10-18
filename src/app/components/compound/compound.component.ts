@@ -5,9 +5,9 @@ import { Observable } from 'rxjs/Observable';
 import * as fromRoot from '../../reducers';
 import * as fromSettings from '../../reducers/settings';
 import * as serverActions from '../../actions/server';
+import * as dataActions from '../../actions/data';
 
 import { ManipulateDataService } from '../../services/manipulate-data.service';
-import { Compound } from '../../models/compound';
 import { Signature } from '../../models/signature';
 
 @Component({
@@ -19,8 +19,6 @@ import { Signature } from '../../models/signature';
 export class CompoundComponent implements OnInit {
   settings$: Observable<fromSettings.State>;
   signatureFetched$: Observable<boolean>;
-  compoundFetched$: Observable<boolean>;
-  currentCompound: Compound;
   currentSignature: Signature;
 
   constructor(
@@ -30,20 +28,28 @@ export class CompoundComponent implements OnInit {
       // observe settings for changes
       this.settings$ = this.store.let(fromRoot.getSettings);
 
-      // observe data for changes
+      // observe signature for changes
       this.signatureFetched$ = this.store.let(fromRoot.getSignatureFetched);
-      this.compoundFetched$ = this.store.let(fromRoot.getCompoundFetched);
     }
 
   ngOnInit() {
     this.signatureFetched$.
-      subscribe(ev => this.currentSignature = this.manipulateDataService.getData('signature'));
-    this.compoundFetched$.
-      subscribe(ev => this.currentCompound = this.manipulateDataService.getData('compounds'));
+      subscribe(ev => {
+        this.currentSignature = this.manipulateDataService.getData('signature');
+        this.updateSignature(ev);
+      });
   }
 
   fetchData(queryClass: string) {
     this.store.dispatch(new serverActions.FetchAction(queryClass));
+  }
+
+  updateSignature(updated) {
+    // if signature is changed from input, update it in store
+    if (updated === true) {
+      let sig = this.currentSignature.result.toString();
+      this.store.dispatch(new dataActions.UpdateSignatureAction(sig));
+    }
   }
 
 }

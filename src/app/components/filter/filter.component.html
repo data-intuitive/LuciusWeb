@@ -6,7 +6,9 @@
   <md-input #sign (keyup.enter)="updateSignature(sign.value)"
             placeholder="Signature" [value]="signature$ | async">
   </md-input>
-
+  <div *ngIf="compoundFetched$ | async">
+    {{relatedCompounds.result | json}}
+  </div>
   <!-- FIXME: Update when MD2 is updated, currently broken -->
   <md-slide-toggle>Slider</md-slide-toggle>
   <md-slide-toggle>Slider</md-slide-toggle>

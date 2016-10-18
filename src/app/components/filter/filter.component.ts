@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-// import { Signature } from '../../models/signature';
+import { Compound } from '../../models/compound';
 import { ManipulateDataService } from '../../services/manipulate-data.service';
 
 import * as fromRoot from '../../reducers';
@@ -17,6 +17,8 @@ export class FilterComponent implements OnInit {
   signature: string;
   signature$: Observable<string>;
   compound$: Observable<string>;
+  compoundFetched$: Observable<boolean>;
+  relatedCompounds: Compound;
 
   constructor(
     private store: Store<fromRoot.State>,
@@ -24,9 +26,12 @@ export class FilterComponent implements OnInit {
   ) {
     this.signature$ = this.store.let(fromRoot.getSignature);
     this.compound$ = this.store.let(fromRoot.getCompound);
+    this.compoundFetched$ = this.store.let(fromRoot.getCompoundFetched);
   }
 
   ngOnInit() {
+    this.compoundFetched$.
+      subscribe(ev => this.relatedCompounds = this.manipulateDataService.getData('compounds'));
   }
 
   updateCompound(value: string) {

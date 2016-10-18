@@ -3,18 +3,13 @@ import { Signature } from '../models/signature';
 import { Compound } from '../models/compound';
 import { Zhang } from '../models/zhang';
 
-import { Store } from '@ngrx/store';
-
-import * as fromRoot from '../reducers';
-import * as dataActions from '../actions/data';
-
 @Injectable()
 export class ManipulateDataService {
   signatureOfCompound: Signature;
   relatedCompounds: Compound;
   zhangData: Zhang;
 
-  constructor(private store: Store<fromRoot.State>) {
+  constructor() {
   }
 
   // setter function to save data and update the store flag
@@ -23,7 +18,6 @@ export class ManipulateDataService {
     switch (classPath) {
       case 'signature':
         this.signatureOfCompound = data;
-        this.store.dispatch(new dataActions.UpdateSignatureAction(data.result));
         break;
       case 'compounds':
         this.relatedCompounds = data;

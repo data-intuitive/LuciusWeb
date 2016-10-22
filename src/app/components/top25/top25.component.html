@@ -1,5 +1,11 @@
 <div class="title">Top 25 </div>
 <div class="content">
   <strong>Positive</strong><br />
+  <div *ngFor="let item1 of top25Positive">
+    {{item1}}
+  </div>
   <strong>Negative</strong>
+  <div *ngFor="let item2 of top25Negative">
+    {{item2}}
+  </div>
 </div>

@@ -1,18 +1,8 @@
 <app-toolbar type="compound"></app-toolbar>
 <div class="comp">
   <app-filter></app-filter>
-    <div class="myclass">
-      <button md-raised-button
-              color="primary" (click)="fetchData('compounds')">
-              Search for Related Compounds
-      </button>
-      <button md-raised-button
-              color="primary" (click)="fetchData('signature')">
-              Search for Signature
-      </button>
-    </div>
-    <app-plot [compound]="currentCompound" [signature]="currentSignature"></app-plot>
-    <app-histogram [compound]="currentCompound" [signature]="currentSignature"></app-histogram>
+    <app-plot></app-plot>
+    <app-histogram></app-histogram>
     <app-known-targets></app-known-targets>
     <app-top25></app-top25>
 </div>

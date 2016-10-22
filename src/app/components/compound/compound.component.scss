@@ -33,16 +33,3 @@ app-toolbar {
 
   background-color: $bg-color;
 }
-
-.myclass {
-  flex: 1 2;
-
-  padding: unit(1);
-
-  flex-shrink: 1;
-  flex-grow: 1;
-
-  & > *:first-child {
-    margin-right: 0;
-  }
-}

@@ -1,1 +1,9 @@
-<div class="title">Known Targets for {{compound$ | async}} </div>
+<div class="title">
+  Known Targets
+  <span *ngIf="(compound$ | async) !== '' ">
+    for {{compound$ | async}}
+  </span>
+</div>
+<div class="content">
+  {{knownTargets}}
+</div>

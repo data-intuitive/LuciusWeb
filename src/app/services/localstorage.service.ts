@@ -10,10 +10,10 @@ const initialValues: Settings = {
   hist2dNoise: 0,
   histogramBins: 16,
   topComps: 25,
-  serverURL: 'http://192.168.1.10:8090/jobs',
+  serverURL: 'http://192.168.1.100:8090/jobs',
   queryStr: 'context=compass&appName=luciusapi&sync=true',
   classPath: 'luciusapi',
-  sourireURL: 'http://192.168.1.10:9999',
+  sourireURL: 'http://192.168.1.100:9999',
   hiddenComps: false
 };
 

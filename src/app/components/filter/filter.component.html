@@ -1,14 +1,15 @@
 <div class="title">Search</div>
 <div class="content">
-  <md-input #comp (keyup.enter)="updateCompound(comp.value)"
+  <md-input [formControl]="comp" (keyup.enter)="updateCompound(comp.value)"
             placeholder="Compound" [value]="compound$ | async">
   </md-input>
+  <ul>
+    <li *ngFor="let item of relatedCompoundsArray">{{item}}</li>
+  </ul>
   <md-input #sign (keyup.enter)="updateSignature(sign.value)"
             placeholder="Signature" [value]="signature$ | async">
   </md-input>
-  <div *ngIf="compoundFetched$ | async">
-    {{relatedCompounds.result | json}}
-  </div>
+  {{ relatedCompounds | json}}
   <!-- FIXME: Update when MD2 is updated, currently broken -->
   <md-slide-toggle>Slider</md-slide-toggle>
   <md-slide-toggle>Slider</md-slide-toggle>

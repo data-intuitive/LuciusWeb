@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 
 import { StoreUtil } from '../../shared';
 import { Settings } from '../../models/settings';
@@ -16,12 +17,14 @@ import * as settingsActions from '../../actions/settings';
 
 export class SettingsComponent implements OnInit {
   settingsForm: FormGroup;
+  updateComplete$: Observable<boolean>;
   settings: Settings;
 
   constructor(
     private formBuilder: FormBuilder,
     private store: Store<fromRoot.State>
   ) {
+    this.updateComplete$ = this.store.let(fromRoot.getSettingsComplete);
   }
 
   ngOnInit() {
@@ -51,4 +54,5 @@ export class SettingsComponent implements OnInit {
       new settingsActions.Update(this.settingsForm.value)
     );
   }
+
 }

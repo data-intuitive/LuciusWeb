@@ -13,7 +13,9 @@ import { LuciusWebRoutingModule } from './app-routing.module';
 import { reducer } from './reducers';
 import { SettingsEffects } from './effects/settings';
 import { ServerEffects } from './effects/server';
+import { DataEffects } from './effects/data';
 import { AppComponent } from './app.component';
+
 import {
   CompoundComponent,
   SettingsComponent,
@@ -22,7 +24,8 @@ import {
   PlotComponent,
   HistogramComponent,
   Top25Component,
-  KnownTargetsComponent
+  KnownTargetsComponent,
+  AreaChartComponent
 } from './components';
 
 @NgModule({
@@ -35,7 +38,8 @@ import {
     PlotComponent,
     HistogramComponent,
     Top25Component,
-    KnownTargetsComponent
+    KnownTargetsComponent,
+    AreaChartComponent
   ],
   imports: [
     BrowserModule,
@@ -49,6 +53,7 @@ import {
     StoreModule.provideStore(reducer),
     EffectsModule.runAfterBootstrap(SettingsEffects),
     EffectsModule.runAfterBootstrap(ServerEffects),
+    EffectsModule.runAfterBootstrap(DataEffects),
     // DEBUG: remove Devtools in production
     StoreDevtoolsModule.instrumentOnlyWithExtension()
   ],

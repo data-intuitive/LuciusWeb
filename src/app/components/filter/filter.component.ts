@@ -1,11 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
+import { FormControl } from '@angular/forms';
+
 import { Compound } from '../../models/compound';
-import { ManipulateDataService } from '../../services/manipulate-data.service';
+import { Settings } from '../../models/settings';
+import { FetchDataService } from '../../services/fetch-data.service';
+import { Parser } from '../../shared/parser';
 
 import * as fromRoot from '../../reducers';
 import * as dataActions from '../../actions/data';
+import * as fromSettings from '../../reducers/settings';
 
 @Component({
   selector: 'app-filter',
@@ -13,36 +18,45 @@ import * as dataActions from '../../actions/data';
   styleUrls: ['./filter.component.scss']
 })
 export class FilterComponent implements OnInit {
-  compound: string;
-  signature: string;
-  signature$: Observable<string>;
-  compound$: Observable<string>;
-  compoundFetched$: Observable<boolean>;
-  relatedCompounds: Compound;
+    signature$: Observable<string>;
+    compound$: Observable<string>;
+    settings$: Observable<fromSettings.State>;
+    relatedCompounds: Compound;
+    relatedCompoundsArray: Array<string>;
+    settings: Settings;
+    comp = new FormControl();
 
-  constructor(
-    private store: Store<fromRoot.State>,
-    private manipulateDataService: ManipulateDataService
-  ) {
-    this.signature$ = this.store.let(fromRoot.getSignature);
-    this.compound$ = this.store.let(fromRoot.getCompound);
-    this.compoundFetched$ = this.store.let(fromRoot.getCompoundFetched);
-  }
+    constructor(
+      private store: Store<fromRoot.State>,
+      private fetchDataService: FetchDataService
+      ) {
+        this.signature$ = this.store.let(fromRoot.getSignature);
+        this.compound$ = this.store.let(fromRoot.getCompound);
+        this.settings$ = this.store.let(fromRoot.getSettings);
 
-  ngOnInit() {
-    this.compoundFetched$.
-      subscribe(ev => this.relatedCompounds = this.manipulateDataService.getData('compounds'));
-  }
+        this.comp.valueChanges
+          .debounceTime(200)
+          .distinctUntilChanged()
+          .switchMap(term => this.search(term))
+          .subscribe(result =>
+            this.relatedCompoundsArray = Parser.parseRelatedCompounds(result.data));
+      }
 
-  updateCompound(value: string) {
-    this.compound = value;
-    this.store.dispatch(new dataActions.UpdateCompoundAction(value));
-  }
+      ngOnInit() {
+          this.settings$.subscribe(settings => this.settings = settings);
+      }
 
-  updateSignature(value: string) {
-    this.signature = value;
-    this.store.dispatch(new dataActions.UpdateSignatureAction(value));
-    this.store.dispatch(new dataActions.UpdateCompoundAction(''));
-  }
+      search(term: string): Observable<any> {
+        let url = Parser.parseURL(this.settings, 'compounds');
+        let data = {'compound': term, 'signature': ''};
+        return this.fetchDataService.fetchData(url, data);
+      }
 
+      updateCompound(value: string) {
+        this.store.dispatch(new dataActions.UpdateCompoundAction(value));
+      }
+
+      updateSignature(value: string) {
+        this.store.dispatch(new dataActions.UpdateSignatureAction(value));
+      }
 }

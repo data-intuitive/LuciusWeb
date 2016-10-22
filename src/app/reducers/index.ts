@@ -46,6 +46,10 @@ export const getSettings = compose(
   fromSettings.getSettings, getSettingsState
 );
 
+export const getSettingsComplete = compose(
+  fromSettings.getSettingsComplete, getSettingsState
+);
+
 /**
  * Layout Reducers
  */
@@ -70,20 +74,23 @@ export const getShowSidenav = compose(
    fromServer.getCompoundFetched, getServerState
  );
 
+ export const getZhangFetched = compose(
+   fromServer.getZhangFetched, getServerState
+ );
+
+ export const getSimilaritiesHistFetched = compose(
+   fromServer.getSimilaritiesHistFetched, getServerState
+ );
+
+ export const getKnownTargetsFetched = compose(
+   fromServer.getKnownTargetsFetched, getServerState
+ );
 
  /**
   * Data Reducers
   */
   export const getDataState = (state$: Observable<State>) =>
     state$.select(state => state.data);
-
-  export const getSignatureSaved = compose(
-    fromData.getSignatureSaved, getDataState
-  );
-
-  export const getCompoundSaved = compose(
-    fromData.getCompoundSaved, getDataState
-  );
 
   export const getSignature = compose(
     fromData.getSignature, getDataState

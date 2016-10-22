@@ -1,5 +1,7 @@
 <div class="title">Histogram</div>
-<!-- <div class="content">
-  <strong>Compound</strong> {{ compound | json }}<br />
-  <strong>Signature</strong> {{ signature | json }}
-</div> -->
+<div class="content">
+  <strong>Zhang</strong>
+  <div *ngIf="similaritiesHistogramFetched$ | async">
+    {{similaritiesHistogram | json}}
+  </div>
+</div>

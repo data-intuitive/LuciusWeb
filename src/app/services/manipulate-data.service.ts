@@ -17,6 +17,7 @@ export class ManipulateDataService {
       console.log('[manipulate service] set' + ' ' + classPath);
       switch (classPath) {
         case 'signature':
+          console.log('here!');
           this.signatureOfCompound = data;
           break;
         case 'compounds':

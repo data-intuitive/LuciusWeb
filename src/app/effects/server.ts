@@ -11,6 +11,7 @@ import { Observable } from 'rxjs';
 
 import * as server from '../actions/server';
 import * as fromRoot from '../reducers';
+import * as data from '../actions/data';
 
 @Injectable()
 export class ServerEffects {
@@ -47,9 +48,8 @@ export class ServerEffects {
         .switchMap(payload => this.fetchDataService.fetchData(
           payload.url, payload.data
         ))
-        .map(result => new server.GetSignatureSuccessAction(
-          this.manipulateDataService.setData(
-            result.data, result.type)
+        .map(result => new data.UpdateSignatureAction(
+          result.data.result.toString().replace(/,/g , ' ')
         ));
 
       @Effect() getSignatureSuccess$ = this.actions$

@@ -4,6 +4,7 @@ import { Observable } from 'rxjs/Observable';
 
 import * as fromRoot from '../../reducers';
 import * as fromSettings from '../../reducers/settings';
+import { Settings } from '../../models/settings';
 
 @Component({
   selector: 'app-compound',
@@ -13,6 +14,7 @@ import * as fromSettings from '../../reducers/settings';
 
 export class CompoundComponent implements OnInit {
   settings$: Observable<fromSettings.State>;
+  settings: Settings;
 
   constructor(
     private store: Store<fromRoot.State>,
@@ -22,6 +24,7 @@ export class CompoundComponent implements OnInit {
     }
 
   ngOnInit() {
+    this.settings$.subscribe(settings => this.settings = settings);
   }
 
 }

@@ -6,4 +6,5 @@ export * from './histogram/histogram.component';
 export * from './plot/plot.component';
 export * from './top25/top25.component';
 export * from './known-targets/known-targets.component';
-export * from './area-chart/area-chart.component';
+export * from '../area-chart/area-chart.component';
+export * from './known-targets-histogram/known-targets-histogram.component';

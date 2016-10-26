@@ -1,3 +1,3 @@
 export interface KnownTargets {
-  result: Array<Array<string | number>>;
+  result: Array<Array<string>>;
 };

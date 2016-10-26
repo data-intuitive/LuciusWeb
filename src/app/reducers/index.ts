@@ -86,6 +86,10 @@ export const getShowSidenav = compose(
    fromServer.getKnownTargetsFetched, getServerState
  );
 
+ export const getAnnotatedPlatewellidsFetched = compose(
+   fromServer.getAnnotatedPlatewellidsFetched, getServerState
+ );
+
  /**
   * Data Reducers
   */

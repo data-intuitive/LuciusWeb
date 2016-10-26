@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
 import * as fromRoot from '../../reducers';
-
+import { AnnotatedPlatewellids } from '../../models';
 import { ManipulateDataService } from '../../services/manipulate-data.service';
 import { Store } from '@ngrx/store';
 import { Parser } from '../../shared/parser';
@@ -14,9 +14,11 @@ import { Parser } from '../../shared/parser';
 })
 export class Top25Component implements OnInit {
     zhangFetched$: Observable<boolean>;
+    annotatedPlatewellids$: Observable<boolean>;
+    annotatedPlatewellids: AnnotatedPlatewellids;
     top25Positive: Array<Array<string>>;
     top25Negative: Array<Array<string>>;
-    pwids: string;
+    // pwids: string;
 
     constructor(
       private store: Store<fromRoot.State>,
@@ -25,21 +27,27 @@ export class Top25Component implements OnInit {
 
       // observe if zhang has arrived from server
       this.zhangFetched$ = this.store.let(fromRoot.getZhangFetched);
+
+      this.annotatedPlatewellids$ = this.store.let(fromRoot.getAnnotatedPlatewellidsFetched);
     }
 
     ngOnInit() {
       this.zhangFetched$.
         subscribe(ev => this.handleZhangEvent(ev));
+
+      this.annotatedPlatewellids$.
+        subscribe(ev => this.annotatedPlatewellids = this.manipulateDataService.
+          getData('annotatedplatewellids'));
      }
 
-     handleZhangEvent(updated): void {
-         if (updated) {
+     handleZhangEvent(ev): void {
+         if (ev) {
            let zhangArray = this.manipulateDataService.getData('zhang').result;
            this.top25Positive = this.getTop25Positive(zhangArray);
            this.top25Negative = this.getTop25Negative(zhangArray);
-           this.pwids = Parser.parsePwids(zhangArray)
-             .toString()
-             .replace(/,/g , ' ');
+          //  this.pwids = Parser.parsePwids(zhangArray)
+          //    .toString()
+          //    .replace(/,/g , ' ');
          }
        }
 

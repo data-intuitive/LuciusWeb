@@ -88,6 +88,29 @@ export class ServerEffects {
             new server.GetKnownTargetsAction('targetFrequency'))
         );
 
+      @Effect() getSimilaritiesSuccess3$ = this.actions$
+        .ofType(server.ServerActionTypes.GET_SIMILARITIES_SUCCESS)
+        .map(action => action.payload)
+        .switchMap(payload => Observable.of(
+            new server.GetAnnotatedPlatewellidsAction('annotatedplatewellids'))
+        );
+
+      @Effect() getAnnotatedPlatewellids$ = this.actions$
+        .ofType(server.ServerActionTypes.GET_ANNOTADED_PLATEWELLIDS)
+        .withLatestFrom(this.store)
+        .map(([action, store]) => ({
+          url: Parser.parseURL(store.settings, action.payload),
+          data: {'storeData': store.data,
+                 'zhang': this.manipulateDataService.getData('zhang')}}
+        ))
+        .switchMap(payload => this.fetchDataService.fetchData(
+          payload.url, payload.data
+        ))
+        .map(result => new server.GetAnnotatedPlatewellidsSuccessAction(
+          this.manipulateDataService.setData(
+            result.data, result.type)
+        ));
+
       @Effect() getSimilaritiesHist$ = this.actions$
         .ofType(server.ServerActionTypes.GET_SIMILARITIES_HISTOGRAM)
         .withLatestFrom(this.store)

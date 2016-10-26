@@ -43,8 +43,9 @@ export class FetchDataService {
       }
 
       case 'annotatedplatewellids': {
-        let body = 'query=' + data.signature + ', features=jnjs id smiles' +
-                    ', pwids = ' ;
+        let pwids = Parser.parsePwids(data.zhang.result).toString().replace(/,/g , ' ');
+        let body = 'query=' + data.storeData.signature + ', features=jnjs id smiles' +
+                    ', pwids = ' + pwids ;
         return this.http.post(url, body, options)
           .map(res => ({'data': res.json(), 'type': classPath}))
           .catch((error: any) => Observable

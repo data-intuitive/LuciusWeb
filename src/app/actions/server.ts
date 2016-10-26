@@ -10,7 +10,9 @@ export const ServerActionTypes = {
   GET_SIMILARITIES_HISTOGRAM: '[Server] Get Similarities Histogram',
   GET_SIMILARITIES_HISTOGRAM_SUCCESS: '[Server] Get Similarities Histogram Success',
   GET_KNOWN_TARGETS: '[Server] Get Known Targets',
-  GET_KNOWN_TARGETS_SUCCESS: '[Server] Get Known Targets Success'
+  GET_KNOWN_TARGETS_SUCCESS: '[Server] Get Known Targets Success',
+  GET_ANNOTADED_PLATEWELLIDS: '[Server] Get Annotated Platewellids',
+  GET_ANNOTADED_PLATEWELLIDS_SUCCESS: '[Server] Get Annotated Platewellids Success'
 };
 
 export class GetCompoundsByJNJAction implements Action {
@@ -83,6 +85,20 @@ export class GetKnownTargetsSuccessAction implements Action {
     }
   }
 
+  export class GetAnnotatedPlatewellidsAction implements Action {
+      type = ServerActionTypes.GET_ANNOTADED_PLATEWELLIDS;
+
+      constructor(public payload: string) {
+      }
+  }
+
+  export class GetAnnotatedPlatewellidsSuccessAction implements Action {
+      type = ServerActionTypes.GET_ANNOTADED_PLATEWELLIDS_SUCCESS;
+
+      constructor(public payload: string) {
+      }
+    }
+
 export type SettingsActions =
     GetCompoundsByJNJAction
   | GetCompoundsByJNJSuccessAction
@@ -94,3 +110,5 @@ export type SettingsActions =
   | GetSimilaritiesHistogramSuccessAction
   | GetKnownTargetsAction
   | GetKnownTargetsSuccessAction
+  | GetAnnotatedPlatewellidsAction
+  | GetAnnotatedPlatewellidsSuccessAction

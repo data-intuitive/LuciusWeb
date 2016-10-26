@@ -8,6 +8,7 @@ export class ManipulateDataService {
     zhang: models.Zhang;
     histogramData: models.HistData;
     knownTargets: models.KnownTargets;
+    annotatedPlatewellids: models.AnnotatedPlatewellids;
 
     constructor() {
     }
@@ -17,7 +18,6 @@ export class ManipulateDataService {
       console.log('[manipulate service] set' + ' ' + classPath);
       switch (classPath) {
         case 'signature':
-          console.log('here!');
           this.signatureOfCompound = data;
           break;
         case 'compounds':
@@ -31,6 +31,9 @@ export class ManipulateDataService {
           break;
         case 'targetFrequency':
           this.knownTargets = data;
+          break;
+        case 'annotatedplatewellids':
+          this.annotatedPlatewellids = data;
           break;
       }
       return classPath;
@@ -50,6 +53,8 @@ export class ManipulateDataService {
           return this.histogramData;
         case 'knownTargets':
           return this.knownTargets;
+        case 'annotatedplatewellids':
+          return this.annotatedPlatewellids;
       }
   }
 }

@@ -11,6 +11,7 @@ export interface State {
   zhangFetched: boolean;
   similaritiesHistFetched: boolean;
   knownTargetsFetched: boolean;
+  annotatedPlatewellidsFetched: boolean;
 }
 
 const initialState: State = {
@@ -18,7 +19,8 @@ const initialState: State = {
   compoundFetched: false,
   zhangFetched: false,
   similaritiesHistFetched: false,
-  knownTargetsFetched: false
+  knownTargetsFetched: false,
+  annotatedPlatewellidsFetched: false
 };
 
 export function reducer(state = initialState, action: Action) {
@@ -64,6 +66,15 @@ export function reducer(state = initialState, action: Action) {
     case ServerActionTypes.GET_KNOWN_TARGETS_SUCCESS: {
           return Object.assign({}, state, {knownTargetsFetched: true});
       }
+
+    case ServerActionTypes.GET_ANNOTADED_PLATEWELLIDS: {
+          return Object.assign({}, state, {annotatedPlatewellidsFetched: false});
+      }
+
+    case ServerActionTypes.GET_ANNOTADED_PLATEWELLIDS_SUCCESS: {
+          return Object.assign({}, state, {annotatedPlatewellidsFetched: true});
+      }
+
     default: {
       return state;
     }
@@ -88,4 +99,8 @@ export function getSimilaritiesHistFetched(state$: Observable<State>) {
 
 export function getKnownTargetsFetched(state$: Observable<State>) {
   return state$.select(state => state.knownTargetsFetched);
+}
+
+export function getAnnotatedPlatewellidsFetched(state$: Observable<State>) {
+  return state$.select(state => state.annotatedPlatewellidsFetched);
 }

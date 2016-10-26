@@ -25,7 +25,8 @@ import {
   HistogramComponent,
   Top25Component,
   KnownTargetsComponent,
-  AreaChartComponent
+  AreaChartComponent,
+  KnownTargetsHistogramComponent
 } from './components';
 
 @NgModule({
@@ -39,7 +40,8 @@ import {
     HistogramComponent,
     Top25Component,
     KnownTargetsComponent,
-    AreaChartComponent
+    AreaChartComponent,
+    KnownTargetsHistogramComponent
   ],
   imports: [
     BrowserModule,

@@ -1,7 +1,74 @@
 <md-toolbar>
-  <button md-icon-button class="menu-bt"
-          (click)="openSidenav()">
-    <md-icon>menu</md-icon>
-  </button>
-  <div class="row">{{type}}</div>
+    <button md-icon-button class="menu-bt"
+            (click)="openSidenav()">
+      <md-icon>menu</md-icon>
+    </button>
+    <div class="row">{{type}}</div>
+      <div *ngIf="showMe" class="box jnj">
+        <div class="icon">
+          <md-icon>
+            <svg viewBox="0 0 24 24" height="100%" width="100%"
+                 preserveAspectRatio="xMidYMid meet" fit=""
+                 style="pointer-events: none; display: block;">
+                 <g>
+                   <path d="M17,2L17,2c-2.1,0-3,0.5-3,3v7h-4V5c0-2.5-0.9-3-3-3l0,0L6,2v2h1c0.7,0,1,0.4,1,1v12c0,5.2,4,5,4,5s4,0.2,4-5V5
+                            c0-0.6,0.3-1,1-1h1V2L17,2z">
+                   </path>
+                 </g>
+            </svg>
+          </md-icon>
+        </div>
+        <input id="compinput" class="input" is="core-input" list="datalist"
+              placeholder="Compound">
+      </div>
+      <div *ngIf="showMe" class="box gene">
+        <div class="icon">
+          <md-icon>
+              <svg viewBox="0 0 24 24" height="100%" width="100%"
+                   preserveAspectRatio="xMidYMid meet" fit=""
+                   style="pointer-events: none; display: block;">
+                   <g>
+                      <path d="M22.7,9.7l-1.4-1.4c-0.4,0.4-0.8,0.8-1.2,1.1l-5.4-5.4c0.3-0.4,0.7-0.8,1.1-1.2l-1.4-1.4c-3.4,3.4-3.6,6.7-3.4,9.6
+                            	 c-3-0.2-6.3,0-9.6,3.4l1.4,1.4c0.4-0.4,0.8-0.8,1.2-1.1l5.4,5.4c-0.3,0.4-0.7,0.8-1.1,1.2l1.4,1.4c3.4-3.4,3.5-6.6,3.4-9.6
+                            	 C16,13.3,19.3,13.1,22.7,9.7z M19.2,9.9c-0.9,0.5-1.7,0.8-2.6,1l-3.6-3.6c0.2-0.9,0.5-1.7,1-2.6L19.2,9.9z M11.1,12.9
+                            	 c0.1,0.8,0.1,1.6,0,2.4l-2.5-2.5C9.4,12.9,10.2,12.9,11.1,12.9z M4.8,14.1c0.9-0.5,1.7-0.8,2.6-1l3.6,3.6c-0.2,0.9-0.5,1.7-1,2.6
+                            	 L4.8,14.1z M12.9,11.1c-0.1-0.8-0.1-1.7,0-2.5l2.5,2.5C14.6,11.2,13.8,11.1,12.9,11.1z">
+                      </path>
+                   </g>
+              </svg>
+          </md-icon>
+          </div>
+          <input id="siginput" class="input" is="core-input" list="datalist"
+                placeholder="Signature">
+      </div>
+      <div *ngIf="showMe" class="box toggle">
+        <div class="icon">
+          <md-icon>
+            <svg viewBox="0 0 24 24" height="100%" width="100%" preserveAspectRatio="xMidYMid meet"
+                 fit="" style="pointer-events: none; display: block;">
+              <g>
+                <path d="M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z"></path>
+              </g>
+            </svg>
+          </md-icon>
+        </div>
+        <div class="container">
+          <md-slide-toggle></md-slide-toggle>
+        </div>
+      </div>
+      <div *ngIf="showMe" class="box toggle">
+        <div class="icon">
+          <md-icon>
+            <svg viewBox="0 0 24 24" height="100%" width="100%" preserveAspectRatio="xMidYMid meet"
+                 fit="" style="pointer-events: none; display: block;">
+              <g>
+                <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"></path>
+              </g>
+            </svg>
+          </md-icon>
+        </div>
+        <div class="container">
+          <md-slide-toggle></md-slide-toggle>
+        </div>
+      </div>
 </md-toolbar>

@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Http, Headers, RequestOptions } from '@angular/http';
+import { Http, Headers, RequestOptions, Response } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
-// import { Data } from '../models/data';
 import { Parser } from '../shared/parser';
 
 @Injectable()
@@ -22,24 +21,21 @@ export class FetchDataService {
         let body = 'compound=' + data.compound;
         return this.http.post(url, body, options)
           .map(res => ({'data': res.json(), 'type': classPath}))
-          .catch((error: any) => Observable
-            .throw(error.json().error || 'Server error'));
+          .catch(this.handleError);
       }
 
       case 'compounds': {
         let body = 'query=' + data.compound;
         return this.http.post(url, body, options)
           .map(res => ({'data': res.json(), 'type': classPath}))
-          .catch((error: any) => Observable
-            .throw(error.json().error || 'Server error'));
+          .catch(this.handleError);
       }
 
       case 'zhang': {
         let body = 'query=' + data.signature + ', sorted=true';
         return this.http.post(url, body, options)
           .map(res => ({'data': res.json(), 'type': classPath}))
-          .catch((error: any) => Observable
-            .throw(error.json().error || 'Server error'));
+          .catch(this.handleError);
       }
 
       case 'annotatedplatewellids': {
@@ -48,8 +44,7 @@ export class FetchDataService {
                     ', pwids = ' + pwids ;
         return this.http.post(url, body, options)
           .map(res => ({'data': res.json(), 'type': classPath}))
-          .catch((error: any) => Observable
-            .throw(error.json().error || 'Server error'));
+          .catch(this.handleError);
       }
 
       case 'targetFrequency': {
@@ -57,8 +52,7 @@ export class FetchDataService {
         let body = 'pwids=' + pwids;
         return this.http.post(url, body, options)
           .map(res => ({'data': res.json(), 'type': classPath}))
-          .catch((error: any) => Observable
-            .throw(error.json().error || 'Server error'));
+          .catch(this.handleError);
       }
 
       case 'targetHistogram': {
@@ -67,10 +61,21 @@ export class FetchDataService {
          + ', query=' + data.storeData.signature;
         return this.http.post(url, body, options)
           .map(res => ({'data': res.json(), 'type': classPath}))
-          .catch((error: any) => Observable
-            .throw(error.json().error || 'Server error'));
+          .catch(this.handleError);
       }
-
     }
+  }
+
+    private handleError (error: Response | any) {
+    let errMsg: string;
+    if (error instanceof Response) {
+      const body = error.json() || '';
+      const err = body.error || JSON.stringify(body);
+      errMsg = `${error.status} - ${error.statusText || ''} ${err}`;
+    } else {
+      errMsg = error.message ? error.message : error.toString();
+    }
+    console.error(errMsg);
+    return Observable.throw(errMsg);
   }
 }

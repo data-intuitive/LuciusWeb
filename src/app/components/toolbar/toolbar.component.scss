@@ -5,7 +5,7 @@ $s-border-radius: 4px;
 :host {
   z-index: 1;
 
-  flex: 1 0 auto;
+  flex: 1 1 auto;
   display: flex;
 
   md-toolbar {
@@ -49,13 +49,12 @@ $s-border-radius: 4px;
     margin: 0 8px;
 
     .input {
-      width: 100%;
       box-sizing: border-box;
       display: flex;
       opacity: 0.5;
       color: #fff;
       background-color: $cl-bg;
-
+      width: 100%;
       margin: 0;
       padding: 8px 8px 8px 44px;
 

@@ -18,8 +18,12 @@
             </svg>
           </md-icon>
         </div>
-        <input id="compinput" class="input" is="core-input" list="datalist"
-              placeholder="Compound">
+        <input id="compinput" [formControl]="comp" class="input" list="relatedCompounds"
+               placeholder="Compound" (keyup.enter)="updateCompound(comp.value)">
+         <datalist id="relatedCompounds">
+             <option *ngFor="let item of relatedCompoundsArray" value="{{item}}">
+             </option>
+         </datalist>
       </div>
       <div *ngIf="showMe" class="box gene">
         <div class="icon">
@@ -38,8 +42,8 @@
               </svg>
           </md-icon>
           </div>
-          <input id="siginput" class="input" is="core-input" list="datalist"
-                placeholder="Signature">
+          <input #sign id="compinput" class="input" (keyup.enter)="updateSignature(sign.value)"
+                 placeholder="Signature" [value]="signature$ | async">
       </div>
       <div *ngIf="showMe" class="box toggle">
         <div class="icon">

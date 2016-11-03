@@ -91,13 +91,13 @@ export class AreaChartComponent implements   OnInit {
     }
 
   updateValues() {
-    // this.gWidth = this.offsetWidth - this.margin.left - this.margin.right;
-    // this.gWidthPad = Math.round(this.gWidth - this.padding.left - this.padding.right);
-    // this.gHeight = this.offsetHeight - this.margin.top - this.margin.bottom;
-    // this.gHeightPad = Math.round(this.gHeight - this.padding.top - this.padding.bottom);
-    // this.svg
-    //   .attr('width', this.offsetWidth)
-    //   .attr('height', this.offsetHeight);
+    this.gWidth = this.el.offsetWidth - this.margin.left - this.margin.right;
+    this.gWidthPad = Math.round(this.gWidth - this.padding.left - this.padding.right);
+    this.gHeight = this.el.offsetHeight - this.margin.top - this.margin.bottom;
+    this.gHeightPad = Math.round(this.gHeight - this.padding.top - this.padding.bottom);
+    this.svg
+      .attr('width', this.el.offsetWidth)
+      .attr('height', this.el.offsetHeight);
 
     this.barSize = Math.floor(this.gHeightPad / this.bins);
   }

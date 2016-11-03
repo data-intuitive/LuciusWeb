@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { FormControl } from '@angular/forms';
@@ -14,7 +14,6 @@ import * as fromSettings from '../../reducers/settings';
 
 @Component({
   selector: 'app-toolbar',
-  encapsulation: ViewEncapsulation.Emulated,
   templateUrl: './toolbar.component.html',
   styleUrls: ['./toolbar.component.scss']
 })

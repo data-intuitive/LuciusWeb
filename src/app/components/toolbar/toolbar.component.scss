@@ -1,12 +1,11 @@
 @import '../../../styles/variables';
 $cl-bg: rgba(255, 255, 255, 0.15);
 $s-border-radius: 4px;
+$s-jnj: 140px;
 
 :host {
-  z-index: 1;
-
-  flex: 1 1 auto;
-  display: flex;
+  justify-content: center;
+  align-items: stretch;
 
   md-toolbar {
     @include md-elevation(3);
@@ -32,36 +31,24 @@ $s-border-radius: 4px;
     color: $primary-color-text;
   }
 
-  .icon {
-    color: $primary-color-text;
-    position: relative;
-
-    md-icon {
-      position: absolute;
-      top: 8px;
-      left: 12px;
-
-      color: #eee;
-    }
-  }
-
   .box {
     margin: 0 8px;
 
     .input {
+      width: 100%;
       box-sizing: border-box;
-      display: flex;
+
       opacity: 0.5;
       color: #fff;
       background-color: $cl-bg;
-      width: 100%;
+
       margin: 0;
       padding: 8px 8px 8px 44px;
 
       border-radius: $s-border-radius;
 
       font-size: 18px;
-      font-weight: 200;
+      font-weight: 300;
 
       text-transform: uppercase;
 
@@ -69,17 +56,30 @@ $s-border-radius: 4px;
         color: #ccc;
       }
 
-      &::-webkit-calendar-picker-indicator {
-        display: none;
-      }
-
       &:focus {
         opacity: 0.8;
       }
     }
 
+    .icon {
+      color: $primary-color-text;
+      position: relative;
+
+      md-icon {
+        position: absolute;
+        top: 8px;
+        left: 12px;
+
+        color: #eee;
+      }
+    }
+
     datalist {
       border: 4px solid #389;
+    }
+
+    .jnj {
+      width: $s-jnj;
     }
 
     &.toggle {

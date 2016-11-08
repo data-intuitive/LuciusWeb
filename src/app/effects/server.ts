@@ -5,7 +5,7 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { FetchDataService } from '../services/fetch-data.service';
-import { ManipulateDataService } from '../services/manipulate-data.service';
+import { HandleDataService } from '../services/handle-data.service';
 import { Parser } from '../shared/parser';
 import { Observable } from 'rxjs';
 
@@ -13,13 +13,21 @@ import * as server from '../actions/server';
 import * as fromRoot from '../reducers';
 import * as data from '../actions/data';
 
+/* API endpoints */
+// const signature = 'signature';
+// const compounds = 'compounds';
+const zhang = 'zhang';
+const targetFrequency = 'targetFrequency';
+const targetHistogram = 'targetHistogram';
+const annotatedplatewellids = 'annotatedplatewellids';
+
 @Injectable()
 export class ServerEffects {
   constructor(
     private actions$: Actions,
     private store: Store<fromRoot.State>,
     private fetchDataService: FetchDataService,
-    private manipulateDataService: ManipulateDataService
+    private handleDataService: HandleDataService
   ) {
   }
 
@@ -34,7 +42,7 @@ export class ServerEffects {
         payload.url, payload.data
       ))
       .map(result => new server.GetCompoundsByJNJSuccessAction(
-        this.manipulateDataService.setData(
+        this.handleDataService.setData(
           result.data, result.type)
       ));
 
@@ -56,7 +64,7 @@ export class ServerEffects {
         .ofType(server.ServerActionTypes.GET_SIGNATURE_SUCCESS)
         .map(action => action.payload)
         .switchMap(payload => Observable.of(
-            new server.GetSimilaritiesAction('zhang'))
+            new server.GetSimilaritiesAction(zhang))
         );
 
       @Effect() getSimilarities$ = this.actions$
@@ -70,7 +78,7 @@ export class ServerEffects {
           payload.url, payload.data
         ))
         .map(result => new server.GetSimilaritiesSuccessAction(
-          this.manipulateDataService.setData(
+          this.handleDataService.setData(
             result.data, result.type)
         ));
 
@@ -78,21 +86,21 @@ export class ServerEffects {
         .ofType(server.ServerActionTypes.GET_SIMILARITIES_SUCCESS)
         .map(action => action.payload)
         .switchMap(payload => Observable.of(
-            new server.GetSimilaritiesHistogramAction('targetHistogram'))
+            new server.GetSimilaritiesHistogramAction(targetHistogram))
         );
 
       @Effect() getSimilaritiesSuccess2$ = this.actions$
         .ofType(server.ServerActionTypes.GET_SIMILARITIES_SUCCESS)
         .map(action => action.payload)
         .switchMap(payload => Observable.of(
-            new server.GetKnownTargetsAction('targetFrequency'))
+            new server.GetKnownTargetsAction(targetFrequency))
         );
 
       @Effect() getSimilaritiesSuccess3$ = this.actions$
         .ofType(server.ServerActionTypes.GET_SIMILARITIES_SUCCESS)
         .map(action => action.payload)
         .switchMap(payload => Observable.of(
-            new server.GetAnnotatedPlatewellidsAction('annotatedplatewellids'))
+            new server.GetAnnotatedPlatewellidsAction(annotatedplatewellids))
         );
 
       @Effect() getAnnotatedPlatewellids$ = this.actions$
@@ -101,13 +109,13 @@ export class ServerEffects {
         .map(([action, store]) => ({
           url: Parser.parseURL(store.settings, action.payload),
           data: {'storeData': store.data,
-                 'zhang': this.manipulateDataService.getData('zhang')}}
+                 'zhang': this.handleDataService.getData(zhang)}}
         ))
         .switchMap(payload => this.fetchDataService.fetchData(
           payload.url, payload.data
         ))
         .map(result => new server.GetAnnotatedPlatewellidsSuccessAction(
-          this.manipulateDataService.setData(
+          this.handleDataService.setData(
             result.data, result.type)
         ));
 
@@ -117,13 +125,13 @@ export class ServerEffects {
         .map(([action, store]) => ({
           url: Parser.parseURL(store.settings, action.payload),
           data: {'storeData': store.data, 'bins': store.settings.histogramBins,
-                 'zhang': this.manipulateDataService.getData('zhang')}}
+                 'zhang': this.handleDataService.getData(zhang)}}
         ))
         .switchMap(payload => this.fetchDataService.fetchData(
           payload.url, payload.data
         ))
         .map(result => new server.GetSimilaritiesHistogramSuccessAction(
-          this.manipulateDataService.setData(
+          this.handleDataService.setData(
             result.data, result.type)
         ));
 
@@ -132,13 +140,13 @@ export class ServerEffects {
         .withLatestFrom(this.store)
         .map(([action, store]) => ({
           url: Parser.parseURL(store.settings, action.payload),
-          data: this.manipulateDataService.getData('zhang')}
+          data: this.handleDataService.getData(zhang)}
         ))
         .switchMap(payload => this.fetchDataService.fetchData(
           payload.url, payload.data
         ))
         .map(result => new server.GetKnownTargetsSuccessAction(
-          this.manipulateDataService.setData(
+          this.handleDataService.setData(
             result.data, result.type)
         ));
 }

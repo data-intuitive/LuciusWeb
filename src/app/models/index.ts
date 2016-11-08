@@ -6,3 +6,4 @@ export * from './zhang';
 export * from './hist';
 export * from './known-targets';
 export * from './annotated-platewellids';
+export * from './target-hist';

@@ -3,21 +3,21 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
 
-import { AreaChartComponent } from './area-chart.component';
+import { SimilarityHistogramComponent } from './similarity-histogram.component';
 
-describe('AreaChartComponent', () => {
-  let component: AreaChartComponent;
-  let fixture: ComponentFixture<AreaChartComponent>;
+describe('SimilarityHistogramComponent', () => {
+  let component: SimilarityHistogramComponent;
+  let fixture: ComponentFixture<SimilarityHistogramComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ AreaChartComponent ]
+      declarations: [ SimilarityHistogramComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(AreaChartComponent);
+    fixture = TestBed.createComponent(SimilarityHistogramComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -1,14 +1,15 @@
 @import '../../../styles/variables';
-$cl-bg: rgba(255, 255, 255, 0.15);
+$cl-bg: rgba(255, 255, 255, .15);
 $s-border-radius: 4px;
 $s-jnj: 140px;
 
 :host {
-  justify-content: center;
   align-items: stretch;
+  justify-content: center;
 
   md-toolbar {
     @include md-elevation(3);
+
     background-color: md-color($primary);
 
     .app-toolbar-filler {
@@ -35,35 +36,34 @@ $s-jnj: 140px;
     margin: 0 8px;
 
     .input {
-      width: 100%;
-      box-sizing: border-box;
-
-      opacity: 0.5;
-      color: #fff;
-      background-color: $cl-bg;
-
-      margin: 0;
-      padding: 8px 8px 8px 44px;
-
-      border-radius: $s-border-radius;
-
       font-size: 18px;
       font-weight: 300;
 
+      box-sizing: border-box;
+      width: 100%;
+      margin: 0;
+      padding: 8px 8px 8px 44px;
+
       text-transform: uppercase;
+
+      opacity: .5;
+      color: #fff;
+      border-radius: $s-border-radius;
+      background-color: $cl-bg;
 
       &::placeholder {
         color: #ccc;
       }
 
       &:focus {
-        opacity: 0.8;
+        opacity: .8;
       }
     }
 
     .icon {
-      color: $primary-color-text;
       position: relative;
+
+      color: $primary-color-text;
 
       md-icon {
         position: absolute;
@@ -84,16 +84,17 @@ $s-jnj: 140px;
 
     &.toggle {
       .container {
-        padding: 0 0 0 32px;
         display: flex;
-        justify-content: center;
         align-items: center;
+        justify-content: center;
+
         width: 64px;
         height: 44px;
         margin: 0;
-        background-color: fade-out($cl-bg, 0.07);
+        padding: 0 0 0 32px;
 
         border-radius: $s-border-radius;
+        background-color: fade-out($cl-bg, .07);
       }
     }
 

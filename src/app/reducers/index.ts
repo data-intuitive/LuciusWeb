@@ -66,28 +66,28 @@ export const getShowSidenav = compose(
  export const getServerState = (state$: Observable<State>) =>
    state$.select(state => state.server);
 
- export const getSignatureFetched = compose(
-   fromServer.getSignatureFetched, getServerState
+ export const getSignatureReady = compose(
+   fromServer.getSignatureReady, getServerState
  );
 
- export const getCompoundFetched = compose(
-   fromServer.getCompoundFetched, getServerState
+ export const getCompoundReady = compose(
+   fromServer.getCompoundReady, getServerState
  );
 
- export const getZhangFetched = compose(
-   fromServer.getZhangFetched, getServerState
+ export const getZhangReady = compose(
+   fromServer.getZhangReady, getServerState
  );
 
- export const getSimilaritiesHistFetched = compose(
-   fromServer.getSimilaritiesHistFetched, getServerState
+ export const getSimilaritiesHistReady = compose(
+   fromServer.getSimilaritiesHistReady, getServerState
  );
 
- export const getKnownTargetsFetched = compose(
-   fromServer.getKnownTargetsFetched, getServerState
+ export const getKnownTargetsReady = compose(
+   fromServer.getKnownTargetsReady, getServerState
  );
 
- export const getAnnotatedPlatewellidsFetched = compose(
-   fromServer.getAnnotatedPlatewellidsFetched, getServerState
+ export const getAnnotatedPlatewellidsReady = compose(
+   fromServer.getAnnotatedPlatewellidsReady, getServerState
  );
 
  /**

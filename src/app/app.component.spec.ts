@@ -15,7 +15,7 @@ let comp: AppComponent;
 let fixture: ComponentFixture<AppComponent>;
 let el: DebugElement;
 
-describe('App: LuciusWeb', () => {
+describe('LuciusWeb: AppComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
         imports: [

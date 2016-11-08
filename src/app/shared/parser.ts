@@ -1,5 +1,5 @@
-import { Settings } from '../models/settings';
-import { Compound } from '../models/compound';
+import { Settings } from '../models/';
+import { Compound } from '../models';
 
 export class Parser {
 
@@ -16,24 +16,27 @@ export class Parser {
 
   static parseRelatedCompounds(relatedCompounds: Compound): Array<string> {
     let relatedCompoundsArray = [];
-    for (let entry of relatedCompounds.result) {
-      relatedCompoundsArray.push(entry[0].toString());
+    let i;
+    for (i = 0; i < relatedCompounds.result.length ; i++) {
+      relatedCompoundsArray.push(relatedCompounds.result[i][0].toString());
     }
     return relatedCompoundsArray;
   }
 
   static parseSimiliarityValues(zhangArray: Array<Array<string>>): Array<number> {
     let zhangValues = [];
-    for (let entry of zhangArray) {
-      zhangValues.push(entry[1]);
+    let i;
+    for (i = 0; i < zhangArray.length; i++) {
+      zhangValues[i] = (+zhangArray[i][1]);
     }
     return zhangValues;
   }
 
   static parsePwids(zhangArray: Array<Array<string>>): Array<string> {
     let pwids = [];
-    for (let entry of zhangArray) {
-      pwids.push(entry[3]);
+    let i;
+    for (i = 0; i < zhangArray.length ; i++) {
+      pwids[i] = zhangArray[i][3];
     }
     return pwids;
   }

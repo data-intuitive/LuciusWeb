@@ -1,8 +1,17 @@
 import { Injectable } from '@angular/core';
 import * as models from '../models';
 
+/* API Endpoints */
+const signature = 'signature';
+const compounds = 'compounds';
+const zhang = 'zhang';
+const targetFrequency = 'targetFrequency';
+const targetHistogram = 'targetHistogram';
+const annotatedplatewellids = 'annotatedplatewellids';
+const knownTargets = 'knownTargets';
+
 @Injectable()
-export class ManipulateDataService {
+export class HandleDataService {
     signatureOfCompound: models.Signature;
     relatedCompounds: models.Compound;
     zhang: models.Zhang;
@@ -15,24 +24,24 @@ export class ManipulateDataService {
 
     // setter function to save data and update the store flag
     setData(data: any, classPath: string): string {
-      console.log('[manipulate service] set' + ' ' + classPath);
+      console.log('[handler service] set' + ' ' + classPath);
       switch (classPath) {
-        case 'signature':
+        case signature:
           this.signatureOfCompound = data;
           break;
-        case 'compounds':
+        case compounds:
           this.relatedCompounds = data;
           break;
-        case 'zhang':
+        case zhang:
           this.zhang = data;
           break;
-        case 'targetHistogram':
+        case targetHistogram:
           this.histogramData = data;
           break;
-        case 'targetFrequency':
+        case targetFrequency:
           this.knownTargets = data;
           break;
-        case 'annotatedplatewellids':
+        case annotatedplatewellids:
           this.annotatedPlatewellids = data;
           break;
       }
@@ -41,19 +50,19 @@ export class ManipulateDataService {
 
     // getter function to get data
     getData(classPath: string): any {
-      console.log('[manipulate service] get' + ' ' + classPath);
+      console.log('[handler service] get' + ' ' + classPath);
       switch (classPath) {
-        case 'signature':
+        case signature:
           return this.signatureOfCompound;
-        case 'compounds':
+        case compounds:
           return this.relatedCompounds;
-        case 'zhang':
+        case zhang:
           return this.zhang;
-        case 'targetHistogram':
+        case targetHistogram:
           return this.histogramData;
-        case 'knownTargets':
+        case knownTargets:
           return this.knownTargets;
-        case 'annotatedplatewellids':
+        case annotatedplatewellids:
           return this.annotatedPlatewellids;
       }
   }

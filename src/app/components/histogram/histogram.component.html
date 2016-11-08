@@ -1,7 +1,0 @@
-<div class="title">Histogram</div>
-<div class="content">
-  <app-chart-area [settings]="settings" ></app-chart-area>
-  <div *ngIf="similaritiesHistogramFetched$ | async">
-    {{similaritiesHistogram | json}}
-  </div>
-</div>

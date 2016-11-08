@@ -1,18 +1,18 @@
 import { Component } from '@angular/core';
-import { ElementRef, SimpleChange, OnChanges, ViewChild,
+import { ElementRef, ViewChild,
          ViewEncapsulation, Input, OnInit } from '@angular/core';
-import { Settings } from '../models/settings';
+import { Settings } from '../../../models/settings';
 
 import * as d3 from 'd3';
 
 @Component({
-  selector: 'app-chart-area',
+  selector: 'app-similarity-histogram',
   encapsulation: ViewEncapsulation.Native,
-  styleUrls: ['./area-chart.component.scss'],
-  templateUrl: './area-chart.component.html'
+  styleUrls: ['./similarity-histogram.component.scss'],
+  templateUrl: './similarity-histogram.component.html'
 })
 
-export class AreaChartComponent implements   OnInit {
+export class SimilarityHistogramComponent implements   OnInit {
     @ViewChild('container') element: ElementRef;
     @Input() settings: Settings;
     @Input() data: Array<number>;
@@ -44,13 +44,13 @@ export class AreaChartComponent implements   OnInit {
     private bins = 16;
     private targetGene= '';
     private geneData: Array<any>;
-    private dataBounds: Array<any>;
+    // private dataBounds: Array<any>;
     private yScale: any;
     private xScale: any;
     private yAxis: any;
     private yAxisGroup: any;
-    private xAxis: any;
-    private xAxisGroup: any;
+    // private xAxis: any;
+    // private xAxisGroup: any;
     private colorScale: any;
     private barSelected: any;
     private barSize= 0;
@@ -61,7 +61,7 @@ export class AreaChartComponent implements   OnInit {
 
     ngOnInit() {
       this.el = this.element.nativeElement;
-      this.bins = this.settings.hist2dBins;
+      // this.bins = this.settings.hist2dBins;
       // this.colors = app.colors;
       this.init();
     }

@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
+import { Settings } from '../models';
 
 import { LocalStorageService } from '../services/localstorage.service';
 import * as settings from '../actions/settings';
@@ -35,7 +36,7 @@ export class SettingsEffects {
   @Effect() update$ = this.actions$
     .ofType(settings.SettingsActionTypes.UPDATE)
     .withLatestFrom(this.store)
-    .map(([action, store]) => Object.assign({},
+    .map(([action, store]) => <Settings>Object.assign({},
       store.settings, action.payload
     ))
     .switchMap(payload => Observable.of(

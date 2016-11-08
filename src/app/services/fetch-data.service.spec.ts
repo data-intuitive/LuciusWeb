@@ -2,10 +2,14 @@
 
 import { TestBed, async, inject } from '@angular/core/testing';
 import { FetchDataService } from './fetch-data.service';
+import { HttpModule } from '@angular/http';
 
 describe('Service: FetchData', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
+      imports: [
+        HttpModule
+      ],
       providers: [FetchDataService]
     });
   });

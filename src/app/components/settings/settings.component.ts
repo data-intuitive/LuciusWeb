@@ -51,8 +51,7 @@ export class SettingsComponent implements OnInit {
   // when 'Save' button is pressed
   onSubmit() {
     this.store.dispatch(
-      new settingsActions.Update(this.settingsForm.value)
-    );
+      new settingsActions.Update(this.settingsForm.value));
   }
 
 }

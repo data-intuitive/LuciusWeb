@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
-import { ElementRef, SimpleChange, OnChanges, ViewChild,
+import { ElementRef, ViewChild,
          AfterViewInit, ViewEncapsulation, Input, OnInit } from '@angular/core';
-import { Settings } from '../../models/settings';
-import { KnownTargets } from '../../models/known-targets';
+import { Settings } from '../../../models/settings';
+import { KnownTargets } from '../../../models/known-targets';
 import { Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
-import { ManipulateDataService } from '../../services/manipulate-data.service';
-import * as fromRoot from '../../reducers';
+import { HandleDataService } from '../../../services/handle-data.service';
+import * as fromRoot from '../../../reducers';
 
 import * as d3 from 'd3';
 
@@ -25,27 +25,27 @@ export class KnownTargetsHistogramComponent implements  AfterViewInit, OnInit {
     @ViewChild('container') element: ElementRef;
     @Input() settings: Settings;
     private el: HTMLElement;
-    private margin =  {top: 16, right: 48, bottom: 16, left: 8};
-    private padding = {top: 16, right: 24, bottom: 16, left: 24};
-    private divs: any;
+    // private margin =  {top: 16, right: 48, bottom: 16, left: 8};
+    // private padding = {top: 16, right: 24, bottom: 16, left: 24};
+    // private divs: any;
     knownTargets: KnownTargets;
-    knownTargetsFetched$: Observable<boolean>;
+    knownTargetsReady$: Observable<boolean>;
     dataset: Array<{name: string, value: number}>;
     datasetNames: Array<string>;
     datasetValues: Array<number>;
 
     constructor(private store: Store<fromRoot.State>,
-    private manipulateDataService: ManipulateDataService) {
-      this.knownTargetsFetched$ = this.store.let(fromRoot.getKnownTargetsFetched);
+                private handleDataService: HandleDataService) {
+      this.knownTargetsReady$ = this.store.let(fromRoot.getKnownTargetsReady);
       this.dataset = [];
       this.datasetNames = [];
       this.datasetValues = [];
     }
 
     ngOnInit() {
-      this.knownTargetsFetched$
+      this.knownTargetsReady$
         .subscribe(ev => {if (ev) {
-          this.knownTargets = this.manipulateDataService
+          this.knownTargets = this.handleDataService
             .getData('knownTargets');
             for (let i = 0; i < (this.knownTargets.result.length); i++) {
               this.dataset.push({name: this.knownTargets.result[i][0], value: +this.knownTargets.result[i][1]});

@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { LocalStorageService } from './services/localstorage.service';
-import { ManipulateDataService } from './services/manipulate-data.service';
+import { HandleDataService } from './services/handle-data.service';
 import { FetchDataService } from './services/fetch-data.service';
 import { MaterialModule } from '@angular/material';
 import { StoreModule } from '@ngrx/store';
@@ -20,11 +20,11 @@ import {
   CompoundComponent,
   SettingsComponent,
   ToolbarComponent,
-  PlotComponent,
-  HistogramComponent,
-  Top25Component,
+  SimilarityChartsComponent,
+  TopCompoundsComponent,
   KnownTargetsComponent,
-  AreaChartComponent,
+  SimilarityHistogramComponent,
+  SimilarityScatterComponent,
   KnownTargetsHistogramComponent
 } from './components';
 
@@ -34,11 +34,11 @@ import {
     CompoundComponent,
     SettingsComponent,
     ToolbarComponent,
-    PlotComponent,
-    HistogramComponent,
-    Top25Component,
+    SimilarityChartsComponent,
+    TopCompoundsComponent,
     KnownTargetsComponent,
-    AreaChartComponent,
+    SimilarityHistogramComponent,
+    SimilarityScatterComponent,
     KnownTargetsHistogramComponent
   ],
   imports: [
@@ -60,7 +60,7 @@ import {
   providers: [
     LocalStorageService,
     FetchDataService,
-    ManipulateDataService
+    HandleDataService
   ],
   bootstrap: [AppComponent]
 })

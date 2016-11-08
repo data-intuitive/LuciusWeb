@@ -6,21 +6,21 @@ import { ServerActionTypes } from '../actions/server';
 
 // the settings object, as saved inside the store
 export interface State {
-  signatureFetched: boolean;
-  compoundFetched: boolean;
-  zhangFetched: boolean;
-  similaritiesHistFetched: boolean;
-  knownTargetsFetched: boolean;
-  annotatedPlatewellidsFetched: boolean;
+  signatureReady: boolean;
+  compoundReady: boolean;
+  zhangReady: boolean;
+  similaritiesHistReady: boolean;
+  knownTargetsReady: boolean;
+  annotatedPlatewellidsReady: boolean;
 }
 
 const initialState: State = {
-  signatureFetched: false,
-  compoundFetched: false,
-  zhangFetched: false,
-  similaritiesHistFetched: false,
-  knownTargetsFetched: false,
-  annotatedPlatewellidsFetched: false
+  signatureReady: false,
+  compoundReady: false,
+  zhangReady: false,
+  similaritiesHistReady: false,
+  knownTargetsReady: false,
+  annotatedPlatewellidsReady: false
 };
 
 export function reducer(state = initialState, action: Action) {
@@ -28,51 +28,51 @@ export function reducer(state = initialState, action: Action) {
   switch (action.type) {
 
     case ServerActionTypes.GET_COMPOUNDS_BY_JNJ: {
-          return Object.assign({}, state, {compoundFetched: false});
+          return Object.assign({}, state, {compoundReady: false});
       }
 
     case ServerActionTypes.GET_COMPOUNDS_BY_JNJ_SUCCESS: {
-          return Object.assign({}, state, {compoundFetched: true});
+          return Object.assign({}, state, {compoundReady: true});
       }
 
     case ServerActionTypes.GET_SIGNATURE: {
-          return Object.assign({}, state, {signatureFetched: false});
+          return Object.assign({}, state, {signatureReady: false});
       }
 
     case ServerActionTypes.GET_SIGNATURE_SUCCESS: {
-          return Object.assign({}, state, {signatureFetched: true});
+          return Object.assign({}, state, {signatureReady: true});
       }
 
     case ServerActionTypes.GET_SIMILARITIES: {
-          return Object.assign({}, state, {zhangFetched: false});
+          return Object.assign({}, state, {zhangReady: false});
       }
 
     case ServerActionTypes.GET_SIMILARITIES_SUCCESS: {
-          return Object.assign({}, state, {zhangFetched: true});
+          return Object.assign({}, state, {zhangReady: true});
       }
 
     case ServerActionTypes.GET_SIMILARITIES_HISTOGRAM: {
-          return Object.assign({}, state, {similaritiesHistFetched: false});
+          return Object.assign({}, state, {similaritiesHistReady: false});
       }
 
     case ServerActionTypes.GET_SIMILARITIES_HISTOGRAM_SUCCESS: {
-          return Object.assign({}, state, {similaritiesHistFetched: true});
+          return Object.assign({}, state, {similaritiesHistReady: true});
       }
 
     case ServerActionTypes.GET_KNOWN_TARGETS: {
-          return Object.assign({}, state, {knownTargetsFetched: false});
+          return Object.assign({}, state, {knownTargetsReady: false});
       }
 
     case ServerActionTypes.GET_KNOWN_TARGETS_SUCCESS: {
-          return Object.assign({}, state, {knownTargetsFetched: true});
+          return Object.assign({}, state, {knownTargetsReady: true});
       }
 
     case ServerActionTypes.GET_ANNOTADED_PLATEWELLIDS: {
-          return Object.assign({}, state, {annotatedPlatewellidsFetched: false});
+          return Object.assign({}, state, {annotatedPlatewellidsReady: false});
       }
 
     case ServerActionTypes.GET_ANNOTADED_PLATEWELLIDS_SUCCESS: {
-          return Object.assign({}, state, {annotatedPlatewellidsFetched: true});
+          return Object.assign({}, state, {annotatedPlatewellidsReady: true});
       }
 
     default: {
@@ -81,26 +81,26 @@ export function reducer(state = initialState, action: Action) {
   }
 }
 
-export function getSignatureFetched(state$: Observable<State>) {
-  return state$.select(state => state.signatureFetched);
+export function getSignatureReady(state$: Observable<State>) {
+  return state$.select(state => state.signatureReady);
 }
 
-export function getCompoundFetched(state$: Observable<State>) {
-  return state$.select(state => state.compoundFetched);
+export function getCompoundReady(state$: Observable<State>) {
+  return state$.select(state => state.compoundReady);
 }
 
-export function getZhangFetched(state$: Observable<State>) {
-  return state$.select(state => state.zhangFetched);
+export function getZhangReady(state$: Observable<State>) {
+  return state$.select(state => state.zhangReady);
 }
 
-export function getSimilaritiesHistFetched(state$: Observable<State>) {
-  return state$.select(state => state.similaritiesHistFetched);
+export function getSimilaritiesHistReady(state$: Observable<State>) {
+  return state$.select(state => state.similaritiesHistReady);
 }
 
-export function getKnownTargetsFetched(state$: Observable<State>) {
-  return state$.select(state => state.knownTargetsFetched);
+export function getKnownTargetsReady(state$: Observable<State>) {
+  return state$.select(state => state.knownTargetsReady);
 }
 
-export function getAnnotatedPlatewellidsFetched(state$: Observable<State>) {
-  return state$.select(state => state.annotatedPlatewellidsFetched);
+export function getAnnotatedPlatewellidsReady(state$: Observable<State>) {
+  return state$.select(state => state.annotatedPlatewellidsReady);
 }

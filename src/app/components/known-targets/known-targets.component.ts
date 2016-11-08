@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
 
 import * as fromRoot from '../../reducers';
-import { ManipulateDataService } from '../../services/manipulate-data.service';
+import { HandleDataService } from '../../services/handle-data.service';
 import { KnownTargets } from '../../models/known-targets';
 
 @Component({
@@ -14,20 +14,20 @@ import { KnownTargets } from '../../models/known-targets';
 export class KnownTargetsComponent implements OnInit {
   compound$: Observable<string>;
   knownTargets: KnownTargets;
-  knownTargetsFetched$: Observable<boolean>;
+  knownTargetsReady$: Observable<boolean>;
 
   constructor(
     private store: Store<fromRoot.State>,
-    private manipulateDataService: ManipulateDataService
+    private handleDataService: HandleDataService
   ) {
     this.compound$ = this.store.let(fromRoot.getCompound);
-    this.knownTargetsFetched$ = this.store.let(fromRoot.getKnownTargetsFetched);
+    this.knownTargetsReady$ = this.store.let(fromRoot.getKnownTargetsReady);
   }
 
   ngOnInit() {
-    this.knownTargetsFetched$
+    this.knownTargetsReady$
       .subscribe(ev => {if (ev) {
-        this.knownTargets = this.manipulateDataService
+        this.knownTargets = this.handleDataService
           .getData('knownTargets').result;
     }});
   }

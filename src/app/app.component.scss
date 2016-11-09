@@ -1,7 +1,6 @@
 :host {
   display: flex;
   flex-direction: column;
-
   width: 100%;
   height: 100%;
 }
@@ -11,14 +10,12 @@ md-sidenav-layout {
 }
 
 md-sidenav {
-  width: 250px;
   padding: 16px;
-
+  width: 250px;
   background-color: white;
 
   a {
     display: block;
-
     padding: 16px 0;
 
     &.active {

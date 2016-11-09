@@ -2,7 +2,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
-import { LocalStorageService } from './services/localstorage.service';
+import { LocalStorageService } from './services/local-storage.service';
 import { HandleDataService } from './services/handle-data.service';
 import { FetchDataService } from './services/fetch-data.service';
 import { MaterialModule } from '@angular/material';

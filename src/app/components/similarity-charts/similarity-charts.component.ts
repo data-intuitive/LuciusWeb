@@ -1,3 +1,5 @@
+/* tslint:disable:no-unused-variable */
+
 import { Component, OnInit, Input } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
@@ -8,6 +10,7 @@ import { Store } from '@ngrx/store';
 import { Settings } from '../../models';
 import { TargetHist } from '../../models';
 // import { Parser } from '../../shared/parser';
+import { ApiEndpoints } from '../../shared/api-endpoints';
 
 @Component({
   selector: 'app-similarity-charts',
@@ -31,13 +34,11 @@ export class SimilarityChartsComponent implements OnInit {
 
     ngOnInit() {
       this.similaritiesHistogramReady$.subscribe(
-        value => {
-          if (value) {
+        value => { if (value) {
             this.similaritiesHistogramData = this.handleDataService
-              .getData('targetHistogram');
-            this.getHistProperties();
-          }
-        });
+              .getData(ApiEndpoints.targetHistogram);
+            this.getHistProperties(); }},
+        err => console.log(err));
     }
 
     getHistProperties() {
@@ -45,6 +46,6 @@ export class SimilarityChartsComponent implements OnInit {
       const data = this.similaritiesHistogramData.result.data;
       const zhang = this.similaritiesHistogramData.result.data.zhang;
       // const targets = Parser.parseTargetHistTargets(this.similaritiesHistogramData);
-      console.log(bounds, data, zhang);
+      // console.log(bounds, data, zhang);
     }
 }

@@ -5,6 +5,7 @@ import { Store } from '@ngrx/store';
 import * as fromRoot from '../../reducers';
 import { HandleDataService } from '../../services/handle-data.service';
 import { KnownTargets } from '../../models/known-targets';
+import { ApiEndpoints } from '../../shared/api-endpoints';
 
 @Component({
   selector: 'app-known-targets',
@@ -26,10 +27,11 @@ export class KnownTargetsComponent implements OnInit {
 
   ngOnInit() {
     this.knownTargetsReady$
-      .subscribe(ev => {if (ev) {
-        this.knownTargets = this.handleDataService
-          .getData('knownTargets').result;
-    }});
+      .subscribe(
+        ev => { if (ev) {
+          this.knownTargets = this.handleDataService
+            .getData(ApiEndpoints.knownTargets).result; }},
+        err => console.log(err)
+      );
   }
-
 }

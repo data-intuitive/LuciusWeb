@@ -1,5 +1,3 @@
-/// <reference path="../node_modules/@types/jasmine/index.d.ts"/>
-
 import { TestApp } from './app.po';
 
 describe('Test LuciusWeb', function () {

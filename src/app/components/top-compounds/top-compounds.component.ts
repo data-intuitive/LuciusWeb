@@ -7,6 +7,7 @@ import { HandleDataService } from '../../services/handle-data.service';
 import * as fromRoot from '../../reducers';
 import { Store } from '@ngrx/store';
 // import { Parser } from '../../shared/parser';
+import { ApiEndpoints } from '../../shared/api-endpoints';
 
 @Component({
   selector: 'app-top-compounds',
@@ -38,16 +39,17 @@ export class TopCompoundsComponent implements OnInit {
     }
 
     ngOnInit() {
-      this.zhangReady$.
-        subscribe(ev => this.handleZhangEvent(ev));
+      this.zhangReady$.subscribe(
+        ev => { this.handleZhangEvent(ev); },
+        err => console.log(err)
+      );
 
       this.annotatedPlatewellids$.
-        subscribe(ev => {
-          if (ev) {
+        subscribe(
+          ev => { if (ev) {
             this.annotatedPlatewellids = this.handleDataService.
-              getData('annotatedplatewellids');
-          }
-        });
+              getData(ApiEndpoints.annotatedplatewellids); }},
+          err => console.log(err));
 
       // get number of components
       this.numComps = +this.settings.topComps;
@@ -55,7 +57,7 @@ export class TopCompoundsComponent implements OnInit {
 
      handleZhangEvent(ev): void {
          if (ev) {
-           let zhangArray = this.handleDataService.getData('zhang').result;
+           let zhangArray = this.handleDataService.getData(ApiEndpoints.zhang).result;
            this.topPositive = this.getTopPositive(zhangArray);
            this.topNegative = this.getTopNegative(zhangArray);
           //  this.pwids = Parser.parsePwids(zhangArray)
@@ -71,5 +73,4 @@ export class TopCompoundsComponent implements OnInit {
       getTopNegative(zhangArray: Array<Array<string>>) {
         return zhangArray.reverse().slice(0, this.numComps);
       }
-
    }

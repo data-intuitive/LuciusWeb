@@ -1,5 +1,4 @@
-import { Settings } from '../models/';
-import { Compound } from '../models';
+import { Settings, Compound } from '../models/';
 
 export class Parser {
 

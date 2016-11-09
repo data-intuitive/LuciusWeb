@@ -1,14 +1,6 @@
 import { Injectable } from '@angular/core';
 import * as models from '../models';
-
-/* API Endpoints */
-const signature = 'signature';
-const compounds = 'compounds';
-const zhang = 'zhang';
-const targetFrequency = 'targetFrequency';
-const targetHistogram = 'targetHistogram';
-const annotatedplatewellids = 'annotatedplatewellids';
-const knownTargets = 'knownTargets';
+import { ApiEndpoints } from '../shared/api-endpoints';
 
 @Injectable()
 export class HandleDataService {
@@ -26,22 +18,22 @@ export class HandleDataService {
     setData(data: any, classPath: string): string {
       console.log('[handler service] set' + ' ' + classPath);
       switch (classPath) {
-        case signature:
+        case ApiEndpoints.signature:
           this.signatureOfCompound = data;
           break;
-        case compounds:
+        case ApiEndpoints.compounds:
           this.relatedCompounds = data;
           break;
-        case zhang:
+        case ApiEndpoints.zhang:
           this.zhang = data;
           break;
-        case targetHistogram:
+        case ApiEndpoints.targetHistogram:
           this.histogramData = data;
           break;
-        case targetFrequency:
+        case ApiEndpoints.targetFrequency:
           this.knownTargets = data;
           break;
-        case annotatedplatewellids:
+        case ApiEndpoints.annotatedplatewellids:
           this.annotatedPlatewellids = data;
           break;
       }
@@ -52,17 +44,17 @@ export class HandleDataService {
     getData(classPath: string): any {
       console.log('[handler service] get' + ' ' + classPath);
       switch (classPath) {
-        case signature:
+        case ApiEndpoints.signature:
           return this.signatureOfCompound;
-        case compounds:
+        case ApiEndpoints.compounds:
           return this.relatedCompounds;
-        case zhang:
+        case ApiEndpoints.zhang:
           return this.zhang;
-        case targetHistogram:
+        case ApiEndpoints.targetHistogram:
           return this.histogramData;
-        case knownTargets:
+        case ApiEndpoints.knownTargets:
           return this.knownTargets;
-        case annotatedplatewellids:
+        case ApiEndpoints.annotatedplatewellids:
           return this.annotatedPlatewellids;
       }
   }

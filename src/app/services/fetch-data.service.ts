@@ -2,14 +2,7 @@ import { Injectable } from '@angular/core';
 import { Http, Headers, RequestOptions, Response } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 import { Parser } from '../shared/parser';
-
-/* API Endpoints */
-const signature = 'signature';
-const compounds = 'compounds';
-const zhang = 'zhang';
-const targetFrequency = 'targetFrequency';
-const targetHistogram = 'targetHistogram';
-const annotatedplatewellids = 'annotatedplatewellids';
+import { ApiEndpoints } from '../shared/api-endpoints';
 
 @Injectable()
 export class FetchDataService {
@@ -25,28 +18,28 @@ export class FetchDataService {
     console.log(url);
 
     switch (classPath) {
-      case signature: {
+      case ApiEndpoints.signature: {
         let body = 'compound=' + data.compound;
         return this.http.post(url, body, options)
           .map(res => ({'data': res.json(), 'type': classPath}))
           .catch(this.handleError);
       }
 
-      case compounds: {
+      case ApiEndpoints.compounds: {
         let body = 'query=' + data.compound;
         return this.http.post(url, body, options)
           .map(res => ({'data': res.json(), 'type': classPath}))
           .catch(this.handleError);
       }
 
-      case zhang: {
+      case ApiEndpoints.zhang: {
         let body = 'query=' + data.signature + ', sorted=true';
         return this.http.post(url, body, options)
           .map(res => ({'data': res.json(), 'type': classPath}))
           .catch(this.handleError);
       }
 
-      case annotatedplatewellids: {
+      case ApiEndpoints.annotatedplatewellids: {
         let pwids = Parser.parsePwids(data.zhang.result).toString().replace(/,/g , ' ');
         let body = 'query=' + data.storeData.signature + ', features=jnjs id smiles' +
                     ', pwids = ' + pwids ;
@@ -55,7 +48,7 @@ export class FetchDataService {
           .catch(this.handleError);
       }
 
-      case targetFrequency: {
+      case ApiEndpoints.targetFrequency: {
         let pwids = Parser.parsePwids(data.result).toString().replace(/,/g , ' ');
         let body = 'pwids=' + pwids;
         return this.http.post(url, body, options)
@@ -63,7 +56,7 @@ export class FetchDataService {
           .catch(this.handleError);
       }
 
-      case targetHistogram: {
+      case ApiEndpoints.targetHistogram: {
         let features = '';
         let body = 'bins=' + data.bins + ', features=zhang';
         if (features !== '') {

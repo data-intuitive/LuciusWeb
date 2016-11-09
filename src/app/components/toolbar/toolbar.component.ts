@@ -47,13 +47,11 @@ export class ToolbarComponent implements OnInit {
     }
 
     ngOnInit() {
-      this.settings$.subscribe(settings => this.settings = settings);
+      this.settings$.subscribe(
+        settings => { this.settings = settings; },
+        err => console.log(err));
 
-      if (this.type === 'settings') {
-        this.showMe = false;
-      }else {
-        this.showMe = true;
-      }
+      this.showMe = !(this.type === 'settings');
     }
 
     // open side navigation bar by updating store, when menu button is pressed

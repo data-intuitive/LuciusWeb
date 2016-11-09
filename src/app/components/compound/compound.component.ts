@@ -24,7 +24,9 @@ export class CompoundComponent implements OnInit {
     }
 
   ngOnInit() {
-    this.settings$.subscribe(settings => this.settings = settings);
+    this.settings$.subscribe(
+      settings => { this.settings = settings; },
+      err => console.log(err));
   }
 
 }

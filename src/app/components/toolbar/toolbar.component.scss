@@ -8,9 +8,9 @@ $s-jnj: 140px;
   justify-content: center;
 
   md-toolbar {
-    @include md-elevation(3);
-
     background-color: md-color($primary);
+
+    @include md-elevation(3);
 
     .app-toolbar-filler {
       flex: 1 1 auto;
@@ -23,13 +23,10 @@ $s-jnj: 140px;
 
   .row {
     display: flex;
-    align-items: stretch;
-
     margin: 0 unit();
-
     text-transform: capitalize;
-
     color: $primary-color-text;
+    align-items: stretch;
   }
 
   .box {
@@ -62,14 +59,12 @@ $s-jnj: 140px;
 
     .icon {
       position: relative;
-
       color: $primary-color-text;
 
       md-icon {
         position: absolute;
         top: 8px;
         left: 12px;
-
         color: #eee;
       }
     }
@@ -85,16 +80,14 @@ $s-jnj: 140px;
     &.toggle {
       .container {
         display: flex;
-        align-items: center;
-        justify-content: center;
-
         width: 64px;
         height: 44px;
         margin: 0;
         padding: 0 0 0 32px;
-
         border-radius: $s-border-radius;
         background-color: fade-out($cl-bg, .07);
+        align-items: center;
+        justify-content: center;
       }
     }
 

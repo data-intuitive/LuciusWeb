@@ -3,7 +3,6 @@
 :host {
   display: flex;
   flex-direction: column;
-
   height: 100%;
 }
 
@@ -12,10 +11,10 @@ app-toolbar {
 }
 
 .content {
-  flex: 1 1 auto;
   display: flex;
   overflow: auto;
   flex-direction: column;
+  flex: 1 1 auto;
   align-items: flex-start;
 
   & > *:first-child {
@@ -24,12 +23,10 @@ app-toolbar {
 }
 
 .comp {
-  @include md-elevation(1);
-
   flex: 0 1 auto;
-
   margin: unit();
   padding: unit();
-
   background-color: $bg-color;
+
+  @include md-elevation(1);
 }

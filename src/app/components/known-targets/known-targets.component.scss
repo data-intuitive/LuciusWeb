@@ -1,22 +1,26 @@
 @import '../../../styles/variables';
 
 :host {
-  @include md-elevation(1);
-
   display: flex;
-  flex: 2 1 auto;
   flex-direction: column;
+  flex: 2 1 auto;
+
   box-sizing: border-box;
-  margin: unit();
   min-width: unit(14);
+  margin: unit();
+
   background-color: $bg-color;
+
+  @include md-elevation(1);
 }
 
 .title {
-  padding: unit(.5);
-  background-color: md-color($primary, 50);
-  color: md-color($primary, 600);
   font-size: $font-sm;
+
+  padding: unit(.5);
+
+  color: md-color($primary, 600);
+  background-color: md-color($primary, 50);
 }
 
 .content {

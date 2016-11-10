@@ -1,15 +1,16 @@
 import { Injectable } from '@angular/core';
-import * as models from '../models';
+import { Response } from '@angular/http';
+
 import { ApiEndpoints } from '../shared/api-endpoints';
 
 @Injectable()
 export class HandleDataService {
-    signatureOfCompound: models.Signature;
-    relatedCompounds: models.Compound;
-    zhang: models.Zhang;
-    histogramData: models.HistData;
-    knownTargets: models.KnownTargets;
-    annotatedPlatewellids: models.AnnotatedPlatewellids;
+    signature: Response;
+    relatedCompounds: Response;
+    zhang: Response;
+    histogramData: Response;
+    knownTargets: Response;
+    annotatedPlatewellids: Response;
 
     constructor() {
     }
@@ -19,7 +20,7 @@ export class HandleDataService {
       console.log('[handler service] set' + ' ' + classPath);
       switch (classPath) {
         case ApiEndpoints.signature:
-          this.signatureOfCompound = data;
+          this.signature = data;
           break;
         case ApiEndpoints.compounds:
           this.relatedCompounds = data;
@@ -33,7 +34,7 @@ export class HandleDataService {
         case ApiEndpoints.targetFrequency:
           this.knownTargets = data;
           break;
-        case ApiEndpoints.annotatedplatewellids:
+        case ApiEndpoints.annotatedPlateWellids:
           this.annotatedPlatewellids = data;
           break;
       }
@@ -45,7 +46,7 @@ export class HandleDataService {
       console.log('[handler service] get' + ' ' + classPath);
       switch (classPath) {
         case ApiEndpoints.signature:
-          return this.signatureOfCompound;
+          return this.signature;
         case ApiEndpoints.compounds:
           return this.relatedCompounds;
         case ApiEndpoints.zhang:
@@ -54,7 +55,7 @@ export class HandleDataService {
           return this.histogramData;
         case ApiEndpoints.knownTargets:
           return this.knownTargets;
-        case ApiEndpoints.annotatedplatewellids:
+        case ApiEndpoints.annotatedPlateWellids:
           return this.annotatedPlatewellids;
       }
   }

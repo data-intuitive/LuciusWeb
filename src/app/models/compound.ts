@@ -1,3 +1,4 @@
-export interface Compound {
-  result: Array<Array<(string|Array<string>)>>;
+export enum CompoundEnum {
+  relatedJNJ,
+  pwids
 }

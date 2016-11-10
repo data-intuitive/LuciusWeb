@@ -2,10 +2,10 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { FormControl } from '@angular/forms';
-import { Compound } from '../../models/compound';
 import { Settings } from '../../models/settings';
 import { FetchDataService } from '../../services/fetch-data.service';
 import { Parser } from '../../shared/parser';
+// import { CompoundEnum } from '../../models/compound';
 
 import * as fromRoot from '../../reducers';
 import * as layoutActions from '../../actions/layout';
@@ -24,7 +24,7 @@ export class ToolbarComponent implements OnInit {
     signature$: Observable<string>;
     compound$: Observable<string>;
     settings$: Observable<fromSettings.State>;
-    relatedCompounds: Compound;
+    relatedCompounds: any;
     relatedCompoundsArray: Array<string>;
     settings: Settings;
     comp = new FormControl();

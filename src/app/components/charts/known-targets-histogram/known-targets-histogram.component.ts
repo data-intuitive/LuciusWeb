@@ -1,12 +1,13 @@
 import { Component } from '@angular/core';
 import { ElementRef, ViewChild,
          AfterViewInit, ViewEncapsulation, Input, OnInit } from '@angular/core';
-import { Settings } from '../../../models/settings';
-import { KnownTargets } from '../../../models/known-targets';
 import { Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
+
 import { HandleDataService } from '../../../services/handle-data.service';
 import * as fromRoot from '../../../reducers';
+import { Settings } from '../../../models/settings';
+// import { KnownTargetEnum } from '../../../models/known-target';
 
 import * as d3 from 'd3';
 
@@ -28,7 +29,7 @@ export class KnownTargetsHistogramComponent implements  AfterViewInit, OnInit {
     // private margin =  {top: 16, right: 48, bottom: 16, left: 8};
     // private padding = {top: 16, right: 24, bottom: 16, left: 24};
     // private divs: any;
-    knownTargets: KnownTargets;
+    knownTargets: any;
     knownTargetsReady$: Observable<boolean>;
     dataset: Array<{name: string, value: number}>;
     datasetNames: Array<string>;

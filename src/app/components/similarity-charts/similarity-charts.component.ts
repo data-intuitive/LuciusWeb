@@ -8,7 +8,7 @@ import * as fromRoot from '../../reducers';
 import { HandleDataService } from '../../services/handle-data.service';
 import { Store } from '@ngrx/store';
 import { Settings } from '../../models';
-import { TargetHist } from '../../models';
+import { TargetHistogram } from '../../models';
 // import { Parser } from '../../shared/parser';
 import { ApiEndpoints } from '../../shared/api-endpoints';
 
@@ -20,7 +20,7 @@ import { ApiEndpoints } from '../../shared/api-endpoints';
 
 export class SimilarityChartsComponent implements OnInit {
     similaritiesHistogramReady$: Observable<boolean>;
-    similaritiesHistogramData: TargetHist;
+    similaritiesHistogramData: any;
     @Input() settings: Settings;
 
     constructor(

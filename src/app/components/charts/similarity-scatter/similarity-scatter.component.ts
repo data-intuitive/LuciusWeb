@@ -1,9 +1,10 @@
 /* tslint:disable:no-unused-variable */
 import { Component, OnInit, Input } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
+import { Store } from '@ngrx/store';
+
 import * as fromRoot from '../../../reducers';
 import { HandleDataService } from '../../../services/handle-data.service';
-import { Store } from '@ngrx/store';
 import { Parser } from '../../../shared/parser';
 import { Settings } from '../../../models/settings';
 

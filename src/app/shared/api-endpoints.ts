@@ -12,6 +12,6 @@ export class ApiEndpoints {
    static zhang = zhng;
    static targetFrequency = targetFreq;
    static targetHistogram = targetHist;
-   static annotatedplatewellids = annotatedpwids;
+   static annotatedPlateWellids = annotatedpwids;
    static knownTargets = knownTarg;
 }

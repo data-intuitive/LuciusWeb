@@ -4,8 +4,8 @@ import { Store } from '@ngrx/store';
 
 import * as fromRoot from '../../reducers';
 import { HandleDataService } from '../../services/handle-data.service';
-import { KnownTargets } from '../../models/known-targets';
 import { ApiEndpoints } from '../../shared/api-endpoints';
+// import { KnownTargetEnum } from '../../models/known-target';
 
 @Component({
   selector: 'app-known-targets',
@@ -14,7 +14,7 @@ import { ApiEndpoints } from '../../shared/api-endpoints';
 })
 export class KnownTargetsComponent implements OnInit {
   compound$: Observable<string>;
-  knownTargets: KnownTargets;
+  knownTargets: any;
   knownTargetsReady$: Observable<boolean>;
 
   constructor(

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Http, Headers, RequestOptions, Response } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
+
 import { Parser } from '../shared/parser';
 import { ApiEndpoints } from '../shared/api-endpoints';
 
@@ -18,33 +19,33 @@ export class FetchDataService {
     console.log(url);
 
     switch (classPath) {
-      case ApiEndpoints.signature: {
-        let body = 'compound=' + data.compound;
-        return this.http.post(url, body, options)
-          .map(res => ({'data': res.json(), 'type': classPath}))
-          .catch(this.handleError);
-      }
-
       case ApiEndpoints.compounds: {
         let body = 'query=' + data.compound;
         return this.http.post(url, body, options)
-          .map(res => ({'data': res.json(), 'type': classPath}))
+          .map(res => (this.handleResponse(res, classPath)))
+          .catch(this.handleError);
+      }
+
+      case ApiEndpoints.signature: {
+        let body = 'compound=' + data.compound;
+        return this.http.post(url, body, options)
+          .map(res => (this.handleResponse(res, classPath)))
           .catch(this.handleError);
       }
 
       case ApiEndpoints.zhang: {
         let body = 'query=' + data.signature + ', sorted=true';
         return this.http.post(url, body, options)
-          .map(res => ({'data': res.json(), 'type': classPath}))
+          .map(res => (this.handleResponse(res, classPath)))
           .catch(this.handleError);
       }
 
-      case ApiEndpoints.annotatedplatewellids: {
+      case ApiEndpoints.annotatedPlateWellids: {
         let pwids = Parser.parsePwids(data.zhang.result).toString().replace(/,/g , ' ');
         let body = 'query=' + data.storeData.signature + ', features=jnjs id smiles' +
                     ', pwids = ' + pwids ;
         return this.http.post(url, body, options)
-          .map(res => ({'data': res.json(), 'type': classPath}))
+          .map(res => (this.handleResponse(res, classPath)))
           .catch(this.handleError);
       }
 
@@ -52,7 +53,7 @@ export class FetchDataService {
         let pwids = Parser.parsePwids(data.result).toString().replace(/,/g , ' ');
         let body = 'pwids=' + pwids;
         return this.http.post(url, body, options)
-          .map(res => ({'data': res.json(), 'type': classPath}))
+          .map(res => (this.handleResponse(res, classPath)))
           .catch(this.handleError);
       }
 
@@ -64,22 +65,31 @@ export class FetchDataService {
         }
         body += ', query=' + data.storeData.signature;
         return this.http.post(url, body, options)
-          .map(res => ({'data': res.json(), 'type': classPath}))
+          .map(res => (this.handleResponse(res, classPath)))
           .catch(this.handleError);
       }
     }
   }
 
-    private handleError (error: Response | any) {
-      let errMsg: string;
-      if (error instanceof Response) {
-        const body = error.json() || '';
-        const err = body.error || JSON.stringify(body);
-        errMsg = `${error.status} - ${error.statusText || ''} ${err}`;
-      } else {
-        errMsg = error.message ? error.message : error.toString();
-      }
-      console.error(errMsg);
-      return Observable.throw(errMsg);
+  /* function to handle Response from server and return desired Object */
+  private handleResponse(res: Response, classPath: string) {
+    /* TODO : Perform some check on the Response code */
+    let data = res.json();
+    let returnObject = {'data': data, 'type': classPath };
+    return returnObject;
+  }
+
+  /* function to handle Error occuring from interaction with the server */
+  private handleError (error: Response | any) {
+    let errMsg: string;
+    if (error instanceof Response) {
+      const body = error.json() || '';
+      const err = body.error || JSON.stringify(body);
+      errMsg = `${error.status} - ${error.statusText || ''} ${err}`;
+    } else {
+      errMsg = error.message ? error.message : error.toString();
     }
+    console.error(errMsg);
+    return Observable.throw(errMsg);
+  }
 }

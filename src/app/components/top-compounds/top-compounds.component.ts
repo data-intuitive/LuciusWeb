@@ -1,7 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
-import { AnnotatedPlatewellids } from '../../models';
+import { AnnotatedPlatewellid } from '../../models';
 import { Settings } from '../../models';
 import { HandleDataService } from '../../services/handle-data.service';
 import * as fromRoot from '../../reducers';
@@ -19,7 +19,7 @@ export class TopCompoundsComponent implements OnInit {
     @Input() settings: Settings;
     zhangReady$: Observable<boolean>;
     annotatedPlatewellids$: Observable<boolean>;
-    annotatedPlatewellids: AnnotatedPlatewellids;
+    annotatedPlatewellids: any;
     topPositive: Array<Array<string>>;
     topNegative: Array<Array<string>>;
     numComps: number;
@@ -48,7 +48,7 @@ export class TopCompoundsComponent implements OnInit {
         subscribe(
           ev => { if (ev) {
             this.annotatedPlatewellids = this.handleDataService.
-              getData(ApiEndpoints.annotatedplatewellids); }},
+              getData(ApiEndpoints.annotatedPlateWellids); }},
           err => console.log(err));
 
       // get number of components

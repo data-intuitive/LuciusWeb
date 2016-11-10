@@ -1,3 +1,3 @@
-export interface Signature {
-  result: Array<string>;
+export enum SignatureEnum {
+  genes
 }

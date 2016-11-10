@@ -1,4 +1,5 @@
-import { Settings, Compound } from '../models/';
+import { Settings } from '../models/';
+// import { CompoundEnum } from '../models';
 
 export class Parser {
 
@@ -13,7 +14,7 @@ export class Parser {
     return queryString.substring(start, end);
   }
 
-  static parseRelatedCompounds(relatedCompounds: Compound): Array<string> {
+  static parseRelatedCompounds(relatedCompounds: any): Array<string> {
     let relatedCompoundsArray = [];
     let i;
     for (i = 0; i < relatedCompounds.result.length ; i++) {

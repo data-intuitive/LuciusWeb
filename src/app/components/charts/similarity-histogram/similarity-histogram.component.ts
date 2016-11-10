@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { ElementRef, ViewChild,
          ViewEncapsulation, Input, OnInit } from '@angular/core';
-import { Settings } from '../../../models/settings';
 
+import { Settings } from '../../../models/settings';
 import * as d3 from 'd3';
 
 @Component({

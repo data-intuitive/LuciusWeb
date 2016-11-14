@@ -1,12 +1,12 @@
 <div class="title">Top {{numComps}} Compounds </div>
 <div class="content">
   <strong>Positive</strong><br />
-  <div *ngFor="let item1 of topPositive">
-    {{item1}}
+  <div *ngFor="let item of topPositiveCorrelations">
+    {{item | json}}
   </div>
   <strong>Negative</strong>
-  <div *ngFor="let item2 of topNegative">
-    {{item2}}
+  <div *ngFor="let item of topNegativeCorrelations">
+    {{item | json}}
   </div>
   {{annotatedPlatewellids | json}}
 </div>

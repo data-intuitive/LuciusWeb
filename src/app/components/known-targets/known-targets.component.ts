@@ -3,9 +3,10 @@ import { Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
 
 import * as fromRoot from '../../reducers';
+
 import { HandleDataService } from '../../services/handle-data.service';
 import { ApiEndpoints } from '../../shared/api-endpoints';
-// import { KnownTargetEnum } from '../../models/known-target';
+import { Parser } from '../../shared/parser';
 
 @Component({
   selector: 'app-known-targets',
@@ -14,13 +15,14 @@ import { ApiEndpoints } from '../../shared/api-endpoints';
 })
 export class KnownTargetsComponent implements OnInit {
   compound$: Observable<string>;
-  knownTargets: any;
+  knownTargets: Array<any>;
+  knownTargetsResponse: Array<Array<string>>;
   knownTargetsReady$: Observable<boolean>;
 
   constructor(
     private store: Store<fromRoot.State>,
-    private handleDataService: HandleDataService
-  ) {
+    private handleDataService: HandleDataService) {
+
     this.compound$ = this.store.let(fromRoot.getCompound);
     this.knownTargetsReady$ = this.store.let(fromRoot.getKnownTargetsReady);
   }
@@ -28,10 +30,16 @@ export class KnownTargetsComponent implements OnInit {
   ngOnInit() {
     this.knownTargetsReady$
       .subscribe(
-        ev => { if (ev) {
-          this.knownTargets = this.handleDataService
-            .getData(ApiEndpoints.knownTargets).result; }},
+        ev => { this.handleKnownTargetsEvent(ev); },
         err => console.log(err)
       );
+  }
+
+  handleKnownTargetsEvent(ev): void {
+    if (ev) {
+     this.knownTargetsResponse = this.handleDataService
+       .getData(ApiEndpoints.knownTargets).result;
+     this.knownTargets = Parser.parseKnownTargetsData(this.knownTargetsResponse);
+    }
   }
 }

@@ -1,17 +1,9 @@
-const sig = 'signature';
-const comp = 'compounds';
-const zhng = 'zhang';
-const targetFreq = 'targetFrequency';
-const targetHist = 'targetHistogram';
-const knownTarg = 'knownTargets';
-const annotatedpwids = 'annotatedplatewellids';
-
 export class ApiEndpoints {
-   static signature = sig;
-   static compounds = comp;
-   static zhang = zhng;
-   static targetFrequency = targetFreq;
-   static targetHistogram = targetHist;
-   static annotatedPlateWellids = annotatedpwids;
-   static knownTargets = knownTarg;
+   static signature = 'signature';
+   static compounds = 'compounds';
+   static zhang = 'zhang';
+   static targetFrequency = 'targetFrequency';
+   static targetHistogram = 'targetHistogram';
+   static annotatedPlateWellids = 'annotatedplatewellids';
+   static knownTargets = 'knownTargets';
 }

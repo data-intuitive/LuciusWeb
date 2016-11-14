@@ -1,10 +1,11 @@
-import { Settings } from '../models/';
-// import { CompoundEnum } from '../models';
+import { Settings, CompoundEnum, Zhang, TargetHistogram,
+         KnownTargetEnum } from '../models/';
 
 export class Parser {
 
   static parseURL(settings: Settings, classPath: string) {
-    return settings.serverURL + '?' + settings.queryStr + '&classPath=luciusapi.' + classPath;
+    return settings.serverURL + '?' + settings.queryStr +
+      '&classPath=luciusapi.' + classPath;
   }
 
   static parseClassPath(url: string): string {
@@ -18,7 +19,8 @@ export class Parser {
     let relatedCompoundsArray = [];
     let i;
     for (i = 0; i < relatedCompounds.result.length ; i++) {
-      relatedCompoundsArray.push(relatedCompounds.result[i][0].toString());
+      relatedCompoundsArray.push(relatedCompounds.
+        result[i][CompoundEnum.relatedJNJ].toString());
     }
     return relatedCompoundsArray;
   }
@@ -39,5 +41,61 @@ export class Parser {
       pwids[i] = zhangArray[i][3];
     }
     return pwids;
+  }
+
+  static parseTopCorrelations(zhangArray: Array<Array<string>>,
+    type: string, numComps: number): Array<Zhang> {
+     let result = [];
+     let subArray = [[]];
+
+     if (type === 'POSITIVE') {
+       subArray = zhangArray.slice(0, numComps);
+     }else {
+       subArray = zhangArray.reverse().slice(0, numComps);
+     }
+
+     for (let i = 0; i < numComps; i++) {
+       let obj = <Zhang> new Object();
+       obj.indexSorted = +subArray[i][0];
+       obj.zhangScore = +subArray[i][1];
+       obj.indexUnSorted = +subArray[i][2];
+       obj.pwid = subArray[i][3];
+       result[i] = obj;
+     }
+     return result;
+  }
+
+  static parseZhangData(zhangArray: Array<Array<string>>): Array<Zhang> {
+    let result = [];
+
+    for (let i = 0; i < zhangArray.length ; i++) {
+      let obj = <Zhang> new Object();
+      obj.indexSorted = +zhangArray[i][0];
+      obj.zhangScore = +zhangArray[i][1];
+      obj.indexUnSorted = +zhangArray[i][2];
+      obj.pwid = zhangArray[i][3];
+      result[i] = obj;
+    }
+    return result;
+  }
+
+  static parseSimilarityHistogramData(similarityHistogramResult: any) {
+    let obj = <TargetHistogram> new Object();
+
+    obj.metadata = similarityHistogramResult.metadata;
+    obj.data = similarityHistogramResult.data;
+    return obj;
+  }
+
+  static parseKnownTargetsData(knownTargetsArray: Array<Array<string>>) {
+    let result = [];
+
+    for (let i = 0; i < knownTargetsArray.length; i++) {
+      let obj = <{'gene': string, 'frequency': number}> new Object();
+      obj.gene = knownTargetsArray[i][KnownTargetEnum.gene];
+      obj.frequency = +knownTargetsArray[i][KnownTargetEnum.frequency];
+      result[i] = obj;
+    }
+    return result;
   }
 }

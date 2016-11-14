@@ -5,6 +5,10 @@
   </span>
 </div>
 <div class="content">
-  <!-- {{knownTargets}} -->
+  <div *ngIf="knownTargetsReady$ | async">
+    <div *ngFor="let item of knownTargets">
+      {{item | json}}
+    </div>
+  </div>
   <app-known-targets-hist></app-known-targets-hist>
 </div>

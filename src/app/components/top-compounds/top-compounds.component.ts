@@ -5,9 +5,12 @@ import * as fromRoot from '../../reducers';
 import { Store } from '@ngrx/store';
 
 import { ApiEndpoints } from '../../shared/api-endpoints';
-import { Settings } from '../../models';
+import { Settings, AnnotatedPlatewellid, Zhang } from '../../models';
 import { HandleDataService } from '../../services/handle-data.service';
-// import { Parser } from '../../shared/parser';
+import { Parser } from '../../shared/parser';
+
+const pos = 'POSITIVE';
+const neg = 'NEGATIVE';
 
 @Component({
   selector: 'app-top-compounds',
@@ -19,11 +22,10 @@ export class TopCompoundsComponent implements OnInit {
     @Input() settings: Settings;
     zhangReady$: Observable<boolean>;
     annotatedPlatewellids$: Observable<boolean>;
-    annotatedPlatewellids: any;
-    topPositive: Array<Array<string>>;
-    topNegative: Array<Array<string>>;
+    annotatedPlatewellids: Array<AnnotatedPlatewellid>;
+    topPositiveCorrelations: Array<Zhang>;
+    topNegativeCorrelations: Array<Zhang>;
     numComps: number;
-    // pwids: string;
 
     constructor(
       private store: Store<fromRoot.State>,
@@ -35,42 +37,41 @@ export class TopCompoundsComponent implements OnInit {
 
       // observe if annotatedPlatewellids have arrived from server
       this.annotatedPlatewellids$ = this.store.let(fromRoot.getAnnotatedPlatewellidsReady);
-
     }
 
     ngOnInit() {
+
+      /* listen for Zhang data from the server */
       this.zhangReady$.subscribe(
         ev => { this.handleZhangEvent(ev); },
         err => console.log(err)
       );
 
-      this.annotatedPlatewellids$.
-        subscribe(
-          ev => { if (ev) {
-            this.annotatedPlatewellids = this.handleDataService.
-              getData(ApiEndpoints.annotatedPlateWellids); }},
-          err => console.log(err));
+      /* listen for annotatedPlatewellids data from the server */
+      this.annotatedPlatewellids$.subscribe(
+        ev => { this.handleAnnotatedPlateWellidsEvent(ev); },
+        err => console.log(err));
 
-      // get number of components
+      /* get number of components as number */
       this.numComps = +this.settings.topComps;
      }
 
      handleZhangEvent(ev): void {
          if (ev) {
-           let zhangArray = this.handleDataService.getData(ApiEndpoints.zhang).result;
-           this.topPositive = this.getTopPositive(zhangArray);
-           this.topNegative = this.getTopNegative(zhangArray);
-          //  this.pwids = Parser.parsePwids(zhangArray)
-          //    .toString()
-          //    .replace(/,/g , ' ');
+           let zhangArray = this.handleDataService.
+              getData(ApiEndpoints.zhang).result;
+           this.topPositiveCorrelations = Parser.
+              parseTopCorrelations(zhangArray, pos, this.numComps);
+           this.topNegativeCorrelations = Parser.
+              parseTopCorrelations(zhangArray, neg, this.numComps);
          }
-       }
+     }
 
-      getTopPositive(zhangArray: Array<Array<string>>) {
-        return zhangArray.slice(0, this.numComps);
+     handleAnnotatedPlateWellidsEvent(ev): void {
+         if (ev) {
+           this.annotatedPlatewellids = this.handleDataService.
+             getData(ApiEndpoints.annotatedPlateWellids).result;
+         }
       }
 
-      getTopNegative(zhangArray: Array<Array<string>>) {
-        return zhangArray.reverse().slice(0, this.numComps);
-      }
-   }
+}

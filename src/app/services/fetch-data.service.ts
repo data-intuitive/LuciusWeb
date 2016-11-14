@@ -42,8 +42,7 @@ export class FetchDataService {
 
       case ApiEndpoints.annotatedPlateWellids: {
         let pwids = Parser.parsePwids(data.zhang.result).toString().replace(/,/g , ' ');
-        let body = 'query=' + data.storeData.signature + ', features=jnjs id smiles' +
-                    ', pwids = ' + pwids ;
+        let body = 'query=' + data.storeData.signature + ', pwids = ' + pwids ;
         return this.http.post(url, body, options)
           .map(res => (this.handleResponse(res, classPath)))
           .catch(this.handleError);

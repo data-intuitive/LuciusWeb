@@ -1,6 +1,6 @@
 export interface Zhang {
   indexSorted: number;
-  zhangScore: string;
+  zhangScore: number;
   indexUnSorted: number;
   pwid: string;
 }

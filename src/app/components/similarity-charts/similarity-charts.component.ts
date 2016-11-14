@@ -1,5 +1,3 @@
-/* tslint:disable:no-unused-variable */
-
 import { Component, OnInit, Input } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
@@ -7,9 +5,9 @@ import * as fromRoot from '../../reducers';
 
 import { HandleDataService } from '../../services/handle-data.service';
 import { Store } from '@ngrx/store';
-import { Settings } from '../../models';
-import { TargetHistogram } from '../../models';
-// import { Parser } from '../../shared/parser';
+import { Settings, Zhang, TargetHistogram } from '../../models';
+
+import { Parser } from '../../shared/parser';
 import { ApiEndpoints } from '../../shared/api-endpoints';
 
 @Component({
@@ -19,33 +17,48 @@ import { ApiEndpoints } from '../../shared/api-endpoints';
 })
 
 export class SimilarityChartsComponent implements OnInit {
-    similaritiesHistogramReady$: Observable<boolean>;
-    similaritiesHistogramData: any;
     @Input() settings: Settings;
+
+    zhangReady$: Observable<boolean>;
+    zhangResponse: Array<Array<string>>;
+    zhangArray: Array<Zhang>;
+
+    similarityHistogramReady$: Observable<boolean>;
+    similarityHistogramResponse: Array<any>;
+    similarityHistogramData: TargetHistogram;
 
     constructor(
       private store: Store<fromRoot.State>,
       private handleDataService: HandleDataService) {
 
-      // observe if similaritesHistogram has arrived from server
-      this.similaritiesHistogramReady$ = this.store
-        .let(fromRoot.getSimilaritiesHistReady);
+      // observe if Zhang Data has arrived from server
+      this.zhangReady$ = this.store.let(fromRoot.getZhangReady);
+
+      // observe if SimilarityHistogram Data has arrived from server
+      this.similarityHistogramReady$ = this.store.
+        let(fromRoot.getSimilaritiesHistReady);
     }
 
     ngOnInit() {
-      this.similaritiesHistogramReady$.subscribe(
-        value => { if (value) {
-            this.similaritiesHistogramData = this.handleDataService
-              .getData(ApiEndpoints.targetHistogram);
-            this.getHistProperties(); }},
+      this.zhangReady$.subscribe(
+        value => {
+          if (value) {
+            this.zhangResponse = this.handleDataService.
+              getData(ApiEndpoints.zhang).result;
+            this.zhangArray = Parser.
+              parseZhangData(this.zhangResponse);
+          }},
         err => console.log(err));
-    }
 
-    getHistProperties() {
-      const bounds = this.similaritiesHistogramData.result.metadata.bounds;
-      const data = this.similaritiesHistogramData.result.data;
-      const zhang = this.similaritiesHistogramData.result.data.zhang;
-      // const targets = Parser.parseTargetHistTargets(this.similaritiesHistogramData);
-      // console.log(bounds, data, zhang);
-    }
+    this.similarityHistogramReady$.subscribe(
+      value => {
+        if (value) {
+          this.similarityHistogramResponse = this.handleDataService.
+            getData(ApiEndpoints.targetHistogram).result;
+          this.similarityHistogramData = Parser.
+            parseSimilarityHistogramData(this.similarityHistogramResponse);
+        }},
+      err => console.log(err));
+  }
+
 }

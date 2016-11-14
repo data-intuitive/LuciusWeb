@@ -6,11 +6,11 @@ import { Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { Settings } from '../models';
 
 import { LocalStorageService } from '../services/local-storage.service';
 import * as settings from '../actions/settings';
 import * as fromRoot from '../reducers';
+import { Settings } from '../models';
 
 @Injectable()
 export class SettingsEffects {

@@ -21,7 +21,7 @@
         <input id="compinput" [formControl]="comp" class="input" list="relatedCompounds"
                placeholder="Compound" (keyup.enter)="updateCompound(comp.value)">
          <datalist id="relatedCompounds">
-             <option *ngFor="let item of relatedCompoundsArray" value="{{item}}">
+             <option *ngFor="let item of relatedCompounds" value="{{item}}">
              </option>
          </datalist>
       </div>

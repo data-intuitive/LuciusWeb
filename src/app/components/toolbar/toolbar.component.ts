@@ -2,15 +2,15 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { FormControl } from '@angular/forms';
-import { Settings } from '../../models/settings';
-import { FetchDataService } from '../../services/fetch-data.service';
-import { Parser } from '../../shared/parser';
-// import { CompoundEnum } from '../../models/compound';
 
 import * as fromRoot from '../../reducers';
 import * as layoutActions from '../../actions/layout';
 import * as dataActions from '../../actions/data';
 import * as fromSettings from '../../reducers/settings';
+
+import { Settings } from '../../models/settings';
+import { FetchDataService } from '../../services/fetch-data.service';
+import { Parser } from '../../shared/parser';
 
 @Component({
   selector: 'app-toolbar',
@@ -20,15 +20,15 @@ import * as fromSettings from '../../reducers/settings';
 
 export class ToolbarComponent implements OnInit {
     @Input() type: string = '';
-    showMe: boolean;
     signature$: Observable<string>;
     compound$: Observable<string>;
     settings$: Observable<fromSettings.State>;
-    relatedCompounds: any;
-    relatedCompoundsArray: Array<string>;
+
+    relatedCompounds: Array<string>;
     settings: Settings;
     comp = new FormControl();
     minChar = 1;
+    showMe: boolean;
 
     constructor(
       private store: Store<fromRoot.State>,
@@ -43,7 +43,7 @@ export class ToolbarComponent implements OnInit {
           .distinctUntilChanged()
           .switchMap(term => this.search(term))
           .subscribe(result =>
-            this.relatedCompoundsArray = Parser.parseRelatedCompounds(result.data));
+            this.relatedCompounds = Parser.parseRelatedCompounds(result.data));
     }
 
     ngOnInit() {
@@ -59,6 +59,7 @@ export class ToolbarComponent implements OnInit {
       this.store.dispatch(new layoutActions.OpenSidenavAction());
     }
 
+    /* make REST API call for specific term from input */
     search(term: string): Observable<any> {
         let url = Parser.parseURL(this.settings, 'compounds');
         let data = {'compound': term, 'signature': ''};

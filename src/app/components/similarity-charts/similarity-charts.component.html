@@ -2,7 +2,12 @@
 <div class="content">
   <app-similarity-scatter [settings]="settings" ></app-similarity-scatter>
   <app-similarity-histogram [settings]="settings" ></app-similarity-histogram>
-  <!-- <div *ngIf="similaritiesHistogramFetched$ | async">
-    {{similaritiesHistogramData | json}}
-  </div> -->
+  <div *ngIf="similarityHistogramReady$ | async">
+    {{similarityHistogramData | json}}
+  </div>
+  <div *ngIf="zhangReady$ | async">
+    <div *ngFor="let item of zhangArray">
+      {{item | json}}
+    </div>
+  </div>
 </div>

@@ -1,13 +1,13 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
-import { AnnotatedPlatewellid } from '../../models';
-import { Settings } from '../../models';
-import { HandleDataService } from '../../services/handle-data.service';
 import * as fromRoot from '../../reducers';
 import { Store } from '@ngrx/store';
-// import { Parser } from '../../shared/parser';
+
 import { ApiEndpoints } from '../../shared/api-endpoints';
+import { Settings } from '../../models';
+import { HandleDataService } from '../../services/handle-data.service';
+// import { Parser } from '../../shared/parser';
 
 @Component({
   selector: 'app-top-compounds',

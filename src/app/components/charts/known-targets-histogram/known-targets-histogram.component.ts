@@ -17,8 +17,8 @@ import * as d3 from 'd3';
 })
 
 export class KnownTargetsHistogramComponent implements  AfterViewInit, OnInit {
-    graphData: Array<Number>;
-    data: Array<number>;
+    graphData: number[] = Array();
+    data: number[] = Array();
     width: string;
     height: string;
     @ViewChild('container') element: ElementRef;
@@ -27,9 +27,9 @@ export class KnownTargetsHistogramComponent implements  AfterViewInit, OnInit {
     // private margin =  {top: 16, right: 48, bottom: 16, left: 8};
     // private padding = {top: 16, right: 24, bottom: 16, left: 24};
     // private divs: any;
-    dataset: Array<{name: string, value: number}>;
-    datasetNames: Array<string>;
-    datasetValues: Array<number>;
+    dataset: {gene: string, frequency: number}[] = Array();
+    datasetNames: string[] = Array();
+    datasetValues: number[] = Array();
 
     constructor(private store: Store<fromRoot.State>,
                 private handleDataService: HandleDataService) {
@@ -68,14 +68,14 @@ export class KnownTargetsHistogramComponent implements  AfterViewInit, OnInit {
         .append('rect')
           .attr('class', 'bar')
           .attr('x', function(d) {
-            return xScale(d.name);
+            return xScale(d.gene);
           })
           .attr('y', function(d) {
-            return h - yScale(d.value);
+            return h - yScale(d.frequency);
           })
           .attr('width', 20)
           .attr('height', function(d) {
-            return yScale(d.value);
+            return yScale(d.frequency);
         });
     }
 }

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Response } from '@angular/http';
 
 import { ApiEndpoints } from '../shared/api-endpoints';
+import { Parser } from '../shared/parser';
 
 @Injectable()
 export class HandleDataService {
@@ -50,13 +51,13 @@ export class HandleDataService {
         case ApiEndpoints.compounds:
           return this.relatedCompounds;
         case ApiEndpoints.zhang:
-          return this.zhang;
+          return Parser.parseZhangData(this.zhang);
         case ApiEndpoints.targetHistogram:
-          return this.histogramData;
+          return Parser.parseSimilarityHistogramData(this.histogramData);
         case ApiEndpoints.knownTargets:
-          return this.knownTargets;
+          return Parser.parseKnownTargetsData(this.knownTargets);
         case ApiEndpoints.annotatedPlateWellids:
-          return this.annotatedPlatewellids;
+          return Parser.parseAnnotatedPlateWellids(this.annotatedPlatewellids);
       }
   }
 }

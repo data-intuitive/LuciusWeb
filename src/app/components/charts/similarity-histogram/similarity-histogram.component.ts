@@ -15,7 +15,7 @@ import * as d3 from 'd3';
 export class SimilarityHistogramComponent implements   OnInit {
     @ViewChild('container') element: ElementRef;
     @Input() settings: Settings;
-    @Input() data: Array<number>;
+    @Input() data: number[] = Array();
 
     private el: HTMLElement;
 

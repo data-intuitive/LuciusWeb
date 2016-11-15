@@ -7,6 +7,7 @@
       <div *ngIf="showMe" class="box jnj">
         <div class="icon">
           <md-icon>
+            <!--TODO load svg from external source -->
             <svg viewBox="0 0 24 24" height="100%" width="100%"
                  preserveAspectRatio="xMidYMid meet" fit=""
                  style="pointer-events: none; display: block;">
@@ -18,6 +19,7 @@
             </svg>
           </md-icon>
         </div>
+        <!--TODO fix input field width with css flex -->
         <input id="compinput" [formControl]="comp" class="input" list="relatedCompounds"
                placeholder="Compound" (keyup.enter)="updateCompound(comp.value)">
          <datalist id="relatedCompounds">
@@ -28,6 +30,7 @@
       <div *ngIf="showMe" class="box gene">
         <div class="icon">
           <md-icon>
+            <!--TODO load svg from external source -->
               <svg viewBox="0 0 24 24" height="100%" width="100%"
                    preserveAspectRatio="xMidYMid meet" fit=""
                    style="pointer-events: none; display: block;">
@@ -42,12 +45,14 @@
               </svg>
           </md-icon>
           </div>
+          <!--TODO fix input field width with css flex -->
           <input #sign id="compinput" class="input" (keyup.enter)="updateSignature(sign.value)"
                  placeholder="Signature" [value]="signature$ | async">
       </div>
       <div *ngIf="showMe" class="box toggle">
         <div class="icon">
           <md-icon>
+            <!--TODO load svg from external source -->
             <svg viewBox="0 0 24 24" height="100%" width="100%" preserveAspectRatio="xMidYMid meet"
                  fit="" style="pointer-events: none; display: block;">
               <g>
@@ -63,6 +68,7 @@
       <div *ngIf="showMe" class="box toggle">
         <div class="icon">
           <md-icon>
+            <!--TODO load svg from external source -->
             <svg viewBox="0 0 24 24" height="100%" width="100%" preserveAspectRatio="xMidYMid meet"
                  fit="" style="pointer-events: none; display: block;">
               <g>

@@ -5,7 +5,6 @@ import { Store } from '@ngrx/store';
 
 import * as fromRoot from '../../../reducers';
 import { HandleDataService } from '../../../services/handle-data.service';
-import { Parser } from '../../../shared/parser';
 import { Settings } from '../../../models/settings';
 
 @Component({
@@ -15,8 +14,7 @@ import { Settings } from '../../../models/settings';
 })
 export class SimilarityScatterComponent implements OnInit {
   zhangReady$: Observable<boolean>;
-  // zhangArray: Array<Array<string>>;
-  // zhangValues: Array<number>;
+  zhangArray: string[][] = Array();
   @Input() settings: Settings;
 
   constructor(
@@ -31,8 +29,7 @@ export class SimilarityScatterComponent implements OnInit {
     this.zhangReady$.
       subscribe(ev => {if (ev) {
         // zhang data has arrived from server
-        const zhangArray = this.handleDataService.getData('zhang').result;
-        const zhangValues = Parser.parseSimiliarityValues(zhangArray);
+        this.zhangArray = this.handleDataService.getData('zhang');
       }});
   }
 

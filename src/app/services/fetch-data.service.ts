@@ -41,7 +41,7 @@ export class FetchDataService {
       }
 
       case ApiEndpoints.annotatedPlateWellids: {
-        let pwids = Parser.parsePwids(data.zhang.result).toString().replace(/,/g , ' ');
+        let pwids = Parser.parsePwids(data.zhang);
         let body = 'query=' + data.storeData.signature + ', pwids = ' + pwids ;
         return this.http.post(url, body, options)
           .map(res => (this.handleResponse(res, classPath)))
@@ -49,7 +49,7 @@ export class FetchDataService {
       }
 
       case ApiEndpoints.targetFrequency: {
-        let pwids = Parser.parsePwids(data.result).toString().replace(/,/g , ' ');
+        let pwids = Parser.parsePwids(data);
         let body = 'pwids=' + pwids;
         return this.http.post(url, body, options)
           .map(res => (this.handleResponse(res, classPath)))

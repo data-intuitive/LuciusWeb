@@ -7,7 +7,6 @@ import { HandleDataService } from '../../services/handle-data.service';
 import { Store } from '@ngrx/store';
 import { Settings, Zhang, TargetHistogram } from '../../models';
 
-import { Parser } from '../../shared/parser';
 import { ApiEndpoints } from '../../shared/api-endpoints';
 
 @Component({
@@ -20,11 +19,9 @@ export class SimilarityChartsComponent implements OnInit {
     @Input() settings: Settings;
 
     zhangReady$: Observable<boolean>;
-    zhangResponse: Array<Array<string>>;
-    zhangArray: Array<Zhang>;
+    zhangArray: Zhang[] = Array();
 
     similarityHistogramReady$: Observable<boolean>;
-    similarityHistogramResponse: Array<any>;
     similarityHistogramData: TargetHistogram;
 
     constructor(
@@ -43,20 +40,16 @@ export class SimilarityChartsComponent implements OnInit {
       this.zhangReady$.subscribe(
         value => {
           if (value) {
-            this.zhangResponse = this.handleDataService.
-              getData(ApiEndpoints.zhang).result;
-            this.zhangArray = Parser.
-              parseZhangData(this.zhangResponse);
+            this.zhangArray = this.handleDataService
+              .getData(ApiEndpoints.zhang);
           }},
         err => console.log(err));
 
     this.similarityHistogramReady$.subscribe(
       value => {
         if (value) {
-          this.similarityHistogramResponse = this.handleDataService.
-            getData(ApiEndpoints.targetHistogram).result;
-          this.similarityHistogramData = Parser.
-            parseSimilarityHistogramData(this.similarityHistogramResponse);
+          this.similarityHistogramData = this.handleDataService.
+            getData(ApiEndpoints.targetHistogram);
         }},
       err => console.log(err));
   }

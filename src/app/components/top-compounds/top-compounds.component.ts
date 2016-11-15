@@ -21,10 +21,10 @@ const neg = 'NEGATIVE';
 export class TopCompoundsComponent implements OnInit {
     @Input() settings: Settings;
     zhangReady$: Observable<boolean>;
-    annotatedPlatewellids$: Observable<boolean>;
-    annotatedPlatewellids: Array<AnnotatedPlatewellid>;
-    topPositiveCorrelations: Array<Zhang>;
-    topNegativeCorrelations: Array<Zhang>;
+    annotatedPlatewellidsReady$: Observable<boolean>;
+    annotatedPlatewellids: AnnotatedPlatewellid[] = Array();
+    topPositiveCorrelations: Zhang[] = Array();
+    topNegativeCorrelations: Zhang[] = Array();
     numComps: number;
 
     constructor(
@@ -33,10 +33,12 @@ export class TopCompoundsComponent implements OnInit {
     ) {
 
       // observe if zhang has arrived from server
-      this.zhangReady$ = this.store.let(fromRoot.getZhangReady);
+      this.zhangReady$ = this.store
+        .let(fromRoot.getZhangReady);
 
       // observe if annotatedPlatewellids have arrived from server
-      this.annotatedPlatewellids$ = this.store.let(fromRoot.getAnnotatedPlatewellidsReady);
+      this.annotatedPlatewellidsReady$ = this.store
+        .let(fromRoot.getAnnotatedPlatewellidsReady);
     }
 
     ngOnInit() {
@@ -48,7 +50,7 @@ export class TopCompoundsComponent implements OnInit {
       );
 
       /* listen for annotatedPlatewellids data from the server */
-      this.annotatedPlatewellids$.subscribe(
+      this.annotatedPlatewellidsReady$.subscribe(
         ev => { this.handleAnnotatedPlateWellidsEvent(ev); },
         err => console.log(err));
 
@@ -58,8 +60,7 @@ export class TopCompoundsComponent implements OnInit {
 
      handleZhangEvent(ev): void {
          if (ev) {
-           let zhangArray = this.handleDataService.
-              getData(ApiEndpoints.zhang).result;
+           let zhangArray = this.handleDataService.getData(ApiEndpoints.zhang);
            this.topPositiveCorrelations = Parser.
               parseTopCorrelations(zhangArray, pos, this.numComps);
            this.topNegativeCorrelations = Parser.
@@ -70,7 +71,7 @@ export class TopCompoundsComponent implements OnInit {
      handleAnnotatedPlateWellidsEvent(ev): void {
          if (ev) {
            this.annotatedPlatewellids = this.handleDataService.
-             getData(ApiEndpoints.annotatedPlateWellids).result;
+             getData(ApiEndpoints.annotatedPlateWellids);
          }
       }
 

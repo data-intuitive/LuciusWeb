@@ -6,7 +6,6 @@ import * as fromRoot from '../../reducers';
 
 import { HandleDataService } from '../../services/handle-data.service';
 import { ApiEndpoints } from '../../shared/api-endpoints';
-import { Parser } from '../../shared/parser';
 
 @Component({
   selector: 'app-known-targets',
@@ -15,8 +14,8 @@ import { Parser } from '../../shared/parser';
 })
 export class KnownTargetsComponent implements OnInit {
   compound$: Observable<string>;
-  knownTargets: Array<any>;
-  knownTargetsResponse: Array<Array<string>>;
+  knownTargets: any[] = Array();
+  knownTargetsResponse: string[][] = Array();
   knownTargetsReady$: Observable<boolean>;
 
   constructor(
@@ -37,9 +36,8 @@ export class KnownTargetsComponent implements OnInit {
 
   handleKnownTargetsEvent(ev): void {
     if (ev) {
-     this.knownTargetsResponse = this.handleDataService
-       .getData(ApiEndpoints.knownTargets).result;
-     this.knownTargets = Parser.parseKnownTargetsData(this.knownTargetsResponse);
+     this.knownTargets = this.handleDataService
+       .getData(ApiEndpoints.knownTargets);
     }
   }
 }

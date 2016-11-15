@@ -24,7 +24,7 @@ export class ToolbarComponent implements OnInit {
     compound$: Observable<string>;
     settings$: Observable<fromSettings.State>;
 
-    relatedCompounds: string[] = Array();
+    relatedCompounds: string[];
     settings: Settings;
     comp = new FormControl();
     minChar = 1;

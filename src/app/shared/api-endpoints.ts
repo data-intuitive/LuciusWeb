@@ -1,4 +1,4 @@
-export class ApiEndpoints {
+export class APIEndpoints {
    static signature = 'signature';
    static compounds = 'compounds';
    static zhang = 'zhang';

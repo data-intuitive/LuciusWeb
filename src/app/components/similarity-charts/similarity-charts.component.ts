@@ -7,7 +7,7 @@ import { HandleDataService } from '../../services/handle-data.service';
 import { Store } from '@ngrx/store';
 import { Settings, Zhang, TargetHistogram } from '../../models';
 
-import { ApiEndpoints } from '../../shared/api-endpoints';
+import { APIEndpoints } from '../../shared/api-endpoints';
 
 @Component({
   selector: 'app-similarity-charts',
@@ -41,7 +41,7 @@ export class SimilarityChartsComponent implements OnInit {
         value => {
           if (value) {
             this.zhangArray = this.handleDataService
-              .getData(ApiEndpoints.zhang);
+              .getData(APIEndpoints.zhang);
           }},
         err => console.log(err));
 
@@ -49,7 +49,7 @@ export class SimilarityChartsComponent implements OnInit {
       value => {
         if (value) {
           this.similarityHistogramData = this.handleDataService.
-            getData(ApiEndpoints.targetHistogram);
+            getData(APIEndpoints.targetHistogram);
         }},
       err => console.log(err));
   }

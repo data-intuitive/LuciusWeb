@@ -11,7 +11,7 @@ import * as data from '../actions/data';
 import * as fromRoot from '../reducers';
 
 import { HandleDataService } from '../services/handle-data.service';
-import { ApiEndpoints } from '../shared/api-endpoints';
+import { APIEndpoints } from '../shared/api-endpoints';
 
 @Injectable()
 export class DataEffects {
@@ -26,20 +26,20 @@ export class DataEffects {
       .ofType(data.DataActionTypes.UPDATE_COMPOUND)
       .map(action => action.payload)
       .switchMapTo(Observable.of(
-          new server.GetCompoundsByJNJAction(ApiEndpoints.compounds))
+          new server.GetCompoundsByJNJAction(APIEndpoints.compounds))
       );
 
     @Effect() getNewSignature$ = this.actions$
       .ofType(data.DataActionTypes.UPDATE_COMPOUND)
       .map(action => action.payload)
       .switchMapTo(Observable.of(
-          new server.GetSignatureAction(ApiEndpoints.signature))
+          new server.GetSignatureAction(APIEndpoints.signature))
       );
 
     @Effect() updateSignature$ = this.actions$
       .ofType(data.DataActionTypes.UPDATE_SIGNATURE)
       .map(action => action.payload)
       .switchMap(payload => Observable.of(new server.GetSignatureSuccessAction(
-        this.handleDataService.setData(payload, ApiEndpoints.signature))
+        this.handleDataService.setData(payload, APIEndpoints.signature))
       ));
 }

@@ -13,7 +13,7 @@ import * as data from '../actions/data';
 import { FetchDataService } from '../services/fetch-data.service';
 import { HandleDataService } from '../services/handle-data.service';
 import { Parser } from '../shared/parser';
-import { ApiEndpoints } from '../shared/api-endpoints';
+import { APIEndpoints } from '../shared/api-endpoints';
 
 @Injectable()
 export class ServerEffects {
@@ -58,7 +58,7 @@ export class ServerEffects {
         .ofType(server.ServerActionTypes.GET_SIGNATURE_SUCCESS)
         .map(action => action.payload)
         .switchMap(payload => Observable.of(
-            new server.GetSimilaritiesAction(ApiEndpoints.zhang))
+            new server.GetSimilaritiesAction(APIEndpoints.zhang))
         );
 
       @Effect() getSimilarities$ = this.actions$
@@ -76,19 +76,20 @@ export class ServerEffects {
             result.data, result.type)
         ));
 
+      // TODO: combine these 3 effects into one
       @Effect() getSimilaritiesSuccess1$ = this.actions$
         .ofType(server.ServerActionTypes.GET_SIMILARITIES_SUCCESS)
         .map(action => action.payload)
         .switchMap(payload => Observable.of(
             new server.GetSimilaritiesHistogramAction(
-                ApiEndpoints.targetHistogram))
+                APIEndpoints.targetHistogram))
         );
 
       @Effect() getSimilaritiesSuccess2$ = this.actions$
         .ofType(server.ServerActionTypes.GET_SIMILARITIES_SUCCESS)
         .map(action => action.payload)
         .switchMap(payload => Observable.of(
-            new server.GetKnownTargetsAction(ApiEndpoints.targetFrequency))
+            new server.GetKnownTargetsAction(APIEndpoints.targetFrequency))
         );
 
       @Effect() getSimilaritiesSuccess3$ = this.actions$
@@ -96,7 +97,7 @@ export class ServerEffects {
         .map(action => action.payload)
         .switchMap(payload => Observable.of(
             new server.GetAnnotatedPlatewellidsAction(
-                ApiEndpoints.annotatedPlateWellids))
+                APIEndpoints.annotatedPlateWellids))
         );
 
       @Effect() getAnnotatedPlatewellids$ = this.actions$
@@ -105,7 +106,7 @@ export class ServerEffects {
         .map(([action, store]) => ({
           url: Parser.parseURL(store.settings, action.payload),
           data: {'storeData': store.data,
-                 'zhang': this.handleDataService.getData(ApiEndpoints.zhang)}}
+                 'zhang': this.handleDataService.getData(APIEndpoints.zhang)}}
         ))
         .switchMap(payload => this.fetchDataService.fetchData(
           payload.url, payload.data
@@ -121,7 +122,7 @@ export class ServerEffects {
         .map(([action, store]) => ({
           url: Parser.parseURL(store.settings, action.payload),
           data: {'storeData': store.data, 'bins': store.settings.histogramBins,
-                 'zhang': this.handleDataService.getData(ApiEndpoints.zhang)}}
+                 'zhang': this.handleDataService.getData(APIEndpoints.zhang)}}
         ))
         .switchMap(payload => this.fetchDataService.fetchData(
           payload.url, payload.data
@@ -136,7 +137,7 @@ export class ServerEffects {
         .withLatestFrom(this.store)
         .map(([action, store]) => ({
           url: Parser.parseURL(store.settings, action.payload),
-          data: this.handleDataService.getData(ApiEndpoints.zhang)}
+          data: this.handleDataService.getData(APIEndpoints.zhang)}
         ))
         .switchMap(payload => this.fetchDataService.fetchData(
           payload.url, payload.data

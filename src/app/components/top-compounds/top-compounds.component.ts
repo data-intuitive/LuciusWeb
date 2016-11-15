@@ -4,7 +4,7 @@ import { Observable } from 'rxjs/Observable';
 import * as fromRoot from '../../reducers';
 import { Store } from '@ngrx/store';
 
-import { ApiEndpoints } from '../../shared/api-endpoints';
+import { APIEndpoints } from '../../shared/api-endpoints';
 import { Settings, AnnotatedPlatewellid, Zhang } from '../../models';
 import { HandleDataService } from '../../services/handle-data.service';
 import { Parser } from '../../shared/parser';
@@ -60,7 +60,7 @@ export class TopCompoundsComponent implements OnInit {
 
      handleZhangEvent(ev): void {
          if (ev) {
-           let zhangArray = this.handleDataService.getData(ApiEndpoints.zhang);
+           let zhangArray = this.handleDataService.getData(APIEndpoints.zhang);
            this.topPositiveCorrelations = Parser.
               parseTopCorrelations(zhangArray, pos, this.numComps);
            this.topNegativeCorrelations = Parser.
@@ -71,7 +71,7 @@ export class TopCompoundsComponent implements OnInit {
      handleAnnotatedPlateWellidsEvent(ev): void {
          if (ev) {
            this.annotatedPlatewellids = this.handleDataService.
-             getData(ApiEndpoints.annotatedPlateWellids);
+             getData(APIEndpoints.annotatedPlateWellids);
          }
       }
 

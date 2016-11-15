@@ -1,5 +1,7 @@
-import { Settings, CompoundEnum, Zhang, TargetHistogram,
-         KnownTargetEnum, AnnotatedPlatewellid } from '../models/';
+import {
+  Settings, CompoundEnum, Zhang, TargetHistogram,
+  KnownTargetEnum, AnnotatedPlatewellid
+} from '../models/';
 
 interface KnownTarget {
   gene: string;
@@ -14,110 +16,99 @@ export class Parser {
   }
 
   static parseClassPath(url: string): string {
-    let queryString = url.substring(url.indexOf('?') + 1 );
+    let queryString = url.substring(url.indexOf('?') + 1);
     let start = queryString.indexOf('.') + 1;
     let end = queryString.length;
     return queryString.substring(start, end);
   }
 
-  static parseRelatedCompounds(relatedCompounds: any): Array<string> {
+  static parseRelatedCompounds(relatedCompounds): string[] {
     let relatedCompoundsArray: string[] = Array();
-    for (let i = 0; i < relatedCompounds.result.length ; i++) {
+    for (let i = 0; i < relatedCompounds.result.length; i++) {
       relatedCompoundsArray[i] = (relatedCompounds.
         result[i][CompoundEnum.relatedJNJ].toString());
     }
     return relatedCompoundsArray;
   }
 
-  static parseSimiliarityValues(zhangArray: Array<Array<string>>):
-   Array<number> {
-
-      let zhangValues: number[] = Array();
-      for (let i = 0; i < zhangArray.length; i++) {
-        zhangValues[i] = (+zhangArray[i][1]);
-      }
-      return zhangValues;
+  static parseSimiliarityValues(zhangArray: Array<Array<string>>): number[] {
+    let zhangValues: number[] = Array();
+    for (let i = 0; i < zhangArray.length; i++) {
+      zhangValues[i] = (+zhangArray[i][1]);
+    }
+    return zhangValues;
   }
 
-  static parsePwids(zhangArray: Array<Zhang>):
-   string {
-
-      let pwids: string[] = Array();
-      for (let i = 0; i < zhangArray.length ; i++) {
-        pwids[i] = zhangArray[i].pwid;
-      }
-      return pwids.toString().replace(/,/g , ' ');
+  static parsePwids(zhangArray: Zhang[]): string {
+    let pwids: string[] = Array();
+    for (let i = 0; i < zhangArray.length; i++) {
+      pwids[i] = zhangArray[i].pwid;
+    }
+    return pwids.toString().replace(/,/g, ' ');
   }
 
-  static parseTopCorrelations(zhangArray: Array<Zhang>, type: string,
-     numComps: number): Array<Zhang> {
+  static parseTopCorrelations(
+    zhangArray: Zhang[], type: string,
+    numComps: number
+  ): Zhang[] {
 
-       let result: Zhang[] = Array();
-       let subArray: Zhang[] = Array();
+    let result: Zhang[];
+    let subArray: Zhang[];
 
-       if (type === 'POSITIVE') {
-         subArray = zhangArray.slice(0, numComps);
-       }else {
-         subArray = zhangArray.reverse().slice(0, numComps);
-       }
+    if (type === 'POSITIVE') {
+      subArray = zhangArray.slice(0, numComps);
+    } else {
+      subArray = zhangArray.reverse().slice(0, numComps);
+    }
 
-       for (let i = 0; i < numComps; i++) {
-         let obj = <Zhang>{};
-         obj.indexSorted = +subArray[i].indexSorted;
-         obj.zhangScore = +subArray[i].zhangScore;
-         obj.indexUnSorted = +subArray[i].indexUnSorted;
-         obj.pwid = subArray[i].pwid;
-         result[i] = obj;
-       }
-       return result;
+    for (let i = 0; i < numComps; i++) {
+      let obj = <Zhang>{};
+      obj.indexSorted = +subArray[i].indexSorted;
+      obj.zhangScore = +subArray[i].zhangScore;
+      obj.indexUnSorted = +subArray[i].indexUnSorted;
+      obj.pwid = subArray[i].pwid;
+      result[i] = obj;
+    }
+    return result;
   }
 
-  static parseZhangData(zhang: any):
-   Array<Zhang> {
+  static parseZhangData(zhang): Zhang[] {
 
-      let zhangArray = zhang.result;
-      let result: Zhang[] = Array();
+    let result: Zhang[] = Array();
 
-      for (let i = 0; i < zhangArray.length ; i++) {
-        let obj = <Zhang> new Object();
-        obj.indexSorted = +zhangArray[i][0];
-        obj.zhangScore = +zhangArray[i][1];
-        obj.indexUnSorted = +zhangArray[i][2];
-        obj.pwid = zhangArray[i][3];
-        result[i] = obj;
-      }
-      return result;
+    for (let i = 0; i < zhang.length; i++) {
+      let obj = <Zhang>{};
+      obj.indexSorted = +zhang[i][0];
+      obj.zhangScore = +zhang[i][1];
+      obj.indexUnSorted = +zhang[i][2];
+      obj.pwid = zhang[i][3];
+      result[i] = obj;
+    }
+    return result;
   }
 
-  static parseSimilarityHistogramData(similarityHistogram: any):
-    TargetHistogram {
+  static parseSimilarityHistogramData(histogram): TargetHistogram {
 
-      let simHistResult = similarityHistogram.result;
-      let obj = <TargetHistogram>{};
+    let obj = <TargetHistogram>{};
 
-      obj.metadata = simHistResult.metadata;
-      obj.data = simHistResult.data;
-      return obj;
+    obj.metadata = histogram.metadata;
+    obj.data = histogram.data;
+    return obj;
   }
 
-  static parseKnownTargetsData(knownTargetsArray: any):
-    Array<KnownTarget> {
+  static parseKnownTargetsData(knownTargets): KnownTarget[] {
+    let result: KnownTarget[] = Array();
 
-      let result: KnownTarget[] = Array();
-
-      for (let i = 0; i < knownTargetsArray.length; i++) {
-        let obj = <KnownTarget>{};
-        obj.gene = knownTargetsArray[i][KnownTargetEnum.gene];
-        obj.frequency = +knownTargetsArray[i][KnownTargetEnum.frequency];
-        result[i] = obj;
-      }
-      return result;
+    for (let i = 0; i < knownTargets.length; i++) {
+      let obj = <KnownTarget>{};
+      obj.gene = knownTargets[i][KnownTargetEnum.gene];
+      obj.frequency = +knownTargets[i][KnownTargetEnum.frequency];
+      result[i] = obj;
+    }
+    return result;
   }
 
-  static parseAnnotatedPlateWellids(annotatedplatewellids: any):
-    Array<AnnotatedPlatewellid> {
-
-      let annotatedPlateWellids = annotatedplatewellids.result;
-      return annotatedPlateWellids;
+  static parseAnnotatedPlateWellids(ids): AnnotatedPlatewellid[] {
+    return ids;
   }
 }

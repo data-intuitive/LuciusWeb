@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import * as fromRoot from '../../reducers';
 
 import { HandleDataService } from '../../services/handle-data.service';
-import { ApiEndpoints } from '../../shared/api-endpoints';
+import { APIEndpoints } from '../../shared/api-endpoints';
 
 @Component({
   selector: 'app-known-targets',
@@ -37,7 +37,7 @@ export class KnownTargetsComponent implements OnInit {
   handleKnownTargetsEvent(ev): void {
     if (ev) {
      this.knownTargets = this.handleDataService
-       .getData(ApiEndpoints.knownTargets);
+       .getData(APIEndpoints.knownTargets);
     }
   }
 }

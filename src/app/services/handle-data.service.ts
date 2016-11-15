@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Response } from '@angular/http';
 
-import { ApiEndpoints } from '../shared/api-endpoints';
+import { APIEndpoints } from '../shared/api-endpoints';
 import { Parser } from '../shared/parser';
 
 @Injectable()
@@ -20,22 +20,22 @@ export class HandleDataService {
     setData(data: any, classPath: string): string {
       console.log('[handler service] set' + ' ' + classPath);
       switch (classPath) {
-        case ApiEndpoints.signature:
+        case APIEndpoints.signature:
           this.signature = data;
           break;
-        case ApiEndpoints.compounds:
+        case APIEndpoints.compounds:
           this.relatedCompounds = data;
           break;
-        case ApiEndpoints.zhang:
+        case APIEndpoints.zhang:
           this.zhang = data;
           break;
-        case ApiEndpoints.targetHistogram:
+        case APIEndpoints.targetHistogram:
           this.histogramData = data;
           break;
-        case ApiEndpoints.targetFrequency:
+        case APIEndpoints.targetFrequency:
           this.knownTargets = data;
           break;
-        case ApiEndpoints.annotatedPlateWellids:
+        case APIEndpoints.annotatedPlateWellids:
           this.annotatedPlatewellids = data;
           break;
       }
@@ -46,17 +46,17 @@ export class HandleDataService {
     getData(classPath: string): any {
       console.log('[handler service] get' + ' ' + classPath);
       switch (classPath) {
-        case ApiEndpoints.signature:
+        case APIEndpoints.signature:
           return this.signature;
-        case ApiEndpoints.compounds:
+        case APIEndpoints.compounds:
           return this.relatedCompounds;
-        case ApiEndpoints.zhang:
+        case APIEndpoints.zhang:
           return Parser.parseZhangData(this.zhang);
-        case ApiEndpoints.targetHistogram:
+        case APIEndpoints.targetHistogram:
           return Parser.parseSimilarityHistogramData(this.histogramData);
-        case ApiEndpoints.knownTargets:
+        case APIEndpoints.knownTargets:
           return Parser.parseKnownTargetsData(this.knownTargets);
-        case ApiEndpoints.annotatedPlateWellids:
+        case APIEndpoints.annotatedPlateWellids:
           return Parser.parseAnnotatedPlateWellids(this.annotatedPlatewellids);
       }
   }

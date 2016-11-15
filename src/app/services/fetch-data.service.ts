@@ -3,7 +3,7 @@ import { Http, Headers, RequestOptions, Response } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 
 import { Parser } from '../shared/parser';
-import { ApiEndpoints } from '../shared/api-endpoints';
+import { APIEndpoints } from '../shared/api-endpoints';
 
 @Injectable()
 export class FetchDataService {
@@ -19,28 +19,28 @@ export class FetchDataService {
     console.log(url);
 
     switch (classPath) {
-      case ApiEndpoints.compounds: {
+      case APIEndpoints.compounds: {
         let body = 'query=' + data.compound;
         return this.http.post(url, body, options)
           .map(res => (this.handleResponse(res, classPath)))
           .catch(this.handleError);
       }
 
-      case ApiEndpoints.signature: {
+      case APIEndpoints.signature: {
         let body = 'compound=' + data.compound;
         return this.http.post(url, body, options)
           .map(res => (this.handleResponse(res, classPath)))
           .catch(this.handleError);
       }
 
-      case ApiEndpoints.zhang: {
+      case APIEndpoints.zhang: {
         let body = 'query=' + data.signature + ', sorted=true';
         return this.http.post(url, body, options)
           .map(res => (this.handleResponse(res, classPath)))
           .catch(this.handleError);
       }
 
-      case ApiEndpoints.annotatedPlateWellids: {
+      case APIEndpoints.annotatedPlateWellids: {
         let pwids = Parser.parsePwids(data.zhang);
         let body = 'query=' + data.storeData.signature + ', pwids = ' + pwids ;
         return this.http.post(url, body, options)
@@ -48,7 +48,7 @@ export class FetchDataService {
           .catch(this.handleError);
       }
 
-      case ApiEndpoints.targetFrequency: {
+      case APIEndpoints.targetFrequency: {
         let pwids = Parser.parsePwids(data);
         let body = 'pwids=' + pwids;
         return this.http.post(url, body, options)
@@ -56,7 +56,7 @@ export class FetchDataService {
           .catch(this.handleError);
       }
 
-      case ApiEndpoints.targetHistogram: {
+      case APIEndpoints.targetHistogram: {
         let features = '';
         let body = 'bins=' + data.bins + ', features=zhang';
         if (features !== '') {
@@ -74,7 +74,7 @@ export class FetchDataService {
   private handleResponse(res: Response, classPath: string) {
     /* TODO : Perform some check on the Response code */
     let data = res.json();
-    let returnObject = {'data': data, 'type': classPath };
+    let returnObject = {'data': data.result, 'type': classPath };
     return returnObject;
   }
 

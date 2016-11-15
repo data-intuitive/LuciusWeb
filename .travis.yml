@@ -8,15 +8,19 @@ notifications:
   email: false
 
 env:
-  - SCRIPT=lint
-  - SCRIPT=slint
-  - SCRIPT=e2e
-  - SCRIPT=test:ci
+  - SCRIPT=lint BROWSER=no
+  - SCRIPT=slint BROWSER=no
+  - SCRIPT=e2e BROWSER=yes
+  - SCRIPT=test:ci BROWSER=yes
 
 before_install:
-  - export DISPLAY=:99.0
-  - sh -e /etc/init.d/xvfb start
-  - export CHROME_BIN=chromium-browser
+  - if [[ "$BROWSER" == "yes" ]]; then export CHROME_BIN=/usr/bin/google-chrome; fi
+  - if [[ "$BROWSER" == "yes" ]]; then export DISPLAY=:99.0; fi
+  - if [[ "$BROWSER" == "yes" ]]; then sh -e /etc/init.d/xvfb start; fi
+  - if [[ "$BROWSER" == "yes" ]]; then sudo apt-get update; fi
+  - if [[ "$BROWSER" == "yes" ]]; then sudo apt-get install -y libappindicator1 fonts-liberation; fi
+  - if [[ "$BROWSER" == "yes" ]]; then wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb; fi
+  - if [[ "$BROWSER" == "yes" ]]; then sudo dpkg -i google-chrome*.deb; fi
   - npm config set spin false
   - npm config set progress false
 

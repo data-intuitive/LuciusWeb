@@ -1,30 +1,123 @@
 @import '../../../styles/variables';
+$cl-bg: rgba(255, 255, 255, .15);
+$s-border-radius: 4px;
+$s-jnj: 140px;
 
 :host {
-  z-index: 1;
-  display: flex;
-  flex: 0 0 auto;
-  flex-direction: column;
-}
-
-md-toolbar {
-  @include md-elevation(3);
-
-  background-color: md-color($primary);
-}
-
-.row {
-  display: flex;
   align-items: stretch;
-  margin: 0 unit();
-  color: $primary-color-text;
-  text-transform: capitalize;
-}
+  justify-content: center;
 
-md-icon {
-  color: $primary-color-text;
-}
+  md-toolbar {
+    background-color: md-color($primary);
 
-.app-toolbar-filler {
-  flex: 1 1 auto;
+    @include md-elevation(3);
+
+    .app-toolbar-filler {
+      flex: 1 1 auto;
+    }
+  }
+
+  .menu-bt {
+    color: $primary-color-text;
+  }
+
+  .row {
+    display: flex;
+    margin: 0 unit();
+    text-transform: capitalize;
+    color: $primary-color-text;
+    align-items: stretch;
+  }
+
+  .box {
+    margin: 0 8px;
+
+    .input {
+      font-size: 18px;
+      font-weight: 300;
+
+      box-sizing: border-box;
+      width: 100%;
+      margin: 0;
+      padding: 8px 8px 8px 44px;
+
+      text-transform: uppercase;
+
+      opacity: .5;
+      color: #fff;
+      border-radius: $s-border-radius;
+      background-color: $cl-bg;
+
+      &::placeholder {
+        color: #ccc;
+      }
+
+      &:focus {
+        opacity: .8;
+      }
+    }
+
+    .icon {
+      position: relative;
+      color: $primary-color-text;
+
+      md-icon {
+        position: absolute;
+        top: 8px;
+        left: 12px;
+        color: #eee;
+      }
+    }
+
+    datalist {
+      border: 4px solid #389;
+    }
+
+    .jnj {
+      width: $s-jnj;
+    }
+
+    &.toggle {
+      .container {
+        display: flex;
+        width: 64px;
+        height: 44px;
+        margin: 0;
+        padding: 0 0 0 32px;
+        border-radius: $s-border-radius;
+        background-color: fade-out($cl-bg, .07);
+        align-items: center;
+        justify-content: center;
+      }
+    }
+
+    &.toggle md-slide-toggle::shadow {
+      .toggle-bar {
+        background-color: #000;
+      }
+
+      .toggle-button {
+        background-color: #f1f1f1;
+      }
+
+      .toggle {
+        background-color: #7986cb;
+      }
+
+      [checked] .toggle {
+        background-color: #0f9d58;
+        // background-color: $cl-grey-100;
+      }
+
+      .toggle-ink {
+        color: #bbb;
+        // color: $cl-a500;
+      }
+
+      [checked] .toggle-ink {
+        color: #0f9d58;
+        // color: $cl-white;
+      }
+    }
+  }
 }

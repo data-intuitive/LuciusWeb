@@ -11,9 +11,10 @@ export interface State extends Settings {}
 export function reducer(state = {}, action: Action) {
   switch (action.type) {
 
-    // 1. action to initialize the settings state
-    // 2. action to update the settings state
+    // action to initialize the settings state
     case SettingsActionTypes.INIT_COMPLETE:
+
+    // action to update the settings state
     case SettingsActionTypes.UPDATE_COMPLETE: {
       return Object.assign({}, action.payload, {complete: true});
     }
@@ -28,3 +29,6 @@ export function getSettings(state$: Observable<State>) {
   return state$.select(state => state);
 }
 
+export function getSettingsComplete(state$: Observable<State>) {
+  return state$.select(state => state.complete);
+}

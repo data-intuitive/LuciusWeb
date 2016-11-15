@@ -1,7 +1,6 @@
 <app-toolbar type="compound"></app-toolbar>
-<div class="content">
-  <app-filter></app-filter>
-  <div class="comp">
-    {{settings$ | async | json}}
-  </div>
+<div class="comp">
+    <app-similarity-charts [settings]="settings"></app-similarity-charts>
+    <app-known-targets></app-known-targets>
+    <app-top-compounds [settings]="settings"></app-top-compounds>
 </div>

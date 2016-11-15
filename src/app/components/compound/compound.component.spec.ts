@@ -4,20 +4,29 @@ import { TestBed, async, ComponentFixture } from '@angular/core/testing';
 import { DebugElement, NO_ERRORS_SCHEMA } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { StoreModule } from '@ngrx/store';
+import { HttpModule } from '@angular/http';
 
 import { CompoundComponent } from './compound.component';
 import { ToolbarComponent } from '../toolbar/toolbar.component';
+import { KnownTargetsComponent } from '../known-targets/known-targets.component';
+import { SimilarityChartsComponent } from '../similarity-charts/similarity-charts.component';
+import { TopCompoundsComponent } from '../top-compounds/top-compounds.component';
+import { FetchDataService } from '../../services/fetch-data.service';
 import { reducer } from '../../reducers';
 
 let comp: CompoundComponent;
 let fixture: ComponentFixture<CompoundComponent>;
 let el: DebugElement;
 
-describe('App: LuciusWeb', () => {
+describe('CompoundComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
         imports: [
-          StoreModule.provideStore(reducer)
+          StoreModule.provideStore(reducer),
+          HttpModule
+        ],
+        providers: [
+          FetchDataService
         ],
         declarations: [
           CompoundComponent,

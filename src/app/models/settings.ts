@@ -1,15 +1,14 @@
 export interface Settings {
-  version: Number;
-  complete: Boolean;
-  plotNoise: Number;
-  hist2dBins: Number;
-  hist2dNoise: Number;
-  histogramBins: Number;
-  topComps: Number;
-  serverURL: String;
-  queryStr: String;
-  classPath: String;
-  sourireURL: String;
-  hiddenComps: Boolean;
+  version: number;
+  complete: boolean;
+  plotNoise: number;
+  hist2dBins: number;
+  hist2dNoise: number;
+  histogramBins: number;
+  topComps: number;
+  serverURL: string;
+  queryStr: string;
+  classPath: string;
+  sourireURL: string;
+  hiddenComps: boolean;
 }
-

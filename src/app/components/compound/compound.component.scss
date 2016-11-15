@@ -12,9 +12,10 @@ app-toolbar {
 
 .content {
   display: flex;
+  overflow: auto;
+  flex-direction: column;
   flex: 1 1 auto;
   align-items: flex-start;
-  overflow: auto;
 
   & > *:first-child {
     margin-right: 0;
@@ -22,10 +23,10 @@ app-toolbar {
 }
 
 .comp {
-  @include md-elevation(1);
-
-  flex: 6 1 auto;
+  flex: 0 1 auto;
   margin: unit();
   padding: unit();
   background-color: $bg-color;
+
+  @include md-elevation(1);
 }

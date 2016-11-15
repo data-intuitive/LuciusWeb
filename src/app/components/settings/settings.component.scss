@@ -3,6 +3,7 @@
 :host {
   display: flex;
   flex-direction: column;
+
   height: 100%;
 }
 
@@ -11,18 +12,19 @@ app-toolbar {
 }
 
 .content {
-  flex: 1 1 auto;
   overflow: auto;
+  flex: 1 1 auto;
   padding: unit();
 }
 
 .wrapper {
-  margin: auto;
   max-width: unit(40);
+  margin: auto;
 }
 
 md-card {
   margin: unit();
+
   background-color: $bg-color;
 }
 
@@ -46,8 +48,8 @@ md-slider {
 }
 
 md-input {
-  margin-bottom: unit(1.5);
   width: 100%;
+  margin-bottom: unit(1.5);
 
   &.ng-valid[required] md-hint {
     display: none;

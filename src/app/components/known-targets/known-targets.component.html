@@ -1,0 +1,14 @@
+<div class="title">
+  Known Targets
+  <span *ngIf="(compound$ | async) !== '' ">
+    for {{compound$ | async}}
+  </span>
+</div>
+<div class="content">
+  <div *ngIf="knownTargetsReady$ | async">
+    <div *ngFor="let item of knownTargets">
+      {{item | json}}
+    </div>
+  </div>
+  <app-known-targets-hist></app-known-targets-hist>
+</div>

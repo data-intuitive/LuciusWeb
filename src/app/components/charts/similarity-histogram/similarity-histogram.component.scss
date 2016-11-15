@@ -1,0 +1,25 @@
+@import '../../../../styles/variables';
+
+body {
+  padding-top: 50px;
+  padding-left: 100px;
+}
+
+#chartArea {
+  background-color: #fff;
+}
+
+.bar {
+  display: inline-block;
+  margin-right: 2px;
+  fill: teal;
+}
+
+.title {
+  font-size: $font-sm;
+
+  padding: unit(.5);
+
+  color: md-color($primary, 600);
+  background-color: md-color($primary, 50);
+}

@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 
 import * as fromRoot from '../../reducers';
 
-import { HandleDataService } from '../../services/handle-data.service';
+import { HandleDataService } from '../../services';
 import { APIEndpoints } from '../../shared/api-endpoints';
 
 @Component({

@@ -24,9 +24,9 @@ export class Parser {
 
   static parseRelatedCompounds(relatedCompounds): string[] {
     let relatedCompoundsArray: string[] = Array();
-    for (let i = 0; i < relatedCompounds.result.length; i++) {
-      relatedCompoundsArray[i] = (relatedCompounds.
-        result[i][CompoundEnum.relatedJNJ].toString());
+    for (let i = 0; i < relatedCompounds.length; i++) {
+      relatedCompoundsArray[i] = relatedCompounds[i][CompoundEnum.relatedJNJ]
+        .toString();
     }
     return relatedCompoundsArray;
   }
@@ -52,8 +52,8 @@ export class Parser {
     numComps: number
   ): Zhang[] {
 
-    let result: Zhang[];
-    let subArray: Zhang[];
+    let result: Zhang[] = Array();
+    let subArray: Zhang[] = Array();
 
     if (type === 'POSITIVE') {
       subArray = zhangArray.slice(0, numComps);

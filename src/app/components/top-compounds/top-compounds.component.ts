@@ -6,7 +6,7 @@ import { Store } from '@ngrx/store';
 
 import { APIEndpoints } from '../../shared/api-endpoints';
 import { Settings, AnnotatedPlatewellid, Zhang } from '../../models';
-import { HandleDataService } from '../../services/handle-data.service';
+import { HandleDataService } from '../../services';
 import { Parser } from '../../shared/parser';
 
 const pos = 'POSITIVE';

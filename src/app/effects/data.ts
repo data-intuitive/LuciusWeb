@@ -10,7 +10,7 @@ import * as server from '../actions/server';
 import * as data from '../actions/data';
 import * as fromRoot from '../reducers';
 
-import { HandleDataService } from '../services/handle-data.service';
+import { HandleDataService } from '../services';
 import { APIEndpoints } from '../shared/api-endpoints';
 
 @Injectable()

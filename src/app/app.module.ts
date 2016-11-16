@@ -2,18 +2,12 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
-import { LocalStorageService } from './services/local-storage.service';
-import { HandleDataService } from './services/handle-data.service';
-import { FetchDataService } from './services/fetch-data.service';
 import { MaterialModule } from '@angular/material';
 import { StoreModule } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { EffectsModule } from '@ngrx/effects';
 import { LuciusWebRoutingModule } from './app-routing.module';
 import { reducer } from './reducers';
-import { SettingsEffects } from './effects/settings';
-import { ServerEffects } from './effects/server';
-import { DataEffects } from './effects/data';
 import { AppComponent } from './app.component';
 
 import {
@@ -27,6 +21,16 @@ import {
   SimilarityScatterComponent,
   KnownTargetsHistogramComponent
 } from './components';
+
+import { LocalStorageService,
+         HandleDataService,
+         FetchDataService
+} from './services';
+
+import { SettingsEffects,
+         ServerEffects,
+         DataEffects }
+from './effects';
 
 @NgModule({
   declarations: [

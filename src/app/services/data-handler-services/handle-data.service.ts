@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Response } from '@angular/http';
 
-import { APIEndpoints } from '../shared/api-endpoints';
-import { Parser } from '../shared/parser';
+import { APIEndpoints } from '../../shared/api-endpoints';
+import { Parser } from '../../shared/parser';
 
 @Injectable()
 export class HandleDataService {
@@ -20,11 +20,11 @@ export class HandleDataService {
     setData(data: any, classPath: string): string {
       console.log('[handler service] set' + ' ' + classPath);
       switch (classPath) {
-        case APIEndpoints.signature:
-          this.signature = data;
-          break;
         case APIEndpoints.compounds:
           this.relatedCompounds = data;
+          break;
+        case APIEndpoints.signature:
+          this.signature = data;
           break;
         case APIEndpoints.zhang:
           this.zhang = data;

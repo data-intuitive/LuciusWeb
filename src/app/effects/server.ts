@@ -10,8 +10,7 @@ import * as server from '../actions/server';
 import * as fromRoot from '../reducers';
 import * as data from '../actions/data';
 
-import { FetchDataService } from '../services/fetch-data.service';
-import { HandleDataService } from '../services/handle-data.service';
+import { FetchDataService, HandleDataService } from '../services';
 import { Parser } from '../shared/parser';
 import { APIEndpoints } from '../shared/api-endpoints';
 
@@ -51,7 +50,7 @@ export class ServerEffects {
           payload.url, payload.data
         ))
         .map(result => new data.UpdateSignatureAction(
-          result.data.result.toString().replace(/,/g , ' ')
+          result.data.toString().replace(/,/g , ' ')
         ));
 
       @Effect() getSignatureSuccess$ = this.actions$
@@ -89,7 +88,8 @@ export class ServerEffects {
         .ofType(server.ServerActionTypes.GET_SIMILARITIES_SUCCESS)
         .map(action => action.payload)
         .switchMap(payload => Observable.of(
-            new server.GetKnownTargetsAction(APIEndpoints.targetFrequency))
+            new server.GetKnownTargetsAction(
+              APIEndpoints.targetFrequency))
         );
 
       @Effect() getSimilaritiesSuccess3$ = this.actions$

@@ -9,7 +9,7 @@ import * as dataActions from '../../actions/data';
 import * as fromSettings from '../../reducers/settings';
 
 import { Settings } from '../../models/settings';
-import { FetchDataService } from '../../services/fetch-data.service';
+import { FetchDataService } from '../../services';
 import { Parser } from '../../shared/parser';
 
 @Component({
@@ -42,8 +42,9 @@ export class ToolbarComponent implements OnInit {
           .debounceTime(250)
           .distinctUntilChanged()
           .switchMap(term => this.search(term))
-          .subscribe(result =>
-            this.relatedCompounds = Parser.parseRelatedCompounds(result.data));
+          .subscribe(result => {
+            this.relatedCompounds = Parser.parseRelatedCompounds(result.data);
+          });
     }
 
     ngOnInit() {

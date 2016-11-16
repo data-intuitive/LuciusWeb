@@ -3,7 +3,7 @@ import { Observable } from 'rxjs/Observable';
 
 import * as fromRoot from '../../reducers';
 
-import { HandleDataService } from '../../services/handle-data.service';
+import { HandleDataService } from '../../services';
 import { Store } from '@ngrx/store';
 import { Settings, Zhang, TargetHistogram } from '../../models';
 

@@ -1,16 +1,16 @@
 /* tslint:disable:no-unused-variable */
 
 import { TestBed, async, inject } from '@angular/core/testing';
-import { TargetHistogramService } from './target-histogram.service';
+import { TargetHistogramDataService } from './target-histogram-data.service';
 
 describe('Service: TargetHistogram', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [TargetHistogramService]
+      providers: [TargetHistogramDataService]
     });
   });
 
-  it('should ...', inject([TargetHistogramService], (service: TargetHistogramService) => {
+  it('should ...', inject([TargetHistogramDataService], (service: TargetHistogramDataService) => {
     expect(service).toBeTruthy();
   }));
 });

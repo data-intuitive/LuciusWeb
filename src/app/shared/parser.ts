@@ -8,14 +8,6 @@ export class Parser {
       '&classPath=luciusapi.' + classPath;
   }
 
-  /* utility method to get classPath of given URL */
-  static parseClassPath(url: string): string {
-    let queryString = url.substring(url.indexOf('?') + 1);
-    let start = queryString.indexOf('.') + 1;
-    let end = queryString.length;
-    return queryString.substring(start, end);
-  }
-
   /* utility method to get Pwids from Zhang Data */
   static parsePwids(zhangArray: Zhang[]): string {
     let pwids: string[] = Array();
@@ -24,5 +16,4 @@ export class Parser {
     }
     return pwids.toString().replace(/,/g, ' ');
   }
-
 }

@@ -84,25 +84,14 @@ export class ServerEffects {
       @Effect() getSimilaritiesSuccess1$ = this.actions$
         .ofType(server.ServerActionTypes.GET_SIMILARITIES_SUCCESS)
         .map(action => action.payload)
-        .switchMap(payload => Observable.of(
+        .switchMap(payload => Observable.from([
             new server.GetSimilaritiesHistogramAction(
-                APIEndpoints.targetHistogram))
-        );
-
-      @Effect() getSimilaritiesSuccess2$ = this.actions$
-        .ofType(server.ServerActionTypes.GET_SIMILARITIES_SUCCESS)
-        .map(action => action.payload)
-        .switchMap(payload => Observable.of(
+                APIEndpoints.targetHistogram),
             new server.GetKnownTargetsAction(
-              APIEndpoints.targetFrequency))
-        );
-
-      @Effect() getSimilaritiesSuccess3$ = this.actions$
-        .ofType(server.ServerActionTypes.GET_SIMILARITIES_SUCCESS)
-        .map(action => action.payload)
-        .switchMap(payload => Observable.of(
+                  APIEndpoints.targetFrequency),
             new server.GetAnnotatedPlatewellidsAction(
-                APIEndpoints.annotatedPlateWellids))
+                APIEndpoints.annotatedPlateWellids)
+            ])
         );
 
       @Effect() getAnnotatedPlatewellids$ = this.actions$

@@ -22,18 +22,13 @@ export class DataEffects {
     ) {
     }
 
-    @Effect() getNewRelatedCompounds$ = this.actions$
+    @Effect() updateCompound$ = this.actions$
       .ofType(data.DataActionTypes.UPDATE_COMPOUND)
       .map(action => action.payload)
-      .switchMapTo(Observable.of(
-          new server.GetCompoundsByJNJAction(APIEndpoints.compounds))
-      );
-
-    @Effect() getNewSignature$ = this.actions$
-      .ofType(data.DataActionTypes.UPDATE_COMPOUND)
-      .map(action => action.payload)
-      .switchMapTo(Observable.of(
-          new server.GetSignatureAction(APIEndpoints.signature))
+      .switchMapTo(Observable.from([
+          new server.GetCompoundsByJNJAction(APIEndpoints.compounds),
+          new server.GetSignatureAction(APIEndpoints.signature)
+        ])
       );
 
     @Effect() updateSignature$ = this.actions$

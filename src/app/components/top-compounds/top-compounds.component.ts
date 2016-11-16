@@ -61,7 +61,6 @@ export class TopCompoundsComponent implements OnInit {
      handleZhangEvent(ev): void {
        if (ev) {
          let zhangArray = this.handleDataService.getData(APIEndpoints.zhang);
-
          this.topPositiveCorrelations = this.
            getTopCorrelations(zhangArray, pos);
 
@@ -82,9 +81,12 @@ export class TopCompoundsComponent implements OnInit {
       let subArray: Zhang[] = Array();
 
       if (type === 'POSITIVE') {
-        return subArray = zhangArray.slice(0, this.numComps);
+        return subArray = zhangArray.
+          slice(0, this.numComps);
       } else {
-        return subArray = zhangArray.reverse().slice(0, this.numComps);
+        return subArray = zhangArray.
+          slice(zhangArray.length - this.numComps, zhangArray.length).
+          reverse();
       }
     }
 }

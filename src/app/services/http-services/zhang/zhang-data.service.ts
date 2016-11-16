@@ -29,7 +29,7 @@ export class ZhangDataService {
     /* TODO : Perform some check on the Response code */
     let data = res.json();
     let parsedZhangData = this.parseZhangData(data.result);
-    let returnObject = {'data': parsedZhangData, 'type': classPath };
+    let returnObject = {'data': parsedZhangData, 'type': classPath};
     return returnObject;
   }
 

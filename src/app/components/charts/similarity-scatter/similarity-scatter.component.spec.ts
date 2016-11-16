@@ -6,7 +6,7 @@ import { DebugElement, NO_ERRORS_SCHEMA } from '@angular/core';
 import { StoreModule } from '@ngrx/store';
 
 import { SimilarityScatterComponent } from './similarity-scatter.component';
-import { HandleDataService } from '../../../services/handle-data.service';
+import { HandleDataService } from '../../../services';
 import { reducer } from '../../../reducers';
 
 let comp: SimilarityScatterComponent;

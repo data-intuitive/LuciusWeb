@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Settings } from '../models/settings';
+import { Settings } from '../../models/settings';
 
 // desired initial values for settings
 const initialValues: Settings = {

@@ -3,7 +3,7 @@ import { ElementRef, ViewChild,
          AfterViewInit, ViewEncapsulation, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { HandleDataService } from '../../../services/handle-data.service';
+import { HandleDataService } from '../../../services';
 import * as fromRoot from '../../../reducers';
 import { Settings } from '../../../models/settings';
 

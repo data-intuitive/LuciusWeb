@@ -11,7 +11,7 @@ import { ToolbarComponent } from '../toolbar/toolbar.component';
 import { KnownTargetsComponent } from '../known-targets/known-targets.component';
 import { SimilarityChartsComponent } from '../similarity-charts/similarity-charts.component';
 import { TopCompoundsComponent } from '../top-compounds/top-compounds.component';
-import { FetchDataService } from '../../services/fetch-data.service';
+import { CompoundDataService } from '../../services';
 import { reducer } from '../../reducers';
 
 let comp: CompoundComponent;
@@ -26,7 +26,7 @@ describe('CompoundComponent', () => {
           HttpModule
         ],
         providers: [
-          FetchDataService
+          CompoundDataService
         ],
         declarations: [
           CompoundComponent,

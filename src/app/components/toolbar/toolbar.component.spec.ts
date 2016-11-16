@@ -1,16 +1,16 @@
 /* tslint:disable:no-unused-variable */
-
-import { TestBed, async, ComponentFixture } from '@angular/core/testing';
-import { DebugElement, NO_ERRORS_SCHEMA } from '@angular/core';
-import { StoreModule } from '@ngrx/store';
-import { FetchDataService } from '../../services/fetch-data.service';
-import { HttpModule } from '@angular/http';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { Settings } from '../../models/settings';
 import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/operator/switchMap';
 
+import { TestBed, async, ComponentFixture } from '@angular/core/testing';
+import { DebugElement, NO_ERRORS_SCHEMA } from '@angular/core';
+import { StoreModule } from '@ngrx/store';
+import { HttpModule } from '@angular/http';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+
+import { CompoundDataService } from '../../services';
+import { Settings } from '../../models/settings';
 import { ToolbarComponent } from './toolbar.component';
 import { reducer } from '../../reducers';
 
@@ -28,7 +28,7 @@ describe('App: LuciusWeb', () => {
           ReactiveFormsModule
         ],
         providers: [
-          FetchDataService
+          CompoundDataService
         ],
         declarations: [
           ToolbarComponent

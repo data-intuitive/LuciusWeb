@@ -6,7 +6,7 @@ import { DebugElement } from '@angular/core';
 import { StoreModule } from '@ngrx/store';
 
 import { KnownTargetsHistogramComponent } from './known-targets-histogram.component';
-import { HandleDataService } from '../../../services/handle-data.service';
+import { HandleDataService } from '../../../services';
 import { reducer } from '../../../reducers';
 
 let comp: KnownTargetsHistogramComponent;

@@ -9,7 +9,7 @@ import { SimilarityChartsComponent } from './similarity-charts.component';
 import { SimilarityScatterComponent } from '../charts/similarity-scatter/similarity-scatter.component';
 import { SimilarityHistogramComponent } from '../charts/similarity-histogram/similarity-histogram.component';
 
-import { HandleDataService } from '../../services/handle-data.service';
+import { HandleDataService } from '../../services';
 import { reducer } from '../../reducers';
 
 let comp: SimilarityChartsComponent;

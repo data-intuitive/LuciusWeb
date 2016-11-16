@@ -1,20 +1,20 @@
 /* tslint:disable:no-unused-variable */
 
 import { TestBed, async, inject } from '@angular/core/testing';
-import { FetchDataService } from './fetch-data.service';
+import { AnnotatedPlateWellIdsDataService } from './annotated-plate-well-ids-data.service';
 import { HttpModule } from '@angular/http';
 
-describe('Service: FetchData', () => {
+describe('Service: AnnotatedPlateWellIdsData', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
+      providers: [AnnotatedPlateWellIdsDataService],
       imports: [
         HttpModule
       ],
-      providers: [FetchDataService]
     });
   });
 
-  it('should ...', inject([FetchDataService], (service: FetchDataService) => {
+  it('should ...', inject([AnnotatedPlateWellIdsDataService], (service: AnnotatedPlateWellIdsDataService) => {
     expect(service).toBeTruthy();
   }));
 });

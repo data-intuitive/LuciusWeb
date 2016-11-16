@@ -9,9 +9,8 @@ import { Observable } from 'rxjs';
 import * as server from '../actions/server';
 import * as fromRoot from '../reducers';
 import * as data from '../actions/data';
+import * as services from '../services';
 
-import { FetchDataService } from '../services/fetch-data.service';
-import { HandleDataService } from '../services/handle-data.service';
 import { Parser } from '../shared/parser';
 import { APIEndpoints } from '../shared/api-endpoints';
 
@@ -20,8 +19,13 @@ export class ServerEffects {
   constructor(
     private actions$: Actions,
     private store: Store<fromRoot.State>,
-    private fetchDataService: FetchDataService,
-    private handleDataService: HandleDataService
+    private handleDataService: services.HandleDataService,
+    private compoundDataService: services.CompoundDataService,
+    private signatureDataService: services.SignatureDataService,
+    private zhangDataService: services.ZhangDataService,
+    private annotatedPlateWellidsDataService: services.AnnotatedPlateWellIdsDataService,
+    private targetFrequencyDataService: services.TargetFrequencyDataService,
+    private targetHistogramDataService: services.TargetHistogramDataService,
   ) {
   }
 
@@ -30,9 +34,9 @@ export class ServerEffects {
       .withLatestFrom(this.store)
       .map(([action, store]) => ({
         url: Parser.parseURL(store.settings, action.payload),
-        data: store.data}
+        data: store.data.compound}
       ))
-      .switchMap(payload => this.fetchDataService.fetchData(
+      .switchMap(payload => this.compoundDataService.fetchData(
         payload.url, payload.data
       ))
       .map(result => new server.GetCompoundsByJNJSuccessAction(
@@ -47,11 +51,11 @@ export class ServerEffects {
           url: Parser.parseURL(store.settings, action.payload),
           data: store.data}
         ))
-        .switchMap(payload => this.fetchDataService.fetchData(
+        .switchMap(payload => this.signatureDataService.fetchData(
           payload.url, payload.data
         ))
         .map(result => new data.UpdateSignatureAction(
-          result.data.result.toString().replace(/,/g , ' ')
+          result.data.toString().replace(/,/g , ' ')
         ));
 
       @Effect() getSignatureSuccess$ = this.actions$
@@ -68,7 +72,7 @@ export class ServerEffects {
           url: Parser.parseURL(store.settings, action.payload),
           data: store.data}
         ))
-        .switchMap(payload => this.fetchDataService.fetchData(
+        .switchMap(payload => this.zhangDataService.fetchData(
           payload.url, payload.data
         ))
         .map(result => new server.GetSimilaritiesSuccessAction(
@@ -80,24 +84,14 @@ export class ServerEffects {
       @Effect() getSimilaritiesSuccess1$ = this.actions$
         .ofType(server.ServerActionTypes.GET_SIMILARITIES_SUCCESS)
         .map(action => action.payload)
-        .switchMap(payload => Observable.of(
+        .switchMap(payload => Observable.from([
             new server.GetSimilaritiesHistogramAction(
-                APIEndpoints.targetHistogram))
-        );
-
-      @Effect() getSimilaritiesSuccess2$ = this.actions$
-        .ofType(server.ServerActionTypes.GET_SIMILARITIES_SUCCESS)
-        .map(action => action.payload)
-        .switchMap(payload => Observable.of(
-            new server.GetKnownTargetsAction(APIEndpoints.targetFrequency))
-        );
-
-      @Effect() getSimilaritiesSuccess3$ = this.actions$
-        .ofType(server.ServerActionTypes.GET_SIMILARITIES_SUCCESS)
-        .map(action => action.payload)
-        .switchMap(payload => Observable.of(
+                APIEndpoints.targetHistogram),
+            new server.GetKnownTargetsAction(
+                  APIEndpoints.targetFrequency),
             new server.GetAnnotatedPlatewellidsAction(
-                APIEndpoints.annotatedPlateWellids))
+                APIEndpoints.annotatedPlateWellids)
+            ])
         );
 
       @Effect() getAnnotatedPlatewellids$ = this.actions$
@@ -108,7 +102,7 @@ export class ServerEffects {
           data: {'storeData': store.data,
                  'zhang': this.handleDataService.getData(APIEndpoints.zhang)}}
         ))
-        .switchMap(payload => this.fetchDataService.fetchData(
+        .switchMap(payload => this.annotatedPlateWellidsDataService.fetchData(
           payload.url, payload.data
         ))
         .map(result => new server.GetAnnotatedPlatewellidsSuccessAction(
@@ -124,7 +118,7 @@ export class ServerEffects {
           data: {'storeData': store.data, 'bins': store.settings.histogramBins,
                  'zhang': this.handleDataService.getData(APIEndpoints.zhang)}}
         ))
-        .switchMap(payload => this.fetchDataService.fetchData(
+        .switchMap(payload => this.targetHistogramDataService.fetchData(
           payload.url, payload.data
         ))
         .map(result => new server.GetSimilaritiesHistogramSuccessAction(
@@ -139,7 +133,7 @@ export class ServerEffects {
           url: Parser.parseURL(store.settings, action.payload),
           data: this.handleDataService.getData(APIEndpoints.zhang)}
         ))
-        .switchMap(payload => this.fetchDataService.fetchData(
+        .switchMap(payload => this.targetFrequencyDataService.fetchData(
           payload.url, payload.data
         ))
         .map(result => new server.GetKnownTargetsSuccessAction(

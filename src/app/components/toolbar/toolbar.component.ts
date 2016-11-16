@@ -9,8 +9,9 @@ import * as dataActions from '../../actions/data';
 import * as fromSettings from '../../reducers/settings';
 
 import { Settings } from '../../models/settings';
-import { FetchDataService } from '../../services/fetch-data.service';
+import { CompoundDataService } from '../../services';
 import { Parser } from '../../shared/parser';
+import { APIEndpoints } from '../../shared/api-endpoints';
 
 @Component({
   selector: 'app-toolbar',
@@ -27,12 +28,12 @@ export class ToolbarComponent implements OnInit {
     relatedCompounds: string[];
     settings: Settings;
     comp = new FormControl();
-    minChar = 1;
     showMe: boolean;
+    minChar = 1;
 
     constructor(
       private store: Store<fromRoot.State>,
-      private fetchDataService: FetchDataService
+      private compoundDataService: CompoundDataService
     ) {
         this.signature$ = this.store.let(fromRoot.getSignature);
         this.compound$ = this.store.let(fromRoot.getCompound);
@@ -42,38 +43,41 @@ export class ToolbarComponent implements OnInit {
           .debounceTime(250)
           .distinctUntilChanged()
           .switchMap(term => this.search(term))
-          .subscribe(result =>
-            this.relatedCompounds = Parser.parseRelatedCompounds(result.data));
+          .subscribe(result => this.relatedCompounds = result.data);
     }
 
     ngOnInit() {
       this.settings$.subscribe(
-        settings => { this.settings = settings; },
+        settings => this.settings = settings,
         err => console.log(err));
 
+      /* check which page is currently active */
       this.showMe = !(this.type === 'settings');
     }
 
-    // open side navigation bar by updating store, when menu button is pressed
+    /* open side navigation bar via the store, when 'menu' button is pressed */
     openSidenav() {
       this.store.dispatch(new layoutActions.OpenSidenavAction());
     }
 
     /* make REST API call for specific term from input */
     search(term: string): Observable<any> {
-        let url = Parser.parseURL(this.settings, 'compounds');
-        let data = {'compound': term, 'signature': ''};
-        if (term.length < this.minChar) {
+        let url = Parser.parseURL(this.settings, APIEndpoints.compounds);
+        let data = term;
+
+        if (data.length < this.minChar) {
           console.log('zero length term!');
-          data = {'compound': '1', 'signature': ''};
+          data = '1';
         }
-        return this.fetchDataService.fetchData(url, data);
+        return this.compoundDataService.fetchData(url, data);
     }
 
+    /* update current compound value in data store */
     updateCompound(value: string) {
       this.store.dispatch(new dataActions.UpdateCompoundAction(value));
     }
 
+    /* update current signature value in data store */
     updateSignature(value: string) {
       this.store.dispatch(new dataActions.UpdateSignatureAction(value));
     }

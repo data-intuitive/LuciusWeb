@@ -6,17 +6,17 @@ import { By } from '@angular/platform-browser';
 import { StoreModule } from '@ngrx/store';
 import { FormBuilder } from '@angular/forms';
 import { HttpModule } from '@angular/http';
+import { reducer } from '../../reducers';
 
 import { SettingsComponent } from './settings.component';
 import { ToolbarComponent } from '../toolbar/toolbar.component';
-import { reducer } from '../../reducers';
-import { FetchDataService } from '../../services/fetch-data.service';
+import { CompoundDataService } from '../../services';
 
 let comp: SettingsComponent;
 let fixture: ComponentFixture<SettingsComponent>;
 let el: DebugElement;
 
-describe('App: LuciusWeb', () => {
+describe('SettingsComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
         imports: [
@@ -28,7 +28,7 @@ describe('App: LuciusWeb', () => {
           ToolbarComponent
         ],
         providers: [
-          FetchDataService,
+          CompoundDataService,
           FormBuilder
         ],
         schemas: [NO_ERRORS_SCHEMA]

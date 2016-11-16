@@ -7,8 +7,8 @@ import { Store } from '@ngrx/store';
 import { APIEndpoints } from '../../shared/api-endpoints';
 import { Settings, AnnotatedPlatewellid, Zhang } from '../../models';
 import { HandleDataService } from '../../services';
-import { Parser } from '../../shared/parser';
 
+/* constants */
 const pos = 'POSITIVE';
 const neg = 'NEGATIVE';
 
@@ -45,13 +45,13 @@ export class TopCompoundsComponent implements OnInit {
 
       /* listen for Zhang data from the server */
       this.zhangReady$.subscribe(
-        ev => { this.handleZhangEvent(ev); },
+        ev => this.handleZhangEvent(ev),
         err => console.log(err)
       );
 
       /* listen for annotatedPlatewellids data from the server */
       this.annotatedPlatewellidsReady$.subscribe(
-        ev => { this.handleAnnotatedPlateWellidsEvent(ev); },
+        ev => this.handleAnnotatedPlateWellidsEvent(ev),
         err => console.log(err));
 
       /* get number of components as number */
@@ -59,20 +59,32 @@ export class TopCompoundsComponent implements OnInit {
      }
 
      handleZhangEvent(ev): void {
-         if (ev) {
-           let zhangArray = this.handleDataService.getData(APIEndpoints.zhang);
-           this.topPositiveCorrelations = Parser.
-              parseTopCorrelations(zhangArray, pos, this.numComps);
-           this.topNegativeCorrelations = Parser.
-              parseTopCorrelations(zhangArray, neg, this.numComps);
-         }
+       if (ev) {
+         let zhangArray = this.handleDataService.getData(APIEndpoints.zhang);
+
+         this.topPositiveCorrelations = this.
+           getTopCorrelations(zhangArray, pos);
+
+         this.topNegativeCorrelations = this.
+           getTopCorrelations(zhangArray, neg);
+       }
      }
 
      handleAnnotatedPlateWellidsEvent(ev): void {
-         if (ev) {
-           this.annotatedPlatewellids = this.handleDataService.
-             getData(APIEndpoints.annotatedPlateWellids);
-         }
-      }
+       if (ev) {
+         this.annotatedPlatewellids = this.handleDataService.
+          getData(APIEndpoints.annotatedPlateWellids);
+       }
+     }
 
+    /* function to get top postive/negative correlations */
+    getTopCorrelations(zhangArray: Zhang[], type: string): Zhang[] {
+      let subArray: Zhang[] = Array();
+
+      if (type === 'POSITIVE') {
+        return subArray = zhangArray.slice(0, this.numComps);
+      } else {
+        return subArray = zhangArray.reverse().slice(0, this.numComps);
+      }
+    }
 }

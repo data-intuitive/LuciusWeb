@@ -10,22 +10,8 @@ import { LuciusWebRoutingModule } from './app-routing.module';
 import { reducer } from './reducers';
 import { AppComponent } from './app.component';
 
-import {
-  CompoundComponent,
-  SettingsComponent,
-  ToolbarComponent,
-  SimilarityChartsComponent,
-  TopCompoundsComponent,
-  KnownTargetsComponent,
-  SimilarityHistogramComponent,
-  SimilarityScatterComponent,
-  KnownTargetsHistogramComponent
-} from './components';
-
-import { LocalStorageService,
-         HandleDataService,
-         FetchDataService
-} from './services';
+import * as components from './components';
+import * as services from './services';
 
 import { SettingsEffects,
          ServerEffects,
@@ -35,15 +21,15 @@ from './effects';
 @NgModule({
   declarations: [
     AppComponent,
-    CompoundComponent,
-    SettingsComponent,
-    ToolbarComponent,
-    SimilarityChartsComponent,
-    TopCompoundsComponent,
-    KnownTargetsComponent,
-    SimilarityHistogramComponent,
-    SimilarityScatterComponent,
-    KnownTargetsHistogramComponent
+    components.CompoundComponent,
+    components.SettingsComponent,
+    components.ToolbarComponent,
+    components.SimilarityChartsComponent,
+    components.TopCompoundsComponent,
+    components.KnownTargetsComponent,
+    components.SimilarityHistogramComponent,
+    components.SimilarityScatterComponent,
+    components.KnownTargetsHistogramComponent
   ],
   imports: [
     BrowserModule,
@@ -62,9 +48,14 @@ from './effects';
     StoreDevtoolsModule.instrumentOnlyWithExtension()
   ],
   providers: [
-    LocalStorageService,
-    FetchDataService,
-    HandleDataService
+    services.LocalStorageService,
+    services.HandleDataService,
+    services.CompoundDataService,
+    services.SignatureDataService,
+    services.ZhangDataService,
+    services.AnnotatedPlateWellIdsDataService,
+    services.TargetFrequencyDataService,
+    services.TargetHistogramDataService,
   ],
   bootstrap: [AppComponent]
 })

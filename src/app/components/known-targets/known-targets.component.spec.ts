@@ -6,7 +6,7 @@ import { StoreModule } from '@ngrx/store';
 
 import { reducer } from '../../reducers';
 import { KnownTargetsComponent } from './known-targets.component';
-import { HandleDataService } from '../../services/handle-data.service';
+import { HandleDataService } from '../../services';
 
 import { KnownTargetsHistogramComponent } from '../charts/known-targets-histogram/known-targets-histogram.component';
 

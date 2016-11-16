@@ -2,11 +2,15 @@
 
 import { TestBed, async, inject } from '@angular/core/testing';
 import { SignatureDataService } from './signature-data.service';
+import { HttpModule } from '@angular/http';
 
 describe('Service: SignatureData', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [SignatureDataService]
+      providers: [SignatureDataService],
+      imports: [
+        HttpModule
+      ],
     });
   });
 

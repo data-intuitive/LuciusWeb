@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { Response } from '@angular/http';
 
 import { APIEndpoints } from '../../shared/api-endpoints';
-import { Parser } from '../../shared/parser';
 
 @Injectable()
 export class HandleDataService {
@@ -46,18 +45,18 @@ export class HandleDataService {
     getData(classPath: string): any {
       console.log('[handler service] get' + ' ' + classPath);
       switch (classPath) {
-        case APIEndpoints.signature:
-          return this.signature;
         case APIEndpoints.compounds:
           return this.relatedCompounds;
+        case APIEndpoints.signature:
+          return this.signature;
         case APIEndpoints.zhang:
-          return Parser.parseZhangData(this.zhang);
-        case APIEndpoints.targetHistogram:
-          return Parser.parseSimilarityHistogramData(this.histogramData);
-        case APIEndpoints.knownTargets:
-          return Parser.parseKnownTargetsData(this.knownTargets);
+          return this.zhang;
         case APIEndpoints.annotatedPlateWellids:
-          return Parser.parseAnnotatedPlateWellids(this.annotatedPlatewellids);
+          return this.annotatedPlatewellids;
+        case APIEndpoints.targetHistogram:
+          return this.histogramData;
+        case APIEndpoints.knownTargets:
+          return this.knownTargets;
       }
   }
 }

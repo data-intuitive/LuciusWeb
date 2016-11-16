@@ -3,10 +3,9 @@ import { Observable } from 'rxjs/Observable';
 
 import * as fromRoot from '../../reducers';
 
-import { HandleDataService } from '../../services';
 import { Store } from '@ngrx/store';
+import { HandleDataService } from '../../services';
 import { Settings, Zhang, TargetHistogram } from '../../models';
-
 import { APIEndpoints } from '../../shared/api-endpoints';
 
 @Component({
@@ -28,30 +27,35 @@ export class SimilarityChartsComponent implements OnInit {
       private store: Store<fromRoot.State>,
       private handleDataService: HandleDataService) {
 
-      // observe if Zhang Data has arrived from server
+      /* observe if Zhang Data has arrived from server */
       this.zhangReady$ = this.store.let(fromRoot.getZhangReady);
 
-      // observe if SimilarityHistogram Data has arrived from server
+      /* observe if SimilarityHistogram Data has arrived from server */
       this.similarityHistogramReady$ = this.store.
         let(fromRoot.getSimilaritiesHistReady);
     }
 
     ngOnInit() {
       this.zhangReady$.subscribe(
-        value => {
-          if (value) {
-            this.zhangArray = this.handleDataService
-              .getData(APIEndpoints.zhang);
-          }},
+        ev => this.handleZhangEvent(ev),
         err => console.log(err));
 
-    this.similarityHistogramReady$.subscribe(
-      value => {
-        if (value) {
-          this.similarityHistogramData = this.handleDataService.
-            getData(APIEndpoints.targetHistogram);
-        }},
-      err => console.log(err));
-  }
+      this.similarityHistogramReady$.subscribe(
+        ev => this.handleSimilarityHistogramEvent(ev),
+        err => console.log(err));
+    }
 
+    handleZhangEvent(ev) {
+      if (ev) {
+        this.zhangArray = this.handleDataService.
+          getData(APIEndpoints.zhang);
+      }
+    }
+
+    handleSimilarityHistogramEvent(ev) {
+      if (ev) {
+        this.similarityHistogramData = this.handleDataService.
+          getData(APIEndpoints.targetHistogram);
+      }
+    }
 }

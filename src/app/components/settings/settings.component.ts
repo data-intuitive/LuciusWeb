@@ -28,11 +28,11 @@ export class SettingsComponent implements OnInit {
   }
 
   ngOnInit() {
-    // get initial values using the store util and
-    // assign them to a local variable
+    /* get initial values using the store util and
+       assign them to a local variable */
     this.settings = StoreUtil.getState(this.store).settings;
 
-    // set initial values in the settings form
+    /* set initial values in the settings form */
     this.settingsForm = this.formBuilder.group({
       plotNoise: this.settings.plotNoise,
       hist2dBins: this.settings.hist2dBins,
@@ -47,11 +47,10 @@ export class SettingsComponent implements OnInit {
     });
   }
 
-  // set new settings values by updating the store,
-  // when 'Save' button is pressed
+  /* set new settings values by updating the store,
+     when 'Save' button is pressed */
   onSubmit() {
     this.store.dispatch(
       new settingsActions.Update(this.settingsForm.value));
   }
-
 }

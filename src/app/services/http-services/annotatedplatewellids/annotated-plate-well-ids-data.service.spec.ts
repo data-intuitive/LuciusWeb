@@ -2,11 +2,15 @@
 
 import { TestBed, async, inject } from '@angular/core/testing';
 import { AnnotatedPlateWellIdsDataService } from './annotated-plate-well-ids-data.service';
+import { HttpModule } from '@angular/http';
 
 describe('Service: AnnotatedPlateWellIdsData', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [AnnotatedPlateWellIdsDataService]
+      providers: [AnnotatedPlateWellIdsDataService],
+      imports: [
+        HttpModule
+      ],
     });
   });
 

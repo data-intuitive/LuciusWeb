@@ -12,6 +12,7 @@ import { APIEndpoints } from '../../shared/api-endpoints';
   templateUrl: './known-targets.component.html',
   styleUrls: ['./known-targets.component.scss']
 })
+
 export class KnownTargetsComponent implements OnInit {
   compound$: Observable<string>;
   knownTargets: any[] = Array();
@@ -29,7 +30,7 @@ export class KnownTargetsComponent implements OnInit {
   ngOnInit() {
     this.knownTargetsReady$
       .subscribe(
-        ev => { this.handleKnownTargetsEvent(ev); },
+        ev => this.handleKnownTargetsEvent(ev),
         err => console.log(err)
       );
   }

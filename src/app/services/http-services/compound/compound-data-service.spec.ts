@@ -2,11 +2,15 @@
 
 import { TestBed, async, inject } from '@angular/core/testing';
 import { CompoundDataService } from './compound-data.service';
+import { HttpModule } from '@angular/http';
 
 describe('Service: CompoundDataService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [CompoundDataService]
+      providers: [CompoundDataService],
+      imports: [
+        HttpModule
+      ],
     });
   });
 

@@ -2,7 +2,7 @@ dist: trusty
 sudo: required
 language: node_js
 node_js:
-  - "6"
+  - "7"
 
 notifications:
   email: false
@@ -10,7 +10,8 @@ notifications:
 env:
   - SCRIPT=lint BROWSER=no
   - SCRIPT=slint BROWSER=no
-  - SCRIPT=e2e BROWSER=yes
+  # FIXME: Check solution
+  # - SCRIPT=e2e BROWSER=yes 
   - SCRIPT=test:ci BROWSER=yes
 
 before_install:

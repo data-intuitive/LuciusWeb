@@ -10,7 +10,8 @@ notifications:
 env:
   - SCRIPT=lint BROWSER=no
   - SCRIPT=slint BROWSER=no
-  - SCRIPT=e2e BROWSER=yes
+  # FIXME: Check solution
+  # - SCRIPT=e2e BROWSER=yes 
   - SCRIPT=test:ci BROWSER=yes
 
 before_install:

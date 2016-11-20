@@ -34,7 +34,8 @@ export class DataEffects {
     @Effect() updateSignature$ = this.actions$
       .ofType(data.DataActionTypes.UPDATE_SIGNATURE)
       .map(action => action.payload)
-      .switchMap(payload => Observable.of(new server.GetSignatureSuccessAction(
-        this.handleDataService.setData(payload, APIEndpoints.signature))
+      .switchMap(payload => Observable.of(
+        new server.GetSignatureSuccessAction(
+          this.handleDataService.setData(payload, APIEndpoints.signature))
       ));
 }

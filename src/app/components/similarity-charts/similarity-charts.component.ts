@@ -28,11 +28,12 @@ export class SimilarityChartsComponent implements OnInit {
       private handleDataService: HandleDataService) {
 
       /* observe if Zhang Data has arrived from server */
-      this.zhangReady$ = this.store.let(fromRoot.getZhangReady);
+      this.zhangReady$ = this.store.let(
+        fromRoot.getZhangReady);
 
       /* observe if SimilarityHistogram Data has arrived from server */
-      this.similarityHistogramReady$ = this.store.
-        let(fromRoot.getSimilaritiesHistReady);
+      this.similarityHistogramReady$ = this.store.let(
+        fromRoot.getSimilaritiesHistReady);
     }
 
     ngOnInit() {

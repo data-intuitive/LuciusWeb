@@ -1,9 +1,8 @@
-import { Component } from '@angular/core';
-import { ElementRef, ViewChild,
-         ViewEncapsulation, Input, OnInit } from '@angular/core';
-
-import { Settings } from '../../../models/settings';
+import { Component, ElementRef, ViewChild,  AfterViewInit,
+         Input, ViewEncapsulation } from '@angular/core';
 import * as d3 from 'd3';
+import { Settings, TargetHistogram } from '../../../models';
+import { BaseGraphComponent } from '../base-graph/base-graph.component';
 
 @Component({
   selector: 'app-similarity-histogram',
@@ -12,196 +11,200 @@ import * as d3 from 'd3';
   templateUrl: './similarity-histogram.component.html'
 })
 
-export class SimilarityHistogramComponent implements   OnInit {
-    @ViewChild('container') element: ElementRef;
+export class SimilarityHistogramComponent extends BaseGraphComponent
+    implements AfterViewInit {
+
+    @ViewChild('simHist') element: ElementRef;
     @Input() settings: Settings;
-    @Input() data: number[] = Array();
+    @Input() similarityHistogramData: TargetHistogram;
+    data: number[] = Array();
 
-    private el: HTMLElement;
+    /* DOM Element */
+    el: HTMLElement;
 
-    /* svg */
-    private svg: any;
-    private bg: any;
-    private g: any;
+    /* config variables */
+    margin =  {top: 16, right: 48, bottom: 16, left: 8};
+    padding = {top: 16, right: 24, bottom: 16, left: 24};
+    bins = 16;
+    targetGene= '';
+    geneData = [];
+    dataBounds = [];
 
-    /* checks before drawing graph */
-    isActive = false;
-    isInit = false;
-    isDataReady = false;
-    isDataNew = false;
-    isResizing = false;
-
-    /* measurements */
-    private gWidth = 0;
-    private gHeight = 0;
-    private gWidthPad = 0;
-    private gHeightPad = 0;
-
-    /* config */
-    private margin =  {top: 16, right: 48, bottom: 16, left: 8};
-    private padding = {top: 16, right: 24, bottom: 16, left: 24};
-    private colors: Array<any>;
-    private bins = 16;
-    private targetGene= '';
-    private geneData: Array<any>;
-    // private dataBounds: Array<any>;
-    private yScale: any;
-    private xScale: any;
-    private yAxis: any;
-    private yAxisGroup: any;
-    // private xAxis: any;
-    // private xAxisGroup: any;
-    private colorScale: any;
-    private barSelected: any;
-    private barSize= 0;
-    private barGap= 2;
+    yScale;
+    xScale;
+    yAxis;
+    yAxisGroup;
+    xAxis;
+    xAxisGroup;
+    yAxisScale;
+    colorScale;
+    barSelected;
+    barSize = 0;
+    barGap = 2;
 
     constructor() {
+      super();
+
+      /*mock data */
+      this.data[0] = 0.5;
+      this.data[1] = 0.7;
+      this.data[2] = 0.2;
+      this.data[3] = 0.9;
+      this.data[4] = 0.1;
+      this.data[5] = 0.5;
+      this.data[6] = 0.7;
     }
 
-    ngOnInit() {
-      this.el = this.element.nativeElement;
-      // this.bins = this.settings.hist2dBins;
-      // this.colors = app.colors;
+    ngAfterViewInit() {
+      super.ngAfterViewInit();
+      // this.el = this.element.nativeElement;
+      // console.log('child', this.el);
+      this.bins = this.settings.hist2dBins;
+      // if (this.similarityHistogramData) {
+        this.isDataReady = true;
+      // }
       this.init();
     }
 
     init() {
-      this.svg = d3.select(this.el).append('svg');
-      // console.log(this.svg);
-
-      // append Background // z:1
-      this.bg = this.svg.append('rect')
-        .attr('class', 'bg');
-
-      // append Axis // z:2
-      this.initAxis();
-
-      //  append Group  z:3
-      this.g = this.svg.append('g');
-
-      // init finished
-      this.isInit = true;
+      super.init();
+      console.log('svg', this.svg);
     }
 
     initAxis() {
+      super.initAxis();
+
       this.yAxis = d3.svg.axis();
       this.yAxisGroup = this.svg.append('g')
-            .attr('class', 'y axis');
+        .attr('class', 'y axis');
     }
 
-  updateValues() {
-    this.gWidth = this.el.offsetWidth - this.margin.left - this.margin.right;
-    this.gWidthPad = Math.round(this.gWidth - this.padding.left - this.padding.right);
-    this.gHeight = this.el.offsetHeight - this.margin.top - this.margin.bottom;
-    this.gHeightPad = Math.round(this.gHeight - this.padding.top - this.padding.bottom);
-    this.svg
-      .attr('width', this.el.offsetWidth)
-      .attr('height', this.el.offsetHeight);
+    updateValues() {
+      super.updateValues();
 
-    this.barSize = Math.floor(this.gHeightPad / this.bins);
-  }
+      this.barSize = Math.floor(this.gHeightPad / this.bins);
+    }
 
     updateScales() {
+      super.updateScales();
+
       let dataSize = this.data.length - 1;
-      this.yScale = d3.scale.linear()
+
+      /* scale for y-Axis */
+      this.yAxisScale = d3.scale.linear()
         .domain([1, -1])
         .range([0, this.gHeightPad]);
+
+      /* scale for y-dimension */
       this.yScale = d3.scale.linear()
         .domain([0, dataSize])
         .range([0, this.gHeightPad]);
+
+      /* scale for x-dimension */
       this.xScale = d3.scale.linear()
         .domain([0, d3.max(this.data)])
         .range([0, this.gWidthPad]);
-      this.colorScale = d3.scale.linear()
+
+      /* scale to add colors to the chart */
+      this.colorScale = d3.scale.linear<d3.Rgb>()
         .domain([0, 0.25 * dataSize, 0.5 * dataSize, 0.75 * dataSize, dataSize])
         .range(this.colors);
     }
 
     updateGraph() {
-      // draw Background
-      this.bg
-        .attr('width', this.gWidth)
-        .attr('height', this.gHeight)
-        .attr('transform', 'translate(' +
-          this.margin.left + ', ' +
-          this.margin.top + ')');
+      super.updateGraph();
 
-      // draw Axis
-      this.yAxis.scale(this.yScale)
+      /* draw Axis */
+      this.yAxis
+        .scale(this.yAxisScale)
         .orient('right')
         .tickSize(this.gWidth);
+
       this.yAxisGroup
         .attr('transform', 'translate(' +
           this.margin.left + ',' +
           (this.margin.top + this.padding.top) + ')')
         .call(this.yAxis);
 
-      // draw graph
+      /* draw graph element according to margins */
       this.g.attr('transform', 'translate(' +
         (this.margin.left + this.padding.left) + ',' +
-        (this.margin.top + this.padding.top - (this.barSize / 2) + (this.barGap / 2)) + ')');
+        (this.margin.top + this.padding.top -
+        (this.barSize / 2) + (this.barGap / 2)) + ')');
 
-      // Stop execution if data is not ready
+      /* Stop execution if data is not ready */
       if (!this.isDataReady) {
+        console.log('Data is not ready!');
         return true;
       }
 
+      /* reference to current component */
+      let thisComp = this;
+
       function drawHistogram(selection, selector, fill) {
-        selection.enter().append('rect');
+        selection.enter()
+        .append('rect');
+
         selection.attr('class', selector)
-          .attr('x', function(d) { return this.gWidthPad - this.xScale(d); })
-          .attr('y', function(d, i) { return this.yScale(i); })
-          .attr('height', this.barSize - this.barGap)
+          .attr('x', function(d) { return thisComp.gWidthPad - thisComp.xScale(d); })
+          .attr('y', function(d, i) { return thisComp.yScale(i); })
+          .attr('height', thisComp.barSize - thisComp.barGap)
           .attr('width', function(d) {
-            return d > 0 ? this.xScale(d) + this.padding.left - 1 : 0;
+            return d > 0 ? thisComp.xScale(d) + thisComp.padding.left - 1 : 0;
           });
+
         if (fill) {
           selection
-            .attr('fill', function(d, i) { return this.colorScale(i); });
+            .attr('fill', function(d, i) { return thisComp.colorScale(i); });
         }
         selection.exit().remove();
       }
-      if (this.geneData.length) {
-        this.g.selectAll('.genebar')
-          .data(this.geneData)
-          .call(drawHistogram, 'genebar', false);
-      } else {
-        this.g.selectAll('.genebar').remove();
-      }
+
+    //   if (this.geneData.length) {
+    //     this.g.selectAll('.genebar')
+    //       .data(this.geneData)
+    //       .call(drawHistogram, 'genebar', false);
+    //   } else {
+    //     this.g.selectAll('.genebar').remove();
+    //   }
+
       let bars = this.g.selectAll('.bar')
         .data(this.data)
         .call(drawHistogram, 'bar', true);
+
       bars.on('mouseover', function() {
         d3.select(this).classed('hover', true);
       });
+
       bars.on('mouseout', function() {
         d3.select(this).classed('hover', false);
       });
-      bars.on('click', function(d, i) {
-        this.fire('core-signal', {
-          name: 'filter-data',
-          data: { bounds: this.dataBounds[i] }
-        });
-        if (this.barSelected) {
-          d3.select(this.barSelected).classed('selected', false);
-        }
-        this.barSelected = this;
-        d3.select(this.barSelected).classed('selected', true);
-      });
-      this.bg.on('click', function() {
-        this.fire('core-signal', {
-          name: 'unfilter-data',
-          data: null
-        });
-        if (this.barSelected) {
-          d3.select(this.barSelected).classed('selected', false);
-          this.barSelected = null;
-        }
-      });
-      if (this.barSelected && this.targetGene) {
-        d3.select(this.barSelected).classed('selected', true);
-      }
+
+      // bars.on('click', function(d, i) {
+      //   this.fire('core-signal', {
+      //     name: 'filter-data',
+      //     data: { bounds: this.dataBounds[i] }
+      //   });
+      //   if (this.barSelected) {
+      //     d3.select(this.barSelected).classed('selected', false);
+      //   }
+      //   this.barSelected = this;
+      //   d3.select(this.barSelected).classed('selected', true);
+      // });
+      //
+      // this.bg.on('click', function() {
+      //   this.fire('core-signal', {
+      //     name: 'unfilter-data',
+      //     data: null
+      //   });
+      //   if (this.barSelected) {
+      //     d3.select(this.barSelected).classed('selected', false);
+      //     this.barSelected = null;
+      //   }
+      // });
+      // if (this.barSelected && this.targetGene) {
+      //   d3.select(this.barSelected).classed('selected', true);
+      // }
       this.isDataNew = false;
     }
 }

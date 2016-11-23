@@ -1,25 +1,19 @@
-<div class="title">Similarity Charts</div>
 <div class="content">
 
   <!-- Add similarity Scatter schart -->
-  <app-similarity-scatter
-    [settings]="settings"
-    [zhangData]="zhangArray">
-  </app-similarity-scatter>
+  <div *ngIf="zhangReady$ | async">
+    <app-similarity-scatter
+      [settings]="settings"
+      [zhangData]="zhangArray">
+    </app-similarity-scatter>
+  </div>
 
   <!-- Add similarity Histogram chart -->
-  <app-similarity-histogram
-    [settings]="settings"
-    [similarityHistogramData]="similarityHistogramData">
-  </app-similarity-histogram>
-
-  <!-- Display raw data when to check if arrived from server -->
-  <!-- <div *ngIf="similarityHistogramReady$ | async">
-    {{similarityHistogramData | json}}
+  <div *ngIf="similarityHistogramReady$ | async">
+    <app-similarity-histogram
+      [settings]="settings"
+      [similarityHistogramData]="similarityHistogramData">
+    </app-similarity-histogram>
   </div>
-  <div *ngIf="zhangReady$ | async">
-    <div *ngFor="let item of zhangArray">
-      {{item | json}}
-    </div>
-  </div> -->
+
 </div>

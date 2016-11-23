@@ -2,7 +2,6 @@ import { Component, ElementRef, ViewChild,  AfterViewInit,
          Input, ViewEncapsulation } from '@angular/core';
 
 import * as d3 from 'd3';
-import * as plugin from 'd3-plugin-hist2d';
 import { Settings, Zhang } from '../../../models';
 import { BaseGraphComponent } from '../base-graph/base-graph.component';
 
@@ -31,17 +30,17 @@ export class SimilarityScatterComponent extends BaseGraphComponent
     sort = true;
 
     /* config variables */
-    margin = {top: 16, right: 8, bottom: 16, left: 48};
-    padding = {top: 16, right: 48, bottom: 16, left: 24};
     noise = 2;
     yScale;
     xScale;
     yAxis;
     yAxisGroup;
     colorScale;
+
     brush;
     brushG;
     isBrushInit;
+
     isDataFiltered;
     isDrawBin;
     hist2d;
@@ -55,20 +54,18 @@ export class SimilarityScatterComponent extends BaseGraphComponent
 
     constructor() {
       super();
+      for (let i = 0; i < this.zhangData.length; i++) {
+        this.data[i][0] = (this.zhangData[i].indexSorted);
+        this.data[i][1] = (this.zhangData[i].zhangScore);
+      }
+      this.isDataNew = true;
     }
 
-    AfterViewInit() {
+    ngAfterViewInit() {
       super.ngAfterViewInit();
 
       this.bins = this.settings.hist2dBins;
       this.init();
-    }
-
-    init() {
-      super.init();
-
-      this.binG = this.g.append('g');
-      this.simG = this.g.append('g');
     }
 
     initAxis() {
@@ -77,6 +74,13 @@ export class SimilarityScatterComponent extends BaseGraphComponent
       this.yAxis = d3.svg.axis();
       this.yAxisGroup = this.svg.append('g')
         .attr('class', 'y axis');
+    }
+
+    init() {
+      super.init();
+
+      this.binG = this.g.append('g');
+      this.simG = this.g.append('g');
     }
 
     updateValues() {
@@ -96,15 +100,11 @@ export class SimilarityScatterComponent extends BaseGraphComponent
       /* reference to current component */
       let thisComp = this;
 
-      let yDomain = d3.extent(this.data, function(d) {
-        /* d[1] = zhang score of each data element */
-        return d[1];
-      });
+      /* d[1] = zhang score of each data element */
+      let yDomain = d3.extent(this.data, function(d) { return d[1]; });
 
-      let xDomain = d3.extent(this.data, function(d) {
-        /* noise value determines the number of bubbles */
-        return d[thisComp.noise];
-      });
+      /* get noise value */
+      let xDomain = d3.extent(this.data, function(d) { return d[thisComp.noise]; });
 
       if (this.isDataFiltered && this.data.length === 1) {
         yDomain = [this.data[0][1] - 0.05, this.data[0][1] + 0.05];
@@ -149,13 +149,14 @@ export class SimilarityScatterComponent extends BaseGraphComponent
       } else {
         this.updateBinGraph();
       }
+
       this.isResizing = false;
     }
 
     updateBinGraph() {
       if (this.isDataNew) {
         // create Hist2D
-        this.hist2d = plugin.hist2d()
+        this.hist2d = d3.hist2d()
           .bins(this.bins)
           .indices([this.noise, 1])
           .domain([this.xScale.domain(), this.yScale.domain()])
@@ -167,19 +168,19 @@ export class SimilarityScatterComponent extends BaseGraphComponent
 
     drawBinGraph(hist: Array<Array<any>>) {
       let thisComp = this;
+
       // if (this.isDataNew) {
       //   thisComp.fire('core-signal', { name: 'stop-loader' });
       //   this.$.back.classList.add('hide');
       // }
+
       this.histData = hist;
 
       this.hist2d.size([this.gWidthPad, this.gHeightPad]);
       this.histW = this.hist2d.size()[0];
       this.histH = this.hist2d.size()[1];
 
-      this.histExtent = d3.extent(hist, function(d) {
-        return d.length;
-      });
+      this.histExtent = d3.extent(hist, function(d) { return d.length; });
 
       let radius = Math.min(this.histW, this.histH) / 2;
       let rScale = d3.scale.linear()
@@ -191,9 +192,11 @@ export class SimilarityScatterComponent extends BaseGraphComponent
         colorDomain[i] = this.gHeightPad / (colorDomain.length - 1) * i;
       }
       this.colorScale.domain(colorDomain.reverse());
+
       this.binG.attr('transform', 'translate(' +
         (this.histW * 0.5) + ',' +
         (-this.histH * 0.5) + ')');
+
       this.simG.selectAll('circle').remove();
 
       let circles = this.binG.selectAll('circle')
@@ -206,6 +209,7 @@ export class SimilarityScatterComponent extends BaseGraphComponent
         .attr('cx', function(d) { return thisComp.histW * d.x; })
         .attr('cy', function(d) { return thisComp.gHeightPad - (thisComp.histH * d.y); })
         .attr('fill', function(d) { return thisComp.colorScale(thisComp.histH * d.y); });
+
       circles.exit().remove();
 
       // requestAnimationFrame(this.updateTooltip.bind(this));
@@ -222,6 +226,7 @@ export class SimilarityScatterComponent extends BaseGraphComponent
 
     updateSimpleGraph () {
       let thisComp = this;
+
       this.binG.selectAll('circle').remove();
 
       let circles = this.simG.selectAll('circle')
@@ -259,6 +264,7 @@ export class SimilarityScatterComponent extends BaseGraphComponent
     updateBrush() {
       let thisComp = this;
       let noise = thisComp.noise;
+
       this.brush
         .x(this.xScale)
         .y(this.yScale)

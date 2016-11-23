@@ -23,10 +23,8 @@ export class SimilarityHistogramComponent extends BaseGraphComponent
     el: HTMLElement;
 
     /* config variables */
-    margin =  {top: 16, right: 48, bottom: 16, left: 8};
-    padding = {top: 16, right: 24, bottom: 16, left: 24};
     bins = 16;
-    targetGene= '';
+    targetGene = '';
     geneData = [];
     dataBounds = [];
 
@@ -44,31 +42,34 @@ export class SimilarityHistogramComponent extends BaseGraphComponent
 
     constructor() {
       super();
-
-      /*mock data */
-      this.data[0] = 0.5;
-      this.data[1] = 0.7;
-      this.data[2] = 0.2;
-      this.data[3] = 0.9;
-      this.data[4] = 0.1;
-      this.data[5] = 0.5;
-      this.data[6] = 0.7;
     }
 
     ngAfterViewInit() {
       super.ngAfterViewInit();
-      // this.el = this.element.nativeElement;
-      // console.log('child', this.el);
       this.bins = this.settings.hist2dBins;
-      // if (this.similarityHistogramData) {
+
+      /* check store for targetGeneSelected flag */
+      // if (targetGeneSelected)
+        // this.targetGene = selectedGene;
+      // else
+        this.targetGene = '';
+
+      /* check if data is passed successfully from parent component */
+      if (this.similarityHistogramData) {
+        this.dataBounds = this.similarityHistogramData.metadata.bounds;
+        this.data = this.similarityHistogramData.data.zhang;
+        this.geneData = this.targetGene.length ?
+          this.similarityHistogramData[this.targetGene] : [];
+
+        this.isDataNew = true;
         this.isDataReady = true;
-      // }
+      }
       this.init();
     }
 
     init() {
       super.init();
-      console.log('svg', this.svg);
+      // console.log('svg', this.svg);
     }
 
     initAxis() {
@@ -82,6 +83,7 @@ export class SimilarityHistogramComponent extends BaseGraphComponent
     updateValues() {
       super.updateValues();
 
+      /* calculate size of each bar, given gHeightPad and num of bins */
       this.barSize = Math.floor(this.gHeightPad / this.bins);
     }
 
@@ -160,13 +162,13 @@ export class SimilarityHistogramComponent extends BaseGraphComponent
         selection.exit().remove();
       }
 
-    //   if (this.geneData.length) {
-    //     this.g.selectAll('.genebar')
-    //       .data(this.geneData)
-    //       .call(drawHistogram, 'genebar', false);
-    //   } else {
-    //     this.g.selectAll('.genebar').remove();
-    //   }
+      if (this.geneData.length) {
+        this.g.selectAll('.genebar')
+          .data(this.geneData)
+          .call(drawHistogram, 'genebar', false);
+      } else {
+        this.g.selectAll('.genebar').remove();
+      }
 
       let bars = this.g.selectAll('.bar')
         .data(this.data)
@@ -180,31 +182,41 @@ export class SimilarityHistogramComponent extends BaseGraphComponent
         d3.select(this).classed('hover', false);
       });
 
-      // bars.on('click', function(d, i) {
-      //   this.fire('core-signal', {
-      //     name: 'filter-data',
-      //     data: { bounds: this.dataBounds[i] }
-      //   });
-      //   if (this.barSelected) {
-      //     d3.select(this.barSelected).classed('selected', false);
-      //   }
-      //   this.barSelected = this;
-      //   d3.select(this.barSelected).classed('selected', true);
-      // });
-      //
-      // this.bg.on('click', function() {
-      //   this.fire('core-signal', {
-      //     name: 'unfilter-data',
-      //     data: null
-      //   });
-      //   if (this.barSelected) {
-      //     d3.select(this.barSelected).classed('selected', false);
-      //     this.barSelected = null;
-      //   }
-      // });
-      // if (this.barSelected && this.targetGene) {
-      //   d3.select(this.barSelected).classed('selected', true);
-      // }
+      bars.on('click', function(d, i) {
+        // this.fire('core-signal', {
+        //   name: 'filter-data',
+        //   data: { bounds: this.dataBounds[i] }
+        // });
+        // TODO: Update Filter flag in store
+
+        /* undo previous selection */
+        if (this.barSelected) {
+          d3.select(this.barSelected).classed('selected', false);
+        }
+
+        /* mark new selection */
+        this.barSelected = this;
+        d3.select(this.barSelected).classed('selected', true);
+      });
+
+      this.bg.on('click', function() {
+        // this.fire('core-signal', {
+        //   name: 'unfilter-data',
+        //   data: null
+        // });
+        // TODO: Update UnFilter flag in store
+
+        /* undo previous selection */
+        if (this.barSelected) {
+          d3.select(this.barSelected).classed('selected', false);
+          this.barSelected = null;
+        }
+      });
+
+      if (this.barSelected && this.targetGene) {
+        d3.select(this.barSelected)
+          .classed('selected', true);
+      }
       this.isDataNew = false;
     }
 }

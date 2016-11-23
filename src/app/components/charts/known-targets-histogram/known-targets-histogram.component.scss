@@ -1,14 +1,32 @@
-body {
-  padding-top: 50px;
-  padding-left: 100px;
+@import '../../../../styles/variables';
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 2 1 auto;
+
+  box-sizing: border-box;
+  min-width: unit(14);
+  margin: unit();
+
+  background-color: $bg-color;
+
+  @include md-elevation(1);
 }
 
-#chartArea {
-  background-color: #fff;
+.title {
+  font-size: $font-sm;
+
+  padding: unit(.5);
+
+  color: md-color($primary, 600);
+  background-color: md-color($primary, 50);
 }
 
-.bar {
-  display: inline-block;
-  margin-right: 2px;
-  fill: teal;
+.content {
+  padding: unit();
+
+  & > * {
+    margin-bottom: unit();
+  }
 }

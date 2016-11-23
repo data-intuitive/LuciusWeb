@@ -15,6 +15,7 @@ import { APIEndpoints } from '../../shared/api-endpoints';
 
 export class KnownTargetsComponent implements OnInit {
   compound$: Observable<string>;
+  compound: string;
   knownTargets: any[] = Array();
   knownTargetsResponse: string[][] = Array();
   knownTargetsReady$: Observable<boolean>;
@@ -31,6 +32,12 @@ export class KnownTargetsComponent implements OnInit {
     this.knownTargetsReady$
       .subscribe(
         ev => this.handleKnownTargetsEvent(ev),
+        err => console.log(err)
+      );
+
+    this.compound$
+      .subscribe(
+        data => this.compound = data,
         err => console.log(err)
       );
   }

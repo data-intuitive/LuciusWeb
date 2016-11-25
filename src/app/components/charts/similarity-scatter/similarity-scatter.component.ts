@@ -156,11 +156,11 @@ export class SimilarityScatterComponent extends BaseGraphComponent
     updateBinGraph() {
       if (this.isDataNew) {
         // create Hist2D
-        this.hist2d = d3.hist2d()
-          .bins(this.bins)
-          .indices([this.noise, 1])
-          .domain([this.xScale.domain(), this.yScale.domain()])
-          (this.data, this.drawBinGraph.bind(this));
+        // this.hist2d = d3.hist2d()
+        //   .bins(this.bins)
+        //   .indices([this.noise, 1])
+        //   .domain([this.xScale.domain(), this.yScale.domain()])
+        //   (this.data, this.drawBinGraph.bind(this));
       } else {
         this.drawBinGraph(this.histData);
       }

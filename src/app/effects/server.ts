@@ -80,8 +80,7 @@ export class ServerEffects {
             result.data, result.type)
         ));
 
-      // TODO: combine these 3 effects into one
-      @Effect() getSimilaritiesSuccess1$ = this.actions$
+      @Effect() getSimilaritiesSuccess$ = this.actions$
         .ofType(server.ServerActionTypes.GET_SIMILARITIES_SUCCESS)
         .map(action => action.payload)
         .switchMap(payload => Observable.from([
@@ -131,7 +130,8 @@ export class ServerEffects {
         .withLatestFrom(this.store)
         .map(([action, store]) => ({
           url: Parser.parseURL(store.settings, action.payload),
-          data: this.handleDataService.getData(APIEndpoints.zhang)}
+          data: {compounds: this.handleDataService.getData(APIEndpoints.compounds),
+                 zhang: this.handleDataService.getData(APIEndpoints.zhang)}}
         ))
         .switchMap(payload => this.targetFrequencyDataService.fetchData(
           payload.url, payload.data

@@ -1,3 +1,4 @@
+
 import { Settings, Zhang } from '../models';
 
 export class Parser {
@@ -8,7 +9,7 @@ export class Parser {
       '&classPath=luciusapi.' + classPath;
   }
 
-  /* utility method to get Pwids from Zhang Data */
+  /* utility method to get Pwids from Zhang Array */
   static parsePwids(zhangArray: Zhang[]): string {
     let pwids: string[] = Array();
     for (let i = 0; i < zhangArray.length; i++) {

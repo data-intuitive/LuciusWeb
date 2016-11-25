@@ -51,8 +51,6 @@ export class SimilarityHistogramComponent extends BaseGraphComponent
       /* check store for targetGeneSelected flag */
       // if (targetGeneSelected)
         // this.targetGene = selectedGene;
-      // else
-        this.targetGene = '';
 
       /* check if data is passed successfully from parent component */
       if (this.similarityHistogramData) {

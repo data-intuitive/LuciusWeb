@@ -5,6 +5,11 @@ import { Observable } from 'rxjs/Observable';
 import { APIEndpoints } from '../../../shared/api-endpoints';
 import { CompoundEnum } from '../../../models';
 
+interface Compound {
+  relatedCompounds: Array<string>;
+  pwids: string;
+};
+
 @Injectable()
 export class CompoundDataService {
 
@@ -28,20 +33,25 @@ export class CompoundDataService {
     private handleResponse(res: Response, classPath: string) {
       /* TODO : Perform some check on the Response code */
       let data = res.json();
-      let parsedRelatedCompounds = this.parseRelatedCompounds(data.result);
+      let parsedCompounds = this.parseRelatedCompounds(data.result);
+      let returnObject = {'data': parsedCompounds, 'type': classPath };
 
-      let returnObject = {'data': parsedRelatedCompounds, 'type': classPath };
       return returnObject;
     }
 
     /* function to parse Related Compounds from server response */
-    private parseRelatedCompounds(relatedCompounds): string[] {
-      let relatedCompoundsArray: string[] = Array();
+    private parseRelatedCompounds(relatedCompounds): Compound {
+      let compoundsObj = <Compound>{};
+      let relatedArr = [];
+      let pwidString = '';
+
       for (let i = 0; i < relatedCompounds.length; i++) {
-        relatedCompoundsArray[i] = relatedCompounds[i][CompoundEnum.relatedJNJ]
-          .toString();
+        relatedArr[i] = relatedCompounds[i][CompoundEnum.relatedJNJ];
+        pwidString += relatedCompounds[i][CompoundEnum.pwids];
       }
-      return relatedCompoundsArray;
+      compoundsObj.relatedCompounds = relatedArr;
+      compoundsObj.pwids = pwidString.replace(/,/g, ' ');
+      return compoundsObj;
     }
 
     /* function to handle Error occuring from interaction with the server */

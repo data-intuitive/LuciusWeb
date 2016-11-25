@@ -16,12 +16,14 @@ export class TargetHistogramDataService {
       let classPath = APIEndpoints.targetHistogram;
       let headers = new Headers({ 'Content-Type': 'text/plain' });
       let options = new RequestOptions({ headers: headers });
-      console.log(url);
       let features = '';
       let body = 'bins=' + data.bins + ', features=zhang';
+      console.log(url);
+
       if (features !== '') {
         body += ' ' + features;
       }
+
       body += ', query=' + data.storeData.signature;
       return this.http.post(url, body, options)
         .map(res => (this.handleResponse(res, classPath)))

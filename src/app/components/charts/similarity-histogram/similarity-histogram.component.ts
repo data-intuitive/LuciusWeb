@@ -1,5 +1,6 @@
 import { Component, ElementRef, ViewChild,  AfterViewInit,
          Input, ViewEncapsulation } from '@angular/core';
+
 import * as d3 from 'd3';
 import { Settings, TargetHistogram } from '../../../models';
 import { BaseGraphComponent } from '../base-graph/base-graph.component';

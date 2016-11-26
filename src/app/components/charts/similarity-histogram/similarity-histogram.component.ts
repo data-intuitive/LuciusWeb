@@ -2,6 +2,9 @@ import { Component, ElementRef, ViewChild,  AfterViewInit,
          Input, ViewEncapsulation } from '@angular/core';
 
 import * as d3 from 'd3';
+import * as d3scale from 'd3-scale';
+import * as d3axis from 'd3-axis';
+
 import { Settings, TargetHistogram } from '../../../models';
 import { BaseGraphComponent } from '../base-graph/base-graph.component';
 
@@ -68,13 +71,11 @@ export class SimilarityHistogramComponent extends BaseGraphComponent
 
     init() {
       super.init();
-      // console.log('svg', this.svg);
     }
 
     initAxis() {
       super.initAxis();
 
-      this.yAxis = d3.svg.axis();
       this.yAxisGroup = this.svg.append('g')
         .attr('class', 'y axis');
     }
@@ -92,22 +93,22 @@ export class SimilarityHistogramComponent extends BaseGraphComponent
       let dataSize = this.data.length - 1;
 
       /* scale for y-Axis */
-      this.yAxisScale = d3.scale.linear()
+      this.yAxisScale = d3scale.scaleLinear()
         .domain([1, -1])
         .range([0, this.gHeightPad]);
 
       /* scale for y-dimension */
-      this.yScale = d3.scale.linear()
+      this.yScale = d3scale.scaleLinear()
         .domain([0, dataSize])
         .range([0, this.gHeightPad]);
 
       /* scale for x-dimension */
-      this.xScale = d3.scale.linear()
+      this.xScale = d3scale.scaleLinear()
         .domain([0, d3.max(this.data)])
         .range([0, this.gWidthPad]);
 
       /* scale to add colors to the chart */
-      this.colorScale = d3.scale.linear<d3.Rgb>()
+      this.colorScale = d3scale.scaleLinear()
         .domain([0, 0.25 * dataSize, 0.5 * dataSize, 0.75 * dataSize, dataSize])
         .range(this.colors);
     }
@@ -116,20 +117,18 @@ export class SimilarityHistogramComponent extends BaseGraphComponent
       super.updateGraph();
 
       /* draw Axis */
-      this.yAxis
-        .scale(this.yAxisScale)
-        .orient('right')
+      this.yAxis = d3axis.axisRight(this.yAxisScale)
         .tickSize(this.gWidth);
 
       this.yAxisGroup
         .attr('transform', 'translate(' +
-          this.margin.left + ',' +
+          (this.margin.right) + ',' +
           (this.margin.top + this.padding.top) + ')')
         .call(this.yAxis);
 
       /* draw graph element according to margins */
       this.g.attr('transform', 'translate(' +
-        (this.margin.left + this.padding.left) + ',' +
+        (this.margin.left + this.padding.left / 0.6) + ',' +
         (this.margin.top + this.padding.top -
         (this.barSize / 2) + (this.barGap / 2)) + ')');
 
@@ -143,60 +142,63 @@ export class SimilarityHistogramComponent extends BaseGraphComponent
       let thisComp = this;
 
       function drawHistogram(selection, selector, fill) {
-        selection.enter()
-        .append('rect');
 
-        selection.attr('class', selector)
-          .attr('x', function(d) { return thisComp.gWidthPad - thisComp.xScale(d); })
-          .attr('y', function(d, i) { return thisComp.yScale(i); })
-          .attr('height', thisComp.barSize - thisComp.barGap)
-          .attr('width', function(d) {
-            return d > 0 ? thisComp.xScale(d) + thisComp.padding.left - 1 : 0;
-          });
+        /* reference to bar element currently being drawn */
+        let bar = selection.enter()
+          .append('rect');
 
-        if (fill) {
-          selection
-            .attr('fill', function(d, i) { return thisComp.colorScale(i); });
-        }
+        /* set bar attribtes */
+        bar
+        .attr('class', selector)
+        .attr('x', function(d) { return thisComp.gWidthPad - thisComp.xScale(d); })
+        .attr('y', function(d, i) { return thisComp.yScale(i); })
+        .attr('height', thisComp.barSize - thisComp.barGap)
+        .attr('width', function(d) {
+          return d > 0 ? thisComp.xScale(d) + thisComp.padding.left - 1 : 0;
+        })
+        .attr('fill', function(d, i) { if (fill) { return thisComp.colorScale(i); }})
+        .on('mouseover', function() {
+          d3.select(this).classed('hover', true);
+        })
+        .on('mouseout', function() {
+          d3.select(this).classed('hover', false);
+        });
+
+        /* done */
         selection.exit().remove();
       }
 
+      /* if gene is selected */
       if (this.geneData.length) {
         this.g.selectAll('.genebar')
           .data(this.geneData)
           .call(drawHistogram, 'genebar', false);
       } else {
-        this.g.selectAll('.genebar').remove();
+        this.g.selectAll('.genebar')
+          .remove();
       }
 
-      let bars = this.g.selectAll('.bar')
+      /* general case */
+      this.g.selectAll('.bar')
         .data(this.data)
         .call(drawHistogram, 'bar', true);
 
-      bars.on('mouseover', function() {
-        d3.select(this).classed('hover', true);
-      });
-
-      bars.on('mouseout', function() {
-        d3.select(this).classed('hover', false);
-      });
-
-      bars.on('click', function(d, i) {
-        // this.fire('core-signal', {
-        //   name: 'filter-data',
-        //   data: { bounds: this.dataBounds[i] }
-        // });
-        // TODO: Update Filter flag in store
-
-        /* undo previous selection */
-        if (this.barSelected) {
-          d3.select(this.barSelected).classed('selected', false);
-        }
-
-        /* mark new selection */
-        this.barSelected = this;
-        d3.select(this.barSelected).classed('selected', true);
-      });
+      // bars.on('click', function(d, i) {
+      //   // this.fire('core-signal', {
+      //   //   name: 'filter-data',
+      //   //   data: { bounds: this.dataBounds[i] }
+      //   // });
+      //   // TODO: Update Filter flag in store
+      //
+      //   /* undo previous selection */
+      //   if (this.barSelected) {
+      //     d3.select(this.barSelected).classed('selected', false);
+      //   }
+      //
+      //   /* mark new selection */
+      //   this.barSelected = this;
+      //   d3.select(this.barSelected).classed('selected', true);
+      // });
 
       this.bg.on('click', function() {
         // this.fire('core-signal', {

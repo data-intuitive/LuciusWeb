@@ -2,6 +2,7 @@ import { Component, ElementRef, ViewChild,  AfterViewInit,
          Input, ViewEncapsulation, OnInit } from '@angular/core';
 
 import * as d3 from 'd3';
+import * as d3scale from 'd3-scale';
 
 @Component({
   selector: 'app-known-targets-hist',
@@ -66,17 +67,18 @@ export class KnownTargetsHistogramComponent implements  AfterViewInit, OnInit {
       let wordsColumns = 4;
       let boxHeight = 32;
       let boxWidth = Math.floor(100 / wordsColumns) + '%';
-
+      let prevSelection;
       let domainMax = data.length ? data[0][1] : 10;
-      let xScale = d3.scale.linear()
+
+      let xScale = d3scale.scaleLinear()
         .domain([1, domainMax])
         .range([1, 100]);
 
       let words = host.select('#words');
       let box = words.selectAll('.box')
-        .data(data);
-
-      box.enter().append('div');
+        .data(data)
+        .enter()
+        .append('div');
 
       box
         .attr('class', 'box')
@@ -88,9 +90,8 @@ export class KnownTargetsHistogramComponent implements  AfterViewInit, OnInit {
                  xScale(d[1]) + '%"></span><span class="num">' +
                  d[1] + '</span></div>';
         });
-      let prevSelection;
-      let thisComp = this;
 
+      let thisComp = this;
       box.on('click', function(d) {
         thisComp.targetGene = d[0];
         thisComp.showTargetGene = true;

@@ -18,8 +18,7 @@
         "styles/main.scss"
       ],
       "scripts": [
-        "../node_modules/hammerjs/hammer.js",
-        "../node_modules/d3-plugin-hist2d/d3.hist2d.js"
+        "../node_modules/hammerjs/hammer.js"
       ],
       "environments": {
         "source": "environments/environment.ts",

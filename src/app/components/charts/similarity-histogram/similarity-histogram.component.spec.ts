@@ -20,6 +20,7 @@ describe('SimilarityHistogramComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(SimilarityHistogramComponent);
     component = fixture.componentInstance;
+    component.isDataReady = true;
     component.settings = {
       version: 1,
       complete: false,

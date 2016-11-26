@@ -5,7 +5,7 @@ import * as d3 from 'd3';
 import * as d3scale from 'd3-scale';
 import * as d3brush from 'd3-brush';
 import * as d3axis from 'd3-axis';
-import * as d3hist2d from 'plugin-hist2d';
+// import * as d3hist2d from 'plugin-hist2d';
 
 import { Settings, Zhang } from '../../../models';
 import { BaseGraphComponent } from '../base-graph/base-graph.component';

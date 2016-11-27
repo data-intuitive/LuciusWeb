@@ -2,10 +2,7 @@ import { Component, ElementRef, ViewChild,  AfterViewInit,
          Input, ViewEncapsulation } from '@angular/core';
 
 import * as d3 from 'd3';
-import 'd3-scale';
-import 'd3-brush';
-import 'd3-axis';
-import 'd3-hist2d';
+import { hist2d } from 'd3-hist2d';
 
 import { Settings, Zhang } from '../../../models';
 import { BaseGraphComponent } from '../base-graph/base-graph.component';
@@ -158,7 +155,7 @@ export class SimilarityScatterComponent extends BaseGraphComponent
     updateBinGraph() {
       if (this.isDataNew) {
         // create Hist2D
-        this.hist2d = d3.hist2d()
+        this.hist2d = hist2d()
           .bins(this.bins)
           .indices([this.noise, 1])
           .domain([this.xScale.domain(), this.yScale.domain()])
@@ -169,6 +166,9 @@ export class SimilarityScatterComponent extends BaseGraphComponent
     }
 
     drawBinGraph(hist: Array<number[]>) {
+      // Break if hist is empty
+      if (!hist.length) { return 0; }
+
       let thisComp = this;
 
       // if (this.isDataNew) {

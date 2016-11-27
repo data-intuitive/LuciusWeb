@@ -1,0 +1,63 @@
+<div class="title">Top {{topcomp}} Compounds </div>
+<div #topCompList id="list" layout horizontal>
+  <!-- <template repeat="{{group, groupIndex in data}}">
+    <div class="container" flex>
+      <div layout horizontal class="header {{group.type}}">
+        {{group.title}}
+      </div>
+      <template repeat="{{model, index in group.model}}">
+        <div
+          class="row {{ {selected: selected} | tokenList }}"
+          on-click="{{handleOpenDialog}}"
+          data-id="{{index}}"
+          data-groupid="{{groupIndex}}"
+          layout horizontal>
+          <div class="zhang" style="background-color:{{model.zhang | getColorValue}}">
+            <span class="full block hint--top" data-hint="{{model.zhang | getRoundValue}}"></span>
+          </div>
+          <div flex class="txt">
+            <div class="uppercase txt-big">
+              <span class="hint--top" data-hint="PlateWell ID">
+                <span class="ellipsis info">{{model.plateid}}</span>
+              </span>
+              <span class="divider"> | </span>
+              <span class="hint--top" data-hint="Type">
+                <span class="ellipsis info">{{model.Type}}</span>
+              </span>
+            </div>
+            <div class="uppercase txt-big">
+              <template if="{{model.jnjs}}">
+                <span class="hint--top" data-hint="JNJS">
+                  <span class="ellipsis info">{{model.jnjs}}</span>
+                </span>
+              </template>
+              <template if="{{model.jnjb}}">
+                <span class="divider"> | </span>
+                <span class="hint--top" data-hint="JNJB">
+                  <span class="ellipsis info">{{model.jnjb}}</span>
+                </span>
+              </template>
+            </div>
+            <div class="txt-small">
+              <span class="block hint--top" data-hint="Compound Name">
+                <span class="ellipsis info capitalize">{{model.compoundname}}</span>
+              </span>
+            </div>
+            <template if="{{model.targets}}">
+              <div class="txt-small">
+                <span class="block hint--top" data-hint="Target(s)">
+                  <span class="ellipsis info">{{model.targets}}</span>
+                </span>
+              </div>
+            </template>
+          </div>
+          <div flex class="img">
+            <template if="{{model.smiles && model.smiles !== 'NA'}}">
+              <img src="http://placekitten.com/160/104" alt="kitten">
+            </template>
+          </div>
+        </div>
+      </template>
+    </div>
+  </template> -->
+</div>

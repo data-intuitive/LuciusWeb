@@ -30,7 +30,8 @@ from './effects';
     components.SimilarityHistogramComponent,
     components.SimilarityScatterComponent,
     components.KnownTargetsHistogramComponent,
-    components.BaseGraphComponent
+    components.BaseGraphComponent,
+    components.TopCompoundsListComponent
   ],
   imports: [
     BrowserModule,

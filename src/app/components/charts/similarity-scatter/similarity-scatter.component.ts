@@ -2,10 +2,10 @@ import { Component, ElementRef, ViewChild,  AfterViewInit,
          Input, ViewEncapsulation } from '@angular/core';
 
 import * as d3 from 'd3';
-import * as d3scale from 'd3-scale';
-import * as d3brush from 'd3-brush';
-import * as d3axis from 'd3-axis';
-// import * as d3hist2d from 'plugin-hist2d';
+import 'd3-scale';
+import 'd3-brush';
+import 'd3-axis';
+import 'd3-hist2d';
 
 import { Settings, Zhang } from '../../../models';
 import { BaseGraphComponent } from '../base-graph/base-graph.component';
@@ -76,7 +76,6 @@ export class SimilarityScatterComponent extends BaseGraphComponent
     initAxis() {
       super.initAxis();
 
-      // this.yAxis = d3.svg.axis();
       this.yAxisGroup = this.svg.append('g')
         .attr('class', 'y axis');
     }
@@ -119,17 +118,17 @@ export class SimilarityScatterComponent extends BaseGraphComponent
       }
 
       /* scale for y-dimension */
-      this.yScale = d3scale.scaleLinear()
+      this.yScale = d3.scaleLinear()
         .domain(yDomain)
         .range([this.gHeightPad, 0]);
 
       /* scale for x-dimension */
-      this.xScale = d3scale.scaleLinear()
+      this.xScale = d3.scaleLinear()
         .domain(xDomain)
         .range([0, this.gWidthPad]);
 
       /* scale to add colors to the chart */
-      this.colorScale = d3scale.scaleLinear()
+      this.colorScale = d3.scaleLinear()
         .domain([1, 0.5, 0, -0.5, -1])
         .range(this.colors);
     }
@@ -138,7 +137,7 @@ export class SimilarityScatterComponent extends BaseGraphComponent
       super.updateGraph();
 
       // draw Axis
-      this.yAxis = d3axis.axisLeft(this.yScale)
+      this.yAxis = d3.axisLeft(this.yScale)
         .tickSize(this.gWidth);
 
       this.yAxisGroup
@@ -159,17 +158,17 @@ export class SimilarityScatterComponent extends BaseGraphComponent
     updateBinGraph() {
       if (this.isDataNew) {
         // create Hist2D
-        // this.hist2d = d3hist2d.hist2d()
-        //   .bins(this.bins)
-        //   .indices([this.noise, 1])
-        //   .domain([this.xScale.domain(), this.yScale.domain()])
-        //   (this.data, this.drawBinGraph.bind(this));
+        this.hist2d = d3.hist2d()
+          .bins(this.bins)
+          .indices([this.noise, 1])
+          .domain([this.xScale.domain(), this.yScale.domain()])
+          (this.data, this.drawBinGraph);
       } else {
         this.drawBinGraph(this.histData);
       }
     }
 
-    drawBinGraph(hist: Array<Array<number>>) {
+    drawBinGraph(hist: Array<number[]>) {
       let thisComp = this;
 
       // if (this.isDataNew) {
@@ -186,7 +185,7 @@ export class SimilarityScatterComponent extends BaseGraphComponent
       this.histExtent = d3.extent(hist, function(d) { return d.length; });
 
       let radius = Math.min(this.histW, this.histH) / 2;
-      let rScale = d3scale.scaleLinear()
+      let rScale = d3.scaleLinear()
         .domain(this.histExtent)
         .range([radius * 0.4, radius * 1.6]);
 
@@ -257,7 +256,7 @@ export class SimilarityScatterComponent extends BaseGraphComponent
     }
 
     initBrush() {
-      this.brush = d3brush.brush();
+      this.brush = d3.brush();
 
       this.brushG = this.g.append('g')
         .attr('class', 'brush');

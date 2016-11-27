@@ -2,7 +2,7 @@ import { Component, ElementRef, ViewChild,  AfterViewInit,
          Input, ViewEncapsulation, OnInit } from '@angular/core';
 
 import * as d3 from 'd3';
-import * as d3scale from 'd3-scale';
+import 'd3-scale';
 
 @Component({
   selector: 'app-known-targets-hist',
@@ -70,7 +70,7 @@ export class KnownTargetsHistogramComponent implements  AfterViewInit, OnInit {
       let prevSelection;
       let domainMax = data.length ? data[0][1] : 10;
 
-      let xScale = d3scale.scaleLinear()
+      let xScale = d3.scaleLinear()
         .domain([1, domainMax])
         .range([1, 100]);
 

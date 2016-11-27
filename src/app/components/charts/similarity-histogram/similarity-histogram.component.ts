@@ -2,8 +2,8 @@ import { Component, ElementRef, ViewChild,  AfterViewInit,
          Input, ViewEncapsulation } from '@angular/core';
 
 import * as d3 from 'd3';
-import * as d3scale from 'd3-scale';
-import * as d3axis from 'd3-axis';
+import 'd3-scale';
+import 'd3-axis';
 
 import { Settings, TargetHistogram } from '../../../models';
 import { BaseGraphComponent } from '../base-graph/base-graph.component';
@@ -93,22 +93,22 @@ export class SimilarityHistogramComponent extends BaseGraphComponent
       let dataSize = this.data.length - 1;
 
       /* scale for y-Axis */
-      this.yAxisScale = d3scale.scaleLinear()
+      this.yAxisScale = d3.scaleLinear()
         .domain([1, -1])
         .range([0, this.gHeightPad]);
 
       /* scale for y-dimension */
-      this.yScale = d3scale.scaleLinear()
+      this.yScale = d3.scaleLinear()
         .domain([0, dataSize])
         .range([0, this.gHeightPad]);
 
       /* scale for x-dimension */
-      this.xScale = d3scale.scaleLinear()
+      this.xScale = d3.scaleLinear()
         .domain([0, d3.max(this.data)])
         .range([0, this.gWidthPad]);
 
       /* scale to add colors to the chart */
-      this.colorScale = d3scale.scaleLinear()
+      this.colorScale = d3.scaleLinear()
         .domain([0, 0.25 * dataSize, 0.5 * dataSize, 0.75 * dataSize, dataSize])
         .range(this.colors);
     }
@@ -117,7 +117,7 @@ export class SimilarityHistogramComponent extends BaseGraphComponent
       super.updateGraph();
 
       /* draw Axis */
-      this.yAxis = d3axis.axisRight(this.yAxisScale)
+      this.yAxis = d3.axisRight(this.yAxisScale)
         .tickSize(this.gWidth);
 
       this.yAxisGroup

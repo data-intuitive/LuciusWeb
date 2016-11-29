@@ -45,6 +45,7 @@ export class SimilarityScatterComponent extends BaseGraphComponent
 
     isDataFiltered;
     isDrawBin;
+    isDataReady = false;
     hist2d;
     histData: any[][] = Array();
     histW = 0;
@@ -56,17 +57,22 @@ export class SimilarityScatterComponent extends BaseGraphComponent
 
     constructor() {
       super();
-      for (let i = 0; i < this.zhangData.length; i++) {
-        this.data[i][0] = (this.zhangData[i].indexSorted);
-        this.data[i][1] = (this.zhangData[i].zhangScore);
-      }
-      this.isDataNew = true;
     }
 
     ngAfterViewInit() {
       super.ngAfterViewInit();
-
       this.bins = this.settings.hist2dBins;
+
+      if (this.zhangData && this.settings) {
+        for (let i = 0; i < this.zhangData.length; i++) {
+          this.data[i] = [0, 0];
+          this.data[i][0] = (this.zhangData[i].indexSorted);
+          this.data[i][1] = (this.zhangData[i].zhangScore);
+        }
+        this.isDataNew = true;
+        this.isDataReady = true;
+      }
+
       this.init();
     }
 
@@ -80,8 +86,10 @@ export class SimilarityScatterComponent extends BaseGraphComponent
     init() {
       super.init();
 
-      this.binG = this.g.append('g');
-      this.simG = this.g.append('g');
+      this.binG = this.g.append('g')
+        .attr('id', 'binG');
+      this.simG = this.g.append('g')
+        .attr('id', 'simG');
     }
 
     updateValues() {
@@ -101,10 +109,10 @@ export class SimilarityScatterComponent extends BaseGraphComponent
       /* reference to current component */
       let thisComp = this;
 
-      /* d[1] = zhang score of each data element */
+      /* define domain for y dimension [zhang score] */
       let yDomain = d3.extent(this.data, function(d) { return d[1]; });
 
-      /* get noise value */
+      /* define domain for x dimension [index sorted]*/
       let xDomain = d3.extent(this.data, function(d) { return d[thisComp.noise]; });
 
       if (this.isDataFiltered && this.data.length === 1) {
@@ -155,6 +163,7 @@ export class SimilarityScatterComponent extends BaseGraphComponent
     updateBinGraph() {
       if (this.isDataNew) {
         // create Hist2D
+
         this.hist2d = hist2d()
           .bins(this.bins)
           .indices([this.noise, 1])
@@ -170,6 +179,7 @@ export class SimilarityScatterComponent extends BaseGraphComponent
       if (!hist.length) { return 0; }
 
       let thisComp = this;
+
 
       // if (this.isDataNew) {
       //   thisComp.fire('core-signal', { name: 'stop-loader' });

@@ -1,4 +1,15 @@
+@import '../../../../styles/variables';
+
 :host {
+  .title {
+    font-size: $font-sm;
+
+    padding: unit(.5);
+
+    color: md-color($primary, 600);
+    background-color: md-color($primary, 50);
+  }
+
   #list {
     div.container {
       margin: 0 8px;

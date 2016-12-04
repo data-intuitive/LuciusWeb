@@ -2,8 +2,6 @@
 
 :host {
   display: flex;
-  flex-direction: column;
-  flex: 2 1 auto;
 
   box-sizing: border-box;
   min-width: unit(14);
@@ -28,5 +26,18 @@
 
   & > * {
     margin-bottom: unit();
+  }
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  width: 75%;
+
+  .simScatter {
+    flex: 1;
+  }
+
+  .simeHist {
+    flex: 1;
   }
 }

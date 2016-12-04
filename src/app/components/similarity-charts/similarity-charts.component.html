@@ -1,7 +1,7 @@
 <div class="content">
 
   <!-- Add similarity Scatter schart -->
-  <div *ngIf="zhangReady$ | async">
+  <div class='simScatter' *ngIf="zhangReady$ | async">
     <app-similarity-scatter
       [settings]="settings"
       [zhangData]="zhangArray">
@@ -9,7 +9,7 @@
   </div>
 
   <!-- Add similarity Histogram chart -->
-  <div *ngIf="similarityHistogramReady$ | async">
+  <div class='simHist' *ngIf="similarityHistogramReady$ | async">
     <app-similarity-histogram
       [settings]="settings"
       [similarityHistogramData]="similarityHistogramData">

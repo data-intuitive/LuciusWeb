@@ -1,11 +1,16 @@
 import { Component, ElementRef, ViewChild,  AfterViewInit,
-         Input, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
+         Input, ViewEncapsulation, ChangeDetectorRef,
+         ViewContainerRef } from '@angular/core';
+
+import { MdDialog, MdDialogConfig, MdDialogRef } from '@angular/material';
+import { Settings, AnnotatedPlatewellid, Zhang } from '../../../models';
+import { ActionDialogComponent } from './action-dialog/action-dialog.component';
 
 import * as d3 from 'd3';
 import 'd3-color';
 import 'd3-scale';
 
-import { Settings, AnnotatedPlatewellid, Zhang } from '../../../models';
+const detailDialog = ActionDialogComponent;
 
 /* app colors definition */
 const appColors = [
@@ -20,7 +25,8 @@ const appColors = [
   selector: 'app-top-compounds-list',
   encapsulation: ViewEncapsulation.Native,
   templateUrl: './top-compounds-list.component.html',
-  styleUrls: ['./top-compounds-list.component.scss']
+  styleUrls: ['./top-compounds-list.component.scss'],
+  entryComponents: [ActionDialogComponent]
 })
 export class TopCompoundsListComponent implements AfterViewInit {
 
@@ -44,7 +50,12 @@ export class TopCompoundsListComponent implements AfterViewInit {
   data = [];
   initDone = false;
 
-  constructor(private cdr: ChangeDetectorRef) {
+  /* ref to Dialog Window */
+  dialogRef: MdDialogRef<ActionDialogComponent>;
+
+  constructor(public dialog: MdDialog,
+      public viewContainerRef: ViewContainerRef,
+      private cdr: ChangeDetectorRef) {
   }
 
   ngAfterViewInit() {
@@ -83,7 +94,7 @@ export class TopCompoundsListComponent implements AfterViewInit {
 
   initData() {
     this.topcomp = this.settings.topComps;
-    console.log(this.topPositiveAnnotatedPlatewellids);
+    // console.log(this.topPositiveAnnotatedPlatewellids);
 
     if (!this.isBrushEmpty) {
       // this.data = [
@@ -111,7 +122,13 @@ export class TopCompoundsListComponent implements AfterViewInit {
     this.initDone = true;
   }
 
-  handleOpenDialog (e, n, el) {
+  handleOpenDialog (el, groupIdx, modelIdx) {
+    let config = new MdDialogConfig();
+    config.viewContainerRef = this.viewContainerRef;
+
+    this.dialogRef = this.dialog.open(detailDialog, config);
+
+    // console.log(el);
     // let dataFlat = [];
     // let id = +el.dataset.id + (+el.dataset.groupid * this.topcomp);
 

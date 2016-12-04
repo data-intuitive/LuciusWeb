@@ -4,7 +4,7 @@
         {{group.title}}
       </div>
       <div class="row" *ngFor="let model of group.model; let modelIndex = index"
-        on-click="handleOpenDialog"
+        (click)="handleOpenDialog(groupIndex, modelIndex, model)"
         [attr.data-id]="modelIndex"
         [attr.data-groupid]="groupIndex">
 

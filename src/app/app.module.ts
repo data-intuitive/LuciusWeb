@@ -31,7 +31,8 @@ from './effects';
     components.SimilarityScatterComponent,
     components.KnownTargetsHistogramComponent,
     components.BaseGraphComponent,
-    components.TopCompoundsListComponent
+    components.TopCompoundsListComponent,
+    components.ActionDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -59,6 +60,7 @@ from './effects';
     services.TargetFrequencyDataService,
     services.TargetHistogramDataService,
   ],
+  entryComponents: [components.ActionDialogComponent],
   bootstrap: [AppComponent]
 })
 

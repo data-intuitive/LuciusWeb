@@ -9,3 +9,4 @@ export * from './charts/similarity-scatter/similarity-scatter.component';
 export * from './charts/known-targets-histogram/known-targets-histogram.component';
 export * from './charts/base-graph/base-graph.component';
 export * from './charts/top-compounds-list/top-compounds-list.component';
+export * from './charts/top-compounds-list/action-dialog/action-dialog.component';

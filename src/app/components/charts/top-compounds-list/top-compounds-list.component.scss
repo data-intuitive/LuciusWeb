@@ -1,24 +1,19 @@
 @import '../../../../styles/variables';
 
 :host {
-  .title {
-    font-size: $font-sm;
-
-    padding: unit(.5);
-
-    color: md-color($primary, 600);
-    background-color: md-color($primary, 50);
-  }
-
   #list {
+    display: flex;
+    flex-direction: row;
+
     div.container {
+      flex: 0 1 auto;
       margin: 0 8px;
       box-shadow: 0 1px 2px rgba(0, 0, 0, .1);
       background-color: #fefefe;
     }
 
     div.header {
-      align-items: center;
+      flex: 0 1 auto;
 
       height: 40px;
       line-height: 40px;
@@ -45,9 +40,13 @@
       width: 16px;
     }
 
-    $s-row-height: 112px;
+    $s-row-height: 120px;
 
     div.row {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+
       height: $s-row-height;
       padding: 4px 16px;
       border-bottom: solid 1px #eee;
@@ -55,6 +54,7 @@
       align-items: center;
 
       .zhang {
+        flex: 0 1 auto;
         width: 12px;
         height: $s-row-height - 24;
         margin: 0 12px 0 0;
@@ -62,23 +62,20 @@
       }
 
       .txt {
+        flex: 0 1 auto;
         line-height: 1.2em;
       }
 
       .txt > div {
         padding-right: 4px;
-        width: 100%;
+        max-width: 100%;
         display: table;
         table-layout: fixed;
       }
 
-      .txt > div:last-child {
-        // padding-top: 4px;
-      }
-
       .txt-big {
         font-size: 16px;
-        // font-weight: 500;
+        font-weight: 250;
       }
 
       .txt-small {
@@ -87,9 +84,7 @@
       }
 
       .ellipsis {
-        width: 100%;
-        display: block;
-
+        max-width: 100%;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -98,8 +93,6 @@
       .divider {
         color: #ccc;
         margin: 0;
-        position: relative;
-        top: -5px;
       }
 
       .uppercase {
@@ -120,6 +113,8 @@
       }
 
       .img {
+        flex: 0 1 auto;
+
         text-align: center;
 
         img {

@@ -22,7 +22,8 @@ export class TopCompoundsComponent implements OnInit {
     @Input() settings: Settings;
     zhangReady$: Observable<boolean>;
     annotatedPlatewellidsReady$: Observable<boolean>;
-    annotatedPlatewellids: AnnotatedPlatewellid[] = Array();
+    topPositiveAnnotatedPlatewellids: AnnotatedPlatewellid[] = Array();
+    topNegativeAnnotatedPlatewellids: AnnotatedPlatewellid[] = Array();
     topPositiveCorrelations: Zhang[] = Array();
     topNegativeCorrelations: Zhang[] = Array();
     numComps: number;
@@ -61,6 +62,7 @@ export class TopCompoundsComponent implements OnInit {
      handleZhangEvent(ev): void {
        if (ev) {
          let zhangArray = this.handleDataService.getData(APIEndpoints.zhang);
+
          this.topPositiveCorrelations = this.
            getTopCorrelations(zhangArray, pos);
 
@@ -71,8 +73,13 @@ export class TopCompoundsComponent implements OnInit {
 
      handleAnnotatedPlateWellidsEvent(ev): void {
        if (ev) {
-         this.annotatedPlatewellids = this.handleDataService.
-          getData(APIEndpoints.annotatedPlateWellids);
+         let annotatedPlatewellidsArray = this.handleDataService.getData(APIEndpoints.annotatedPlateWellids);
+
+         this.topPositiveAnnotatedPlatewellids = this.
+          getTopAnnotatedPlateWellIds(annotatedPlatewellidsArray, pos);
+
+        this.topNegativeAnnotatedPlatewellids = this.
+           getTopAnnotatedPlateWellIds(annotatedPlatewellidsArray, neg);
        }
      }
 
@@ -86,6 +93,21 @@ export class TopCompoundsComponent implements OnInit {
       } else {
         return subArray = zhangArray.
           slice(zhangArray.length - this.numComps, zhangArray.length).
+          reverse();
+      }
+    }
+
+    /* function to get top postive/negative annotatedPlateWellIds */
+    getTopAnnotatedPlateWellIds(annotatedPlatewellidsArray: AnnotatedPlatewellid[],
+       type: string): AnnotatedPlatewellid[] {
+      let subArray: AnnotatedPlatewellid[] = Array();
+
+      if (type === 'POSITIVE') {
+        return subArray = annotatedPlatewellidsArray.
+          slice(0, this.numComps);
+      } else {
+        return subArray = annotatedPlatewellidsArray.
+          slice(annotatedPlatewellidsArray.length - this.numComps, annotatedPlatewellidsArray.length).
           reverse();
       }
     }

@@ -1,5 +1,5 @@
 import { Component, ElementRef, ViewChild,  AfterViewInit,
-         Input, ViewEncapsulation } from '@angular/core';
+         Input, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
 
 import * as d3 from 'd3';
 import 'd3-color';
@@ -26,7 +26,8 @@ export class TopCompoundsListComponent implements AfterViewInit {
 
   @ViewChild('topCompList') element: ElementRef;
   @Input() settings: Settings;
-  @Input() annotatedPlatewellids: AnnotatedPlatewellid[] = Array();
+  @Input() topPositiveAnnotatedPlatewellids: AnnotatedPlatewellid[] = Array();
+  @Input() topNegativeAnnotatedPlatewellids: AnnotatedPlatewellid[] = Array();
   @Input() topPositiveCorrelations: Zhang[] = Array();
   @Input() topNegativeCorrelations: Zhang[] = Array();
 
@@ -41,6 +42,10 @@ export class TopCompoundsListComponent implements AfterViewInit {
   isInputReady = false;
   topcomp = 25;
   data = [];
+  initDone = false;
+
+  constructor(private cdr: ChangeDetectorRef) {
+  }
 
   ngAfterViewInit() {
     this.el = this.element.nativeElement;
@@ -49,20 +54,24 @@ export class TopCompoundsListComponent implements AfterViewInit {
     if (this.settings &&
         this.topPositiveCorrelations &&
         this.topNegativeCorrelations &&
-        this.annotatedPlatewellids) {
+        this.topPositiveAnnotatedPlatewellids &&
+        this.topNegativeAnnotatedPlatewellids
+      ) {
           this.isInputReady = true;
     }
 
-    if (this.isInputReady) {
-      this.initData();
-    }
-
-    let host = d3.select(this.el);
+    // let host = d3.select(this.el);
 
     /* define colorscale */
     this.colorScale = d3.scaleLinear()
       .domain([1, 0.5, 0, -0.5, -1])
       .range(this.colors);
+
+    if (this.isInputReady) {
+      this.initData();
+    }
+
+    this.cdr.detectChanges();
 
     /* hide sensitive information */
     if (this.settings.hiddenComps) {
@@ -72,10 +81,9 @@ export class TopCompoundsListComponent implements AfterViewInit {
     }
   }
 
-  constructor() { }
-
   initData() {
     this.topcomp = this.settings.topComps;
+    console.log(this.topPositiveAnnotatedPlatewellids);
 
     if (!this.isBrushEmpty) {
       // this.data = [
@@ -90,16 +98,17 @@ export class TopCompoundsListComponent implements AfterViewInit {
         {
           title: 'Top ' + this.topcomp + ' positive correlations',
           type: 'positive',
-          model: this.topPositiveCorrelations
+          model: this.topPositiveAnnotatedPlatewellids
         },
         {
           title: 'Top ' + this.topcomp + ' negative correlations',
           type: 'negative',
-          model: this.topNegativeCorrelations
+          model: this.topNegativeAnnotatedPlatewellids
         }
       ];
     }
-
+    // console.log(this.data);
+    this.initDone = true;
   }
 
   handleOpenDialog (e, n, el) {
@@ -117,15 +126,14 @@ export class TopCompoundsListComponent implements AfterViewInit {
   }
 
   getColorValue(value) {
-          if (value) {
-            return this.colorScale(value);
-          }
-        }
+    if (value) {
+      return this.colorScale(value);
+    }
+  }
 
   getRoundValue(value) {
     if (value) {
-      // 'e3' ?
-      return Number(Math.round(value) + 'e-3');
+      return value.toFixed(3);
     }
   }
 

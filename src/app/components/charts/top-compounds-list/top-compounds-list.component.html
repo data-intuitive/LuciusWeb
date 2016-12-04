@@ -1,63 +1,57 @@
-<div class="title">Top {{topcomp}} Compounds </div>
-<div #topCompList id="list" layout horizontal>
-  <!-- <template repeat="{{group, groupIndex in data}}">
-    <div class="container" flex>
-      <div layout horizontal class="header {{group.type}}">
+<div #topCompList id="list">
+    <div class = "container" *ngFor="let group of data; let groupIndex = index">
+      <div class="header {{group.type}}">
         {{group.title}}
       </div>
-      <template repeat="{{model, index in group.model}}">
-        <div
-          class="row {{ {selected: selected} | tokenList }}"
-          on-click="{{handleOpenDialog}}"
-          data-id="{{index}}"
-          data-groupid="{{groupIndex}}"
-          layout horizontal>
-          <div class="zhang" style="background-color:{{model.zhang | getColorValue}}">
-            <span class="full block hint--top" data-hint="{{model.zhang | getRoundValue}}"></span>
+      <div class="row" *ngFor="let model of group.model; let modelIndex = index"
+        on-click="handleOpenDialog"
+        [attr.data-id]="modelIndex"
+        [attr.data-groupid]="groupIndex">
+
+        <!-- Bar and Zhang Score -->
+        <div class="zhang" [style.background-color]="getColorValue(model.zhang)">
+          <span class="full block hint--top" [attr.data-hint]="getRoundValue(model.zhang)"></span>
+        </div>
+
+        <!-- Text Info -->
+        <div class="txt">
+          <div class="uppercase txt-big">
+            <span class="hint--top" data-hint="PlateWell ID">
+              <span class="ellipsis info">{{model.plateid}}</span>
+            </span>
+            <span class="divider"> | </span>
+            <span class="hint--top" data-hint="Type">
+              <span class="ellipsis info">{{model.Type}}</span>
+            </span>
           </div>
-          <div flex class="txt">
-            <div class="uppercase txt-big">
-              <span class="hint--top" data-hint="PlateWell ID">
-                <span class="ellipsis info">{{model.plateid}}</span>
-              </span>
+          <div class="uppercase txt-big">
+            <span *ngIf="model.jnjs" class="hint--top" data-hint="JNJS">
+                <span class="ellipsis info">{{model.jnjs}}</span>
+            </span>
+            <span *ngIf="model.jnjb" class="hint--top" data-hint="JNJB">
               <span class="divider"> | </span>
-              <span class="hint--top" data-hint="Type">
-                <span class="ellipsis info">{{model.Type}}</span>
-              </span>
-            </div>
-            <div class="uppercase txt-big">
-              <template if="{{model.jnjs}}">
-                <span class="hint--top" data-hint="JNJS">
-                  <span class="ellipsis info">{{model.jnjs}}</span>
-                </span>
-              </template>
-              <template if="{{model.jnjb}}">
-                <span class="divider"> | </span>
-                <span class="hint--top" data-hint="JNJB">
-                  <span class="ellipsis info">{{model.jnjb}}</span>
-                </span>
-              </template>
-            </div>
-            <div class="txt-small">
-              <span class="block hint--top" data-hint="Compound Name">
-                <span class="ellipsis info capitalize">{{model.compoundname}}</span>
-              </span>
-            </div>
-            <template if="{{model.targets}}">
-              <div class="txt-small">
-                <span class="block hint--top" data-hint="Target(s)">
-                  <span class="ellipsis info">{{model.targets}}</span>
-                </span>
-              </div>
-            </template>
+              <span class="ellipsis info">{{model.jnjb}}</span>
+            </span>
           </div>
-          <div flex class="img">
-            <template if="{{model.smiles && model.smiles !== 'NA'}}">
-              <img src="http://placekitten.com/160/104" alt="kitten">
-            </template>
+          <div class="txt-small">
+            <span class="block hint--top" data-hint="Compound Name">
+              <span class="ellipsis info capitalize">{{model.compoundname}}</span>
+            </span>
+          </div>
+          <div *ngIf="model.targets" class="txt-small">
+            <span  class="block hint--top" data-hint="Target(s)">
+              <span class="ellipsis info">{{model.targets}}</span>
+            </span>
           </div>
         </div>
-      </template>
+
+        <!-- Image -->
+        <div class="img">
+          <div *ngIf="model.smiles && model.smiles !== 'NA'">
+            <img src="http://placekitten.com/160/104" alt="kitten">
+          </div>
+        </div>
+
+      </div>
     </div>
-  </template> -->
 </div>

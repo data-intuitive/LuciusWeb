@@ -1,8 +1,6 @@
 @import '../../../styles/variables';
 
 :host {
-  display: flex;
-
   box-sizing: border-box;
   min-width: unit(14);
   margin: unit();
@@ -34,10 +32,10 @@
   width: 75%;
 
   .simScatter {
-    flex: 1;
+    flex: 1 1 auto;
   }
 
-  .simeHist {
-    flex: 1;
+  .simHist {
+    flex: 1 1 auto;
   }
 }

@@ -13,23 +13,6 @@ $cl-grey-50: #f3f3f3;
   background-color: $cl-grey-100;
   overflow-y: auto;
 
-  .title {
-    font-size: $font-sm;
-
-    padding: unit(.5);
-
-    color: md-color($primary, 600);
-    background-color: md-color($primary, 50);
-  }
-
-  .content {
-    padding: unit();
-
-    & > * {
-      margin-bottom: unit();
-    }
-  }
-
   .header {
     align-items: center;
 

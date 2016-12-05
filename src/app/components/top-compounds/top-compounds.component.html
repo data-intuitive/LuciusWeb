@@ -1,4 +1,4 @@
-<div class = "content" *ngIf="annotatedPlatewellidsReady$ | async">
+<div *ngIf="annotatedPlatewellidsReady$ | async">
   <app-top-compounds-list
     [settings]="settings"
     [topPositiveCorrelations]="topPositiveCorrelations"

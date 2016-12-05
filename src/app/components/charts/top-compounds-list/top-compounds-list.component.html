@@ -1,5 +1,5 @@
 <div #topCompList id="list">
-    <div class = "container" *ngFor="let group of data; let groupIndex = index">
+    <div class="container" *ngFor="let group of data; let groupIndex = index">
       <div class="header {{group.type}}">
         {{group.title}}
       </div>
@@ -10,38 +10,56 @@
 
         <!-- Bar and Zhang Score -->
         <div class="zhang" [style.background-color]="getColorValue(model.zhang)">
-          <span class="full block hint--top" [attr.data-hint]="getRoundValue(model.zhang)"></span>
+          <span [ngClass]="['full', 'block', 'tooltip']">
+              <span class="tooltiptext">{{getRoundValue(model.zhang)}}</span>
+          </span>
         </div>
 
         <!-- Text Info -->
         <div class="txt">
           <div class="uppercase txt-big">
-            <span class="hint--top" data-hint="PlateWell ID">
-              <span class="ellipsis info">{{model.plateid}}</span>
+            <span class="tooltip">
+              <span [ngClass]="['ellipsis', 'info']">
+                {{model.plateid}}
+                <span class="tooltiptext">PlateWell ID</span>
+              </span>
             </span>
             <span class="divider"> | </span>
-            <span class="hint--top" data-hint="Type">
-              <span class="ellipsis info">{{model.Type}}</span>
+            <span class="tooltip">
+              <span [ngClass]="['ellipsis', 'info']">
+                {{model.Type}}
+                <span class="tooltiptext">Type</span>
+              </span>
             </span>
           </div>
+
           <div class="uppercase txt-big">
-            <span *ngIf="model.jnjs" class="hint--top" data-hint="JNJS">
-                <span class="ellipsis info">{{model.jnjs}}</span>
+            <span *ngIf="model.jnjs" class="tooltip">
+                <div [ngClass]="['ellipsis', 'info']">
+                  {{model.jnjs}}
+                  <span class="tooltiptext">JNJS</span>
+                </div>
             </span>
-            <span *ngIf="model.jnjb" class="hint--top" data-hint="JNJB">
+            <span *ngIf="model.jnjb" class="tooltip">
               <span class="divider"> | </span>
-              <span class="ellipsis info">{{model.jnjb}}</span>
+              <span [ngClass]="['ellipsis', 'info']">
+                {{model.jnjb}}
+                <span class="tooltiptext">JNJB</span>
+              </span>
             </span>
           </div>
+
           <div class="txt-small">
-            <span class="block hint--top" data-hint="Compound Name">
-              <span class="ellipsis info capitalize">{{model.compoundname}}</span>
+            <span [ngClass]="['ellipsis', 'capitalize', 'info', 'tooltip']">
+              {{model.compoundname}}
+              <span class="tooltiptext">Compound Name</span>
             </span>
           </div>
-          <div class="txt-small block">
-            <span *ngIf="model.targets" class="hint--top" data-hint="Target(s)">
-              <span class="ellipsis info">{{model.targets}}</span>
-            </span>
+          <div *ngIf="model.targets" class="txt-small">
+              <span [ngClass]="['ellipsis', 'info', 'tooltip']">
+                {{model.targets}}
+                <span class="tooltiptext">Target(s)</span>
+              </span>
           </div>
         </div>
 

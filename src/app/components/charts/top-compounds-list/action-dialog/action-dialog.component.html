@@ -1,3 +1,12 @@
-<h2>Md Dialog</h2>
-<p>Details</p>
-<button md-raised-button (click)="dialogRef.close()">Close</button>
+<div id='detail'>
+  <!-- {{dataDetail | json}} -->
+
+  <div class="image">
+    <div *ngIf="dataDetail.smiles">
+      <div style="background-image: url(http://placekitten.com/600/300);"></div>
+    </div>
+    <div *ngIf="!dataDetail.smiles">
+      <div>NO IMAGE</div>
+    </div>
+  </div>
+  <button md-raised-button (click)="dialogRef.close()">Close</button>

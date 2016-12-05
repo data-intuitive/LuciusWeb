@@ -11,13 +11,4 @@
   background-color: $bg-color;
 
   @include md-elevation(1);
-
-  .content {
-    padding: unit();
-    flex: 0 1 auto;
-
-    & > * {
-      margin-bottom: unit();
-    }
-  }
 }

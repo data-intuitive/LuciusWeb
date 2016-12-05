@@ -5,6 +5,7 @@ import { Component, ElementRef, ViewChild,  AfterViewInit,
 import { MdDialog, MdDialogConfig, MdDialogRef } from '@angular/material';
 import { Settings, AnnotatedPlatewellid, Zhang } from '../../../models';
 import { ActionDialogComponent } from './action-dialog/action-dialog.component';
+import { HandleDataService } from '../../../services';
 
 import * as d3 from 'd3';
 import 'd3-color';
@@ -25,9 +26,9 @@ const appColors = [
   selector: 'app-top-compounds-list',
   encapsulation: ViewEncapsulation.Native,
   templateUrl: './top-compounds-list.component.html',
-  styleUrls: ['./top-compounds-list.component.scss'],
-  entryComponents: [ActionDialogComponent]
+  styleUrls: ['./top-compounds-list.component.scss']
 })
+
 export class TopCompoundsListComponent implements AfterViewInit {
 
   @ViewChild('topCompList') element: ElementRef;
@@ -55,7 +56,8 @@ export class TopCompoundsListComponent implements AfterViewInit {
 
   constructor(public dialog: MdDialog,
       public viewContainerRef: ViewContainerRef,
-      private cdr: ChangeDetectorRef) {
+      private cdr: ChangeDetectorRef,
+      private handleDataService: HandleDataService) {
   }
 
   ngAfterViewInit() {
@@ -94,7 +96,6 @@ export class TopCompoundsListComponent implements AfterViewInit {
 
   initData() {
     this.topcomp = this.settings.topComps;
-    // console.log(this.topPositiveAnnotatedPlatewellids);
 
     if (!this.isBrushEmpty) {
       // this.data = [
@@ -118,17 +119,16 @@ export class TopCompoundsListComponent implements AfterViewInit {
         }
       ];
     }
-    // console.log(this.data);
     this.initDone = true;
   }
 
-  handleOpenDialog (el, groupIdx, modelIdx) {
+  handleOpenDialog (groupIdx: number , modelIdx: number, el: AnnotatedPlatewellid) {
     let config = new MdDialogConfig();
     config.viewContainerRef = this.viewContainerRef;
+    this.handleDataService.setCorrelationData(el);
 
     this.dialogRef = this.dialog.open(detailDialog, config);
 
-    // console.log(el);
     // let dataFlat = [];
     // let id = +el.dataset.id + (+el.dataset.groupid * this.topcomp);
 

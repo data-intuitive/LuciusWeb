@@ -152,7 +152,7 @@ export class SimilarityHistogramComponent extends BaseGraphComponent
         .attr('class', selector)
         .attr('x', function(d) { return thisComp.gWidthPad - thisComp.xScale(d); })
         .attr('y', function(d, i) { return thisComp.yScale(i); })
-        .attr('height', thisComp.barSize - thisComp.barGap)
+        .attr('height', thisComp.barSize - thisComp.barGap + 2.5)
         .attr('width', function(d) {
           return d > 0 ? thisComp.xScale(d) + thisComp.padding.left - 1 : 0;
         })

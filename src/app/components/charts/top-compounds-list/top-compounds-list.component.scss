@@ -1,13 +1,17 @@
 @import '../../../../styles/variables';
+$cl-grey-100: #eee;
 
 :host {
+  background-color: $cl-grey-100;
+  overflow-y: auto;
+
   #list {
     display: flex;
     flex-direction: row;
 
     div.container {
       flex: 0 1 auto;
-      margin: 0 8px;
+      // margin: 0 8px;
       box-shadow: 0 1px 2px rgba(0, 0, 0, .1);
       background-color: #fefefe;
     }
@@ -54,7 +58,7 @@
       align-items: center;
 
       .zhang {
-        flex: 0 1 auto;
+        flex: 1 0 auto;
         width: 12px;
         height: $s-row-height - 24;
         margin: 0 12px 0 0;
@@ -68,14 +72,14 @@
 
       .txt > div {
         padding-right: 4px;
-        max-width: 100%;
+        width: 100%;
         display: table;
         table-layout: fixed;
       }
 
       .txt-big {
         font-size: 16px;
-        font-weight: 250;
+        font-weight: 300;
       }
 
       .txt-small {
@@ -84,9 +88,8 @@
       }
 
       .ellipsis {
-        max-width: 100%;
-        white-space: nowrap;
-        overflow: hidden;
+        width: 100%;
+        white-space: wrap;
         text-overflow: ellipsis;
       }
 
@@ -113,7 +116,7 @@
       }
 
       .img {
-        flex: 0 1 auto;
+        flex: 1 0 auto;
 
         text-align: center;
 
@@ -136,47 +139,44 @@
       div.right {
         text-align: right;
       }
+    }
 
-      //// TOOLTIP OVERRRIDE ////
-      [data-hint]:hover::before,
-      [data-hint]:hover::after {
-        transition-delay: 800ms;
-      }
+    .tooltip {
+      position: relative;
+      display: inline-block;
+    }
 
-      /**
-       * top tooltip
-       */
-      .hint--top {
-        z-index: 1000;
-      }
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      font-size: 12px;
+      background-color: #333;
+      color: #eee;
+      text-align: center;
+      border-radius: 6px;
+      padding: 5px;
+      position: absolute;
+      z-index: 1000;
+      bottom: 100%;
+      right: 60%;
+      box-shadow: 0 2 4 0 #222;
+      opacity: 0;
+      transition: opacity 900ms;
+    }
 
-      .hint--top::before {
-        border-top-color: #333;
-      }
+    .tooltip .tooltiptext::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-left: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: #333 transparent transparent;
+    }
 
-      .hint--top::before {
-        margin-bottom: -12px;
-        margin-left: -4px;
-      }
-
-      .hint--top::after {
-        background-color: #333;
-        box-shadow: 0 2 4 0 rgba(#333, .4);
-        margin-left: -10px;
-      }
-
-      .hint--top::before,
-      .hint--top::after {
-        bottom: 100%;
-        left: 4px;
-      }
-
-      .hint--top:hover::after,
-      .hint--top:hover::before,
-      .hint--top:focus::after,
-      .hint--top:focus::before {
-        transform: translateY(-4px);
-      }
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
     }
 
     &.hideinfo {

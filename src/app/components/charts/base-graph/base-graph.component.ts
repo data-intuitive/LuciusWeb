@@ -104,7 +104,7 @@ export class BaseGraphComponent implements AfterViewInit {
       // apply to svg element
       this.svg
         .attr('width', this.offsetWidth)
-        .attr('height', this.offsetHeight);
+        .attr('height', this.offsetHeight * 1.05);
     }
 
     initConfig() {

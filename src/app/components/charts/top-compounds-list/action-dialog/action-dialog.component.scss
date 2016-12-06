@@ -1,0 +1,55 @@
+:host {
+  filter: blur(0);
+  z-index: 1;
+}
+
+#detail {
+  width: 750px;
+  height: 600px;
+  overflow-y: scroll;
+
+  button {
+    float: right;
+    text-align: center;
+    outline: none;
+    box-sizing: border-box;
+    color: #5c6bc0;
+    background: #e8eaf6;
+  }
+
+  img {
+    display: block;
+    margin: 0 auto;
+    width: 75%;
+    height: 75%;
+    border-radius: 2px;
+  }
+
+  .flex-container {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .flex-item {
+    flex: 1 1 auto;
+  }
+
+  .field {
+    color: #999;
+    font-weight: 300;
+  }
+
+  .uppercase {
+    text-transform: uppercase;
+  }
+
+  &.hideinfo {
+    img {
+      filter: blur(8px);
+    }
+
+    .info {
+      filter: blur(3px);
+    }
+  }
+}

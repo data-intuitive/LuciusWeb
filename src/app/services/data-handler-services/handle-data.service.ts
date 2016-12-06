@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { Response } from '@angular/http';
 
 import { APIEndpoints } from '../../shared/api-endpoints';
-import { AnnotatedPlatewellid } from '../../models';
 
 @Injectable()
 export class HandleDataService {
@@ -12,8 +11,6 @@ export class HandleDataService {
     histogramData: Response;
     knownTargets: Response;
     annotatedPlatewellids: Response;
-
-    selectedCorrelation: AnnotatedPlatewellid;
 
     constructor() {
     }
@@ -61,17 +58,5 @@ export class HandleDataService {
         case APIEndpoints.knownTargets:
           return this.knownTargets;
       }
-  }
-
-  // setter function to save selected correlation data
-  setCorrelationData(data: AnnotatedPlatewellid) {
-    console.log('[handler service] set correlation data');
-    this.selectedCorrelation = data;
-  }
-
-  // getter function to retrieve selected correlation data
-  getCorrelationData(): AnnotatedPlatewellid {
-    console.log('[handler service] set correlation data');
-    return this.selectedCorrelation;
   }
 }

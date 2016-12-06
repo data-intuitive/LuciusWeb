@@ -5,7 +5,6 @@ import { Component, ElementRef, ViewChild,  AfterViewInit,
 import { MdDialog, MdDialogConfig, MdDialogRef } from '@angular/material';
 import { Settings, AnnotatedPlatewellid, Zhang } from '../../../models';
 import { ActionDialogComponent } from './action-dialog/action-dialog.component';
-import { HandleDataService } from '../../../services';
 
 import * as d3 from 'd3';
 import 'd3-color';
@@ -56,8 +55,7 @@ export class TopCompoundsListComponent implements AfterViewInit {
 
   constructor(public dialog: MdDialog,
       public viewContainerRef: ViewContainerRef,
-      private cdr: ChangeDetectorRef,
-      private handleDataService: HandleDataService) {
+      private cdr: ChangeDetectorRef) {
   }
 
   ngAfterViewInit() {
@@ -125,9 +123,9 @@ export class TopCompoundsListComponent implements AfterViewInit {
   handleOpenDialog (groupIdx: number , modelIdx: number, el: AnnotatedPlatewellid) {
     let config = new MdDialogConfig();
     config.viewContainerRef = this.viewContainerRef;
-    this.handleDataService.setCorrelationData(el);
 
     this.dialogRef = this.dialog.open(detailDialog, config);
+    this.dialogRef.componentInstance.dataDetail = el;
 
     // let dataFlat = [];
     // let id = +el.dataset.id + (+el.dataset.groupid * this.topcomp);

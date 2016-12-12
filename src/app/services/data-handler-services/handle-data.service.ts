@@ -11,6 +11,7 @@ export class HandleDataService {
     histogramData: Response;
     knownTargets: Response;
     annotatedPlatewellids: Response;
+    binnedZhang: Response;
 
     constructor() {
     }
@@ -27,6 +28,9 @@ export class HandleDataService {
           break;
         case APIEndpoints.zhang:
           this.zhang = data;
+          break;
+        case APIEndpoints.binnedZhang:
+          this.binnedZhang = data;
           break;
         case APIEndpoints.targetHistogram:
           this.histogramData = data;
@@ -51,6 +55,8 @@ export class HandleDataService {
           return this.signature;
         case APIEndpoints.zhang:
           return this.zhang;
+        case APIEndpoints.binnedZhang:
+          return this.binnedZhang;
         case APIEndpoints.annotatedPlateWellids:
           return this.annotatedPlatewellids;
         case APIEndpoints.targetHistogram:

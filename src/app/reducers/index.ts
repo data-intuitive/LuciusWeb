@@ -10,19 +10,22 @@ import * as fromLayout from './layout';
 import * as fromSettings from './settings';
 import * as fromServer from './server';
 import * as fromData from './data';
+import * as fromCharts from './charts';
 
 export interface State {
   settings: fromSettings.State;
   layout: fromLayout.State;
   server: fromServer.State;
   data: fromData.State;
+  charts: fromCharts.State;
 }
 
 const reducers = {
   settings: fromSettings.reducer,
   layout: fromLayout.reducer,
   server: fromServer.reducer,
-  data: fromData.reducer
+  data: fromData.reducer,
+  charts: fromCharts.reducer
 };
 
 const developmentReducer: Function = compose(storeFreeze, combineReducers)(reducers);
@@ -90,6 +93,10 @@ export const getShowSidenav = compose(
    fromServer.getAnnotatedPlatewellidsReady, getServerState
  );
 
+ export const getBinnedZhangReady = compose(
+   fromServer.getBinnedZhangReady, getServerState
+ );
+
  /**
   * Data Reducers
   */
@@ -103,3 +110,25 @@ export const getShowSidenav = compose(
   export const getCompound = compose(
     fromData.getCompound, getDataState
   );
+
+  /**
+   * Charts Reducers
+   */
+   export const getChartsState = (state$: Observable<State>) =>
+     state$.select(state => state.charts);
+
+   export const getTargetGene = compose(
+     fromCharts.getTargetGene, getChartsState
+   );
+
+   export const getGeneData = compose(
+     fromCharts.getGeneData, getChartsState
+   );
+
+   export const getDataBounds = compose(
+     fromCharts.getDataBounds, getChartsState
+   );
+
+   export const getFilter = compose(
+     fromCharts.getFilter, getChartsState
+   );

@@ -1,8 +1,15 @@
 <div class="header">
-  Known Targets
-  <span *ngIf="compoundSelected !== '' ">
-    for {{compoundSelected}}
-  </span>
+  <div class="content">
+    Known Targets&nbsp;
+    <span *ngIf="compound.length">
+      <span>for</span>
+      <span class="compound">{{compound}}</span>
+    </span>
+  </div>
+  <div *ngIf="showTargetGene">
+    <div class="target_label">Selected target:</div>
+    <div class="target">{{targetGene}}</div>
+  </div>
 </div>
 
 <div #knownTargetsHist id="knownTargetsHist">

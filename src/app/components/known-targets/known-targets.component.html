@@ -1,6 +1,6 @@
 <div *ngIf="knownTargetsReady$ | async">
     <app-known-targets-hist
-      [compoundSelected] = "compound"
+      [compound] = "compound"
       [targetHistData] = "knownTargets">
     </app-known-targets-hist>
 </div>

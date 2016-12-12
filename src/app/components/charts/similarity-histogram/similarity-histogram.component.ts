@@ -1,12 +1,15 @@
 import { Component, ElementRef, ViewChild,  AfterViewInit,
          Input, ViewEncapsulation } from '@angular/core';
+import { Observable } from 'rxjs/Observable';
+
+import { Store } from '@ngrx/store';
+import * as fromRoot from '../../../reducers';
+import { Settings, TargetHistogram } from '../../../models';
+import { BaseGraphComponent } from '../base-graph/base-graph.component';
 
 import * as d3 from 'd3';
 import 'd3-scale';
 import 'd3-axis';
-
-import { Settings, TargetHistogram } from '../../../models';
-import { BaseGraphComponent } from '../base-graph/base-graph.component';
 
 @Component({
   selector: 'app-similarity-histogram',
@@ -22,6 +25,8 @@ export class SimilarityHistogramComponent extends BaseGraphComponent
     @Input() settings: Settings;
     @Input() similarityHistogramData: TargetHistogram;
     data: number[] = Array();
+
+    targetGene$: Observable<string>;
 
     /* DOM Element */
     el: HTMLElement;
@@ -40,26 +45,34 @@ export class SimilarityHistogramComponent extends BaseGraphComponent
     xAxisGroup;
     yAxisScale;
     colorScale;
+
     barSelected;
     barSize = 0;
     barGap = 2;
 
-    constructor() {
+    constructor(private store: Store<fromRoot.State>) {
       super();
+
+      /* observe if targetGene was selected by user*/
+      this.targetGene$ = this.store.let(fromRoot.getTargetGene);
     }
 
     ngAfterViewInit() {
       super.ngAfterViewInit();
       this.bins = this.settings.hist2dBins;
 
-      /* check store for targetGeneSelected flag */
-      // if (targetGeneSelected)
-        // this.targetGene = selectedGene;
+      /* check store for targetGene in the store */
+      this.targetGene$.subscribe(
+        data => this.targetGene = data,
+        err => console.log(err)
+      );
 
       /* check if data is passed successfully from parent component */
       if (this.similarityHistogramData) {
         this.dataBounds = this.similarityHistogramData.metadata.bounds;
         this.data = this.similarityHistogramData.data.zhang;
+
+        /* if specific gene selected, get its data */
         this.geneData = this.targetGene.length ?
           this.similarityHistogramData[this.targetGene] : [];
 
@@ -73,6 +86,7 @@ export class SimilarityHistogramComponent extends BaseGraphComponent
       super.init();
     }
 
+    // called from parent
     initAxis() {
       super.initAxis();
 
@@ -80,13 +94,15 @@ export class SimilarityHistogramComponent extends BaseGraphComponent
         .attr('class', 'y axis');
     }
 
+    // called from parent
     updateValues() {
       super.updateValues();
 
       /* calculate size of each bar, given gHeightPad and num of bins */
-      this.barSize = Math.floor(this.gHeightPad / this.bins);
+      this.barSize = Math.floor(this.gHeightPad / this.bins) * 1.1;
     }
 
+    // called from parent
     updateScales() {
       super.updateScales();
 
@@ -113,6 +129,7 @@ export class SimilarityHistogramComponent extends BaseGraphComponent
         .range(this.colors);
     }
 
+    // called from parent
     updateGraph() {
       super.updateGraph();
 
@@ -149,26 +166,26 @@ export class SimilarityHistogramComponent extends BaseGraphComponent
 
         /* set bar attribtes */
         bar
-        .attr('class', selector)
-        .attr('x', function(d) { return thisComp.gWidthPad - thisComp.xScale(d); })
-        .attr('y', function(d, i) { return thisComp.yScale(i); })
-        .attr('height', thisComp.barSize - thisComp.barGap + 2.5)
-        .attr('width', function(d) {
-          return d > 0 ? thisComp.xScale(d) + thisComp.padding.left - 1 : 0;
-        })
-        .attr('fill', function(d, i) { if (fill) { return thisComp.colorScale(i); }})
-        .on('mouseover', function() {
+         .attr('class', selector)
+         .attr('x', function(d) { return thisComp.gWidthPad - thisComp.xScale(d); })
+         .attr('y', function(d, i) { return thisComp.yScale(i); })
+         .attr('height', thisComp.barSize - thisComp.barGap + 2)
+         .attr('width', function(d) {
+           return d > 0 ? thisComp.xScale(d) + thisComp.padding.left - 1 : 0;
+         })
+         .attr('fill', function(d, i) { if (fill) { return thisComp.colorScale(i); }})
+         .on('mouseover', function() {
           d3.select(this).classed('hover', true);
-        })
-        .on('mouseout', function() {
+         })
+         .on('mouseout', function() {
           d3.select(this).classed('hover', false);
-        });
+         });
 
         /* done */
         selection.exit().remove();
       }
 
-      /* if gene is selected */
+      /* if gene is selected, add extra layer to histogram with genebars */
       if (this.geneData.length) {
         this.g.selectAll('.genebar')
           .data(this.geneData)
@@ -183,6 +200,7 @@ export class SimilarityHistogramComponent extends BaseGraphComponent
         .data(this.data)
         .call(drawHistogram, 'bar', true);
 
+      /* Get zhang score Bounds to Zoom in Scatter */
       // bars.on('click', function(d, i) {
       //   // this.fire('core-signal', {
       //   //   name: 'filter-data',
@@ -201,15 +219,12 @@ export class SimilarityHistogramComponent extends BaseGraphComponent
       // });
 
       this.bg.on('click', function() {
-        // this.fire('core-signal', {
-        //   name: 'unfilter-data',
-        //   data: null
-        // });
         // TODO: Update UnFilter flag in store
 
         /* undo previous selection */
         if (this.barSelected) {
-          d3.select(this.barSelected).classed('selected', false);
+          d3.select(this.barSelected)
+            .classed('selected', false);
           this.barSelected = null;
         }
       });

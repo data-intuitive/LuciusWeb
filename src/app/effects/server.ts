@@ -23,6 +23,7 @@ export class ServerEffects {
     private compoundDataService: services.CompoundDataService,
     private signatureDataService: services.SignatureDataService,
     private zhangDataService: services.ZhangDataService,
+    private binnedZhangDataService: services.BinnedZhangDataService,
     private annotatedPlateWellidsDataService: services.AnnotatedPlateWellIdsDataService,
     private targetFrequencyDataService: services.TargetFrequencyDataService,
     private targetHistogramDataService: services.TargetHistogramDataService,
@@ -61,8 +62,10 @@ export class ServerEffects {
       @Effect() getSignatureSuccess$ = this.actions$
         .ofType(server.ServerActionTypes.GET_SIGNATURE_SUCCESS)
         .map(action => action.payload)
-        .switchMap(payload => Observable.of(
-            new server.GetSimilaritiesAction(APIEndpoints.zhang))
+        .switchMap(payload => Observable.from([
+            new server.GetSimilaritiesAction(APIEndpoints.zhang),
+            new server.GetBinnedZhangAction(APIEndpoints.binnedZhang)
+          ])
         );
 
       @Effect() getSimilarities$ = this.actions$
@@ -137,6 +140,21 @@ export class ServerEffects {
           payload.url, payload.data
         ))
         .map(result => new server.GetKnownTargetsSuccessAction(
+          this.handleDataService.setData(
+            result.data, result.type)
+        ));
+
+      @Effect() getBinnedZhang$ = this.actions$
+        .ofType(server.ServerActionTypes.GET_BINNED_ZHANG)
+        .withLatestFrom(this.store)
+        .map(([action, store]) => ({
+          url: Parser.parseURL(store.settings, action.payload),
+          data: store.data}
+        ))
+        .switchMap(payload => this.binnedZhangDataService.fetchData(
+          payload.url, payload.data
+        ))
+        .map(result => new server.GetBinnedZhangSuccessAction(
           this.handleDataService.setData(
             result.data, result.type)
         ));

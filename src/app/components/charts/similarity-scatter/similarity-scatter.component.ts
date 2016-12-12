@@ -1,11 +1,18 @@
-import { Component, ElementRef, ViewChild,  AfterViewInit,
+import { Component, ElementRef, ViewChild, AfterViewInit,
          Input, ViewEncapsulation } from '@angular/core';
 
 import * as d3 from 'd3';
-import { hist2d } from 'd3-hist2d';
 
-import { Settings, Zhang } from '../../../models';
+import { Settings } from '../../../models';
 import { BaseGraphComponent } from '../base-graph/base-graph.component';
+
+interface BinnedZhang {
+  'x': number;
+  'count': number;
+  'y': number;
+  'avg': number;
+  'bin': string;
+}
 
 @Component({
   selector: 'app-similarity-scatter',
@@ -19,7 +26,7 @@ export class SimilarityScatterComponent extends BaseGraphComponent
 
     @ViewChild('simScatter') element: ElementRef;
     @Input() settings: Settings;
-    @Input() zhangData: Zhang[] = Array();
+    @Input() binnedZhangData: BinnedZhang[] = Array();
     data: number[][] = Array();
 
     /* DOM Element */
@@ -43,11 +50,10 @@ export class SimilarityScatterComponent extends BaseGraphComponent
     brushG;
     isBrushInit;
 
-    isDataFiltered;
+    isDataFiltered = false;
     isDrawBin;
     isDataReady = false;
-    hist2d;
-    histData: any[][] = Array();
+    histData;
     histW = 0;
     histH = 0;
     histExtent;
@@ -63,19 +69,36 @@ export class SimilarityScatterComponent extends BaseGraphComponent
       super.ngAfterViewInit();
       this.bins = this.settings.hist2dBins;
 
-      if (this.zhangData && this.settings) {
-        for (let i = 0; i < this.zhangData.length; i++) {
-          this.data[i] = [0, 0];
-          this.data[i][0] = (this.zhangData[i].indexSorted);
-          this.data[i][1] = (this.zhangData[i].zhangScore);
-        }
+      if (this.binnedZhangData && this.settings) {
         this.isDataNew = true;
         this.isDataReady = true;
+        for (let i = 0; i < this.binnedZhangData.length; i++) {
+            this.data[i] = [];
+            this.data[i][0] = this.binnedZhangData[i].x;
+            this.data[i][1] = this.binnedZhangData[i].y;
+        }
       }
 
       this.init();
     }
 
+    handleBackButton() {
+      /* update filter flag in store, to zoom out */
+    }
+
+    filterData() {
+
+    }
+
+    unFilterData() {
+
+    }
+
+    init() {
+      super.init();
+    }
+
+    /* called from parent */
     initAxis() {
       super.initAxis();
 
@@ -83,15 +106,7 @@ export class SimilarityScatterComponent extends BaseGraphComponent
         .attr('class', 'y axis');
     }
 
-    init() {
-      super.init();
-
-      this.binG = this.g.append('g')
-        .attr('id', 'binG');
-      this.simG = this.g.append('g')
-        .attr('id', 'simG');
-    }
-
+    /* called from parent */
     updateValues() {
       super.updateValues();
 
@@ -103,17 +118,18 @@ export class SimilarityScatterComponent extends BaseGraphComponent
       }
     }
 
+    /* called from parent */
     updateScales() {
       super.updateScales();
 
       /* reference to current component */
       let thisComp = this;
 
-      /* define domain for y dimension [zhang score] */
-      let yDomain = d3.extent(this.data, function(d) { return d[1]; });
+      /* define domain for y dimension, getting max [zhang score]*/
+      let yDomain = d3.extent(this.binnedZhangData, function(d) { return d.y; });
 
-      /* define domain for x dimension [index sorted]*/
-      let xDomain = d3.extent(this.data, function(d) { return d[thisComp.noise]; });
+      /* define domain for x dimension, getting max [horizontal position] */
+      let xDomain = d3.extent(this.binnedZhangData, function(d) { return d.x; });
 
       if (this.isDataFiltered && this.data.length === 1) {
         yDomain = [this.data[0][1] - 0.05, this.data[0][1] + 0.05];
@@ -125,12 +141,12 @@ export class SimilarityScatterComponent extends BaseGraphComponent
       /* scale for y-dimension */
       this.yScale = d3.scaleLinear()
         .domain(yDomain)
-        .range([this.gHeightPad, 0]);
+        .range([this.gHeightPad * 1.1, 0]);
 
       /* scale for x-dimension */
       this.xScale = d3.scaleLinear()
         .domain(xDomain)
-        .range([0, this.gWidthPad]);
+        .range([0, this.gWidthPad * 1]);
 
       /* scale to add colors to the chart */
       this.colorScale = d3.scaleLinear()
@@ -138,16 +154,18 @@ export class SimilarityScatterComponent extends BaseGraphComponent
         .range(this.colors);
     }
 
+    /* called from parent */
     updateGraph() {
       super.updateGraph();
 
       // draw Axis
-      this.yAxis = d3.axisLeft(this.yScale)
+      this.yAxis = d3
+        .axisLeft(this.yScale)
         .tickSize(this.gWidth);
 
       this.yAxisGroup
         .attr('transform', 'translate(' +
-          (this.gWidth + this.margin.left) + ',' +
+          (this.gWidth + this.margin.left + 18) + ',' +
           (this.margin.top + this.padding.top) + ')')
         .call(this.yAxis);
 
@@ -162,24 +180,23 @@ export class SimilarityScatterComponent extends BaseGraphComponent
 
     updateBinGraph() {
       if (this.isDataNew) {
-        // create Hist2D
-
-        // this.hist2d = hist2d()
-        //   .bins(this.bins)
-        //   .indices([this.noise, 1])
-        //   .domain([this.xScale.domain(), this.yScale.domain()])
-        //   (this.data, this.drawBinGraph);
+        this.binG = this.g.append('g')
+          .attr('id', 'binG');
+        this.simG = this.g.append('g')
+          .attr('id', 'simG');
+        this.drawBinGraph(this.binnedZhangData);
       } else {
         this.drawBinGraph(this.histData);
       }
     }
 
-    drawBinGraph(hist: Array<number[]>) {
+    drawBinGraph(hist: Array<BinnedZhang>) {
       // Break if hist is empty
-      if (!hist.length) { return 0; }
+      if (!hist.length) {
+        return 0;
+      }
 
       let thisComp = this;
-
 
       // if (this.isDataNew) {
       //   thisComp.fire('core-signal', { name: 'stop-loader' });
@@ -187,17 +204,15 @@ export class SimilarityScatterComponent extends BaseGraphComponent
       // }
 
       this.histData = hist;
+      this.histW = this.gWidthPad * 0.10;
+      this.histH = this.gHeightPad * 0.10;
 
-      this.hist2d.size([this.gWidthPad, this.gHeightPad]);
-      this.histW = this.hist2d.size()[0];
-      this.histH = this.hist2d.size()[1];
+      this.histExtent = d3.extent(hist, function(d) { return d.count; });
 
-      this.histExtent = d3.extent(hist, function(d) { return d.length; });
-
-      let radius = Math.min(this.histW, this.histH) / 2;
+      let radius = Math.min(this.histW, this.histH) / 3;
       let rScale = d3.scaleLinear()
         .domain(this.histExtent)
-        .range([radius * 0.4, radius * 1.6]);
+        .range([radius * 0.5, radius * 1.5]);
 
       let colorDomain = new Array(this.colors.length);
       for (let i = 0, ii = colorDomain.length; i < ii; i++) {
@@ -211,13 +226,15 @@ export class SimilarityScatterComponent extends BaseGraphComponent
 
       this.simG.selectAll('circle').remove();
 
-      let circles = this.binG.selectAll('circle')
-        .data(hist);
-
-      circles.enter().append('circle');
+      /* define scatterplot circles */
+      let circles = this.binG
+        .selectAll('circle')
+        .data(hist)
+        .enter()
+        .append('circle');
 
       circles
-        .attr('r', function(d) { return rScale(d.length); })
+        .attr('r', function(d) { return rScale(d.count); })
         .attr('cx', function(d) { return thisComp.histW * d.x; })
         .attr('cy', function(d) { return thisComp.gHeightPad - (thisComp.histH * d.y); })
         .attr('fill', function(d) { return thisComp.colorScale(thisComp.histH * d.y); });
@@ -232,6 +249,7 @@ export class SimilarityScatterComponent extends BaseGraphComponent
         this.brushG.remove();
         this.binData = [];
       }
+
       this.isDataNew = false;
       this.isDrawBin = true;
     }

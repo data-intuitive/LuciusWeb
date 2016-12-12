@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 
 import * as fromRoot from '../../reducers';
 
@@ -19,6 +19,8 @@ export class KnownTargetsComponent implements OnInit {
   knownTargets: any[] = Array();
   knownTargetsResponse: string[][] = Array();
   knownTargetsReady$: Observable<boolean>;
+  targetGene$: Observable<string>;
+  targetGene: string;
 
   constructor(
     private store: Store<fromRoot.State>,
@@ -26,18 +28,23 @@ export class KnownTargetsComponent implements OnInit {
 
     this.compound$ = this.store.let(fromRoot.getCompound);
     this.knownTargetsReady$ = this.store.let(fromRoot.getKnownTargetsReady);
+    this.targetGene$ = this.store.let(fromRoot.getCompound);
   }
 
   ngOnInit() {
-    this.knownTargetsReady$
-      .subscribe(
-        ev => this.handleKnownTargetsEvent(ev),
+    this.compound$.subscribe(
+        data => this.compound = data,
         err => console.log(err)
       );
 
-    this.compound$
+    this.targetGene$.subscribe(
+        data => this.targetGene = data,
+        err => console.log(err)
+      );
+
+    this.knownTargetsReady$
       .subscribe(
-        data => this.compound = data,
+        ev => this.handleKnownTargetsEvent(ev),
         err => console.log(err)
       );
   }

@@ -56,6 +56,7 @@ from './effects';
     services.CompoundDataService,
     services.SignatureDataService,
     services.ZhangDataService,
+    services.BinnedZhangDataService,
     services.AnnotatedPlateWellIdsDataService,
     services.TargetFrequencyDataService,
     services.TargetHistogramDataService,

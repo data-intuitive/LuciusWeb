@@ -8,12 +8,15 @@ $cl-svg-blue: rgb(44, 123, 182);
 $cl-txt: #444;
 $cl-grey-400: #aaa;
 $cl-grey-50: #f3f3f3;
+$cl-word-bg: lighten($cl-svg-orange, 8%);
 
 :host {
   background-color: $cl-grey-100;
   overflow-y: auto;
 
   .header {
+    display: flex;
+    flex-direction: row;
     align-items: center;
 
     height: 40px;
@@ -30,14 +33,19 @@ $cl-grey-50: #f3f3f3;
       font-weight: normal;
     }
 
-    .target_lable {
+    .content {
+      flex: 1 1 auto;
+    }
+
+    .target_label {
+      display: inline-block;
       padding-left: 16px;
       padding-right: 16px;
-
       background-color: rgba($cl-word-bg, .2);
     }
 
     .target {
+      display: inline-block;
       position: relative;
       color: $cl-txt;
       font-weight: normal;
@@ -45,8 +53,6 @@ $cl-grey-50: #f3f3f3;
       padding-left: 16px;
       padding-right: 16px;
       margin-right: 32px;
-      // top: -4px;
-      // line-height: 32px;
     }
 
     .target::after {

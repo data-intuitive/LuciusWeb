@@ -1,6 +1,10 @@
 import { Component, ElementRef, ViewChild,  AfterViewInit,
          Input, ViewEncapsulation, OnInit } from '@angular/core';
 
+import { Store } from '@ngrx/store';
+import * as fromRoot from '../../../reducers';
+import * as ChartsActions from '../../../actions/charts';
+
 import * as d3 from 'd3';
 import 'd3-scale';
 
@@ -12,32 +16,33 @@ import 'd3-scale';
 })
 
 export class KnownTargetsHistogramComponent implements  AfterViewInit, OnInit {
-    @Input() targetHistData = Array();
-    @Input() compoundSelected: string;
     @ViewChild('knownTargetsHist') element: ElementRef;
+    @Input() targetHistData = Array();
+    @Input() compound: string;
 
     /* DOM Element */
     el: HTMLElement;
 
-    /* config variables */
     brushdata = [];
     bindata = [];
 
+    /* var for selected compound */
     hasCompound = false;
     showCompound = false;
-    showTargetGene = false;
-    targetGene = '';
-    compound = '';
-    pwids = '';
-    pwidsComp = '';
+
+    /* config vars */
     empty = false;
     numBars = 48;
+
+    /* vars for selected gene */
+    showTargetGene = false;
+    targetGene = '';
 
     ngOnInit() {
       this.empty = this.targetHistData.length === 0;
     }
 
-    constructor() {
+    constructor(private store: Store<fromRoot.State>) {
     }
 
     ngAfterViewInit() {
@@ -59,8 +64,9 @@ export class KnownTargetsHistogramComponent implements  AfterViewInit, OnInit {
     }
 
     init(data) {
+        this.showCompound = (this.compound !== '');
         this.updateGraph(data);
-      }
+    }
 
     updateGraph(data) {
       let host = d3.select(this.el);
@@ -100,10 +106,9 @@ export class KnownTargetsHistogramComponent implements  AfterViewInit, OnInit {
         d3.select(prevSelection).classed('selected', false);
         prevSelection = this;
 
-        // thisComp.fire('core-signal', {
-        //   name: 'update-hist-data',
-        //   data: thisComp.targetGene
-        // });
+        /* Update the store with selected TargetGene new value */
+        thisComp.store.dispatch(new ChartsActions.
+          UpdateTargetGeneAction(d[0]));
       });
 
       box.exit().remove();

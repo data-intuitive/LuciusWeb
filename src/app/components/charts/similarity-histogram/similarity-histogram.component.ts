@@ -1,15 +1,10 @@
 import { Component, ElementRef, ViewChild,  AfterViewInit,
          Input, ViewEncapsulation } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
 
-import { Store } from '@ngrx/store';
-import * as fromRoot from '../../../reducers';
 import { Settings, TargetHistogram } from '../../../models';
 import { BaseGraphComponent } from '../base-graph/base-graph.component';
 
 import * as d3 from 'd3';
-import 'd3-scale';
-import 'd3-axis';
 
 @Component({
   selector: 'app-similarity-histogram',
@@ -25,8 +20,6 @@ export class SimilarityHistogramComponent extends BaseGraphComponent
     @Input() settings: Settings;
     @Input() similarityHistogramData: TargetHistogram;
     data: number[] = Array();
-
-    targetGene$: Observable<string>;
 
     /* DOM Element */
     el: HTMLElement;
@@ -50,22 +43,13 @@ export class SimilarityHistogramComponent extends BaseGraphComponent
     barSize = 0;
     barGap = 2;
 
-    constructor(private store: Store<fromRoot.State>) {
+    constructor() {
       super();
-
-      /* observe if targetGene was selected by user*/
-      this.targetGene$ = this.store.let(fromRoot.getTargetGene);
     }
 
     ngAfterViewInit() {
       super.ngAfterViewInit();
       this.bins = this.settings.hist2dBins;
-
-      /* check store for targetGene in the store */
-      this.targetGene$.subscribe(
-        data => this.targetGene = data,
-        err => console.log(err)
-      );
 
       /* check if data is passed successfully from parent component */
       if (this.similarityHistogramData) {

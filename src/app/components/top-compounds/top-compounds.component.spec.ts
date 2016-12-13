@@ -2,8 +2,9 @@
 
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { DebugElement } from '@angular/core';
+import { DebugElement, NO_ERRORS_SCHEMA } from '@angular/core';
 import { StoreModule } from '@ngrx/store';
+import { NgModule } from '@angular/core';
 
 import { TopCompoundsComponent } from './top-compounds.component';
 import { HandleDataService } from '../../services';
@@ -17,14 +18,15 @@ describe('TopCompoundsComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
         imports: [
-          StoreModule.provideStore(reducer)
+          StoreModule.provideStore(reducer),
         ],
         providers: [
           HandleDataService
         ],
         declarations: [
           TopCompoundsComponent
-        ]
+        ],
+        schemas: [NO_ERRORS_SCHEMA]
       })
       .compileComponents()
       .then(() => {

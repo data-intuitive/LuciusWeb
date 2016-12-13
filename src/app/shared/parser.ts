@@ -1,4 +1,3 @@
-
 import { Settings, Zhang } from '../models';
 
 export class Parser {

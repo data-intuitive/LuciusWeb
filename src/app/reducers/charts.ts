@@ -20,19 +20,19 @@ export function reducer(state = initialState, action: ChartActions): State {
   switch (action.type) {
 
     case ChartActionTypes.UPDATE_TARGET_GENE: {
-        return Object.assign({}, state, {compound: action.payload});
+        return Object.assign({}, state, {targetGene: action.payload});
     }
 
     case ChartActionTypes.UPDATE_GENE_DATA: {
-        return Object.assign({}, state, {signature: action.payload});
+        return Object.assign({}, state, {geneData: action.payload});
     }
 
     case ChartActionTypes.UPDATE_DATA_BOUNDS: {
-        return Object.assign({}, state, {signature: action.payload});
+        return Object.assign({}, state, {dataBounds: action.payload});
     }
 
     case ChartActionTypes.UPDATE_FILTER: {
-        return Object.assign({}, state, {signature: action.payload});
+        return Object.assign({}, state, {filter: action.payload});
     }
 
     default:

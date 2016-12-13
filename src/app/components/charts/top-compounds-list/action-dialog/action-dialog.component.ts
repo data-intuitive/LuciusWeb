@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { MdDialogRef } from '@angular/material';
 import { AnnotatedPlatewellid } from '../../../../models';
+import { MdDialogRef } from '@angular/material';
 
 @Component({
   selector: 'app-action-dialog',

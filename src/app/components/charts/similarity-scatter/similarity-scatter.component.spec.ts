@@ -4,6 +4,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { DebugElement, NO_ERRORS_SCHEMA } from '@angular/core';
 import { StoreModule } from '@ngrx/store';
+import { MaterialModule } from '@angular/material';
 
 import { SimilarityScatterComponent } from './similarity-scatter.component';
 import { HandleDataService } from '../../../services';
@@ -17,6 +18,7 @@ describe('SimilarityScatterComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
+        MaterialModule.forRoot(),
         StoreModule.provideStore(reducer)
       ],
       providers: [

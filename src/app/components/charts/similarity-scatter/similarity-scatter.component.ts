@@ -2,16 +2,15 @@ import { Component, ElementRef, ViewChild, AfterViewInit,
          Input, ViewEncapsulation } from '@angular/core';
 
 import * as d3 from 'd3';
-
 import { Settings } from '../../../models';
 import { BaseGraphComponent } from '../base-graph/base-graph.component';
 
 interface BinnedZhang {
-  'x': number;
-  'count': number;
-  'y': number;
-  'avg': number;
-  'bin': string;
+  x: number;
+  count: number;
+  y: number;
+  avg: number;
+  bin: string;
 }
 
 @Component({

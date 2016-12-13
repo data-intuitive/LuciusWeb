@@ -1,17 +1,8 @@
 import { Component, ViewChild,
          ElementRef, AfterViewInit } from '@angular/core';
 
+import { appColors } from '../../../shared/colors';
 import * as d3 from 'd3';
-import 'd3-color';
-
-/* app colors definition */
-const appColors = [
-  d3.rgb(44, 123, 182),
-  d3.rgb(171, 217, 233),
-  d3.rgb(255, 255, 191),
-  d3.rgb(253, 174, 97),
-  d3.rgb(215, 25, 28)
-];
 
 @Component({
   selector: 'app-base-graph',

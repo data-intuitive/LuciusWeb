@@ -4,9 +4,7 @@ import { Component, ElementRef, ViewChild,  AfterViewInit,
 import { Store } from '@ngrx/store';
 import * as fromRoot from '../../../reducers';
 import * as ChartsActions from '../../../actions/charts';
-
 import * as d3 from 'd3';
-import 'd3-scale';
 
 @Component({
   selector: 'app-known-targets-hist',

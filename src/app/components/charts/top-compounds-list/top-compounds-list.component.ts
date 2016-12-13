@@ -5,21 +5,10 @@ import { Component, ElementRef, ViewChild,  AfterViewInit,
 import { MdDialog, MdDialogConfig, MdDialogRef } from '@angular/material';
 import { Settings, AnnotatedPlatewellid, Zhang } from '../../../models';
 import { ActionDialogComponent } from './action-dialog/action-dialog.component';
-
+import { appColors } from '../../../shared/colors';
 import * as d3 from 'd3';
-import 'd3-color';
-import 'd3-scale';
 
 const detailDialog = ActionDialogComponent;
-
-/* app colors definition */
-const appColors = [
-  d3.rgb(44, 123, 182),
-  d3.rgb(171, 217, 233),
-  d3.rgb(255, 255, 191),
-  d3.rgb(253, 174, 97),
-  d3.rgb(215, 25, 28)
-];
 
 @Component({
   selector: 'app-top-compounds-list',
@@ -32,8 +21,8 @@ export class TopCompoundsListComponent implements AfterViewInit {
 
   @ViewChild('topCompList') element: ElementRef;
   @Input() settings: Settings;
-  @Input() topPositiveAnnotatedPlatewellids: AnnotatedPlatewellid[] = Array();
-  @Input() topNegativeAnnotatedPlatewellids: AnnotatedPlatewellid[] = Array();
+  @Input() public topPositiveAnnotatedPlatewellids: AnnotatedPlatewellid[] = Array();
+  @Input() public topNegativeAnnotatedPlatewellids: AnnotatedPlatewellid[] = Array();
   @Input() topPositiveCorrelations: Zhang[] = Array();
   @Input() topNegativeCorrelations: Zhang[] = Array();
 

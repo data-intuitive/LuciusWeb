@@ -29,7 +29,10 @@ from './effects';
     components.KnownTargetsComponent,
     components.SimilarityHistogramComponent,
     components.SimilarityScatterComponent,
-    components.KnownTargetsHistogramComponent
+    components.KnownTargetsHistogramComponent,
+    components.BaseGraphComponent,
+    components.TopCompoundsListComponent,
+    components.ActionDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -53,10 +56,12 @@ from './effects';
     services.CompoundDataService,
     services.SignatureDataService,
     services.ZhangDataService,
+    services.BinnedZhangDataService,
     services.AnnotatedPlateWellIdsDataService,
     services.TargetFrequencyDataService,
     services.TargetHistogramDataService,
   ],
+  entryComponents: [components.ActionDialogComponent],
   bootstrap: [AppComponent]
 })
 

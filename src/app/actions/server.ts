@@ -12,7 +12,9 @@ export const ServerActionTypes = {
   GET_KNOWN_TARGETS: '[Server] Get Known Targets',
   GET_KNOWN_TARGETS_SUCCESS: '[Server] Get Known Targets Success',
   GET_ANNOTADED_PLATEWELLIDS: '[Server] Get Annotated Platewellids',
-  GET_ANNOTADED_PLATEWELLIDS_SUCCESS: '[Server] Get Annotated Platewellids Success'
+  GET_ANNOTADED_PLATEWELLIDS_SUCCESS: '[Server] Get Annotated Platewellids Success',
+  GET_BINNED_ZHANG: '[Server] Get Binned Zhang',
+  GET_BINNED_ZHANG_SUCCESS: '[Server] Get Binned Zhang Success'
 };
 
 export class GetCompoundsByJNJAction implements Action {
@@ -99,6 +101,20 @@ export class GetKnownTargetsSuccessAction implements Action {
       }
     }
 
+    export class GetBinnedZhangAction implements Action {
+        type = ServerActionTypes.GET_BINNED_ZHANG;
+
+        constructor(public payload: string) {
+        }
+      }
+
+    export class GetBinnedZhangSuccessAction implements Action {
+        type = ServerActionTypes.GET_BINNED_ZHANG_SUCCESS;
+
+        constructor(public payload: string) {
+        }
+      }
+
 export type SettingsActions =
     GetCompoundsByJNJAction
   | GetCompoundsByJNJSuccessAction
@@ -112,3 +128,5 @@ export type SettingsActions =
   | GetKnownTargetsSuccessAction
   | GetAnnotatedPlatewellidsAction
   | GetAnnotatedPlatewellidsSuccessAction
+  | GetBinnedZhangAction
+  | GetBinnedZhangSuccessAction

@@ -5,7 +5,7 @@ import * as fromRoot from '../../reducers';
 
 import { Store } from '@ngrx/store';
 import { HandleDataService } from '../../services';
-import { Settings, Zhang, TargetHistogram } from '../../models';
+import { Settings, TargetHistogram } from '../../models';
 import { APIEndpoints } from '../../shared/api-endpoints';
 
 @Component({
@@ -17,8 +17,8 @@ import { APIEndpoints } from '../../shared/api-endpoints';
 export class SimilarityChartsComponent implements OnInit {
     @Input() settings: Settings;
 
-    zhangReady$: Observable<boolean>;
-    zhangArray: Zhang[] = Array();
+    binnedZhangReady$: Observable<boolean>;
+    binnedZhangArray: any[] = Array();
 
     similarityHistogramReady$: Observable<boolean>;
     similarityHistogramData: TargetHistogram;
@@ -28,16 +28,17 @@ export class SimilarityChartsComponent implements OnInit {
       private handleDataService: HandleDataService) {
 
       /* observe if Zhang Data has arrived from server */
-      this.zhangReady$ = this.store.let(fromRoot.getZhangReady);
+      this.binnedZhangReady$ = this.store.let(
+        fromRoot.getBinnedZhangReady);
 
       /* observe if SimilarityHistogram Data has arrived from server */
-      this.similarityHistogramReady$ = this.store.
-        let(fromRoot.getSimilaritiesHistReady);
+      this.similarityHistogramReady$ = this.store.let(
+        fromRoot.getSimilaritiesHistReady);
     }
 
     ngOnInit() {
-      this.zhangReady$.subscribe(
-        ev => this.handleZhangEvent(ev),
+      this.binnedZhangReady$.subscribe(
+        ev => this.handleBinnedZhangEvent(ev),
         err => console.log(err));
 
       this.similarityHistogramReady$.subscribe(
@@ -45,10 +46,10 @@ export class SimilarityChartsComponent implements OnInit {
         err => console.log(err));
     }
 
-    handleZhangEvent(ev) {
+    handleBinnedZhangEvent(ev) {
       if (ev) {
-        this.zhangArray = this.handleDataService.
-          getData(APIEndpoints.zhang);
+        this.binnedZhangArray = this.handleDataService.
+          getData(APIEndpoints.binnedZhang);
       }
     }
 

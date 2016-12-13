@@ -4,8 +4,8 @@ $s-border-radius: 4px;
 $s-jnj: 140px;
 
 :host {
-  align-items: stretch;
   justify-content: center;
+  align-items: stretch;
 
   md-toolbar {
     background-color: md-color($primary);
@@ -26,11 +26,11 @@ $s-jnj: 140px;
     margin: 0 unit();
     text-transform: capitalize;
     color: $primary-color-text;
-    align-items: stretch;
   }
 
   .box {
-    margin: 0 8px;
+    flex: 1 1 auto;
+    margin: 0 5px;
 
     .input {
       font-size: 18px;
@@ -78,6 +78,9 @@ $s-jnj: 140px;
     }
 
     &.toggle {
+      // max-width: 5%;
+      flex: 0 1 auto;
+
       .container {
         display: flex;
         width: 64px;

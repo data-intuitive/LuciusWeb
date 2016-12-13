@@ -1,0 +1,81 @@
+<div #topCompList id="list">
+    <div class="container" *ngFor="let group of data; let groupIndex = index">
+      <div class="header {{group.type}}">
+        {{group.title}}
+      </div>
+      <div class="inner-container">
+        <div class="row" *ngFor="let model of group.model; let modelIndex = index"
+          (click)="handleOpenDialog(groupIndex, modelIndex, model)"
+          [attr.data-id]="modelIndex"
+          [attr.data-groupid]="groupIndex">
+
+          <div class="row-container">
+
+            <!-- Bar and Zhang Score -->
+            <div class="zhang" [style.background-color]="getColorValue(model.zhang)">
+              <span [ngClass]="['full', 'block', 'tooltip']">
+                  <span class="tooltiptext">{{getRoundValue(model.zhang)}}</span>
+              </span>
+            </div>
+
+            <!-- Text Info -->
+            <div class="txt">
+              <div class="uppercase txt-big">
+                <span class="tooltip">
+                  <span [ngClass]="['ellipsis', 'info']">
+                    {{model.plateid}}
+                    <span class="tooltiptext">PlateWell ID</span>
+                  </span>
+                </span>
+                <span class="divider"> | </span>
+                <span class="tooltip">
+                  <span [ngClass]="['ellipsis', 'info']">
+                    {{model.Type}}
+                    <span class="tooltiptext">Type</span>
+                  </span>
+                </span>
+              </div>
+
+              <div class="uppercase txt-big">
+                <span *ngIf="model.jnjs" class="tooltip">
+                    <span [ngClass]="['ellipsis', 'info']">
+                      {{model.jnjs}}
+                      <span class="tooltiptext">JNJS</span>
+                    </span>
+                </span>
+                <span class="divider"> | </span>
+                <span *ngIf="model.jnjb" class="tooltip">
+                  <span [ngClass]="['ellipsis', 'info']">
+                    {{model.jnjb}}
+                    <span class="tooltiptext">JNJB</span>
+                  </span>
+                </span>
+              </div>
+
+              <div class="txt-small">
+                <span class="tooltip">
+                  <span [ngClass]="['ellipsis', 'capitalize', 'info']">
+                    {{model.compoundname}}
+                    <span class="tooltiptext">Compound Name</span>
+                  </span>
+                </span>
+              </div>
+              <div *ngIf="model.targets" class="txt-small">
+                <span [ngClass]="['ellipsis', 'info', 'tooltip', 'targets']">
+                  {{model.targets}}
+                  <span class="tooltiptext">Target(s)</span>
+                </span>
+              </div>
+            </div>
+
+            <!-- Image -->
+            <div class="img">
+              <div *ngIf="model.smiles && model.smiles !== 'NA'">
+                <img src="http://placekitten.com/160/104" alt="kitten">
+              </div>
+            </div>
+
+        </div>
+      </div>
+    </div>
+</div>

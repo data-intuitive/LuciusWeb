@@ -8,10 +8,6 @@ import { APIEndpoints } from '../../shared/api-endpoints';
 import { Settings, AnnotatedPlatewellid, Zhang } from '../../models';
 import { HandleDataService } from '../../services';
 
-/* constants */
-const pos = 'POSITIVE';
-const neg = 'NEGATIVE';
-
 @Component({
   selector: 'app-top-compounds',
   templateUrl: './top-compounds.component.html',
@@ -22,7 +18,8 @@ export class TopCompoundsComponent implements OnInit {
     @Input() settings: Settings;
     zhangReady$: Observable<boolean>;
     annotatedPlatewellidsReady$: Observable<boolean>;
-    annotatedPlatewellids: AnnotatedPlatewellid[] = Array();
+    topPositiveAnnotatedPlatewellids: AnnotatedPlatewellid[] = Array();
+    topNegativeAnnotatedPlatewellids: AnnotatedPlatewellid[] = Array();
     topPositiveCorrelations: Zhang[] = Array();
     topNegativeCorrelations: Zhang[] = Array();
     numComps: number;
@@ -61,31 +58,52 @@ export class TopCompoundsComponent implements OnInit {
      handleZhangEvent(ev): void {
        if (ev) {
          let zhangArray = this.handleDataService.getData(APIEndpoints.zhang);
+
          this.topPositiveCorrelations = this.
-           getTopCorrelations(zhangArray, pos);
+           getTopCorrelations(zhangArray, true);
 
          this.topNegativeCorrelations = this.
-           getTopCorrelations(zhangArray, neg);
+           getTopCorrelations(zhangArray, false);
        }
      }
 
      handleAnnotatedPlateWellidsEvent(ev): void {
        if (ev) {
-         this.annotatedPlatewellids = this.handleDataService.
-          getData(APIEndpoints.annotatedPlateWellids);
+         let annotatedPlatewellidsArray = this.handleDataService.getData(APIEndpoints.annotatedPlateWellids);
+
+         this.topPositiveAnnotatedPlatewellids = this.
+          getTopAnnotatedPlateWellIds(annotatedPlatewellidsArray, true);
+
+        this.topNegativeAnnotatedPlatewellids = this.
+           getTopAnnotatedPlateWellIds(annotatedPlatewellidsArray, false);
        }
      }
 
     /* function to get top postive/negative correlations */
-    getTopCorrelations(zhangArray: Zhang[], type: string): Zhang[] {
+    getTopCorrelations(zhangArray: Zhang[], isPositive: boolean): Zhang[] {
       let subArray: Zhang[] = Array();
 
-      if (type === 'POSITIVE') {
+      if (isPositive) {
         return subArray = zhangArray.
           slice(0, this.numComps);
       } else {
         return subArray = zhangArray.
           slice(zhangArray.length - this.numComps, zhangArray.length).
+          reverse();
+      }
+    }
+
+    /* function to get top postive/negative annotatedPlateWellIds */
+    getTopAnnotatedPlateWellIds(annotatedPlatewellidsArray: AnnotatedPlatewellid[],
+       isPositive: boolean): AnnotatedPlatewellid[] {
+      let subArray: AnnotatedPlatewellid[] = Array();
+
+      if (isPositive) {
+        return subArray = annotatedPlatewellidsArray.
+          slice(0, this.numComps);
+      } else {
+        return subArray = annotatedPlatewellidsArray.
+          slice(annotatedPlatewellidsArray.length - this.numComps, annotatedPlatewellidsArray.length).
           reverse();
       }
     }

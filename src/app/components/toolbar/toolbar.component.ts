@@ -43,7 +43,8 @@ export class ToolbarComponent implements OnInit {
           .debounceTime(250)
           .distinctUntilChanged()
           .switchMap(term => this.search(term))
-          .subscribe(result => this.relatedCompounds = result.data);
+          .subscribe(result => this.relatedCompounds =
+            result.data.relatedCompounds);
     }
 
     ngOnInit() {

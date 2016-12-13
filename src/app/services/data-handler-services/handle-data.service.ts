@@ -11,11 +11,12 @@ export class HandleDataService {
     histogramData: Response;
     knownTargets: Response;
     annotatedPlatewellids: Response;
+    binnedZhang: Response;
 
     constructor() {
     }
 
-    // setter function to save data and update the store flag
+    // setter function to save data coming from the server
     setData(data: any, classPath: string): string {
       console.log('[handler service] set' + ' ' + classPath);
       switch (classPath) {
@@ -27,6 +28,9 @@ export class HandleDataService {
           break;
         case APIEndpoints.zhang:
           this.zhang = data;
+          break;
+        case APIEndpoints.binnedZhang:
+          this.binnedZhang = data;
           break;
         case APIEndpoints.targetHistogram:
           this.histogramData = data;
@@ -41,7 +45,7 @@ export class HandleDataService {
       return classPath;
     }
 
-    // getter function to get data
+    // getter function to get data coming from the server
     getData(classPath: string): any {
       console.log('[handler service] get' + ' ' + classPath);
       switch (classPath) {
@@ -51,6 +55,8 @@ export class HandleDataService {
           return this.signature;
         case APIEndpoints.zhang:
           return this.zhang;
+        case APIEndpoints.binnedZhang:
+          return this.binnedZhang;
         case APIEndpoints.annotatedPlateWellids:
           return this.annotatedPlatewellids;
         case APIEndpoints.targetHistogram:

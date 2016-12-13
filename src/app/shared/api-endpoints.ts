@@ -6,4 +6,5 @@ export class APIEndpoints {
    static targetHistogram = 'targetHistogram';
    static annotatedPlateWellids = 'annotatedplatewellids';
    static knownTargets = 'knownTargets';
+   static binnedZhang = 'binnedZhang';
 }

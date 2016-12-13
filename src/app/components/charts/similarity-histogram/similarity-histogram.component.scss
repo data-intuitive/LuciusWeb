@@ -1,25 +1,95 @@
 @import '../../../../styles/variables';
 
-body {
-  padding-top: 50px;
-  padding-left: 100px;
-}
+$cl-svg-dark: #999;
+$cl-svg-light: #ddd;
 
-#chartArea {
-  background-color: #fff;
-}
+:host {
+  &::shadow svg {
+    rect {
+      shape-rendering: crispEdges;
+    }
 
-.bar {
-  display: inline-block;
-  margin-right: 2px;
-  fill: teal;
-}
+    rect.bar {
+      stroke: #777;
+      stroke-width: 2;
+      stroke-opacity: .3;
+      opacity: .7;
 
-.title {
-  font-size: $font-sm;
+      &.hover {
+        stroke-opacity: .6;
+        opacity: .8;
+      }
 
-  padding: unit(.5);
+      &.selected {
+        stroke-opacity: .8;
+        opacity: 1;
+      }
+    }
 
-  color: md-color($primary, 600);
-  background-color: md-color($primary, 50);
+    rect.genebar {
+      pointer-events: none;
+
+      fill: rgba(0, 0, 0, .5);
+      stroke: rgba(0, 0, 0, .2);
+      stroke-width: 2;
+    }
+  }
+
+  .title {
+    font-size: $font-sm;
+
+    padding: unit(.5);
+
+    color: md-color($primary, 600);
+    background-color: md-color($primary, 50);
+  }
+
+  // SVG //
+  svg {
+    .bg {
+      fill: #fefefe;
+    }
+
+    text {
+      user-select: none;
+      cursor: default;
+    }
+
+    .brush {
+      .extent {
+        stroke: #fff;
+        fill: #333;
+        fill-opacity: .1;
+        shape-rendering: crispEdges;
+      }
+    }
+
+    .axis {
+      path {
+        display: none;
+        fill: none;
+        stroke: $cl-svg-dark;
+        shape-rendering: crispEdges;
+      }
+
+      line {
+        stroke: $cl-svg-dark;
+        shape-rendering: crispEdges;
+      }
+
+      &.y,
+      &.x {
+        line {
+          stroke: $cl-svg-light;
+          stroke-dasharray: 4, 2;
+        }
+
+        text {
+          fill: $cl-svg-dark;
+          text-anchor: end;
+          font-size: 14px;
+        }
+      }
+    }
+  }
 }

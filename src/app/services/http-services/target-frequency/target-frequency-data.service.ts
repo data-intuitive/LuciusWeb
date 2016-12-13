@@ -3,8 +3,8 @@ import { Http, Headers, RequestOptions, Response } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 
 import { APIEndpoints } from '../../../shared/api-endpoints';
-import { Parser } from '../../../shared/parser';
 import { KnownTargetEnum } from '../../../models';
+import { Parser } from '../../../shared/parser';
 
 interface KnownTarget {
   gene: string;
@@ -15,6 +15,7 @@ interface KnownTarget {
 export class TargetFrequencyDataService {
 
   constructor(private http: Http) { }
+
   fetchData(URL: string, data: any): Observable<any> {
     console.log('[http service] fetch');
     let url = URL;
@@ -22,8 +23,11 @@ export class TargetFrequencyDataService {
     let headers = new Headers({ 'Content-Type': 'text/plain' });
     let options = new RequestOptions({ headers: headers });
     console.log(url);
+    let pwids = '';
 
-    let pwids = Parser.parsePwids(data);
+    data.compounds ? pwids = data.compounds.pwids :
+                     pwids = Parser.parsePwids(data.zhang);
+
     let body = 'pwids=' + pwids;
     return this.http.post(url, body, options)
       .map(res => (this.handleResponse(res, classPath)))

@@ -1,12 +1,9 @@
-import { Component } from '@angular/core';
-import { ElementRef, ViewChild,
-         AfterViewInit, ViewEncapsulation, Input, OnInit } from '@angular/core';
+import { Component, ElementRef, ViewChild,  AfterViewInit,
+         Input, ViewEncapsulation, OnInit } from '@angular/core';
+
 import { Store } from '@ngrx/store';
-
-import { HandleDataService } from '../../../services';
 import * as fromRoot from '../../../reducers';
-import { Settings } from '../../../models/settings';
-
+import * as ChartsActions from '../../../actions/charts';
 import * as d3 from 'd3';
 
 @Component({
@@ -17,65 +14,109 @@ import * as d3 from 'd3';
 })
 
 export class KnownTargetsHistogramComponent implements  AfterViewInit, OnInit {
-    graphData: number[] = Array();
-    data: number[] = Array();
-    width: string;
-    height: string;
-    @ViewChild('container') element: ElementRef;
-    @Input() settings: Settings;
-    private el: HTMLElement;
-    // private margin =  {top: 16, right: 48, bottom: 16, left: 8};
-    // private padding = {top: 16, right: 24, bottom: 16, left: 24};
-    // private divs: any;
-    dataset: {gene: string, frequency: number}[] = Array();
-    datasetNames: string[] = Array();
-    datasetValues: number[] = Array();
+    @ViewChild('knownTargetsHist') element: ElementRef;
+    @Input() targetHistData = Array();
+    @Input() compound: string;
 
-    constructor(private store: Store<fromRoot.State>,
-                private handleDataService: HandleDataService) {
-      this.dataset = [];
-      this.datasetNames = [];
-      this.datasetValues = [];
-    }
+    /* DOM Element */
+    el: HTMLElement;
+
+    brushdata = [];
+    bindata = [];
+
+    /* var for selected compound */
+    hasCompound = false;
+    showCompound = false;
+
+    /* config vars */
+    empty = false;
+    numBars = 48;
+
+    /* vars for selected gene */
+    showTargetGene = false;
+    targetGene = '';
 
     ngOnInit() {
-      this.setup();
+      this.empty = this.targetHistData.length === 0;
+    }
+
+    constructor(private store: Store<fromRoot.State>) {
     }
 
     ngAfterViewInit() {
       this.el = this.element.nativeElement;
+
+      /* check if data is passed successfully from parent component */
+      if (this.targetHistData) {
+        let data = [];
+        if (this.targetHistData.length < 48) {
+          this.numBars = this.targetHistData.length;
+        }
+        for (let i = 0 ; i < this.numBars; i++) {
+          data[i] = [];
+          data[i][0] = this.targetHistData[i]['gene'];
+          data[i][1] = this.targetHistData[i]['frequency'];
+        }
+      this.init(data);
+      }
     }
 
-    setup() {
-      let w = 400;
-      let h = 200;
+    init(data) {
+        this.showCompound = (this.compound !== '');
+        this.updateGraph(data);
+    }
 
-      let svg = d3.select(this.el).append('svg')
-        .attr('width', w)
-        .attr('height', h);
+    updateGraph(data) {
+      let host = d3.select(this.el);
+      let wordsColumns = 4;
+      let boxHeight = 32;
+      let boxWidth = Math.floor(100 / wordsColumns) + '%';
+      let prevSelection;
+      let domainMax = data.length ? data[0][1] : 10;
 
-      let yScale = d3.scale.linear()
-       .domain([0, d3.max(this.datasetValues) * 1.1])
-       .range([0, h]);
+      let xScale = d3.scaleLinear()
+        .domain([1, domainMax])
+        .range([1, 100]);
 
-      let xScale = d3.scale.ordinal()
-        .domain(this.datasetNames)
-        .rangeBands([0 , w], 0.1);
-
-      svg.selectAll('rect')
-        .data(this.dataset)
+      let words = host.select('#words');
+      let box = words.selectAll('.box')
+        .data(data)
         .enter()
-        .append('rect')
-          .attr('class', 'bar')
-          .attr('x', function(d) {
-            return xScale(d.gene);
-          })
-          .attr('y', function(d) {
-            return h - yScale(d.frequency);
-          })
-          .attr('width', 20)
-          .attr('height', function(d) {
-            return yScale(d.frequency);
+        .append('div');
+
+      box
+        .attr('class', 'box')
+        .style('height', boxHeight + 'px')
+        .style('width',  boxWidth)
+        .html(function(d) {
+          return '<div class="word">' + d[0] +
+                 '</div><div class="bar"><span class="bar" style="width:' +
+                 xScale(d[1]) + '%"></span><span class="num">' +
+                 d[1] + '</span></div>';
         });
+
+      let thisComp = this;
+      box.on('click', function(d) {
+        thisComp.targetGene = d[0];
+        thisComp.showTargetGene = true;
+
+        d3.select(this).classed('selected', true);
+        d3.select(prevSelection).classed('selected', false);
+        prevSelection = this;
+
+        /* Update the store with selected TargetGene new value */
+        thisComp.store.dispatch(new ChartsActions.
+          UpdateTargetGeneAction(d[0]));
+      });
+
+      box.exit().remove();
+
+      if (!this.empty) {
+        // Height of #words must be a multiple of the columns + 32px of padding
+        let wordsHeight = Math.ceil(data.length / wordsColumns) * boxHeight + 32;
+        words.style('height', wordsHeight + 'px');
+      } else {
+        words.style('height', 'inherit');
+      }
     }
 }

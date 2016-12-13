@@ -10,9 +10,8 @@ notifications:
 env:
   - SCRIPT=lint BROWSER=no
   - SCRIPT=slint BROWSER=no
-  # FIXME: Check solution
-  # - SCRIPT=e2e BROWSER=yes 
-  - SCRIPT=test:ci BROWSER=yes
+  # - SCRIPT=e2e BROWSER=yes
+  # - SCRIPT=test:ci BROWSER=yes
 
 before_install:
   - if [[ "$BROWSER" == "yes" ]]; then export CHROME_BIN=/usr/bin/google-chrome; fi

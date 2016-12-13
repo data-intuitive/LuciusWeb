@@ -3,30 +3,10 @@
 :host {
   display: flex;
   flex-direction: column;
-  flex: 2 1 auto;
 
   box-sizing: border-box;
-  min-width: unit(14);
-  margin: unit();
 
   background-color: $bg-color;
 
   @include md-elevation(1);
-}
-
-.title {
-  font-size: $font-sm;
-
-  padding: unit(.5);
-
-  color: md-color($primary, 600);
-  background-color: md-color($primary, 50);
-}
-
-.content {
-  padding: unit();
-
-  & > * {
-    margin-bottom: unit();
-  }
 }

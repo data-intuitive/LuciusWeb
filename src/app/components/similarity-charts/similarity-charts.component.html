@@ -1,13 +1,15 @@
-<div class="title">Similarity Charts</div>
-<div class="content">
-  <app-similarity-scatter [settings]="settings" ></app-similarity-scatter>
-  <app-similarity-histogram [settings]="settings" ></app-similarity-histogram>
-  <div *ngIf="similarityHistogramReady$ | async">
-    {{similarityHistogramData | json}}
+  <!-- Add similarity Scatter schart -->
+  <div class='simScatter' *ngIf="binnedZhangReady$ | async">
+    <app-similarity-scatter
+      [settings]="settings"
+      [binnedZhangData]="binnedZhangArray">
+    </app-similarity-scatter>
   </div>
-  <div *ngIf="zhangReady$ | async">
-    <div *ngFor="let item of zhangArray">
-      {{item | json}}
-    </div>
+
+  <!-- Add similarity Histogram chart -->
+  <div class='simHist' *ngIf="similarityHistogramReady$ | async">
+    <app-similarity-histogram
+      [settings]="settings"
+      [similarityHistogramData]="similarityHistogramData">
+    </app-similarity-histogram>
   </div>
-</div>

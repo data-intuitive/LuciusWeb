@@ -1,0 +1,107 @@
+<div id='detail'>
+
+  <div>
+    <div *ngIf="dataDetail.smiles">
+      <img src="http://placekitten.com/600/300">
+    </div>
+    <div *ngIf="!dataDetail.smiles">
+      <div>NO IMAGE</div>
+    </div>
+  </div>
+
+  <div class="flex-container">
+    <div class="flex-item">
+        <p>
+          <span class="field">ID:</span><br>
+          <span class="info">{{dataDetail.id}}&nbsp;</span>
+        </p>
+        <p>
+          <span class="field">Protocol Name:</span><br>
+          <span class="info uppercase">{{dataDetail.protocolname}}&nbsp;</span>
+        </p>
+        <div *ngIf="dataDetail.jnjs">
+          <p>
+            <span class="field">JNJS:</span><br>
+            <span class="info uppercase">{{dataDetail.jnjs}}&nbsp;</span>
+          </p>
+        </div>
+        <div *ngIf="dataDetail.jnjb">
+          <p>
+            <span class="field">JNJB:</span><br>
+            <span class="info uppercase">{{dataDetail.jnjb}}&nbsp;</span>
+          </p>
+        </div>
+    </div>
+    <div class="flex-item">
+      <p>
+        <span class="field">PlateWell ID:</span><br>
+        <span class="info">{{dataDetail.plateid}}&nbsp;</span>
+      </p>
+      <p>
+        <span class="field">Type:</span><br>
+        <span class="info uppercase">{{dataDetail.Type}}&nbsp;</span>
+      </p>
+      <div *ngIf="dataDetail.concentration">
+        <p>
+          <span class="field">Concentration:</span><br>
+          <span class="info">{{dataDetail.concentration}}&nbsp;</span>
+        </p>
+      </div>
+      <div *ngIf="dataDetail.well">
+        <p>
+          <span class="field">Well:</span><br>
+          <span class="info">{{dataDetail.well}}&nbsp;</span>
+        </p>
+      </div>
+    </div>
+    <div class="flex-item">
+      <p>
+        <span class="field">Zhang Score:</span><br>
+        <span class="info">{{dataDetail.zhang}}&nbsp;</span>
+      </p>
+      <div *ngIf="dataDetail.year && dataDetail.year !== 'NA'">
+        <p>
+          <span class="field">Year:</span><br>
+          <span class="info">{{dataDetail.year}}&nbsp;</span>
+        </p>
+      </div>
+      <div *ngIf="dataDetail.batch">
+        <p>
+          <span class="field">Batch:</span><br>
+          <span class="info">{{dataDetail.batch}}&nbsp;</span>
+        </p>
+      </div>
+    </div>
+
+  </div>
+  <hr>
+
+  <div class="flex-item">
+    <p>
+      <span class="field">Compound Name:</span><br>
+      <span class="info capitalize">{{dataDetail.compoundname}}&nbsp;</span>
+    </p>
+    <div *ngIf="dataDetail.inchikey && dataDetail.inchikey !== 'NA'">
+      <p>
+        <span class="field">Inchy Key:</span><br>
+        <span class="info">{{dataDetail.inchikey}}&nbsp;</span>
+      </p>
+    </div>
+  </div>
+  <div class="flex-item">
+    <div *ngIf="dataDetail.targets">
+      <p>
+        <span class="field">Target(s):</span><br>
+        <span class="info">{{dataDetail.targets}}&nbsp;</span>
+      </p>
+    </div>
+    <div *ngIf="dataDetail.smiles">
+      <p>
+        <span class="field">Smiles:</span><br>
+        <span class="info">{{dataDetail.smiles}}&nbsp;</span>
+      </p>
+    </div>
+  </div>
+
+  <button md-raised-button (click)="dialogRef.close()">CLOSE</button>
+</div>

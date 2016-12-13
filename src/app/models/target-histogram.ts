@@ -1,10 +1,10 @@
 export interface TargetHistogram {
   metadata: {
     bins: number;
-    bounds: Array<Array<Number>>;
+    bounds: Array<Array<number>>;
   };
   data: {
-      zhang: Array<Number>;
-      [name: string]: Array<Number>;
+      zhang: Array<number>;
+      [name: string]: Array<number>;
   };
 };

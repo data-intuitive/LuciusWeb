@@ -48,7 +48,7 @@ export function SimilarityPlot(sources) {
 	const data$ = resultData$.startWith(emptyData);
 
 	// Ingest the data in the spec and return to the driver
-    const vegaSpec$ = data$.map(data => ({spec : similarityPlotSpec(data) , el : '#vega', width: 600, height: 300})).remember();
+    const vegaSpec$ = data$.map(data => ({spec : similarityPlotSpec(data) , el : '#vega', width: 700, height: 300})).remember();
 
     const makeHistogram = (state, data) => {
             let visible = state.ux.histogramVisible;

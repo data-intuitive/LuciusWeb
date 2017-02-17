@@ -14,7 +14,9 @@ const initState = {
 				body : {
 					version : 'v2',
 					query : 'ENSG00000012048 -WRONG HSPA1A DNAJB1 DDIT4 HMOX1 -TSEN2',
-					bins: 20
+					bins: 20,
+					binsX:40,
+					binxY:40
 				},
 				connection : {
 					url: 'http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&appName=luciusapi&sync=true&classPath=com.dataintuitive.luciusapi.',
@@ -22,7 +24,7 @@ const initState = {
 				ux : {
 					checkSignatureVisible : false,
 					histogramVisible : false,
-					simplotVisible : true
+					simplotVisible : false
 				}
     };
 

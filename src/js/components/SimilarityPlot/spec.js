@@ -1,5 +1,268 @@
 
-export const similarityPlotSpec = (data) => {
+export const similarityPlotSpec = (data) => ({
+    "padding": "auto",
+    "data": [
+        {
+            "name": "source",
+            "values": data,
+            "format": {
+                "type": "json",
+                "parse": {
+                    "x": "number",
+                    "zhangBoxed": "number",
+                    "xShift": "number",
+                    "avg": "number"
+                }
+            },
+            "transform": [
+                {
+                    "type": "formula",
+                    "field": "absAvg",
+                    "expr": "abs(datum.avg)"
+                },
+                {
+                    "type": "formula",
+                    "field": "xShift",
+                    "expr": "datum.x + 1.5"
+                },
+                {
+                    "type": "formula",
+                    "field": "invAbsAvg",
+                    "expr": "1/(1+datum.absAvgScaled)"
+                },
+                {
+                    "type": "formula",
+                    "field": "fixed",
+                    "expr": "100"
+                },
+                {
+                    "type": "formula",
+                    "field": "countScaled",
+                    "expr": "datum.count * 10"
+                },
+                {
+                    "type": "formula",
+                    "field": "zhangBoxed",
+                    "expr": "datum.y / 20 - 1"
+                },
+                {
+                    "type": "formula",
+                    "field": "binFiltered",
+                    "expr": "datum.absAvg >= .8 ? datum.bin : \"\" "
+                },
+                {
+                    "type": "filter",
+                    "test": "datum[\"x\"] !== null && !isNaN(datum[\"x\"]) && datum[\"zhangBoxed\"] !== null && !isNaN(datum[\"zhangBoxed\"]) && datum[\"xShift\"] !== null && !isNaN(datum[\"xShift\"]) && datum[\"avg\"] !== null && !isNaN(datum[\"avg\"])"
+                }
+            ]
+        },
+        {
+            "name": "layout",
+            "values": [
+                {}
+            ],
+            "transform": [
+                {
+                    "type": "formula",
+                    "field": "width",
+                    "expr": "600"
+                },
+                {
+                    "type": "formula",
+                    "field": "height",
+                    "expr": "350"
+                }
+            ]
+        }
+    ],
+    "marks": [
+        {
+            "name": "root",
+            "type": "group",
+            "description": "Bin Plot",
+            "from": {
+                "data": "layout"
+            },
+            "properties": {
+                "update": {
+                    "width": {
+                        "field": "width"
+                    },
+                    "height": {
+                        "field": "height"
+                    }
+                }
+            },
+            "marks": [
+                {
+                    "name": "layer_0_marks",
+                    "type": "symbol",
+                    "from": {
+                        "data": "source"
+                    },
+                    "properties": {
+                        "update": {
+                            "x": {
+                                "scale": "x",
+                                "field": "x"
+                            },
+                            "y": {
+                                "scale": "y",
+                                "field": "zhangBoxed"
+                            },
+                            // "size": {
+                            //     "value": 60
+                            // },
+                            "shape": {
+                                "value": "circle"
+                            },
+                            "size" : {
+                                "field" : "countScaled"
+                            },
+                            "opacity": {
+                                "value": 0.7
+                            },
+                            "fill": {
+                                "scale": "color",
+                                "field": "avg"
+                            }
+                        }
+                    }
+                },
+                // {
+                //     "name": "layer_1_marks",
+                //     "type": "text",
+                //     "from": {
+                //         "data": "source"
+                //     },
+                //     "properties": {
+                //         "update": {
+                //             "align": {
+                //                 "value": "center"
+                //             },
+                //             "baseline": {
+                //                 "value": "middle"
+                //             },
+                //             "text": {
+                //                 "field": "binFiltered"
+                //             },
+                //             "x": {
+                //                 "scale": "x",
+                //                 "field": "xShift"
+                //             },
+                //             "y": {
+                //                 "scale": "y",
+                //                 "field": "avg"
+                //             },
+                //             "fontSize": {
+                //                 "value": 10
+                //             },
+                //             "fill": {
+                //                 "value": "gray"
+                //             }
+                //         }
+                //     }
+                // }
+            ],
+            "scales": [
+                {
+                    "name": "x",
+                    "type": "linear",
+                    "domain": [
+                        0,
+                        20
+                    ],
+                    "rangeMin": 0,
+                    "rangeMax": 600,
+                    "round": true,
+                    "nice": true,
+                    "zero": false
+                },
+                {
+                    "name": "y",
+                    "type": "linear",
+                    "domain": {
+                        "data": "source",
+                        "field": "zhangBoxed"
+                    },
+                    "rangeMin": 350,
+                    "rangeMax": 0,
+                    "round": true,
+                    "nice": true,
+                    "zero": true
+                },
+                {
+                    "name": "color",
+                    "type": null,
+                    "domain": {
+                        "data": "source",
+                        "field": "avg"
+                    },
+                    "range": ["red", "green"],
+                    "zero": false
+                }
+            ],
+            "axes": [
+                {
+                    "type": "x",
+                    "scale": "x",
+                    "format": "s",
+                    "grid": true,
+                    "layer": "back",
+                    "ticks": 10,
+                    "title": "",
+                    "properties": {
+                        "axis": {
+                            "strokeWidth": {
+                                "value": 0
+                            }
+                        }
+                    }
+                },
+                {
+                    "type": "y",
+                    "scale": "y",
+                    "format": "s",
+                    "grid": true,
+                    "layer": "back",
+                    "ticks": 20,
+                    "title": "Binned Zhang Score",
+                    "properties": {
+                        "axis": {
+                            "strokeWidth": {
+                                "value": 0
+                            }
+                        }
+                    }
+                }
+            ],
+            // "legends": [
+            //     {
+            //         "fill": "color",
+            //         "title": "# Samples",
+            //         "offset": -150,
+            //         "orient": "right",
+            //         "properties": {
+            //             "symbols": {
+            //                 "shape": {
+            //                     "value": "circle"
+            //                 },
+            //                 "strokeWidth": {
+            //                     "value": 0
+            //                 },
+            //                 "opacity": {
+            //                     "value": 0.7
+            //                 }
+            //             }
+            //         }
+            //     }
+            // ]
+        }
+    ]
+})
+
+
+export const similarityPlotSpec1 = (data) => {
     const obj = {
         // "width": 300,
         // "height": 200,

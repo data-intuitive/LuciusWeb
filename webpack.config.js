@@ -26,8 +26,8 @@ module.exports = {
   //          ]
   // ),
   entry: {
-    bundle: [ path.resolve('src/js', "main") ],
-    // './src/js/main'
+    // bundle: [ path.resolve('src/js', "main") ],
+    bundle: './src/js/main'
     // vendors: ["webpack-material-design-icons"]
   },
   module: {
@@ -44,7 +44,7 @@ module.exports = {
       { test: /\.css$/, loader: "style-loader!css-loader" },
       { 
         test: /\.(jpe?g|woff2?|ttf|eot|svg|png|gif)(\?v=\d+\.\d+\.\d+)?$/,
-        loader: "file-loader?name=[name].[ext]"
+        loader: "file-loader?name=fonts/[name].[ext]"
       },
       // {
       //     test: /\.(eot|svg|ttf|woff|woff2)$/,
@@ -53,10 +53,10 @@ module.exports = {
     ]
   },
   output: {
-    // filename: 'bundle.js',
-    path: path.resolve(__dirname, 'dist'),
+    filename: 'dist/bundle.js',
+    // path: path.resolve(__dirname, 'dist'),
     // path: path.resolve(__dirname, "dist"),
-    filename: "[name].js",
+    // filename: "[name].js",
     // chunkFilename: "[name].js"
   },
   plugins: [

@@ -10,8 +10,26 @@ const sassLoaders = [
 
 var ENV = process.env.NODE_ENV;
 
+var PATH = {
+    WWW: path.resolve(__dirname, "dist"),
+    BUILD: path.resolve(__dirname, "build")
+};
+
 module.exports = {
-  entry: './src/js/main',
+  //   entry: ( ENV == 'production' ?
+  //          ['./src/js/main']
+  //          :
+  //          [
+  //           'webpack-dev-server/client?http://localhost:8080',
+  //           'webpack/hot/dev-server',
+  //           './src/js/main'
+  //          ]
+  // ),
+  entry: {
+    bundle: [ path.resolve('src/js', "main") ],
+    // './src/js/main'
+    // vendors: ["webpack-material-design-icons"]
+  },
   module: {
     rules: [
       {
@@ -25,16 +43,26 @@ module.exports = {
       // },
       { test: /\.css$/, loader: "style-loader!css-loader" },
       { 
-        test: /\.(woff2?|ttf|eot|svg|png)(\?v=\d+\.\d+\.\d+)?$/,
-        loader: "file-loader?name=fonts/[name].[ext]"
-      }
+        test: /\.(jpe?g|woff2?|ttf|eot|svg|png|gif)(\?v=\d+\.\d+\.\d+)?$/,
+        loader: "file-loader?name=[name].[ext]"
+      },
+      // {
+      //     test: /\.(eot|svg|ttf|woff|woff2)$/,
+      //     loader: 'file-loader?name=material-design-icons/iconfont/[name].[ext]'
+      // }
     ]
   },
   output: {
-    filename: 'dist/bundle.js',
-    path: path.resolve(__dirname, 'dist')
+    // filename: 'bundle.js',
+    path: path.resolve(__dirname, 'dist'),
+    // path: path.resolve(__dirname, "dist"),
+    filename: "[name].js",
+    // chunkFilename: "[name].js"
   },
   plugins: [
+    // new webpack.optimize.CommonsChunkPlugin({
+    //         names: ["vendors"]
+    //     }),
     new ExtractTextPlugin('[name].css'),
     new webpack.ProvidePlugin({
       $: 'jquery',

@@ -11,20 +11,7 @@ import SignatureWorkflow from './pages/signature';
 
 import 'materialize-css/bin/materialize.css';
 import 'materialize-css/bin/materialize.js';
-
-// import 'jquery/dist/jquery.min.js';
-// import jQuery from 'jquery';
-// window.jQuery = require('materialize-css/js/jquery.js');
-// window.$ = require('jquery');
-// require('jquery')
-// require('materialize-css');
-// require('materialize-css/dist/js/materialize.js');
-// require('materialize-css/js/init.js');
-
-
-// import main from './pages/signature';
-
-// const history = createHistory();
+// import 'material-design-icons/iconfont/MaterialIcons-Regular.woff2';
 
 const drivers = {
   DOM: makeDOMDriver('#root'),

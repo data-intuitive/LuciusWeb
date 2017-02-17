@@ -20,8 +20,11 @@ function SignatureForm(sources) {
 									[ label('Query: '),
 										input('.Query', {style: {fontSize: '20px'} , props: {type: 'text', value: query}, value: query}),
 										div('.row', [
-										button('.SignatureCheck .btn .col .s5 .pink .accent-4', 'Check Signature'),
-										button('.SignatureRun .btn .col .s5 .offset-s2', 'Run Query')
+											div('.col .s1'),
+											button('.SignatureCheck .btn .col .s4 .pink .accent-4', 'Check Signature'),
+											div('.col .s2'),
+											button('.SignatureRun .btn .col .s4 .offset-s2', 'Run Query'),
+											div('.col s1')
 										])
 									])
 	});

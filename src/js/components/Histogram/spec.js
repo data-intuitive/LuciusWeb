@@ -3,7 +3,7 @@ export const vegaHistogramSpec = (data, width, height) => {
 	const obj = {
 		// "width": width,
 		// "height": height,
-		"padding": {"top": 10, "left": 30, "bottom": 30, "right": 10},
+		// "padding": {"top": 10, "left": 30, "bottom": 30, "right": 10},
 
 		"signals": [
 			{

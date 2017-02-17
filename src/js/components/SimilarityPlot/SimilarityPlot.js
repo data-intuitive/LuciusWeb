@@ -2,11 +2,11 @@ import xs from 'xstream';
 import sampleCombine from 'xstream/extra/sampleCombine';
 import { h, p, div, br, label, input, code, table, tr, td, b, h2, button, svg, h1 } from '@cycle/dom';
 import { clone } from 'ramda';
-import { vegaHistogramSpec, exampleData, emptyData } from './spec.js'
+import { similarityPlotSpec, exampleData, emptyData } from './spec.js'
 
 const log = (x) => console.log(x);
 
-export function Histogram(sources) {
+export function SimilarityPlot(sources) {
 
 	console.log('Starting component: Histogram...');
 
@@ -27,18 +27,18 @@ export function Histogram(sources) {
 	// const body$ = state$.map(json => json.body);
     const request$ = refresh$.compose(sampleCombine(state$))
         .map(([x, state]) => {
-			let thisUrl = state.connection.url + 'histogram';
+			let thisUrl = state.connection.url + 'binnedZhang';
 			return {
 				url : thisUrl,
 				method : 'POST',
 				send : state.body,
-				'category' : 'histogram'
+				'category' : 'binnedZhang'
 		}})
 		.debug(log);
 
 	// Catch the response in a stream
 	const response$ = httpSource$
-        .select('histogram')
+        .select('binnedZhang')
         .flatten()
         .debug(log);
 
@@ -48,19 +48,20 @@ export function Histogram(sources) {
 	const data$ = resultData$.startWith(emptyData);
 
 	// Ingest the data in the spec and return to the driver
-    const vegaSpec$ = data$.map(data => ({spec: vegaHistogramSpec(data), el : '#hist', width: 400, height: 300})).remember();
+    const vegaSpec$ = data$.map(data => ({spec : similarityPlotSpec(data) , el : '#vega', width: 600, height: 300})).remember();
 
     const makeHistogram = (state, data) => {
-            let visible = state.ux.simplotVisible;
+            let visible = state.ux.histogramVisible;
             return (
                 (visible)
-                ? div('.card-panel .center-align', [div('#hist')])
-                : div('.card-panel .center-align', [div('#hist', {style: {visibility:'hidden'}})])
+                ? div('.card-panel .center-align', [div('#vega', {style: {border:'1px'}})])
+                : div('.card-panel .center-align', [div('#vega', {style: {visibility:'hidden'}})])
             )
     };
 
 	// View
-    const vdom$ = data$.compose(sampleCombine(state$))
+    const vdom$ = //data$.compose(sampleCombine(state$))
+            xs.combine(data$, state$)
             .map(([data, state]) =>  makeHistogram(state, data) )
             .debug(log);
 
@@ -69,7 +70,7 @@ export function Histogram(sources) {
 		click => function reducer(prevState) {
 			let newState = clone(prevState);
 			let newUx = clone(prevState.ux);
-			newUx.simplotVisible = true;
+			newUx.histogramVisible = true;
 			newState.ux = newUx;
 			console.log(newState);
 			return newState;

@@ -4,6 +4,7 @@ import { SignatureForm } from '../components/SignatureForm';
 import xs from 'xstream';
 import { SignatureCheck } from '../components/SignatureCheck';
 import { Histogram } from '../components/Histogram/Histogram';
+import { SimilarityPlot } from '../components/SimilarityPlot/SimilarityPlot';
 import isolate from '@cycle/isolate';
 // import {vegaHistogramSpec, exampleData} from '../components/Histogram/spec';
 
@@ -20,7 +21,8 @@ const initState = {
 				},
 				ux : {
 					checkSignatureVisible : false,
-					histogramVisible : false
+					histogramVisible : false,
+					simplotVisible : true
 				}
     };
 
@@ -56,6 +58,14 @@ function SignatureWorkflow(sources) {
 	const histogramVega$ = histogramSink.vega;
 	const histogramReducer$ = histogramSink.onion
 
+	// Binned Scatter plot
+	const SimilarityPlotSink = SimilarityPlot(sources);
+	const SimilarityPlotDom$ = SimilarityPlotSink.DOM;
+	const SimilarityPlotHTTP$ = SimilarityPlotSink.HTTP;
+	const SimilarityPlotVega$ = SimilarityPlotSink.vega;
+	const SimilarityPlotReducer$ = SimilarityPlotSink.onion
+
+
 	// Merging
 
 	// HTTP
@@ -74,14 +84,16 @@ function SignatureWorkflow(sources) {
 
     const vdom$ = xs.combine(
                         signatureFormDom$,
+						signatureCheckDom$,
                         histogramDom$,
-						signatureCheckDom$)
-					.map(([form, hist, check, obj]) => 
+						SimilarityPlotDom$)
+					.map(([form, check, hist, simplot]) => 
 						div('.container',{style: {fontSize: '20px'}},
 							[
 								form, 
 								check,
-								hist
+								hist,
+								simplot
 							]
 							)
 						);
@@ -106,9 +118,9 @@ function SignatureWorkflow(sources) {
 
 	return {
         DOM: vdom$,
-		onion: xs.merge(initReducer$, signatureFormReducer$, signatureCheckReducer$, histogramReducer$),
-		vega: histogramVega$,
-		HTTP: xs.merge(signatureCheckHTTP$, histogramHTTP$),
+		onion: xs.merge(initReducer$, signatureFormReducer$, signatureCheckReducer$, histogramReducer$, SimilarityPlotReducer$),
+		vega: xs.merge(histogramVega$,SimilarityPlotVega$),
+		HTTP: xs.merge(signatureCheckHTTP$, histogramHTTP$, SimilarityPlotHTTP$),
 	};
 }
 

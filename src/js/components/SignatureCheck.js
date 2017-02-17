@@ -16,8 +16,6 @@ const empty = {
 	}
 };
 
-const tableStyle = {width: `100%`};
-
 function SignatureCheck(sources) {
 
 	const domSource$ = sources.DOM;

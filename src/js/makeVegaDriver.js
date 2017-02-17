@@ -11,13 +11,13 @@ function makeVegaDriver(container) {
   function vegaDriver(spec$) {
 
     const view$$ = spec$.map(
-        (spec) => {
+        (obj) => {
 
             const vegaParseSpec = Observable.fromCallback(vg.parse.spec)
-            const parsed = vegaParseSpec(spec);
+            const parsed = vegaParseSpec(obj.spec);
             const parsed$ = convert.rx.to.xstream(parsed);
 
-            const view$ = parsed$.map(chart => chart({el:container}).width(400).height(300).update());
+            const view$ = parsed$.map(chart => chart({el:obj.el}).width(obj.width).height(obj.height).update());
 
             return view$;
         }

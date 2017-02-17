@@ -3,9 +3,9 @@ import { div, br, label, input, p, button, code, pre } from '@cycle/dom';
 import { SignatureForm } from '../components/SignatureForm';
 import xs from 'xstream';
 import { SignatureCheck } from '../components/SignatureCheck';
-// import { Histogram } from '../components/histogram/Histogram';
+import { Histogram } from '../components/Histogram/Histogram';
 import isolate from '@cycle/isolate';
-import {vegaHistogramSpec, exampleData} from '../components/Histogram/spec';
+// import {vegaHistogramSpec, exampleData} from '../components/Histogram/spec';
 
 const log = (x) => console.log(x);
 
@@ -19,7 +19,8 @@ const initState = {
 					url: 'http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&appName=luciusapi&sync=true&classPath=com.dataintuitive.luciusapi.',
 				},
 				ux : {
-					checkSignatureVisible : false
+					checkSignatureVisible : false,
+					histogramVisible : false
 				}
     };
 
@@ -33,7 +34,7 @@ function SignatureWorkflow(sources) {
 
 	// const feedback$ = domSource$.select('.SignatureCheck').events('click').mapTo('click !').startWith(null);
 
-    const reducer$ = xs.of(() => (initState))
+    const initReducer$ = xs.of(() => (initState))
     // .debug(x => console.log(x));
 
 	// Queury Form
@@ -46,22 +47,14 @@ function SignatureWorkflow(sources) {
 	const signatureCheckSink = SignatureCheck(sources);
 	const signatureCheckDom$ = signatureCheckSink.DOM;
 	const signatureCheckHTTP$ = signatureCheckSink.HTTP;
-	// const newState$ = signatureCheckSink.onion.state$;
 	const signatureCheckReducer$ = signatureCheckSink.onion;
 
 	// Binned Scatter plot
-	// const histogramSink = Histogram(
-	// 	{
-	// 		DOM: sources.DOM,
-	// 		state: signatureCheckSink.state,
-	// 		HTTP: sources.HTTP,
-	// 		vega: sources.vega
-	// 	}
-	// );
-	// const histogramDom$ = histogramSink.DOM;
-	// const histogramHTTP$ = histogramSink.HTTP;
-	// const histogramState$ = histogramSink.state;
-	// const newVega = histogramSink.vega;
+	const histogramSink = Histogram(sources);
+	const histogramDom$ = histogramSink.DOM;
+	const histogramHTTP$ = histogramSink.HTTP;
+	const histogramVega$ = histogramSink.vega;
+	const histogramReducer$ = histogramSink.onion
 
 	// Merging
 
@@ -81,12 +74,19 @@ function SignatureWorkflow(sources) {
 
     const vdom$ = xs.combine(
                         signatureFormDom$,
-                        xs.of(div('#vega')),
+                        histogramDom$,
 						signatureCheckDom$)
-					.map(([form, svg, check, obj]) => div('.container',{style: {fontSize: '20px'}},[form, check, ]));
+					.map(([form, hist, check, obj]) => 
+						div('.container',{style: {fontSize: '20px'}},
+							[
+								form, 
+								check,
+								hist
+							]
+							)
+						);
 					// .map(([form, svg, check, obj]) => div('.container',{style: {fontSize: '20px'}},[form, check, p('clicked on: ' + ((obj != null) ? obj : "nothing yet"))]));
 
-    const vegaSpec$ = xs.of(vegaHistogramSpec(exampleData, 400, 250)).remember();
 
 	// const HTTPLogger$ = $.catch(mergedHTTP$);
 	// HTTPLogger$.subscribe( 
@@ -106,11 +106,9 @@ function SignatureWorkflow(sources) {
 
 	return {
         DOM: vdom$,
-		onion: xs.merge(reducer$, signatureFormReducer$, signatureCheckReducer$),
-		vega: vegaSpec$,
-		// router: xs.of('/signature')
-		// state: state$,
-		HTTP: signatureCheckHTTP$,
+		onion: xs.merge(initReducer$, signatureFormReducer$, signatureCheckReducer$, histogramReducer$),
+		vega: histogramVega$,
+		HTTP: xs.merge(signatureCheckHTTP$, histogramHTTP$),
 	};
 }
 

@@ -17,7 +17,7 @@ function makeVegaDriver(container) {
             const parsed = vegaParseSpec(spec);
             const parsed$ = convert.rx.to.xstream(parsed);
 
-            const view$ = parsed$.map(chart => chart({el:container}).update());
+            const view$ = parsed$.map(chart => chart({el:container}).width(400).height(300).update());
 
             return view$;
         }

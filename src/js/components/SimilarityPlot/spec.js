@@ -1,6 +1,8 @@
 
 export const similarityPlotSpec = (data) => ({
-    "padding": "auto",
+    // "autosize" : "fit",
+    // "padding": 25,
+    "padding" : "strict",
     "data": [
         {
             "name": "source",
@@ -56,43 +58,43 @@ export const similarityPlotSpec = (data) => ({
                 }
             ]
         },
-        {
-            "name": "layout",
-            "values": [
-                {}
-            ],
-            "transform": [
-                {
-                    "type": "formula",
-                    "field": "width",
-                    "expr": "600"
-                },
-                {
-                    "type": "formula",
-                    "field": "height",
-                    "expr": "350"
-                }
-            ]
-        }
+        // {
+        //     "name": "layout",
+        //     "values": [
+        //         {}
+        //     ],
+        //     "transform": [
+        //         {
+        //             "type": "formula",
+        //             "field": "width",
+        //             "expr": "600"
+        //         },
+        //         {
+        //             "type": "formula",
+        //             "field": "height",
+        //             "expr": "350"
+        //         }
+        //     ]
+        // }
     ],
-    "marks": [
-        {
-            "name": "root",
-            "type": "group",
-            "description": "Bin Plot",
-            "from": {
-                "data": "layout"
-            },
-            "properties": {
-                "update": {
-                    "width": {
-                        "field": "width"
-                    },
-                    "height": {
-                        "field": "height"
-                    }
-                }
-            },
+    // "marks": [
+    //     {
+    //         "name": "root",
+    //         "type": "group",
+    //         "description": "Bin Plot",
+    //         "from": {
+    //             "data": "layout"
+    //         },
+    //         "properties": {
+    //             "update": {
+    //                 "width": {
+    //                     "field": "width"
+    //                 },
+    //                 "height": {
+    //                     "field": "height"
+    //                 }
+    //             }
+    //         },
             "marks": [
                 {
                     "name": "layer_0_marks",
@@ -103,7 +105,7 @@ export const similarityPlotSpec = (data) => ({
                     "properties": {
                         "update": {
                             "x": {
-                                "scale": "x",
+                                "scale": "xscale",
                                 "field": "x"
                             },
                             "y": {
@@ -116,16 +118,22 @@ export const similarityPlotSpec = (data) => ({
                             "shape": {
                                 "value": "circle"
                             },
+                            "stroke": {
+                                "scale": "color",
+                                "field": "avg"
+                            },
+                            "strokeWidth": {"value": 1.5},
+                            "strokeOpacity": {"value": 1},
                             "size" : {
                                 "field" : "countScaled"
-                            },
-                            "opacity": {
-                                "value": 0.7
                             },
                             "fill": {
                                 "scale": "color",
                                 "field": "avg"
-                            }
+                            },
+                            "fillOpacity": {
+                                "value": 0.5
+                            },
                         }
                     }
                 },
@@ -166,14 +174,10 @@ export const similarityPlotSpec = (data) => ({
             ],
             "scales": [
                 {
-                    "name": "x",
+                    "name": "xscale",
                     "type": "linear",
-                    "domain": [
-                        0,
-                        20
-                    ],
-                    "rangeMin": 0,
-                    "rangeMax": 600,
+                    "domain": {"data": "source", "field": "x"},
+                    "range" : "width",
                     "round": true,
                     "nice": true,
                     "zero": false
@@ -185,12 +189,37 @@ export const similarityPlotSpec = (data) => ({
                         "data": "source",
                         "field": "zhangBoxed"
                     },
-                    "rangeMin": 350,
-                    "rangeMax": 0,
+                    "range" : "height",
                     "round": true,
                     "nice": true,
                     "zero": true
                 },
+                // {
+                //     "name": "x",
+                //     "type": "linear",
+                //     "domain": [
+                //         0,
+                //         20
+                //     ],
+                //     "rangeMin": 0,
+                //     "rangeMax": 600,
+                //     "round": true,
+                //     "nice": true,
+                //     "zero": false
+                // },
+                // {
+                //     "name": "y",
+                //     "type": "linear",
+                //     "domain": {
+                //         "data": "source",
+                //         "field": "zhangBoxed"
+                //     },
+                //     "rangeMin": 350,
+                //     "rangeMax": 0,
+                //     "round": true,
+                //     "nice": true,
+                //     "zero": true
+                // },
                 {
                     "name": "color",
                     "type": null,
@@ -205,7 +234,7 @@ export const similarityPlotSpec = (data) => ({
             "axes": [
                 {
                     "type": "x",
-                    "scale": "x",
+                    "scale": "xscale",
                     "format": "s",
                     "grid": true,
                     "layer": "back",
@@ -257,8 +286,9 @@ export const similarityPlotSpec = (data) => ({
             //         }
             //     }
             // ]
-        }
-    ]
+
+    //     }
+    // ]
 })
 
 

@@ -3,6 +3,14 @@ import { p, div, br, label, input, code, table, tr, th, td, b, h2, button, thead
 import { clone } from 'ramda';
 import sampleCombine from 'xstream/extra/sampleCombine';
 
+const emptyData = {
+	body: {
+		result: {
+			data : []
+		}
+	}
+}
+
 // import {thumb_up} from 'webpack-material-design-icons/material-design-icons.css';
 
 // import 'test.css';
@@ -37,27 +45,31 @@ function SignatureCheck(sources) {
 				send : state.body,
 				'category' : 'checkSignature'
 		}})
-		.debug(log);
+		// .debug(log);
 
 	// Catch the response in a stream
+	// Handle errors by returning an empty object
 	const response$ = httpSource$
 		.select('checkSignature')
+		.map((response$) =>
+				response$.replaceError(() => xs.of(emptyData))
+			)		
 		.flatten()
-		.debug(log);
+		// .debug(log);
 
 	const data$ = response$
 		.map(res => res.body)
 		.startWith(empty)
 		.map(json => json.result.data)
-		.debug(log);
+		// .debug(log);
 
 	// Helper function for rendering the table, based on the state
 	const makeTable = (state, data) => {
 			let visible = state.ux.checkSignatureVisible;
 			let rows = data.map(entry => [ 
-				(entry.inL1000) ? td(entry.query) : td(entry.query),
-				(entry.inL1000) ? td(i('.material-icons .dp48','thumb_up')) : td('-'),
-				(entry.inL1000) ? td(entry.symbol) : td(entry.symbol)
+				(entry.inL1000) ? td(entry.query) : td('.red .lighten-4 .red-text .text-darken-4', entry.query),
+				(entry.inL1000) ? td(i('.material-icons .dp48',''), 'x') : td('.red .lighten-4 .red-text .text-darken-4', '-'),
+				(entry.inL1000) ? td(entry.symbol) : td('.red .lighten-4 .red-text .text-darken-4', entry.symbol)
 			]);
 			const header = tr([
 								th('Input'),
@@ -75,7 +87,7 @@ function SignatureCheck(sources) {
 							div('.row'),
 							div('.row', [table('.striped', tableContent)]),
 							div('.row', [
-								button('.collapseUpdate .btn .col .offset-s1 .s4 .pink .accent-4', 'Collapse and Update Query'),
+								button('.collapseUpdate .btn .col .offset-s1 .s4 .pink .accent-4', 'Update Query'),
 								button('.collapse .btn .col .offset-s2 .s4 .pink .accent-4', 'Collapse')
 								]),
 							div('.row')
@@ -99,7 +111,8 @@ function SignatureCheck(sources) {
 			newState.ux = newUx;
 			console.log(newState);
 			return newState;
-		}).debug(log);
+		})
+		// .debug(log);
 
 
 	// When clicked, show table by switching ux visibility state:

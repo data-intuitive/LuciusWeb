@@ -2,11 +2,9 @@ import xs from 'xstream';
 import vg  from 'vega';
 import {Observable} from 'rx';
 import convert from 'stream-conversions';
+import {log} from './utils/logger'
 
-// utility function
-const log = (x) => console.log(x);
-
-function makeVegaDriver(container) {
+function makeVegaDriver() {
 
   function vegaDriver(spec$) {
 
@@ -17,7 +15,8 @@ function makeVegaDriver(container) {
             const parsed = vegaParseSpec(obj.spec);
             const parsed$ = convert.rx.to.xstream(parsed);
 
-            const view$ = parsed$.map(chart => chart({el:obj.el}).width(obj.width).height(obj.height).update());
+            // Make the charts square
+            const view$ = parsed$.map(chart => chart({el:obj.el}).width(obj.width).height(obj.width).update());
 
             return view$;
         }
@@ -25,7 +24,7 @@ function makeVegaDriver(container) {
 
     const view$ = view$$.flatten();
 
-   view$.addListener({
+    view$.addListener({
             next: () => {},
             error: () => {},
             complete: () => {}            
@@ -54,7 +53,6 @@ function makeVegaDriver(container) {
     //     });
 
     return click$;
-    // return xs.of({test:1});
 
   }
 

@@ -1,10 +1,11 @@
 
 export const vegaHistogramSpec = (data, width, height) => {
 	const obj = {
+    "autosize" : "fit",
+    "padding" : "strict",
 		// "width": width,
 		// "height": height,
 		// "padding": {"top": 10, "left": 30, "bottom": 30, "right": 10},
-
 		"signals": [
 			{
 			"name": "tooltip",
@@ -74,7 +75,7 @@ export const vegaHistogramSpec = (data, width, height) => {
             "text": {"template": "{{datum.data|number:','}}"},
             "fill": {"value": "lightgray"},
             "angle": {"value": 50},
-            "fontSize": {"value": 12},
+            "fontSize": {"value": 8},
             "align": {"value": "left"},
             "baseline": {"value": "middle"},
             "dx": {"value": 3}

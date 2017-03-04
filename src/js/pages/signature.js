@@ -1,12 +1,11 @@
-// import Stream from 'xstream';
 import { div, br, label, input, p, button, code, pre } from '@cycle/dom';
 import { SignatureForm } from '../components/SignatureForm';
 import xs from 'xstream';
 import { SignatureCheck } from '../components/SignatureCheck';
 import { Histogram } from '../components/Histogram/Histogram';
 import { SimilarityPlot } from '../components/SimilarityPlot/SimilarityPlot';
+import { Table } from '../components/Table';
 import isolate from '@cycle/isolate';
-// import {vegaHistogramSpec, exampleData} from '../components/Histogram/spec';
 
 const log = (x) => console.log(x);
 
@@ -16,7 +15,8 @@ const initState = {
 					query : 'ENSG00000012048 -WRONG HSPA1A DNAJB1 DDIT4 HMOX1 -TSEN2',
 					bins: 20,
 					binsX:40,
-					binxY:40
+					binxY:40,
+					head: 20
 				},
 				connection : {
 					url: 'http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&appName=luciusapi&sync=true&classPath=com.dataintuitive.luciusapi.',
@@ -67,6 +67,13 @@ function SignatureWorkflow(sources) {
 	const SimilarityPlotVega$ = SimilarityPlotSink.vega;
 	const SimilarityPlotReducer$ = SimilarityPlotSink.onion
 
+	// Binned Scatter plot
+	const TopTableSink = Table(sources);
+	const TopTableDom$ = TopTableSink.DOM;
+	const TopTableHTTP$ = TopTableSink.HTTP;
+	const TopTableVega$ = TopTableSink.vega;
+	const TopTableReducer$ = TopTableSink.onion
+
 
 	// Merging
 
@@ -88,14 +95,19 @@ function SignatureWorkflow(sources) {
                         signatureFormDom$,
 						signatureCheckDom$,
                         histogramDom$,
-						SimilarityPlotDom$)
-					.map(([form, check, hist, simplot]) => 
-						div('.container',{style: {fontSize: '20px'}},
+						SimilarityPlotDom$,
+						TopTableDom$)
+					.map(([form, check, hist, simplot, table]) => 
+						div('.container',{style: {fontSize: '12px'}},
 							[
 								form, 
 								check,
+								div('.row ', [div('.col .s7', [
+								simplot,
+									]), div('.col .s5', [
 								hist,
-								simplot
+										])]),
+								table
 							]
 							)
 						);
@@ -120,9 +132,9 @@ function SignatureWorkflow(sources) {
 
 	return {
         DOM: vdom$,
-		onion: xs.merge(initReducer$, signatureFormReducer$, signatureCheckReducer$, histogramReducer$, SimilarityPlotReducer$),
+		onion: xs.merge(initReducer$, signatureFormReducer$, signatureCheckReducer$, histogramReducer$, SimilarityPlotReducer$, TopTableReducer$),
 		vega: xs.merge(histogramVega$,SimilarityPlotVega$),
-		HTTP: xs.merge(signatureCheckHTTP$, histogramHTTP$, SimilarityPlotHTTP$),
+		HTTP: xs.merge(signatureCheckHTTP$, histogramHTTP$, SimilarityPlotHTTP$, TopTableHTTP$),
 	};
 }
 

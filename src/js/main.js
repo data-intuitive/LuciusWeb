@@ -15,7 +15,7 @@ import 'materialize-css/bin/materialize.js';
 
 const drivers = {
   DOM: makeDOMDriver('#root'),
-  vega: makeVegaDriver('#vega'),
+  vega: makeVegaDriver(),
   HTTP: makeHTTPDriver(),
   router: makeRouterDriver(createHistory(), {capture: true}),
 };

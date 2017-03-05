@@ -21,9 +21,9 @@ function SignatureForm(sources) {
 										input('.Query', {style: {fontSize: '20px'} , props: {type: 'text', value: query}, value: query}),
 										div('.row', [
 											div('.col .s1'),
-											button('.SignatureCheck .btn .col .s4 .pink .accent-4', 'Check Signature'),
+											button('.SignatureCheck .btn .col .s4 .pink .accent-4', 'Check Signature (ENTER)'),
 											div('.col .s2'),
-											button('.SignatureRun .btn .col .s4 .offset-s2', 'Run Query'),
+											button('.SignatureRun .btn .col .s4 .offset-s2', 'Run Query (CTRL-ENTER)'),
 											div('.col s1')
 										])
 									])

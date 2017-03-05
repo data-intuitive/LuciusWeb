@@ -10,6 +10,8 @@ const log = (x) => console.log(x);
 
 const elementID = '#vega'
 
+const ENTER_KEYCODE = 13
+
 export function SimilarityPlot(sources) {
 
 	console.log('Starting component: SimilarityPlot...');
@@ -28,13 +30,11 @@ export function SimilarityPlot(sources) {
 	const width$ = widthStream(domSource$, elementID)
 
     // Intent
-	// Refresh is triggered by click on button or enter on input field
+	// Refresh is triggered by click on button or ctrl-enter on input field
 	const click$ = domSource$.select('.SignatureRun').events('click').debug(log);
-    // This does not work yet!!!
-    const enter$ = domSource$.select('.Query').events('keydown').debug(log) //.filter(({keyCode}) => keyCode === ENTER_KEYCODE);
-	const refresh$ = $.merge(click$, enter$)
+    const ctrlEnter$ = domSource$.select('.Query').events('keydown').filter(({keyCode, ctrlKey}) => keyCode === ENTER_KEYCODE && ctrlKey === true).debug(log) ;
+	const refresh$ = xs.merge(click$, ctrlEnter$)
 
-	// const body$ = state$.map(json => json.body);
     const request$ = refresh$.compose(sampleCombine(state$))
         .map(([x, state]) => {
 			let thisUrl = state.connection.url + 'binnedZhang';
@@ -44,7 +44,7 @@ export function SimilarityPlot(sources) {
 				send : state.body,
 				'category' : 'binnedZhang'
 		}})
-		// .debug(log);
+		.debug(log);
 
 	// Catch the response in a stream
 	const response$ = httpSource$
@@ -72,8 +72,6 @@ export function SimilarityPlot(sources) {
 
 	// View
 	const vdom$ = data$
-			// xs.combine(resize$, data$)
-			// .map(([resize, data]) => data)
 			.compose(sampleCombine(state$))
 			.map(([data, state]) =>  makeChart(state, data))
 

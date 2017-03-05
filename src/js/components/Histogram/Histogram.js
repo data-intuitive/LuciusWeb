@@ -5,8 +5,8 @@ import { h, p, div, br, label, input, code, table, tr, td, b, h2, button, svg, h
 import { clone } from 'ramda';
 import { vegaHistogramSpec, exampleData, emptyData } from './spec.js'
 import { widthStream } from '../../utils/width'
-
-const log = (x) => console.log(x);
+import {log} from '../../utils/logger'
+import {ENTER_KEYCODE} from '../../utils/keycodes.js'
 
 const elementID = '#hist'
 
@@ -21,15 +21,15 @@ export function Histogram(sources) {
 	const httpSource$ = sources.HTTP;
 	const vegaSource$ = sources.vega;
 
+    // -- Intent
+
 	// Size stream
 	const width$ = widthStream(domSource$, elementID)
 
-    // Intent
-	// Refresh is triggered by click on button or enter on input field
+	// Refresh is triggered by click on button or ctrl-enter on input field
 	const click$ = domSource$.select('.SignatureRun').events('click').debug(log);
-    // This does not work yet!!!
-    const enter$ = domSource$.select('.Query').events('keydown').debug(log) //.filter(({keyCode}) => keyCode === ENTER_KEYCODE);
-	const refresh$ = $.merge(click$, enter$)
+    const ctrlEnter$ = domSource$.select('.Query').events('keydown').filter(({keyCode, ctrlKey}) => keyCode === ENTER_KEYCODE && ctrlKey === true).debug(log) ;
+	const refresh$ = xs.merge(click$, ctrlEnter$)
 
 	// const body$ = state$.map(json => json.body);
     const request$ = refresh$.compose(sampleCombine(state$))

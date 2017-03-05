@@ -1,11 +1,17 @@
-import { div, br, label, input, p, button, code, pre } from '@cycle/dom';
-import { SignatureForm } from '../components/SignatureForm';
-import xs from 'xstream';
-import { SignatureCheck } from '../components/SignatureCheck';
-import { Histogram } from '../components/Histogram/Histogram';
-import { SimilarityPlot } from '../components/SimilarityPlot/SimilarityPlot';
-import { Table } from '../components/Table';
-import isolate from '@cycle/isolate';
+import { div, br, label, input, p, button, code, pre } from '@cycle/dom'
+import { SignatureForm } from '../components/SignatureForm'
+import xs from 'xstream'
+import { SignatureCheck } from '../components/SignatureCheck'
+import { Histogram } from '../components/Histogram/Histogram'
+import { SimilarityPlot } from '../components/SimilarityPlot/SimilarityPlot'
+import { Table } from '../components/Table'
+import isolate from '@cycle/isolate'
+import { mergeWith, merge } from 'ramda'
+
+const settings = {
+	url : 'http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&appName=luciusapi&sync=true&classPath=com.dataintuitive.luciusapi.',
+	topTableSize : 5
+}
 
 const log = (x) => console.log(x);
 
@@ -16,10 +22,9 @@ const initState = {
 					bins: 20,
 					binsX:40,
 					binxY:40,
-					head: 20
 				},
 				connection : {
-					url: 'http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&appName=luciusapi&sync=true&classPath=com.dataintuitive.luciusapi.',
+					url: settings.url,
 				},
 				ux : {
 					checkSignatureVisible : false,
@@ -67,39 +72,37 @@ function SignatureWorkflow(sources) {
 	const SimilarityPlotVega$ = SimilarityPlotSink.vega;
 	const SimilarityPlotReducer$ = SimilarityPlotSink.onion
 
-	// Binned Scatter plot
-	const TopTableSink = Table(sources);
+	// Table HEAD
+	const topNProps$ = xs.combine(state$, xs.of({ body : { head: settings.topTableSize } }))
+						 .map(([state, toMerge]) => mergeWith(merge, state, toMerge))
+
+	const TopTableSink = Table(sources, topNProps$);
 	const TopTableDom$ = TopTableSink.DOM;
 	const TopTableHTTP$ = TopTableSink.HTTP;
 	const TopTableVega$ = TopTableSink.vega;
 	const TopTableReducer$ = TopTableSink.onion
 
+	// Table TAIL
+	const bottomNProps$ = xs.combine(state$, xs.of({ body : { tail: settings.topTableSize } }))
+							.map(([state, toMerge]) => mergeWith(merge, state, toMerge))
 
-	// Merging
-
-	// HTTP
-	// const mergedHTTP$ = $.merge(
-	// 	signatureCheckHTTP$,
-	// 	histogramHTTP$
-	// );
-
-	// DOM: Combine Form and Check
-	// const vdom$ = $.combineLatest(
-	// 	signatureFormDom$, signatureCheckDom$, histogramDom$,
-	// 	(x,y,z) => div([ x, y, div('.p2', z ) ])
-	// );
-
-    // const vdom$ = signatureFormDom$;
+	const BottomTableSink = Table(sources, bottomNProps$);
+	const BottomTableDom$ = BottomTableSink.DOM;
+	const BottomTableHTTP$ = BottomTableSink.HTTP;
+	const BottomTableVega$ = BottomTableSink.vega;
+	const BottomTableReducer$ = BottomTableSink.onion
 
     const vdom$ = xs.combine(
                         signatureFormDom$,
 						signatureCheckDom$,
                         histogramDom$,
 						SimilarityPlotDom$,
-						TopTableDom$)
-					.map(([form, check, hist, simplot, table]) => 
-						div('.container',{style: {fontSize: '12px'}},
+						TopTableDom$,
+						BottomTableDom$)
+					.map(([form, check, hist, simplot, tableHead, tableTail]) => 
+						div('.container',{style: {fontSize: '14px'}},
 							[
+								div('.row', []),
 								form, 
 								check,
 								div('.row ', [div('.col .s7', [
@@ -107,34 +110,17 @@ function SignatureWorkflow(sources) {
 									]), div('.col .s5', [
 								hist,
 										])]),
-								table
+								tableHead,
+								tableTail
 							]
 							)
 						);
-					// .map(([form, svg, check, obj]) => div('.container',{style: {fontSize: '20px'}},[form, check, p('clicked on: ' + ((obj != null) ? obj : "nothing yet"))]));
-
-
-	// const HTTPLogger$ = $.catch(mergedHTTP$);
-	// HTTPLogger$.subscribe( 
-	// 	data => console.log(data),
-	// 	err => console.log(err)
-	// 	);
-
-	// const stateLogger$ = $.catch(histogramState$);
-	// stateLogger$.subscribe( 
-	// 	data => console.log(data),
-	// 	err => console.log(err)
-	// 	);
-
-	// histogramState$.map(x => console.log(x));
-
-//, signatureCheckReducer$
 
 	return {
         DOM: vdom$,
-		onion: xs.merge(initReducer$, signatureFormReducer$, signatureCheckReducer$, histogramReducer$, SimilarityPlotReducer$, TopTableReducer$),
+		onion: xs.merge(initReducer$, signatureFormReducer$, signatureCheckReducer$, histogramReducer$, SimilarityPlotReducer$, TopTableReducer$, BottomTableReducer$),
 		vega: xs.merge(histogramVega$,SimilarityPlotVega$),
-		HTTP: xs.merge(signatureCheckHTTP$, histogramHTTP$, SimilarityPlotHTTP$, TopTableHTTP$),
+		HTTP: xs.merge(signatureCheckHTTP$, histogramHTTP$, SimilarityPlotHTTP$, TopTableHTTP$, BottomTableHTTP$),
 	};
 }
 

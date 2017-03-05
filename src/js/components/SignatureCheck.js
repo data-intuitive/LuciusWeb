@@ -1,7 +1,9 @@
 import xs from 'xstream';
 import { p, div, br, label, input, code, table, tr, th, td, b, h2, button, thead, tbody, i, h, hr } from '@cycle/dom';
 import { clone } from 'ramda';
-import sampleCombine from 'xstream/extra/sampleCombine';
+import sampleCombine from 'xstream/extra/sampleCombine'
+import {log} from '../utils/logger'
+import {ENTER_KEYCODE} from '../utils/keycodes.js'
 
 const emptyData = {
 	body: {
@@ -10,13 +12,6 @@ const emptyData = {
 		}
 	}
 }
-
-// import {thumb_up} from 'webpack-material-design-icons/material-design-icons.css';
-
-// import 'test.css';
-
-let debug = true;
-const log = (x) => console.log(x);
 
 const empty = {
 		result: {
@@ -34,10 +29,14 @@ function SignatureCheck(sources) {
 	const state$ = sources.onion.state$;
 	// const body$ = state$.map(json => json);
 
-	// Change in state is the trigger for launching the http request
-	const click$ = domSource$.select('.SignatureCheck').events('click');
-	const request$ = click$.compose(sampleCombine(state$))
-		.map(([click, state]) =>  {
+	// Either click check button or press enter in form field:
+	const click$ = domSource$.select('.SignatureCheck').events('click')
+    const enter$ = domSource$.select('.Query').events('keydown').filter(({keyCode, ctrlKey}) => keyCode === ENTER_KEYCODE && ctrlKey === false).debug(log) ;
+	const update$ = xs.merge(click$, enter$)
+
+	// do request on update
+	const request$ = update$.compose(sampleCombine(state$))
+		.map(([updates, state]) =>  {
 			let thisUrl = state.connection.url + 'checkSignature';
 			return {
 				url : thisUrl,
@@ -45,7 +44,7 @@ function SignatureCheck(sources) {
 				send : state.body,
 				'category' : 'checkSignature'
 		}})
-		// .debug(log);
+		.debug(log);
 
 	// Catch the response in a stream
 	// Handle errors by returning an empty object
@@ -102,8 +101,8 @@ function SignatureCheck(sources) {
 						makeTable(state, data),
 					);
 
-	// When clicked, show table by switching ux visibility state:
-	const expandReducer$ = click$.map(
+	// When updated, show table by switching ux visibility state:
+	const expandReducer$ = update$.map(
 		click => function reducer(prevState) {
 			let newState = clone(prevState);
 			let newUx = clone(prevState.ux);

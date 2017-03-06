@@ -2,8 +2,9 @@ import xs from 'xstream';
 import { p, div, br, label, input, code, table, tr, th, td, b, h2, button, thead, tbody, i, h, hr } from '@cycle/dom';
 import { clone } from 'ramda';
 import sampleCombine from 'xstream/extra/sampleCombine'
-import {log} from '../utils/logger'
+import {log, logThis} from '../utils/logger'
 import {ENTER_KEYCODE} from '../utils/keycodes.js'
+import dropRepeats from 'xstream/extra/dropRepeats'
 
 const emptyData = {
 	body: {
@@ -26,17 +27,22 @@ function SignatureCheck(sources) {
     
 	console.log('Starting component: SignatureCheck...');
 
-	const state$ = sources.onion.state$;
+	const state$ = sources.onion.state$
+
 	// const body$ = state$.map(json => json);
 
 	// Either click check button or press enter in form field:
-	const click$ = domSource$.select('.SignatureCheck').events('click')
-    const enter$ = domSource$.select('.Query').events('keydown').filter(({keyCode, ctrlKey}) => keyCode === ENTER_KEYCODE && ctrlKey === false).debug(log) ;
-	const update$ = xs.merge(click$, enter$)
+	// const click$ = domSource$.select('.SignatureCheck').events('click')
+    // const enter$ = domSource$.select('.Query').events('keydown').filter(({keyCode, ctrlKey}) => keyCode === ENTER_KEYCODE && ctrlKey === false).debug(log) ;
+	// const update$ = xs.merge(click$, enter$)
+
+	const visible$ = state$.map(state => state.ux.checkSignatureVisible).debug(logThis)
 
 	// do request on update
-	const request$ = update$.compose(sampleCombine(state$))
-		.map(([updates, state]) =>  {
+	// const request$ = update$.compose(sampleCombine(state$))
+	// 	.map(([updates, state]) =>  {
+	const request$ = state$
+		.map(state =>  {
 			let thisUrl = state.connection.url + 'checkSignature';
 			return {
 				url : thisUrl,
@@ -63,8 +69,8 @@ function SignatureCheck(sources) {
 		// .debug(log);
 
 	// Helper function for rendering the table, based on the state
-	const makeTable = (state, data) => {
-			let visible = state.ux.checkSignatureVisible;
+	const makeTable = (visible, data) => {
+			// let visible = visible1 //state.ux.checkSignatureVisible;
 			let rows = data.map(entry => [ 
 				(entry.inL1000) ? td(entry.query) : td('.red .lighten-4 .red-text .text-darken-4', entry.query),
 				(entry.inL1000) ? td(i('.material-icons .dp48',''), 'x') : td('.red .lighten-4 .red-text .text-darken-4', '-'),
@@ -96,25 +102,12 @@ function SignatureCheck(sources) {
 	}
 
 	// Render table
-	const vdom$ = xs.combine(state$, data$)
-					.map(([state, data]) => 
-						makeTable(state, data),
+	const vdom$ = xs.combine(visible$, data$)
+					.map(([visible, data]) => 
+						makeTable(visible, data),
 					);
 
-	// When updated, show table by switching ux visibility state:
-	const expandReducer$ = update$.map(
-		click => function reducer(prevState) {
-			let newState = clone(prevState);
-			let newUx = clone(prevState.ux);
-			newUx.checkSignatureVisible = true;
-			newState.ux = newUx;
-			console.log(newState);
-			return newState;
-		})
-		// .debug(log);
-
-
-	// When clicked, show table by switching ux visibility state:
+	// Collapse button collapses the window
 	const collapse$ = domSource$.select('.collapse').events('click');
 	const collapseReducer$ = collapse$.compose(sampleCombine(data$))
 		.map(([collapse, data]) => function reducer(prevState) {
@@ -130,6 +123,7 @@ function SignatureCheck(sources) {
 			return newState;
 		});
 
+	// Update and Collapse button updates the query and collapses the window
 	const collapseUpdate$ = domSource$.select('.collapseUpdate').events('click');
 	const collapseUpdateReducer$ = collapseUpdate$.compose(sampleCombine(data$))
 		.map(([collapse, data]) => function reducer(prevState) {
@@ -153,7 +147,9 @@ function SignatureCheck(sources) {
   return { 
     HTTP: request$,
     DOM: vdom$,
-	onion: xs.merge(expandReducer$, collapseReducer$, collapseUpdateReducer$)
+	onion: xs.merge(
+		collapseReducer$, 
+		collapseUpdateReducer$)
   }
 
 };

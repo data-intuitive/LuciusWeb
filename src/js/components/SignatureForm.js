@@ -1,8 +1,9 @@
+import sampleCombine from 'xstream/extra/sampleCombine'
 import { p, div, br, label, input, code, table, tr, td, b, h2, button } from '@cycle/dom';
 import { clone } from 'ramda';
 import xs from 'xstream';
-
-const log = (x) => console.log(x);
+import { logThis, log } from '../utils/logger'
+import { ENTER_KEYCODE } from '../utils/keycodes.js'
 
 function SignatureForm(sources) {
 
@@ -29,23 +30,32 @@ function SignatureForm(sources) {
 									])
 	});
 
-	// const click$ = domSource$.select('.SignatureCheck').events('click').debug(log);
-	// let morevdom$ = click$.mapTo('click !').startWith('Nothing in form');
+	// Keep a stream of changes to the query:
+	// 1. Because the state has been updated
+	// 2. Because a new query has been entered
+	const newQuery$ = xs.merge(
+				state$.map(state => state.body.query),
+				domSource$.select('.Query').events('input').map(ev => ev.target.value)
+			)
 
-	// const combinedvdom$ = xs.combine(vdom$, morevdom$).map(([vdom, morevdom]) => div([vdom, h2('', morevdom)]));
+	// Signature check: Update state on click
+	// Updated state is propagated and picked up by the necessary components
+	const click$ = domSource$.select('.SignatureCheck').events('click')
+    const enter$ = domSource$.select('.Query').events('keydown').filter(({keyCode, ctrlKey}) => keyCode === ENTER_KEYCODE && ctrlKey === false) ;
+	const update$ = xs.merge(click$, enter$)
 
-	const newQuery$ = domSource$.select('.Query')
-			.events('input')
-			.map(ev => ev.target.value);
-
-	const reducer$ = newQuery$.map(
-		query => function reducer(prevState) {
-			let newState = clone(prevState);
-			let newBody = clone(prevState.body);
-			newBody.query = query;
-			newState.body = newBody;
-			return newState;
-		}); //.debug(log);
+	const reducer$ = update$.compose(sampleCombine(newQuery$))
+						.map(
+							([x, query]) => function reducer(prevState) {
+								let newState = clone(prevState);
+								let newBody = clone(prevState.body);
+								newBody.query = query;
+								newState.body = newBody;
+								let newUx = clone(prevState.ux);
+								newUx.checkSignatureVisible = true;
+								newState.ux = newUx;
+								return newState;
+							});
 
   return { 
     	DOM: vdom$,

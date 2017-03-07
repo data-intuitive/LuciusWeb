@@ -9,7 +9,7 @@ function SignatureForm(sources) {
 
 	console.log('Starting component: SignatureForm...');
 
-	const state$ = sources.onion.state$;
+	const state$ = sources.onion.state$.debug(log);
 	const domSource$ = sources.DOM;
 
 	const vdom$ = state$
@@ -30,13 +30,14 @@ function SignatureForm(sources) {
 									])
 	});
 
-	// Keep a stream of changes to the query:
-	// 1. Because the state has been updated
-	// 2. Because a new query has been entered
+	// Update in query, or simply ENTER
 	const newQuery$ = xs.merge(
-				state$.map(state => state.body.query),
+				// state$.map(state => state.body.query),
 				domSource$.select('.Query').events('input').map(ev => ev.target.value)
 			)
+
+	// Update happened elsewhere (SignatureCheck?)
+	const newQueryValid$ = state$.map(state => state.body.query)
 
 	// Signature check: Update state on click
 	// Updated state is propagated and picked up by the necessary components
@@ -49,6 +50,21 @@ function SignatureForm(sources) {
 							([x, query]) => function reducer(prevState) {
 								let newState = clone(prevState);
 								let newBody = clone(prevState.body);
+								newState.validated = false
+								newBody.query = query;
+								newState.body = newBody;
+								let newUx = clone(prevState.ux);
+								newUx.checkSignatureVisible = true;
+								newState.ux = newUx;
+								return newState;
+							});
+
+	const validReducer$ = update$.compose(sampleCombine(newQueryValid$))
+						.map(
+							([x, query]) => function reducer(prevState) {
+								let newState = clone(prevState);
+								let newBody = clone(prevState.body);
+								// newState.validated = true
 								newBody.query = query;
 								newState.body = newBody;
 								let newUx = clone(prevState.ux);
@@ -59,7 +75,9 @@ function SignatureForm(sources) {
 
   return { 
     	DOM: vdom$,
-		onion: reducer$
+		onion: xs.merge(reducer$, 
+						validReducer$
+						)
   };
 
 }

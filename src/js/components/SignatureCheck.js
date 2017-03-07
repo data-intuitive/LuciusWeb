@@ -22,26 +22,17 @@ const empty = {
 
 function SignatureCheck(sources) {
 
-	const domSource$ = sources.DOM;
-	const httpSource$ = sources.HTTP;
-    
 	console.log('Starting component: SignatureCheck...');
 
+	const domSource$ = sources.DOM;
+	const httpSource$ = sources.HTTP;
 	const state$ = sources.onion.state$
 
-	// const body$ = state$.map(json => json);
+	// This component is active only when the signature is not yet validated
+	const active$ = state$.map(state => !state.validated)
 
-	// Either click check button or press enter in form field:
-	// const click$ = domSource$.select('.SignatureCheck').events('click')
-    // const enter$ = domSource$.select('.Query').events('keydown').filter(({keyCode, ctrlKey}) => keyCode === ENTER_KEYCODE && ctrlKey === false).debug(log) ;
-	// const update$ = xs.merge(click$, enter$)
-
-	const visible$ = state$.map(state => state.ux.checkSignatureVisible).debug(logThis)
-
-	// do request on update
-	// const request$ = update$.compose(sampleCombine(state$))
-	// 	.map(([updates, state]) =>  {
 	const request$ = state$
+		.filter(state => !state.validated)
 		.map(state =>  {
 			let thisUrl = state.connection.url + 'checkSignature';
 			return {
@@ -92,8 +83,8 @@ function SignatureCheck(sources) {
 							div('.row'),
 							div('.row', [table('.striped', tableContent)]),
 							div('.row', [
-								button('.collapseUpdate .btn .col .offset-s1 .s4 .pink .accent-4', 'Update Query'),
-								button('.collapse .btn .col .offset-s2 .s4 .pink .accent-4', 'Collapse')
+								button('.collapseUpdate .btn .col .offset-s4 .s4 .pink .accent-4', 'Update/Validate'),
+								// button('.collapse .btn .col .offset-s2 .s4 .pink .accent-4', 'Collapse')
 								]),
 							div('.row')
 						])
@@ -102,9 +93,9 @@ function SignatureCheck(sources) {
 	}
 
 	// Render table
-	const vdom$ = xs.combine(visible$, data$)
-					.map(([visible, data]) => 
-						makeTable(visible, data),
+	const vdom$ = xs.combine(active$, data$)
+					.map(([active, data]) => 
+						makeTable(active, data),
 					);
 
 	// Collapse button collapses the window
@@ -130,6 +121,8 @@ function SignatureCheck(sources) {
 
 			let newState = clone(prevState);
 
+			newState.validated = true
+
 			// Update UX visibility of this component
 			let newUx = clone(prevState.ux);
 			newUx.checkSignatureVisible = false;
@@ -137,7 +130,7 @@ function SignatureCheck(sources) {
 
 			// Update query value
 			let newBody = clone(prevState.body);
-			newBody.query = data.map(x => (x.inL1000) ? x.symbol : '').join(" ").replace(/\s\s+/g, ' ');
+			newBody.query = data.map(x => (x.inL1000) ? x.symbol : '').join(" ").replace(/\s\s+/g, ' ').trim();
 			newState.body = newBody;			
 
 			console.log(newState);

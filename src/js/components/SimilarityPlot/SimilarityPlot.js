@@ -23,20 +23,18 @@ export function SimilarityPlot(sources) {
 	const httpSource$ = sources.HTTP;
 	const vegaSource$ = sources.vega;
 
+	// This component is active only when the signature is validated
+	const active$ = state$.map(state => state.validated)
+
 	// const resize$ = domSource$.select('.document').events('onload').debug(log)
 	// const resize$ = xs.of('something');
 
 	// Size stream
 	const width$ = widthStream(domSource$, elementID)
 
-    // Intent
-	// Refresh is triggered by click on button or ctrl-enter on input field
-	const click$ = domSource$.select('.SignatureRun').events('click').debug(log);
-    const ctrlEnter$ = domSource$.select('.Query').events('keydown').filter(({keyCode, ctrlKey}) => keyCode === ENTER_KEYCODE && ctrlKey === true).debug(log) ;
-	const refresh$ = xs.merge(click$, ctrlEnter$)
-
-    const request$ = refresh$.compose(sampleCombine(state$))
-        .map(([x, state]) => {
+	const request$ = state$
+		.filter(state => state.validated)
+        .map(state => {
 			let thisUrl = state.connection.url + 'binnedZhang';
 			return {
 				url : thisUrl,
@@ -61,38 +59,25 @@ export function SimilarityPlot(sources) {
 	const vegaSpec$ = xs.combine(data$, width$)
 		.map(([data, newwidth]) => ({spec : similarityPlotSpec(data) , el : elementID, width : newwidth})).remember();
 
-    const makeChart = (state, data) => {
-            let visible = state.ux.histogramVisible;
+    const makeChart = (active, data) => {
             return (
-                (visible)
+                (active)
                 ? div('.card-panel .center-align', [div(elementID)])
                 : div('.card-panel .center-align', [div(elementID, {style: {visibility:'hidden'}})])
             )
     };
 
 	// View
-	const vdom$ = data$
-			.compose(sampleCombine(state$))
-			.map(([data, state]) =>  makeChart(state, data))
+	const vdom$ = xs.combine(active$, data$)
+			.map(([active, data]) =>  makeChart(active, data))
 
-	// When clicked, switch to visible:
-	const expandReducer$ = refresh$.map(
-		click => function reducer(prevState) {
-			let newState = clone(prevState);
-			let newUx = clone(prevState.ux);
-			newUx.histogramVisible = true;
-			newState.ux = newUx;
-			console.log(newState);
-			return newState;
-		});
-
-    // const reducer$ = xs.of((prevState) => prevState);
+    const reducer$ = xs.of((prevState) => prevState);
 
   return { 
     	DOM: vdom$,
 		HTTP: request$,
 		vega: vegaSpec$,
-        onion: expandReducer$
+        onion: reducer$
   };
 
 }

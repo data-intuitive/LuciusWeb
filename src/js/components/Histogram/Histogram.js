@@ -26,14 +26,12 @@ export function Histogram(sources) {
 	// Size stream
 	const width$ = widthStream(domSource$, elementID)
 
-	// Refresh is triggered by click on button or ctrl-enter on input field
-	const click$ = domSource$.select('.SignatureRun').events('click').debug(log);
-    const ctrlEnter$ = domSource$.select('.Query').events('keydown').filter(({keyCode, ctrlKey}) => keyCode === ENTER_KEYCODE && ctrlKey === true).debug(log) ;
-	const refresh$ = xs.merge(click$, ctrlEnter$)
+	// This component is active only when the signature is validated
+	const active$ = state$.map(state => state.validated)
 
-	// const body$ = state$.map(json => json.body);
-    const request$ = refresh$.compose(sampleCombine(state$))
-        .map(([x, state]) => {
+	const request$ = state$
+		.filter(state => state.validated)
+        .map(state => {
 			let thisUrl = state.connection.url + 'histogram';
 			return {
 				url : thisUrl,
@@ -59,38 +57,25 @@ export function Histogram(sources) {
 		.map(([data, newwidth]) => ({spec : vegaHistogramSpec(data) , el : elementID, width : newwidth})).remember();
 
 
-    const makeHistogram = (state, data) => {
-            let visible = state.ux.simplotVisible;
+    const makeHistogram = (active, data) => {
             return (
-                (visible)
+                (active)
                 ? div('.card-panel .center-align', [div(elementID)])
                 : div('.card-panel .center-align', [div(elementID, {style: {visibility:'hidden'}})])
             )
     };
 
 	// View
-    const vdom$ = data$.compose(sampleCombine(state$))
-            .map(([data, state]) =>  makeHistogram(state, data) )
-            // .debug(log);
+    const vdom$ = xs.combine(active$, data$)
+            .map(([active, data]) =>  makeHistogram(active, data) )
 
-	// When clicked, switch to visible:
-	const expandReducer$ = refresh$.map(
-		click => function reducer(prevState) {
-			let newState = clone(prevState);
-			let newUx = clone(prevState.ux);
-			newUx.simplotVisible = true;
-			newState.ux = newUx;
-			console.log(newState);
-			return newState;
-		});
-
-    // const reducer$ = xs.of((prevState) => prevState);
+    const reducer$ = xs.of((prevState) => prevState);
 
   return { 
     	DOM: vdom$,
 		HTTP: request$,
 		vega: vegaSpec$,
-        onion: expandReducer$
+        onion: reducer$
   };
 
 }

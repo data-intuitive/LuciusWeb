@@ -98,21 +98,21 @@ function SignatureCheck(sources) {
 						makeTable(active, data),
 					);
 
-	// Collapse button collapses the window
-	const collapse$ = domSource$.select('.collapse').events('click');
-	const collapseReducer$ = collapse$.compose(sampleCombine(data$))
-		.map(([collapse, data]) => function reducer(prevState) {
+	// // Collapse button collapses the window
+	// const collapse$ = domSource$.select('.collapse').events('click');
+	// const collapseReducer$ = collapse$.compose(sampleCombine(data$))
+	// 	.map(([collapse, data]) => function reducer(prevState) {
 
-			let newState = clone(prevState);
+	// 		let newState = clone(prevState);
 
-			// Update UX visibility of this component
-			let newUx = clone(prevState.ux);
-			newUx.checkSignatureVisible = false;
-			newState.ux = newUx;
+	// 		// Update UX visibility of this component
+	// 		let newUx = clone(prevState.ux);
+	// 		newUx.checkSignatureVisible = false;
+	// 		newState.ux = newUx;
 
-			console.log(newState);
-			return newState;
-		});
+	// 		console.log(newState);
+	// 		return newState;
+	// 	});
 
 	// Update and Collapse button updates the query and collapses the window
 	const collapseUpdate$ = domSource$.select('.collapseUpdate').events('click');
@@ -121,17 +121,20 @@ function SignatureCheck(sources) {
 
 			let newState = clone(prevState);
 
+			// Query is validated
 			newState.validated = true
 
 			// Update UX visibility of this component
-			let newUx = clone(prevState.ux);
-			newUx.checkSignatureVisible = false;
-			newState.ux = newUx;
+			// let newUx = clone(prevState.ux);
+			// newUx.checkSignatureVisible = false;
+			// newState.ux = newUx;
 
 			// Update query value
 			let newBody = clone(prevState.body);
 			newBody.query = data.map(x => (x.inL1000) ? x.symbol : '').join(" ").replace(/\s\s+/g, ' ').trim();
-			newState.body = newBody;			
+			newState.body = newBody
+
+			newState.result = data
 
 			console.log(newState);
 			return newState;
@@ -141,7 +144,7 @@ function SignatureCheck(sources) {
     HTTP: request$,
     DOM: vdom$,
 	onion: xs.merge(
-		collapseReducer$, 
+		// collapseReducer$, 
 		collapseUpdateReducer$)
   }
 

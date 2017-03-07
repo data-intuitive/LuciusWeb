@@ -1,9 +1,10 @@
 import sampleCombine from 'xstream/extra/sampleCombine'
-import { p, div, br, label, input, code, table, tr, td, b, h2, button } from '@cycle/dom';
+import { i,p, div, br, label, input, code, table, tr, td, b, h2, button, textarea } from '@cycle/dom';
 import { clone } from 'ramda';
 import xs from 'xstream';
 import { logThis, log } from '../utils/logger'
 import { ENTER_KEYCODE } from '../utils/keycodes.js'
+import { search } from 'webpack-material-design-icons' 
 
 function SignatureForm(sources) {
 
@@ -18,14 +19,19 @@ function SignatureForm(sources) {
 						(state) => {
 							const query = state.body.query;
 							return div(
-									[ label('Query: '),
-										input('.Query', {style: {fontSize: '20px'} , props: {type: 'text', value: query}, value: query}),
-										div('.row', [
-											div('.col .s1'),
-											button('.SignatureCheck .btn .col .s4 .pink .accent-4', 'Check Signature (ENTER)'),
-											div('.col .s2'),
-											button('.SignatureRun .btn .col .s4 .offset-s2', 'Run Query (CTRL-ENTER)'),
-											div('.col s1')
+									[  
+										 div('.row', []),
+										 div('.row', [
+											// label('Query: '),
+											i('.col .s1 .large .material-icons', {style: {fontSize: '45px', fontColor: 'gray'}}, 'search'),
+											textarea('.Query .col s11 .materialize-textarea', {style: {fontSize: '20px'} , props: {type: 'text', value: query.trim()}, value: query.trim()}),
+											// div('.row', [
+											// 	// div('.col .s1'),
+											// 	// button('.SignatureCheck .btn .col .s4 .pink .accent-4', 'Check Signature (ENTER)'),
+											// 	// div('.col .s2'),
+											// 	// button('.SignatureRun .btn .col .s4 .offset-s2', 'Run Query (CTRL-ENTER)'),
+											// 	// div('.col s1')
+											// ])
 										])
 									])
 	});
@@ -37,7 +43,8 @@ function SignatureForm(sources) {
 			)
 
 	// Update happened elsewhere (SignatureCheck?)
-	const newQueryValid$ = state$.map(state => state.body.query)
+	const newQueryValid$ = state$
+				.map(state => state.body.query.replace(/\n/g, ' ').replace(/\s\s+/g, ' ').trim())
 
 	// Signature check: Update state on click
 	// Updated state is propagated and picked up by the necessary components

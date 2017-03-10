@@ -13,7 +13,7 @@ function SignatureForm(sources) {
 
 	console.log('Starting component: SignatureForm...');
 
-	const state$ = sources.onion.state$
+	const state$ = sources.onion.state$.debug(console.log)
 	const domSource$ = sources.DOM;
 	const props$ = sources.props;
 
@@ -64,7 +64,7 @@ function SignatureForm(sources) {
 
 	// Takes care of initialization
 	const defaultReducer$ = xs.of(function defaultReducer(prevState) {
-		// console.log('Default reducer ...')
+		console.log('Default reducer ...')
         if (typeof prevState === 'undefined') {
 			return {
 				query : 'ENSG00000012048 -WRONG HSPA1A DNAJB1 DDIT4 -TSEN2',
@@ -77,16 +77,16 @@ function SignatureForm(sources) {
 
 	// Update the state when input changes
 	const queryReducer$ = newQuery$.map(query => prevState => {
-		// console.log('Reducing state with update ' + query)
+		console.log('Reducing state with update ' + query)
 		let newState = clone(prevState)
-		console.log(newState)
+		// console.log(newState)
 		newState.query = query
 		return newState
 	})
 
 	// invalidates the query when input changes
 	const invalidateReducer$ = newQuery$.map(query => prevState => {
-		// console.log('Invalidate !!!!')
+		console.log('Invalidate !!!!')
 		let newState = clone(prevState)
 		newState.validated = false
 		return newState
@@ -97,14 +97,14 @@ function SignatureForm(sources) {
 		// .compose(sampleCombine(state$))
 		// .map(([update, query]) => prevState => {
 		.map(signal => prevState => {
-			// console.log('Validate !!!!')
+			console.log('Validate !!!!')
 			let newState = clone(prevState)
 			newState.validated = true
 			return newState
 		})
 
 	// When update is clicked, update the query. Onionify does the rest
-	const childReducer$ = signatureCheckReducer$
+	const childReducer$ = signatureCheckSink.onion
 
 	// When GO clicked or enter -> send updated 'value' to sink
 	// Maybe catch when no valid query?
@@ -117,10 +117,10 @@ function SignatureForm(sources) {
     	DOM: vdom$,
 		onion: xs.merge(
 			defaultReducer$, 
-			childReducer$,
+			queryReducer$,
 			invalidateReducer$,
+			childReducer$,
 			validateReducer$,
-			queryReducer$
 			),
 		HTTP: signatureCheckHTTP$,
 		query: query$

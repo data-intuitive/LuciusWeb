@@ -27,7 +27,7 @@ function SignatureCheck(sources) {
 	const state$ = sources.onion.state$
 
 	const request$ = state$
-		.compose(dropRepeats((x, y) => x.query === y.query))
+		// .compose(dropRepeats((x, y) => x.query === y.query))
 		.map(state =>  {
 			let thisUrl = 'http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&appName=luciusapi&sync=true&classPath=com.dataintuitive.luciusapi.' + 'checkSignature';
 			return {

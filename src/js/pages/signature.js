@@ -71,6 +71,7 @@ function SignatureWorkflow(sources) {
 		console.log('update state ' + query)
 		console.log(query)
 		let newState = clone(prevState)
+		newState.query = query
 		let additionalState = {
 			headTable : {
 				query : query

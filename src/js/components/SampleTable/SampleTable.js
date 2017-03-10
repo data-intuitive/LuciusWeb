@@ -1,6 +1,6 @@
 import xs from 'xstream';
 import sampleCombine from 'xstream/extra/sampleCombine';
-import { a, h, p, div, br, label, input, code, table, tr, td, b, h2, button, svg, h1, th, thead, tbody, ul } from '@cycle/dom';
+import { a, h, p, div, br, label, input, code, table, tr, td, b, h2, button, svg, h1, th, thead, tbody, ul, li } from '@cycle/dom';
 import { clone } from 'ramda';
 import { log } from '../../utils/logger'
 import { ENTER_KEYCODE } from '../../utils/keycodes.js'
@@ -25,7 +25,6 @@ export function SampleTable(sources) {
     const array$ = sources.onion.state$.debug(log); 
 
     const childrenSinks$ = array$.map(array => {
-        // console.log(array)
         return array.map((item, index) => isolate(SampleInfo, index)(sources))
     });
 
@@ -33,9 +32,21 @@ export function SampleTable(sources) {
                     .compose(pick('DOM'))
                     .compose(mix(xs.combine))
                     .map(itemVNodes => {
-                        return ul('.collection', itemVNodes)
+                        return ul('.collection .green', [
+                                        li('.collection-item', 
+                                            [
+                                                div('.row', {style: {fontSize : 'normal', fontWeight : 500}}, [
+                                                    div('.col .s1', ['Zhang']),
+                                                    div('.col .s2', ['Sample ID']),
+                                                    div('.col .s1', ['Protocal']),
+                                                    div('.col .s2', ['JNJS']),
+                                                    div('.col .s3', ['Compound Name']),
+                                                    div('.col .s3', ['Structure']),
+                                                ])
+                                        ])
+                                ].concat(itemVNodes))
                     })
-                    .startWith(ul('.collection', []))
+                    .startWith(ul('.collection .green', [li('.collection-item .center-align .grey-text','no query yet...')]))
 
     // const childrenReducers$ = childrenSinks$
     //                             .compose(pick('onion'));

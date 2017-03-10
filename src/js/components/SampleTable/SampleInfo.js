@@ -16,7 +16,7 @@ export function SampleInfo(sources) {
             return li('.collection-item', 
                 [
                     div('.row', {style: {fontSize : 'small'}}, [
-                        div('.col .s1', [sample.zhang.toFixed(3)]),
+                        div('.col .s1 .left-align', [sample.zhang.toFixed(3)]),
                         div('.col .s2', [sample.id]),
                         div('.col .s1', [sample.protocolname]),
                         div('.col .s2', [(sample.jnjs != "NA") ? sample.jnjs : '']),

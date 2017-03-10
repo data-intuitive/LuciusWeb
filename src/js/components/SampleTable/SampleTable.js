@@ -2,8 +2,8 @@ import xs from 'xstream';
 import sampleCombine from 'xstream/extra/sampleCombine';
 import { a, h, p, div, br, label, input, code, table, tr, td, b, h2, button, svg, h1, th, thead, tbody, ul } from '@cycle/dom';
 import { clone } from 'ramda';
-import { log } from '../utils/logger'
-import { ENTER_KEYCODE } from '../utils/keycodes.js'
+import { log } from '../../utils/logger'
+import { ENTER_KEYCODE } from '../../utils/keycodes.js'
 import { keys, filter, head } from 'ramda'
 import { pick, mix } from 'cycle-onionify';
 import isolate from '@cycle/isolate'
@@ -14,10 +14,7 @@ export function SampleTable(sources) {
 
 	console.log('Starting component: SampleTable...');
 
-    const state$ = sources.onion.state$.debug(state => {
-        console.log('SampleTable:')
-        console.log(state)
-    });
+    const state$ = sources.onion.state$
 	const domSource$ = sources.DOM;
     const props$ = sources.props
 
@@ -25,7 +22,7 @@ export function SampleTable(sources) {
 	// const active$ = state$.map(state => state.validated).startWith(false).debug(log)
 
     // This will become an object representing the JSON table
-    const array$ = sources.onion.state$.debug(log); // emits [{ count: 0 }, { count: 1 }, ... ]
+    const array$ = sources.onion.state$.debug(log); 
 
     const childrenSinks$ = array$.map(array => {
         // console.log(array)
@@ -40,13 +37,16 @@ export function SampleTable(sources) {
                     })
                     .startWith(ul('.collection', []))
 
-    const childrenReducers$ = childrenSinks$
-                                    .compose(pick(sinks => sinks.onion)); // or...
-                                    //.compose(pick('onion'));
-                                    // it does the same thing
+    // const childrenReducers$ = childrenSinks$
+    //                             .compose(pick('onion'));
+    // const childrenReducer$ = childrenReducers$
+    //                             .compose(mix(xs.merge));
 
-    const childrenReducer$ = childrenReducers$
-                                .compose(mix(xs.merge));
+    // const https$ = childrenSinks$
+    //                     .compose(pick('HTTP'));
+    // const http$ = https$
+    //                     .compose(mix(xs.merge));
+
 
 	// View
     // const vdom$ = data$.map(json => JSON.stringify(json))
@@ -74,28 +74,29 @@ export function SampleTable(sources) {
     //     }
     // });
 
-    const reducer$ = array$.map( array => prevState => {
-            console.log('yes !!!!')
-            console.log(array)
-            return array;
-    });
+    // const reducer$ = array$.map( array => prevState => {
+    //         console.log('yes !!!!')
+    //         console.log(array)
+    //         return array;
+    // });
 
-    const defaultReducer$ = xs.of(function defaultReducer(prevState) {
-        if (typeof prevState === 'undefined') {
-            return []; // Parent didn't provide state for the child, so initialize it.
-        } else {
-            return prevState; // Let's just use the state given from the parent.
-        }
-    });
+    // const defaultReducer$ = xs.of(function defaultReducer(prevState) {
+    //     if (typeof prevState === 'undefined') {
+    //         return []; // Parent didn't provide state for the child, so initialize it.
+    //     } else {
+    //         return prevState; // Let's just use the state given from the parent.
+    //     }
+    // });
 
-    const totalReducer$ = xs.merge(
-        // defaultReducer$,
-        reducer$, 
-        )
+    // const totalReducer$ = xs.merge(
+    //     // defaultReducer$,
+    //     reducer$, 
+    //     )
 
     return { 
             DOM: vdom$,
-            // onion: totalReducer$
+            // HTTP: http$,
+            // onion: childrenReducer$
     };
 
 }

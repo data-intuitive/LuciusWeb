@@ -5,7 +5,7 @@ import { clone } from 'ramda';
 import { log } from '../utils/logger'
 import { ENTER_KEYCODE } from '../utils/keycodes.js'
 import { keys, filter, head } from 'ramda'
-import { SampleTable } from './Table2'
+import { SampleTable } from './SampleTable/SampleTable'
 import isolate from '@cycle/isolate'
 import { merge } from 'ramda'
 import dropRepeats from 'xstream/extra/dropRepeats'
@@ -54,20 +54,6 @@ export function Table(sources) {
                     category : 'topTable'
      })).debug(log)
 
-    // const request$ = state$
-    //     .compose(dropRepeats())
-	// 	// .filter(state => state.validated)
-    //     .compose(sampleCombine(newQuery$))
-    //     // .map(([x, state]) => {
-    //     .map(([state, nq]) => {
-	// 		let thisUrl = state.connection.url + 'topTable';
-	// 		return {
-	// 			url : thisUrl,
-	// 			method : 'POST',
-    //             send : merge(state.body, {head : 4}),
-	// 			'category' : 'topTable'
-	// 	}})
-	// 	.debug(log);
 
 	// Catch the response in a stream
 	const response$ = httpSource$
@@ -149,8 +135,8 @@ export function Table(sources) {
 
     const vdom$ = xs.combine(sampleTableSink.DOM, props$)
             .map(([dom,props]) => div([
-                    h4('.right-align', props.title),
-                    dom                    
+                    h4('.right-align .grey-text', props.title),
+                    dom
                 ]))
                 // .startWith(button('.run .btn .col .s4 .pink', 'Run Now!'))
 
@@ -165,16 +151,16 @@ export function Table(sources) {
     //                     }
     //                 })
 
-	const defaultReducer$ = xs.of(function defaultReducer(prevState) {
-		console.log('Default reducer ...')
-        if (typeof prevState === 'undefined') {
-			return {
-				query : null,
-			}
-        } else {
-            return prevState;
-        }
-    });
+	// const defaultReducer$ = xs.of(function defaultReducer(prevState) {
+	// 	console.log('Default reducer ...')
+    //     if (typeof prevState === 'undefined') {
+	// 		return {
+	// 			query : null,
+	// 		}
+    //     } else {
+    //         return prevState;
+    //     }
+    // });
 
 	// Just pass state as-is
     // const thisReducer$ = data$
@@ -222,19 +208,14 @@ export function Table(sources) {
         //     }
         // })
 
-    const sampleTableReducer$ = sampleTableSink.onion
+    // const sampleTableReducer$ = sampleTableSink.onion
     const reducer$ = xs.merge(
-        defaultReducer$,
         stateReducer$,
-        // sampleTableReducer$,
-        // thisReducer$, 
-        )//, sampleTableReducer$)
-
-    // const tableReducer
+        )
 
   return { 
     	DOM: vdom$,
-		HTTP: request$,
+        HTTP: request$,
         onion: reducer$
   };
 

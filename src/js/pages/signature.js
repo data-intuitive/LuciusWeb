@@ -9,7 +9,6 @@ import { SignatureForm } from '../components/SignatureForm'
 import { Histogram } from '../components/Histogram/Histogram'
 import { SimilarityPlot } from '../components/SimilarityPlot/SimilarityPlot'
 import { Table } from '../components/Table'
-import { SampleInfo } from '../components/SampleInfo'
 
 const settings = {
 	url : 'http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&appName=luciusapi&sync=true&classPath=com.dataintuitive.luciusapi.',
@@ -28,7 +27,7 @@ const initState = {
 					binsX:40,
 					binxY:40,
 					head: 3
-				},
+				}, 
 				connection : {
 					url: settings.url,
 				},
@@ -97,32 +96,13 @@ function SignatureWorkflow(sources) {
 	const SimilarityPlotVega$ = SimilarityPlotSink.vega;
 	const SimilarityPlotReducer$ = SimilarityPlotSink.onion
 
-	// Table HEAD
-	// const headProps$ = xs.combine(state$, xs.of({ body : { head: settings.topTableSize } }))
-	// 					 .map(([state, toMerge]) => mergeWith(merge, state, toMerge))
-
-	// const headSources = {DOM: sources.DOM, HTTP: sources.HTTP, onion: sources.onion, props: headProps$}
-
-
-	// const tableProps$ = query$.map(query => ({query : query}) ).startWith(null)
+	// tables
 	const headTableProps$ = xs.of({ title: 'Top Table', version: 'v2', head : 5})
 	const tailTableProps$ = xs.of({ title: 'Bottom Table', version: 'v2', tail : 5})
 
 	const HeadTable = isolate(Table, 'headTable')(merge(sources, {props: headTableProps$}));
 	const TailTable = isolate(Table, 'tailTable')(merge(sources, {props: tailTableProps$}));
 
-
-	// // Table TAIL
-	// const tailProps$ = xs.combine(state$, xs.of({ body : { tail: settings.topTableSize } }))
-	// 						.map(([state, toMerge]) => mergeWith(merge, state, toMerge))
-
-	// const tailSources = {DOM: sources.DOM, HTTP: sources.HTTP, onion: sources.onion, props: tailProps$}
-
-	// const BottomTableSink = Table(tailSources);
-	// const BottomTableDom$ = BottomTableSink.DOM;
-	// const BottomTableHTTP$ = BottomTableSink.HTTP;
-	// const BottomTableVega$ = BottomTableSink.vega;
-	// const BottomTableReducer$ = BottomTableSink.onion
 
     const vdom$ = xs.combine(
                         signatureFormDom$,
@@ -147,7 +127,6 @@ function SignatureWorkflow(sources) {
 								[
 									div('.row', []),
 									form,
-									// check,
 									// div('.row ', [div('.col .s7', [
 									// // simplot,
 									// 	]), div('.col .s5', [
@@ -157,7 +136,6 @@ function SignatureWorkflow(sources) {
 									div('.col .s6', [headTable]),
 									div('.col .s6', [tailTable])
 								// ])
-									// tableTail
 								])
 						])
 						);

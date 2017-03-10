@@ -15,8 +15,7 @@ function makeVegaDriver() {
             const parsed = vegaParseSpec(obj.spec);
             const parsed$ = convert.rx.to.xstream(parsed);
 
-            // Make the charts square
-            const view$ = parsed$.map(chart => chart({el:obj.el}).width(obj.width).height(obj.width).update());
+            const view$ = parsed$.map(chart => chart({el:obj.el}).width(obj.width).height(350).update());
 
             return view$;
         }

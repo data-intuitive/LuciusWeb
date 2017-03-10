@@ -64,7 +64,7 @@ function SignatureWorkflow(sources) {
 
 	// !!! Remove the startWith when running for real (makes testing easier)
 	const query$ = signatureFormSinks.query
-						.startWith('BRCA1')
+						.startWith('HSPA1A DNAJB1 DDIT4 HMOX1 -TSEN2')
 
 	// Inject the query into the state objects for the table children:
 	const stateReducer$ = query$.map(query => prevState => {
@@ -78,20 +78,31 @@ function SignatureWorkflow(sources) {
 			},
 			tailTable : {
 				query : query
+			},
+			hist : {
+				query : query
+			},
+			sim : {
+				query : query
 			}
 		}
 		return merge(newState,additionalState)
 	})
 
+
 	// Binned Scatter plot
-	const histogramSink = Histogram(sources);
+	// const histProps$ = xs.of({ title: 'Histogram', version: 'v2', })
+
+	const histogramSink = isolate(Histogram, 'hist')(sources);
 	const histogramDom$ = histogramSink.DOM;
 	const histogramHTTP$ = histogramSink.HTTP;
 	const histogramVega$ = histogramSink.vega;
 	const histogramReducer$ = histogramSink.onion
 
 	// Binned Scatter plot
-	const SimilarityPlotSink = SimilarityPlot(sources);
+	// const simProps$ = xs.of({ title: 'Histogram', version: 'v2', })
+
+	const SimilarityPlotSink = isolate(SimilarityPlot, 'sim')(sources);
 	const SimilarityPlotDom$ = SimilarityPlotSink.DOM;
 	const SimilarityPlotHTTP$ = SimilarityPlotSink.HTTP;
 	const SimilarityPlotVega$ = SimilarityPlotSink.vega;
@@ -109,8 +120,8 @@ function SignatureWorkflow(sources) {
                         signatureFormDom$,
 						// query$,
 						// signatureCheckDom$,
-                        // histogramDom$,
-						// SimilarityPlotDom$,
+                        histogramDom$,
+						SimilarityPlotDom$,
 						HeadTable.DOM,
 						TailTable.DOM,
 				)
@@ -118,25 +129,28 @@ function SignatureWorkflow(sources) {
 						form,
 						// query,
 						// check, 
-						// hist, 
-						// simplot, 
+						hist, 
+						simplot, 
 						headTable, 
 						tailTable
 					]) => 
 						div([
-							div('.container',{style: {fontSize: '14px'}},
+							div('.container', {style: {fontSize: '14px'}},
 								[
 									div('.row', []),
 									form,
-									// div('.row ', [div('.col .s7', [
-									// // simplot,
-									// 	]), div('.col .s5', [
-									// // hist,
-									// 		])]),
-								// div('.row', [
+									div('.row', []),
+									// on mobile: under each other
+									// on large screen: next to each other
+									div('.row ', [div('.col .s12 .l7', [
+											simplot,
+												]), div('.col .s12 .l5', [
+											hist,
+									])]),
+									div('.row', []),
 									div('.col .s6', [headTable]),
+									div('.row', []),
 									div('.col .s6', [tailTable])
-								// ])
 								])
 						])
 						);
@@ -160,8 +174,8 @@ function SignatureWorkflow(sources) {
 			),
 		HTTP: xs.merge(
 			signatureFormSinks.HTTP, 
-			// histogramHTTP$, 
-			// SimilarityPlotHTTP$, 
+			histogramHTTP$, 
+			SimilarityPlotHTTP$, 
 			HeadTable.HTTP, 
 			TailTable.HTTP
 			// BottomTableHTTP$

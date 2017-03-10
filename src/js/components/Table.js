@@ -39,10 +39,6 @@ export function Table(sources) {
     // const click$ = domSource$.select('.run').events('click')
 
     const modifiedState$ = state$
-            .debug(x => {
-                console.log('in request')
-                console.log(x)
-            })
             .compose(dropRepeats((x, y) => x.query === y.query))
             .filter(state => state.query != null)
 
@@ -53,7 +49,6 @@ export function Table(sources) {
                     url: 'http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&appName=luciusapi&sync=true&classPath=com.dataintuitive.luciusapi.topTable',
                     category : 'topTable'
      })).debug(log)
-
 
 	// Catch the response in a stream
 	const response$ = httpSource$

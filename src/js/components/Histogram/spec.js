@@ -122,8 +122,8 @@ export const vegaHistogramSpec = (data, width, height) => {
 			"type": "text",
 			"properties": {
 				"enter": {
-				"align": {"value": "center"},
-				"fill": {"value": "#333"}
+          "align": {"value": "center"},
+          "fill": {"value": "#333"}
 				},
 				"update": {
 				"x": {"scale": "x", "signal": "tooltip.bin"},

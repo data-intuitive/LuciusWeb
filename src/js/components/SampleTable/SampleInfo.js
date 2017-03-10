@@ -12,8 +12,9 @@ export function SampleInfo(sources) {
 
     const vdom$ = state$
        .map(sample => {
+            let color = (sample.zhang >= 0) ? '.green .lighten-5' : '.orange .lighten-5'
             let url = 'http://localhost:9999/molecule/' + encodeURIComponent(sample.smiles).replace(/%20/g,'+')
-            return li('.collection-item', 
+            return li('.collection-item ' + color,   
                 [
                     div('.row', {style: {fontSize : 'small'}}, [
                         div('.col .s1 .left-align', [sample.zhang.toFixed(3)]),

@@ -21,31 +21,38 @@ export function Histogram(sources) {
 	const httpSource$ = sources.HTTP;
 	const vegaSource$ = sources.vega;
 
-    // -- Intent
+	const props$ = sources.props
 
 	// Size stream
 	const width$ = widthStream(domSource$, elementID)
 
 	// This component is active only when the signature is validated
-	const active$ = state$.map(state => state.validated)
+	// const active$ = state$.map(state => state.validated)
 
-	const request$ = state$
-		.filter(state => state.validated)
+    const modifiedState$ = state$
+            .compose(dropRepeats((x, y) => x.query === y.query))
+            .filter(state => state.query != null)
+
+	const request$ = modifiedState$
+		// .filter(state => state.validated)
         .map(state => {
-			let thisUrl = state.connection.url + 'histogram';
+			let thisUrl = 'http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&appName=luciusapi&sync=true&classPath=com.dataintuitive.luciusapi.' + 'histogram';
 			return {
 				url : thisUrl,
 				method : 'POST',
-				send : state.body,
+				send : {
+					query : state.query,
+					bins: 20
+				},
 				'category' : 'histogram'
 		}})
-		// .debug(log);
+		.debug(log);
 
 	// Catch the response in a stream
 	const response$ = httpSource$
         .select('histogram')
         .flatten()
-        // .debug(log);
+        .debug(log);
 
 	// Extract the data from the result
 	// TODO: check for errors coming back
@@ -57,25 +64,24 @@ export function Histogram(sources) {
 		.map(([data, newwidth]) => ({spec : vegaHistogramSpec(data) , el : elementID, width : newwidth})).remember();
 
 
-    const makeHistogram = (active, data) => {
+    const makeHistogram = (data) => {
             return (
-                (active)
-                ? div('.card-panel .center-align', [div(elementID)])
-                : div('.card-panel .center-align', [div(elementID, {style: {visibility:'hidden'}})])
+                // (active)
+                // ? 
+				div('.card-panel .center-align', [div(elementID)])
+                // : div('.card-panel .center-align', [div(elementID, {style: {visibility:'hidden'}})])
             )
     };
 
 	// View
-    const vdom$ = xs.combine(active$, data$)
-            .map(([active, data]) =>  makeHistogram(active, data) )
-
-    const reducer$ = xs.of((prevState) => prevState);
+    const vdom$ = xs.combine(data$)
+            .map((data) =>  makeHistogram(data) )
 
   return { 
     	DOM: vdom$,
 		HTTP: request$,
 		vega: vegaSpec$,
-        onion: reducer$
+        // onion: reducer$
   };
 
 }

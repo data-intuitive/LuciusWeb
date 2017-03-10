@@ -23,6 +23,8 @@ export function SimilarityPlot(sources) {
 	const httpSource$ = sources.HTTP;
 	const vegaSource$ = sources.vega;
 
+	const props$ = sources.props
+
 	// This component is active only when the signature is validated
 	const active$ = state$.map(state => state.validated)
 
@@ -32,23 +34,31 @@ export function SimilarityPlot(sources) {
 	// Size stream
 	const width$ = widthStream(domSource$, elementID)
 
-	const request$ = state$
-		.filter(state => state.validated)
+    const modifiedState$ = state$
+            .compose(dropRepeats((x, y) => x.query === y.query))
+            .filter(state => state.query != null)
+
+	const request$ = modifiedState$
+		// .filter(state => state.validated)
         .map(state => {
-			let thisUrl = state.connection.url + 'binnedZhang';
+			let thisUrl = 'http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&appName=luciusapi&sync=true&classPath=com.dataintuitive.luciusapi.' + 'binnedZhang';
 			return {
 				url : thisUrl,
 				method : 'POST',
-				send : state.body,
+				send : {
+					query : state.query,
+					binsX: 20,
+					binxY: 20
+				},
 				'category' : 'binnedZhang'
 		}})
 		.debug(log);
-
+	
 	// Catch the response in a stream
 	const response$ = httpSource$
         .select('binnedZhang')
         .flatten()
-        // .debug(log);
+        .debug(log);
 
 	// Extract the data from the result
 	// TODO: check for errors coming back
@@ -59,17 +69,15 @@ export function SimilarityPlot(sources) {
 	const vegaSpec$ = xs.combine(data$, width$)
 		.map(([data, newwidth]) => ({spec : similarityPlotSpec(data) , el : elementID, width : newwidth})).remember();
 
-    const makeChart = (active, data) => {
+    const makeChart = data => {
             return (
-                (active)
-                ? div('.card-panel .center-align', [div(elementID)])
-                : div('.card-panel .center-align', [div(elementID, {style: {visibility:'hidden'}})])
+                div('.card-panel .center-align', [div(elementID)])
             )
     };
 
 	// View
-	const vdom$ = xs.combine(active$, data$)
-			.map(([active, data]) =>  makeChart(active, data))
+	const vdom$ = data$
+			.map(data =>  makeChart(data))
 
     const reducer$ = xs.of((prevState) => prevState);
 
@@ -77,7 +85,7 @@ export function SimilarityPlot(sources) {
     	DOM: vdom$,
 		HTTP: request$,
 		vega: vegaSpec$,
-        onion: reducer$
+        // onion: reducer$
   };
 
 }

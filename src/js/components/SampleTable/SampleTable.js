@@ -32,8 +32,8 @@ export function SampleTable(sources) {
                     .compose(pick('DOM'))
                     .compose(mix(xs.combine))
                     .map(itemVNodes => {
-                        return ul('.collection .green', [
-                                        li('.collection-item', 
+                        return ul('.collection', [
+                                        li('.collection-item .grey .darken-1 .white-text', 
                                             [
                                                 div('.row', {style: {fontSize : 'normal', fontWeight : 500}}, [
                                                     div('.col .s1', ['Zhang']),
@@ -46,7 +46,7 @@ export function SampleTable(sources) {
                                         ])
                                 ].concat(itemVNodes))
                     })
-                    .startWith(ul('.collection .green', [li('.collection-item .center-align .grey-text','no query yet...')]))
+                    .startWith(ul('.collection', [li('.collection-item .center-align .grey-text','no query yet...')]))
 
     // const childrenReducers$ = childrenSinks$
     //                             .compose(pick('onion'));

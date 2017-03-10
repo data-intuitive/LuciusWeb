@@ -14,11 +14,9 @@ const emptyData = {
 	}
 }
 
-const empty = {
-		result: {
-			data: []
-	}
-};
+const templateBody = {
+	version: 'v2'
+}
 
 function SignatureCheck(sources) {
 
@@ -28,17 +26,17 @@ function SignatureCheck(sources) {
 	const httpSource$ = sources.HTTP;
 	const state$ = sources.onion.state$
 
-	// This component is active only when the signature is not yet validated
-	const active$ = state$.map(state => !state.validated)
-
 	const request$ = state$
-		.filter(state => !state.validated)
+		.compose(dropRepeats((x, y) => x.query === y.query))
 		.map(state =>  {
-			let thisUrl = state.connection.url + 'checkSignature';
+			let thisUrl = 'http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&appName=luciusapi&sync=true&classPath=com.dataintuitive.luciusapi.' + 'checkSignature';
 			return {
 				url : thisUrl,
 				method : 'POST',
-				send : state.body,
+				send : {
+					version : 'v2',
+					query : state
+				},
 				'category' : 'checkSignature'
 		}})
 		.debug(log);
@@ -51,16 +49,15 @@ function SignatureCheck(sources) {
 				response$.replaceError(() => xs.of(emptyData))
 			)		
 		.flatten()
-		// .debug(log);
+		.debug(log);
 
 	const data$ = response$
 		.map(res => res.body)
-		.startWith(empty)
+		.startWith(emptyData.body)
 		.map(json => json.result.data)
-		// .debug(log);
 
 	// Helper function for rendering the table, based on the state
-	const makeTable = (visible, data) => {
+	const makeTable = (data) => {
 			// let visible = visible1 //state.ux.checkSignatureVisible;
 			let rows = data.map(entry => [ 
 				(entry.inL1000) ? td(entry.query) : td('.red .lighten-4 .red-text .text-darken-4', entry.query),
@@ -78,8 +75,7 @@ function SignatureCheck(sources) {
 			const tableContent = [thead([header]), tbody(body)];
 
 			return ( 
-					(visible) 
-					? div([
+					div([
 							div('.row'),
 							div('.row', [table('.striped', tableContent)]),
 							div('.row', [
@@ -88,64 +84,30 @@ function SignatureCheck(sources) {
 								]),
 							div('.row')
 						])
-					: div([])
 			);
 	}
 
 	// Render table
-	const vdom$ = xs.combine(active$, data$)
-					.map(([active, data]) => 
-						makeTable(active, data),
-					);
-
-	// // Collapse button collapses the window
-	// const collapse$ = domSource$.select('.collapse').events('click');
-	// const collapseReducer$ = collapse$.compose(sampleCombine(data$))
-	// 	.map(([collapse, data]) => function reducer(prevState) {
-
-	// 		let newState = clone(prevState);
-
-	// 		// Update UX visibility of this component
-	// 		let newUx = clone(prevState.ux);
-	// 		newUx.checkSignatureVisible = false;
-	// 		newState.ux = newUx;
-
-	// 		console.log(newState);
-	// 		return newState;
-	// 	});
+	const vdom$ = data$
+					.map(data => makeTable(data));
 
 	// Update and Collapse button updates the query and collapses the window
 	const collapseUpdate$ = domSource$.select('.collapseUpdate').events('click');
 	const collapseUpdateReducer$ = collapseUpdate$.compose(sampleCombine(data$))
 		.map(([collapse, data]) => function reducer(prevState) {
-
-			let newState = clone(prevState);
-
-			// Query is validated
-			newState.validated = true
-
-			// Update UX visibility of this component
-			// let newUx = clone(prevState.ux);
-			// newUx.checkSignatureVisible = false;
-			// newState.ux = newUx;
-
-			// Update query value
-			let newBody = clone(prevState.body);
-			newBody.query = data.map(x => (x.inL1000) ? x.symbol : '').join(" ").replace(/\s\s+/g, ' ').trim();
-			newState.body = newBody
-
-			newState.result = data
-
-			console.log(newState);
-			return newState;
+			return data.map(x => (x.inL1000) ? x.symbol : '').join(" ").replace(/\s\s+/g, ' ').trim();
 		});
+
+	// The result of this component is an event when valid
+	const validated$ = collapseUpdate$.map(update => true)
 
   return { 
     HTTP: request$,
     DOM: vdom$,
 	onion: xs.merge(
-		// collapseReducer$, 
-		collapseUpdateReducer$)
+		collapseUpdateReducer$, 
+		),
+	validated : validated$
   }
 
 };

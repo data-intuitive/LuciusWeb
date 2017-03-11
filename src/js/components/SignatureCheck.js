@@ -5,6 +5,7 @@ import sampleCombine from 'xstream/extra/sampleCombine'
 import {log, logThis} from '../utils/logger'
 import {ENTER_KEYCODE} from '../utils/keycodes.js'
 import dropRepeats from 'xstream/extra/dropRepeats'
+import { check, flash, play_arrow } from 'webpack-material-design-icons'
 
 const emptyData = {
 	body: {
@@ -61,7 +62,7 @@ function SignatureCheck(sources) {
 			// let visible = visible1 //state.ux.checkSignatureVisible;
 			let rows = data.map(entry => [ 
 				(entry.inL1000) ? td(entry.query) : td('.red .lighten-4 .red-text .text-darken-4', entry.query),
-				(entry.inL1000) ? td(i('.material-icons .dp48',''), 'x') : td('.red .lighten-4 .red-text .text-darken-4', '-'),
+				(entry.inL1000) ? td([i('.small .material-icons', 'done')] ) : td('.red .lighten-4 .red-text .text-darken-4', [i('.small .material-icons', 'mode_edit')] ),
 				(entry.inL1000) ? td(entry.symbol) : td('.red .lighten-4 .red-text .text-darken-4', entry.symbol)
 			]);
 			const header = tr([

@@ -5,7 +5,6 @@ import { clone } from 'ramda';
 import xs from 'xstream';
 import { logThis, log } from '../utils/logger'
 import { ENTER_KEYCODE } from '../utils/keycodes.js'
-import { search, play_arrow } from 'webpack-material-design-icons'
 import { SignatureCheck } from '../components/SignatureCheck'
 import dropRepeats from 'xstream/extra/dropRepeats'
 
@@ -41,9 +40,9 @@ function SignatureForm(sources) {
 											// div('.row', [
 												// div('.col .s1'),
 												(validated) 
-												? div('.SignatureCheck .waves-effect .col .s1', [
-													i('.large .material-icons', {style: {fontSize: '45px', fontColor: 'grey'}}, 'play_arrow')])
-												: div('.SignatureCheck .col .s1', [
+												? div('.SignatureCheck .waves-effect .col .s1  .right-align', [
+													i('.large .material-icons', {style: {fontSize: '45px', fontColor: 'grey'}}, ['play_arrow'])])
+												: div('.SignatureCheck .col .s1 .right-align', [
 													i('.large .material-icons .grey-text .text-lighten-2', {style: {fontSize: '45px', fontColor: 'grey'}}, 'play_arrow')])
 											// ])
 										]),

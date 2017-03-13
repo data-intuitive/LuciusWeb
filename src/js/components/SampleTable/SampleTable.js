@@ -41,7 +41,7 @@ export function SampleTable(sources) {
                                                     div('.col .s1', ['Protocal']),
                                                     div('.col .s2', ['JNJS']),
                                                     div('.col .s3', ['Compound Name']),
-                                                    div('.col .s3', ['Structure']),
+                                                    div('.col .s3 .center-align', ['Structure']),
                                                 ])
                                         ])
                                 ].concat(itemVNodes))

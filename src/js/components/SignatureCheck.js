@@ -61,13 +61,13 @@ function SignatureCheck(sources) {
 	const makeTable = (data) => {
 			// let visible = visible1 //state.ux.checkSignatureVisible;
 			let rows = data.map(entry => [ 
-				(entry.inL1000) ? td(entry.query) : td('.red .lighten-4 .red-text .text-darken-4', entry.query),
 				(entry.inL1000) ? td([i('.small .material-icons', 'done')] ) : td('.red .lighten-4 .red-text .text-darken-4', [i('.small .material-icons', 'mode_edit')] ),
+				(entry.inL1000) ? td(entry.query) : td('.red .lighten-4 .red-text .text-darken-4', entry.query),
 				(entry.inL1000) ? td(entry.symbol) : td('.red .lighten-4 .red-text .text-darken-4', entry.symbol)
 			]);
 			const header = tr([
-								th('Input'),
 								th('In L1000?'),
+								th('Input'),
 								th('Symbol')
 					]);
 

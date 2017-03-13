@@ -64,7 +64,7 @@ function SignatureWorkflow(sources) {
 
 	// !!! Remove the startWith when running for real (makes testing easier)
 	const query$ = signatureFormSinks.query
-						.startWith('HSPA1A DNAJB1 DDIT4 HMOX1 -TSEN2')
+						// .startWith('HSPA1A DNAJB1 DDIT4 HMOX1 -TSEN2')
 
 	// Inject the query into the state objects for the table children:
 	const stateReducer$ = query$.map(query => prevState => {

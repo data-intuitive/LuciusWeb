@@ -34,16 +34,18 @@ function SignatureForm(sources) {
 										 div('.row', []),
 										 div('.row', [
 											// label('Query: '),
-											i('.col .s1 .large .material-icons .grey-text', {style: {fontSize: '45px', fontColor: 'gray'}}, 'search'),
+											div('.Default .waves-effect .col .s1', [
+												i('.large  .center-align .material-icons .grey-text', {style: {fontSize: '45px', fontColor: 'gray'}}, 'search'),
+											]),
 											// textarea('.Query .col s11 .materialize-textarea', {style: {fontSize: '20px'} , props: {type: 'text', value: query.trim()}, value: query.trim()}),
 											input('.Query .col s10', {style: {fontSize: '20px'} , props: {type: 'text', value: query}, value: query}),
 											// div('.row', [
 												// div('.col .s1'),
-												(validated) 
-												? div('.SignatureCheck .waves-effect .col .s1  .right-align', [
-													i('.large .material-icons', {style: {fontSize: '45px', fontColor: 'grey'}}, ['play_arrow'])])
-												: div('.SignatureCheck .col .s1 .right-align', [
-													i('.large .material-icons .grey-text .text-lighten-2', {style: {fontSize: '45px', fontColor: 'grey'}}, 'play_arrow')])
+											(validated) 
+											? div('.SignatureCheck .waves-effect .col .s1 .right-align', [
+												i('.large .material-icons', {style: {fontSize: '45px', fontColor: 'grey'}}, ['play_arrow'])])
+											: div('.SignatureCheck .col .s1 .right-align', [
+												i('.large .material-icons .grey-text .text-lighten-2', {style: {fontSize: '45px', fontColor: 'grey'}}, 'play_arrow')])
 											// ])
 										]),
 										(!validated) ? checkdom : div()
@@ -61,12 +63,20 @@ function SignatureForm(sources) {
     const enter$ = domSource$.select('.Query').events('keydown').filter(({keyCode, ctrlKey}) => keyCode === ENTER_KEYCODE && ctrlKey === false) ;
 	const update$ = xs.merge(click$, enter$).debug(log)
 
+	// Set a default signature for demo purposes
+	const setDefault$ = sources.DOM.select('.Default').events('click')
+	const setDefaultReducer$ = setDefault$.map(events => prevState => ({
+				query : 'ENSG00000012048 -WRONG HSPA1A DNAJB1 DDIT4 -TSEN2',
+				validated : false
+	})
+    );
+
 	// Takes care of initialization
 	const defaultReducer$ = xs.of(function defaultReducer(prevState) {
 		console.log('Default reducer ...')
         if (typeof prevState === 'undefined') {
 			return {
-				query : 'ENSG00000012048 -WRONG HSPA1A DNAJB1 DDIT4 -TSEN2',
+				query : '', //ENSG00000012048 -WRONG HSPA1A DNAJB1 DDIT4 -TSEN2',
 				validated : false
 			}
         } else {
@@ -93,8 +103,6 @@ function SignatureForm(sources) {
 
 	// Validates the state when validated from check
 	const validateReducer$ = signatureCheckSink.validated
-		// .compose(sampleCombine(state$))
-		// .map(([update, query]) => prevState => {
 		.map(signal => prevState => {
 			console.log('Validate !!!!')
 			let newState = clone(prevState)
@@ -115,7 +123,8 @@ function SignatureForm(sources) {
   return { 
     	DOM: vdom$,
 		onion: xs.merge(
-			defaultReducer$, 
+			defaultReducer$,
+			setDefaultReducer$,
 			queryReducer$,
 			invalidateReducer$,
 			childReducer$,

@@ -1,8 +1,5 @@
 import xs from 'xstream';
 import vg  from 'vega';
-import {Observable} from 'rx';
-import convert from 'stream-conversions';
-import {log} from './utils/logger'
 
 function makeVegaDriver() {
 
@@ -11,21 +8,30 @@ function makeVegaDriver() {
     const view$$ = spec$.map(
         (obj) => {
 
-            const vegaParseSpec = Observable.fromCallback(vg.parse.spec)
-            const parsed = vegaParseSpec(obj.spec);
-            const parsed$ = convert.rx.to.xstream(parsed);
+            const parsed$ = xs.create({
+                start: (listener) => {
+                    vg.parse.spec(obj.spec, res => listener.next(res))
+                }, 
+                stop: () => {}
+            })
+            
+            const view$ = parsed$.map(chart => chart({el:obj.el}).width(obj.width).height(350).update())
 
-            const view$ = parsed$.map(chart => chart({el:obj.el}).width(obj.width).height(350).update());
+            const errorHandlingView$ = view$.replaceError(() => xs.empty())
 
-            return view$;
+            return errorHandlingView$
+
         }
     );
 
     const view$ = view$$.flatten();
 
     view$.addListener({
-            next: () => {},
-            error: () => {},
+            next: (n) => {},
+            error: (e) => {
+                console.error('An error occured in the vegaDriver')
+                console.error(e)
+            },
             complete: () => {}            
         });
 
@@ -43,13 +49,6 @@ function makeVegaDriver() {
     });
 
     const click$ = clicks$$.flatten();
-
-    // For debugging:
-    // click$.addListener({
-    //         next: (el) => {log(el)},
-    //         error: () => {},
-    //         complete: () => {}            
-    //     });
 
     return click$;
 

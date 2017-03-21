@@ -76,7 +76,6 @@ export default function Router(sources) {
 				{
 					settings : initSettings,
 					query : 'HSPA1A DNAJB1 DDIT4 -TSEN2',
-          validated: true
 				})
 		} else {
 			return prevState

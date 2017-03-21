@@ -53,10 +53,12 @@ export function SampleInfo(sources) {
        .map(([sample, zoom]) => {
             let bgcolor = (sample.zhang >= 0) ? 'rgba(44,123,182, 0.08)' : 'rgba(215,25,28, 0.08)'
             let url = 'http://localhost:9999/molecule/' + encodeURIComponent(sample.smiles).replace(/%20/g,'+')
+            let zhangRounded = (sample.zhang != null) ? sample.zhang.toFixed(3) : 'NA'
+
             return li('.collection-item  .zoom', {style : {'background-color' : bgcolor}},    
                 [
                     div('.row', {style: {fontWeight : 'small'}}, [
-                        div('.col .s1 .left-align', {style: {fontWeight: 'bold'}}, [sample.zhang.toFixed(3)]),
+                        div('.col .s1 .left-align', {style: {fontWeight: 'bold'}}, [zhangRounded]),
                         div('.col .s2', [sample.id]),
                         div('.col .s1', [sample.protocolname]),
                         div('.col .s2', [(sample.jnjs != "NA") ? sample.jnjs : '']),

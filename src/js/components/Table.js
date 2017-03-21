@@ -23,21 +23,11 @@ export function Table(sources) {
 	const httpSource$ = sources.HTTP;
     const props$ = sources.props
 
-    const queryUpdated$ = state$
-            // .debug(state => console.log('Checking query modified!!!'))
-            .compose(dropRepeats((x, y) =>  {
-                // console.log(x)
-                // console.log(y)
-                // console.log(x === y)
-                const sameQuery = x.query === y.query
-                return sameQuery
-            }))
-            // .debug(state => console.log('Query modified 1!!!'))
-            .filter(state => state.query != null)
-            // .debug(state => console.log('Query modified 2!!!'))
+    const modifiedState$ = state$
+            .filter(state => state.query != '')
+			.compose(dropRepeats((x, y) => x.query === y.query))
 
-    // const request$ = modifiedState$ //, props$)
-    const request$ = xs.combine(queryUpdated$, props$)
+    const request$ = xs.combine(modifiedState$, props$)
             .map(([state, props]) => ({
                     send : merge(state, props),
                     method: 'POST',
@@ -54,16 +44,22 @@ export function Table(sources) {
 	// Extract the data from the result
 	// TODO: check for errors coming back
 	const resultData$ = response$.map(response => response.body.result.data);
-    const data$ = resultData$;
+    const data$ = resultData$.startWith([]);
 
     // This one makes sure the state is cycled by adding the resulting data to its child key
-    const defaultReducer$ = xs.of(prevState => omit('result', prevState))
+    const defaultReducer$ = xs.of(prevState => {
+        if (typeof prevState === 'undefined') {
+            return {query : ''}
+        } else {
+            return omit(prevState, 'result')
+        }     
+    })
 
     // Delegate effective rendering to SampleTable:
     const sampleTable = isolate(SampleTable, 'result')(sources);
 
-    const vdom$ = xs.combine(sampleTable.DOM, props$)
-            .map(([dom,props]) => div([
+    const vdom$ = xs.combine(sampleTable.DOM, data$, props$)
+            .map(([dom, data, props]) => div([
                     div('.row', {style : {'margin-bottom' : '0px', 'background-color': props.color}}, [
                         h5('.white-text .col .s6', props.title),
                         // i('.Add .white-text .material-icons', 'playlist_add')

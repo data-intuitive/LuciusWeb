@@ -95,12 +95,13 @@ function SignatureWorkflow(sources) {
 				.compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
 				.startWith({settings: initSettings})
 				.map(state => state.settings.headTableSettings)
+				// .remember()
 	// const tailTableProps$ = xs.of({ title: 'Bottom Table', version: 'v2', tail : 10, color: 'rgb(215,25,28)'})
 	const tailTableProps$ = state$
 				.compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
 				.startWith({settings: initSettings})
 				.map(state => state.settings.tailTableSettings)
-
+				// .remember()
 	const headTable = isolate(Table, 'headTable')(merge(sources, {props: headTableProps$}));
 	const tailTable = isolate(Table, 'tailTable')(merge(sources, {props: tailTableProps$}));
 

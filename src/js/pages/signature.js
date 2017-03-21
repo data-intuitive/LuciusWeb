@@ -2,133 +2,117 @@ import { a, div, br, label, input, p, button, code, pre } from '@cycle/dom'
 import xs from 'xstream'
 import isolate from '@cycle/isolate'
 import { mergeWith, merge } from 'ramda'
-import { clone } from 'ramda';
+import { clone, equal, equals } from 'ramda';
+import dropRepeats from 'xstream/extra/dropRepeats'
 
 // Components
 import { SignatureForm } from '../components/SignatureForm'
 import { Histogram } from '../components/Histogram/Histogram'
 import { SimilarityPlot } from '../components/SimilarityPlot/SimilarityPlot'
 import { Table } from '../components/Table'
-
-const settings = {
-	url : 'http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&appName=luciusapi&sync=true&classPath=com.dataintuitive.luciusapi.',
-	topTableSize : 5
-}
+import { initSettings } from './settings'
 
 const log = (x) => console.log(x);
 
-const initState = {
-				validated : true,
-				body : {
-					version : 'v2',
-					// query : 'ENSG00000012048 -WRONG HSPA1A DNAJB1 DDIT4 HMOX1 -TSEN2',
-					query : 'HSPA1A DNAJB1 DDIT4 HMOX1 -TSEN2',
-					bins: 20,
-					binsX:40,
-					binxY:40,
-					head: 3
-				}, 
-				connection : {
-					url: settings.url,
-				},
-				ux : {
-					checkSignatureVisible : false,
-					histogramVisible : false,
-					simplotVisible : false
-				}
-    };
-
 function SignatureWorkflow(sources) {
 
-	const state$ = sources.onion.state$.debug(log);
-    const domSource$ = sources.DOM;
-	const vegaSource$ = sources.vega;
+	const state$ = sources.onion.state$.debug(state => {
+		console.log('== State in signature =================')
+		console.log(state)
+	});
 
 	// const feedback$ = vegaSource$.map(item => item.key).startWith(null);
-
 	// const feedback$ = domSource$.select('.SignatureCheck').events('click').mapTo('click !').startWith(null);
 
-    // const initReducer$ = xs.of(() => (initState))
-    // .debug(x => console.log(x));
-
-	const formSources = {
-		DOM: sources.DOM, 
-		HTTP: sources.HTTP,
-		onion: sources.onion,
-	}
-
 	// Queury Form
-	const signatureFormSinks = SignatureForm(formSources);
-	const signatureFormDom$ = signatureFormSinks.DOM;
-    const signatureFormReducer$ = signatureFormSinks.onion;
+	const signatureForm = SignatureForm(sources);
 
-	// !!! Remove the startWith when running for real (makes testing easier)
-	const query$ = signatureFormSinks.query
-						// .startWith('HSPA1A DNAJB1 DDIT4 HMOX1 -TSEN2')
+	// Query updated in signatureForm, so push it to the other components
+	const query$ = signatureForm.query
 
-	// Inject the query into the state objects for the table children:
-	const stateReducer$ = query$.map(query => prevState => {
-		console.log('update state ' + query)
-		console.log(query)
-		let newState = clone(prevState)
-		newState.query = query
-		let additionalState = {
-			headTable : {
-				query : query
-			},
-			tailTable : {
-				query : query
-			},
-			hist : {
-				query : query
-			},
-			sim : {
-				query : query
-			}
+	const defaultReducer$ = xs.of(prevState => {
+		console.log('signature -- defaultReducer')
+		if (typeof prevState === 'undefined') {
+			return (
+				{
+					settings : initSettings,
+					query : 'HSPA1A DNAJB1 DDIT4 -TSEN2',
+				})
+		} else {
+			// return prevState
+			return ({
+					settings : prevState.settings,
+					query : prevState.query,
+				})
 		}
-		return merge(newState,additionalState)
 	})
 
+	// If settings change, reflect that in state of subcomponents so they can be updated
+	// const settingsReducer$ = state$
+	// 	.compose(dropRepeats(equals))
+	// 	.map(state => prevState => {
+	// 		console.log('Settings reducer...')
+	// 		console.log(state)
+	// 		console.log(state.settings)
+	// 		let additionalState = {
+	// 			headTable : merge(prevState.headTable, state.settings.headTableSettings),
+	// 			tailTable : merge(prevState.tailTable, state.settings.tailTableSettings)
+	// 		}
+	// 		return merge(prevState,additionalState)
+	// })
 
-	// Binned Scatter plot
-	// const histProps$ = xs.of({ title: 'Histogram', version: 'v2', })
+	// Propagate query to state of individual components
+	const stateReducer$ = query$.map(query => prevState => {
+			console.log('signature -- stateReducer')
+			let additionalState = {
+				headTable : merge(prevState.headTable, {query : query}),
+				tailTable : merge(prevState.tailTable, {query : query}),
+				hist : {
+					query : query
+				},
+				sim : {
+					query : query
+				}
+			}
+			return merge(prevState,additionalState)
+	})
 
-	const histogramSink = isolate(Histogram, 'hist')(sources);
-	const histogramDom$ = histogramSink.DOM;
-	const histogramHTTP$ = histogramSink.HTTP;
-	const histogramVega$ = histogramSink.vega;
-	const histogramReducer$ = histogramSink.onion
+	// histogram component
+	const histProps$ = state$
+				.compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
+				.startWith({settings: initSettings})
+				.map(state => state.settings.hist)
+	// const histProps$ = xs.of({hist : bins})
 
-	// Binned Scatter plot
-	// const simProps$ = xs.of({ title: 'Histogram', version: 'v2', })
+	const histogram = isolate(Histogram, 'hist')(merge(sources, {props: histProps$}));
 
-	const SimilarityPlotSink = isolate(SimilarityPlot, 'sim')(sources);
-	const SimilarityPlotDom$ = SimilarityPlotSink.DOM;
-	const SimilarityPlotHTTP$ = SimilarityPlotSink.HTTP;
-	const SimilarityPlotVega$ = SimilarityPlotSink.vega;
-	const SimilarityPlotReducer$ = SimilarityPlotSink.onion
+	// Similarity plot components
+	const similarityPlot = isolate(SimilarityPlot, 'sim')(sources);
 
 	// tables
-	const headTableProps$ = xs.of({ title: 'Top Table', version: 'v2', head : 5})
-	const tailTableProps$ = xs.of({ title: 'Bottom Table', version: 'v2', tail : 5})
+	// const headTableProps$ = xs.of({ title: 'Top Table', version: 'v2', head : 10, color: 'rgb(44,123,182)'})
+	const headTableProps$ = state$
+				.compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
+				.startWith({settings: initSettings})
+				.map(state => state.settings.headTableSettings)
+	// const tailTableProps$ = xs.of({ title: 'Bottom Table', version: 'v2', tail : 10, color: 'rgb(215,25,28)'})
+	const tailTableProps$ = state$
+				.compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
+				.startWith({settings: initSettings})
+				.map(state => state.settings.tailTableSettings)
 
-	const HeadTable = isolate(Table, 'headTable')(merge(sources, {props: headTableProps$}));
-	const TailTable = isolate(Table, 'tailTable')(merge(sources, {props: tailTableProps$}));
-
+	const headTable = isolate(Table, 'headTable')(merge(sources, {props: headTableProps$}));
+	const tailTable = isolate(Table, 'tailTable')(merge(sources, {props: tailTableProps$}));
 
     const vdom$ = xs.combine(
-                        signatureFormDom$,
-						// query$,
-						// signatureCheckDom$,
-                        histogramDom$,
-						SimilarityPlotDom$,
-						HeadTable.DOM,
-						TailTable.DOM,
+                        signatureForm.DOM,
+                        histogram.DOM,
+						similarityPlot.DOM,
+						headTable.DOM,
+						tailTable.DOM,
 				)
 					.map(([
 						form,
-						// query,
-						// check, 
 						hist, 
 						simplot, 
 						headTable, 
@@ -156,30 +140,27 @@ function SignatureWorkflow(sources) {
 						);
 
 	return {
-        DOM: vdom$,
+		DOM: vdom$,
 		onion: xs.merge(
-			// initReducer$, 
-			signatureFormReducer$,
+			defaultReducer$,
+			// settingsReducer$,
+			signatureForm.onion,
 			stateReducer$,
-			// signatureCheckReducer$, 
-			// histogramReducer$, 
-			// SimilarityPlotReducer$, 
-			HeadTable.onion,
-			TailTable.onion
-			// BottomTableReducer$, 
+			headTable.onion,
+			tailTable.onion
 			),
 		vega: xs.merge(
-			histogramVega$,
-			SimilarityPlotVega$
+			histogram.vega,
+			similarityPlot.vega
 			),
 		HTTP: xs.merge(
-			signatureFormSinks.HTTP, 
-			histogramHTTP$, 
-			SimilarityPlotHTTP$, 
-			HeadTable.HTTP, 
-			TailTable.HTTP
-			// BottomTableHTTP$
+			signatureForm.HTTP,
+			histogram.HTTP, 
+			similarityPlot.HTTP,
+			headTable.HTTP, 
+			tailTable.HTTP
 			),
+		// router: xs.of('/signature')
 	};
 }
 

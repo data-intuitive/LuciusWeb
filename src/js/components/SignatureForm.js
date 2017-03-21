@@ -1,7 +1,7 @@
 import sampleCombine from 'xstream/extra/sampleCombine'
 import isolate from '@cycle/isolate'
 import { i,p, div, br, label, input, code, table, tr, td, b, h2, button, textarea, a } from '@cycle/dom';
-import { clone } from 'ramda';
+import { clone, equals } from 'ramda';
 import xs from 'xstream';
 import { logThis, log } from '../utils/logger'
 import { ENTER_KEYCODE } from '../utils/keycodes.js'
@@ -12,7 +12,7 @@ function SignatureForm(sources) {
 
 	console.log('Starting component: SignatureForm...');
 
-	const state$ = sources.onion.state$.debug(console.log)
+	const state$ = sources.onion.state$//.debug(console.log)
 	const domSource$ = sources.DOM;
 	const props$ = sources.props;
 
@@ -32,7 +32,7 @@ function SignatureForm(sources) {
 							return div(
 									[  
 										 div('.row', []),
-										 div('.row', [
+										 div('.row', [ // {style : {'background-color': 'rgb(44,123,182)'}}, [
 											// label('Query: '),
 											div('.Default .waves-effect .col .s1', [
 												i('.large  .center-align .material-icons .grey-text', {style: {fontSize: '45px', fontColor: 'gray'}}, 'search'),
@@ -56,37 +56,42 @@ function SignatureForm(sources) {
 	const newQuery$ = xs.merge(
 				// state$.map(state => state.query),
 				domSource$.select('.Query').events('input').map(ev => ev.target.value)
-			)
+			).debug(console.log)
 
 	// Updated state is propagated and picked up by the necessary components
 	const click$ = domSource$.select('.SignatureCheck').events('click')
     const enter$ = domSource$.select('.Query').events('keydown').filter(({keyCode, ctrlKey}) => keyCode === ENTER_KEYCODE && ctrlKey === false) ;
-	const update$ = xs.merge(click$, enter$).debug(log)
+	const update$ = xs.merge(click$, enter$)//.debug(log)
 
 	// Set a default signature for demo purposes
 	const setDefault$ = sources.DOM.select('.Default').events('click')
-	const setDefaultReducer$ = setDefault$.map(events => prevState => ({
-				query : 'ENSG00000012048 -WRONG HSPA1A DNAJB1 DDIT4 -TSEN2',
-				validated : false
+	const setDefaultReducer$ = setDefault$.map(events => prevState => {
+		let newState = clone(prevState)
+		newState.query = 'ENSG00000012048 -WRONG HSPA1A DNAJB1 DDIT4 -TSEN2'
+		newState.validated = false
+		return newState
 	})
-    );
 
 	// Takes care of initialization
 	const defaultReducer$ = xs.of(function defaultReducer(prevState) {
-		console.log('Default reducer ...')
+		console.log('Signatureform -- defaultReducer')
         if (typeof prevState === 'undefined') {
+			// console.log('prevState not exists')
 			return {
 				query : '', //ENSG00000012048 -WRONG HSPA1A DNAJB1 DDIT4 -TSEN2',
 				validated : false
 			}
         } else {
-            return prevState;
+			// console.log('prevState exists')
+			let newState = clone(prevState)
+			// newState.validated = false
+            return newState;
         }
     });
 
 	// Update the state when input changes
 	const queryReducer$ = newQuery$.map(query => prevState => {
-		console.log('Reducing state with update ' + query)
+		console.log('Signatureform -- queryReducer')
 		let newState = clone(prevState)
 		// console.log(newState)
 		newState.query = query
@@ -95,7 +100,7 @@ function SignatureForm(sources) {
 
 	// invalidates the query when input changes
 	const invalidateReducer$ = newQuery$.map(query => prevState => {
-		console.log('Invalidate !!!!')
+		console.log('Signatureform -- invalidateReducer')
 		let newState = clone(prevState)
 		newState.validated = false
 		return newState
@@ -104,7 +109,7 @@ function SignatureForm(sources) {
 	// Validates the state when validated from check
 	const validateReducer$ = signatureCheckSink.validated
 		.map(signal => prevState => {
-			console.log('Validate !!!!')
+			console.log('Signatureform -- validateReducer')
 			let newState = clone(prevState)
 			newState.validated = true
 			return newState
@@ -131,7 +136,8 @@ function SignatureForm(sources) {
 			validateReducer$,
 			),
 		HTTP: signatureCheckHTTP$,
-		query: query$
+		query: query$.debug(q => console.log('!!! QUERY FIRED !!! ' + q))//.compose(dropRepeats(equals))
+
   };
 
 }

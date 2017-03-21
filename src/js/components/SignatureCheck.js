@@ -1,6 +1,6 @@
 import xs from 'xstream';
 import { p, div, br, label, input, code, table, tr, th, td, b, h2, button, thead, tbody, i, h, hr } from '@cycle/dom';
-import { clone } from 'ramda';
+import { clone, equals } from 'ramda';
 import sampleCombine from 'xstream/extra/sampleCombine'
 import {log, logThis} from '../utils/logger'
 import {ENTER_KEYCODE} from '../utils/keycodes.js'
@@ -15,10 +15,6 @@ const emptyData = {
 	}
 }
 
-const templateBody = {
-	version: 'v2'
-}
-
 function SignatureCheck(sources) {
 
 	console.log('Starting component: SignatureCheck...');
@@ -27,8 +23,13 @@ function SignatureCheck(sources) {
 	const httpSource$ = sources.HTTP;
 	const state$ = sources.onion.state$
 
+	// const stateHistory$ = state$
+	// 			.fold((acc,x) => acc + '||' + x, 'History:')
+	// 			// .debug((x => console.log('----' + x)))
+
 	const request$ = state$
-		// .compose(dropRepeats((x, y) => x.query === y.query))
+		.filter(state => state !== '')
+		.compose(dropRepeats((x,y) => x === y))
 		.map(state =>  {
 			let thisUrl = 'http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&appName=luciusapi&sync=true&classPath=com.dataintuitive.luciusapi.' + 'checkSignature';
 			return {
@@ -88,9 +89,9 @@ function SignatureCheck(sources) {
 			);
 	}
 
-	// Render table
+	// vdom
 	const vdom$ = data$
-					.map(data => makeTable(data));
+					.map((data) => makeTable(data))
 
 	// Update and Collapse button updates the query and collapses the window
 	const collapseUpdate$ = domSource$.select('.collapseUpdate').events('click');

@@ -6,7 +6,7 @@ import dropRepeats from 'xstream/extra/dropRepeats'
 
 export function SampleInfo(sources) {
 
-    const state$ = sources.onion.state$.debug(log);
+    const state$ = sources.onion.state$//.debug(log);
 
     const click$ = sources.DOM.select('.zoom').events('click').mapTo(1)
     const zoomed$ = click$
@@ -16,7 +16,7 @@ export function SampleInfo(sources) {
     function entry(key, value) {
         return [
             span('.col .s4', {style : { fontWeight: 'lighter'}}, key), 
-            span('.col .s8', value)
+            span('.col .s8', (value.length != 0) ? value : '')
             ]
     }
 
@@ -42,7 +42,7 @@ export function SampleInfo(sources) {
                 p('.s12', pStyle, entry('Targets: ', sample.targets.join(', '))), 
             ]),            
             div('.col .s4', [ 
-                (sample.smiles != null)
+                (sample.smiles != null && sample.smiles != 'NA')
                 ? img('.col .s12 .valign', {props: {src: url}})
                 : ''
             ]),            
@@ -51,18 +51,18 @@ export function SampleInfo(sources) {
 
     const vdom$ = xs.combine(state$, zoomed$)
        .map(([sample, zoom]) => {
-            let color = (sample.zhang >= 0) ? '.green .lighten-5' : '.orange .lighten-5'
+            let bgcolor = (sample.zhang >= 0) ? 'rgba(44,123,182, 0.08)' : 'rgba(215,25,28, 0.08)'
             let url = 'http://localhost:9999/molecule/' + encodeURIComponent(sample.smiles).replace(/%20/g,'+')
-            return li('.collection-item  .zoom' + color,   
+            return li('.collection-item  .zoom', {style : {'background-color' : bgcolor}},    
                 [
-                    div('.row', {style: {fontss : 'small'}}, [
+                    div('.row', {style: {fontWeight : 'small'}}, [
                         div('.col .s1 .left-align', {style: {fontWeight: 'bold'}}, [sample.zhang.toFixed(3)]),
                         div('.col .s2', [sample.id]),
                         div('.col .s1', [sample.protocolname]),
                         div('.col .s2', [(sample.jnjs != "NA") ? sample.jnjs : '']),
                         div('.col .s3', [sample.compoundname]),
                         div('.col .s3 .center-align',  [
-                            (sample.smiles != null && zoom == false)
+                            ((sample.smiles != null && sample.smiles != 'NA') && zoom == false)
                             ? img({props: {src: url, height:50, 'object-fit': 'contain'}})
                             : ''
                             ]),

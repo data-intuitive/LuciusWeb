@@ -1,10 +1,10 @@
 import xs from 'xstream';
 import sampleCombine from 'xstream/extra/sampleCombine';
-import { a, h, p, div, br, label, input, code, table, tr, td, b, h2, button, svg, h4, th, thead, tbody } from '@cycle/dom';
+import { a, h, p, div, br, label, input, code, table, tr, td, b, h2, button, svg, h5, th, thead, tbody, i } from '@cycle/dom';
 import { clone } from 'ramda';
 import { log } from '../utils/logger'
 import { ENTER_KEYCODE } from '../utils/keycodes.js'
-import { keys, filter, head } from 'ramda'
+import { keys, filter, head, equals, omit } from 'ramda'
 import { SampleTable } from './SampleTable/SampleTable'
 import isolate from '@cycle/isolate'
 import { merge } from 'ramda'
@@ -16,34 +16,29 @@ export function Table(sources) {
 	console.log('Starting component: Table...');
 
     const state$ = sources.onion.state$.debug(state => {
-        console.log('Table:')
-        console.log(state)
-    });
+		console.log('== State in table =================')
+		console.log(state)
+	});
 	const domSource$ = sources.DOM;
 	const httpSource$ = sources.HTTP;
-    const props$ = sources.props.debug(state => {
-        console.log('Props:')
-        console.log(state)
-    });
+    const props$ = sources.props
 
-	// This component is active only when the signature is validated
-	// const active$ = state$.map(state => state.validated).startWith(false).debug(log)
-
-    // Table type (head or tail)
-    // const tableType$ = props$.map( ({ body }) => {
-    //     return head( filter( key => (key === "head" || key === "tail") , keys(body)) )
-    // }).startWith(null).debug(log)
-
-    // const tableType$ = xs.of('head')
-
-    // const click$ = domSource$.select('.run').events('click')
-
-    const modifiedState$ = state$
-            .compose(dropRepeats((x, y) => x.query === y.query))
+    const queryUpdated$ = state$
+            // .debug(state => console.log('Checking query modified!!!'))
+            .compose(dropRepeats((x, y) =>  {
+                // console.log(x)
+                // console.log(y)
+                // console.log(x === y)
+                const sameQuery = x.query === y.query
+                return sameQuery
+            }))
+            // .debug(state => console.log('Query modified 1!!!'))
             .filter(state => state.query != null)
+            // .debug(state => console.log('Query modified 2!!!'))
 
-    const request$ = xs.combine(modifiedState$, props$)
-            .map(([state,props]) => ({
+    // const request$ = modifiedState$ //, props$)
+    const request$ = xs.combine(queryUpdated$, props$)
+            .map(([state, props]) => ({
                     send : merge(state, props),
                     method: 'POST',
                     url: 'http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&appName=luciusapi&sync=true&classPath=com.dataintuitive.luciusapi.topTable',
@@ -61,150 +56,28 @@ export function Table(sources) {
 	const resultData$ = response$.map(response => response.body.result.data);
     const data$ = resultData$;
 
-	// Helper function for rendering the table, based on the state
-	// const makeTableHead = (active, data) => {
-    //         if (!active || data === null) {
-    //             return p('nothing yet...')
-    //         } else {
-    //             let rows = data.map(row => [ 
-    //                 td(row.zhang.toFixed(3)),
-    //                 td(row.id),
-    //                 (row.jnjs != "NA") ? td(row.jnjs) : td(""),
-    //                 td(row.compoundname)
-    //             ]);
-    //             const header = tr('.green .darken-1 .green-text .text-lighten-4', [
-    //                                 th('Zhang'),
-    //                                 th('SampleID'),
-    //                                 th('Jnjs'),
-    //                                 th('Name')
-    //                     ]);
+    // This one makes sure the state is cycled by adding the resulting data to its child key
+    const defaultReducer$ = xs.of(prevState => omit('result', prevState))
 
-    //             let body = [];
-    //             rows.map(row => body.push(tr(row)));
-    //             const tableContent = [thead([header]), tbody({style : {'font-weight': 'light'}}, body)];
+    // Delegate effective rendering to SampleTable:
+    const sampleTable = isolate(SampleTable, 'result')(sources);
 
-    //             return ( 
-    //                     div([
-    //                             div('.row'),
-    //                             div('.row', [table('.head .striped .green-text .text-darken-4', tableContent)]),
-    //                             div('.row'),
-    //                             // a({props: {href: '/foo'}}, 'a link:'),
-    //                             // div('.row'),
-    //                         ])
-    //                 )
-    //         }
-	// }
-
-	// const makeTableTail = (active, data) => {
-    //         if (!active || data === null) {
-    //             return p('nothing yet...')
-    //         } else {
-    //             let rows = data.map(row => [ 
-    //                 td(row.zhang.toFixed(3)),
-    //                 td(row.id),
-    //                 (row.jnjs != "NA") ? td(row.jnjs) : td(""),
-    //                 td(row.compoundname)
-    //             ]);
-    //             const header = tr('.red .darken-1 .red-text .text-lighten-4', [
-    //                                 th('Zhang'),
-    //                                 th('SampleID'),
-    //                                 th('Jnjs'),
-    //                                 th('Name')
-    //                     ]);
-
-    //             let body = [];
-    //             rows.map(row => body.push(tr(row)));
-    //             const tableContent = [thead([header]), tbody({style : {'font-weight': 'light'}}, body)];
-
-    //             return ( 
-    //                     div([
-    //                             div('.row'),
-    //                             div('.row', [table('.tail .striped .red-text .text-darken-4', tableContent)]),
-    //                             div('.row')
-    //                         ])
-    //                 )
-    //         }
-	// }
-
-    const sampleTableSink = isolate(SampleTable, 'result')(sources);
-
-    const vdom$ = xs.combine(sampleTableSink.DOM, props$)
+    const vdom$ = xs.combine(sampleTable.DOM, props$)
             .map(([dom,props]) => div([
-                    h4('.right-align .grey-text', props.title),
-                    dom
-                ]))
-                // .startWith(button('.run .btn .col .s4 .pink', 'Run Now!'))
+                    div('.row', {style : {'margin-bottom' : '0px', 'background-color': props.color}}, [
+                        h5('.white-text .col .s6', props.title),
+                        // i('.Add .white-text .material-icons', 'playlist_add')
+                    ]),
+                    div('.row', [
+                        dom
+                    ])
+                ])
+            )
 
-	// View
-    // const vdom$ = data$.map(json => JSON.stringify(json))
-    // const vdom$ = xs.combine(active$, data$, tableType$)
-    //                 .map(([active, json, type]) => {
-    //                     if (type === "head") {
-    //                         return makeTableHead(active, json)
-    //                     } else {
-    //                         return makeTableTail(active, json)
-    //                     }
-    //                 })
+    const stateReducer$ = data$.map(data => prevState => merge(prevState, {result : data}))
 
-	// const defaultReducer$ = xs.of(function defaultReducer(prevState) {
-	// 	console.log('Default reducer ...')
-    //     if (typeof prevState === 'undefined') {
-	// 		return {
-	// 			query : null,
-	// 		}
-    //     } else {
-    //         return prevState;
-    //     }
-    // });
-
-	// Just pass state as-is
-    // const thisReducer$ = data$
-    //     // data$.map(state => prevStat)
-    //     .compose(dropRepeats())
-    //     .map(data => {
-    //         if (data === null) {
-    //             return prevState => prevState
-    //         } else { prevState => {
-    //             let newState = clone(prevState)
-    //             newState.result = data
-    //             return newState
-    //         }}
-    //     })
-
-    // This one make sure the state is cycled by adding the resulting data to its child key
-    const stateReducer$ = data$.map(data => {
-            return prevState => {
-                    let newState = clone(prevState)
-                    newState.result = data
-                    return newState
-                }
-    })
-
-        // data$.compose(dropRepeats()).map(data => {
-        //     if (data === null) {
-        //         return prevState => prevState
-        //     } else {
-        //         return prevState => merge(prevState, {table : data})
-        //     }
-        // })
-
-    // const thisReducer$ = data$.map( data => prevState => merge(prevState, {table : data}))
-                // .compose(dropRepeats())
-                // .map(data => prevState => {
-                //         prevState.table = data
-                //         return prevState
-                //     })
-                // .map(data => prevState => merge(prevState, {table : data}))
-        // data$.compose(dropRepeats()).map(data => {
-        //     if (data === null) {
-        //         return prevState => prevState
-        //     } else {
-        //         return prevState => merge(prevState, {toptable : data})
-        //     }
-        // })
-
-    // const sampleTableReducer$ = sampleTableSink.onion
     const reducer$ = xs.merge(
+        defaultReducer$,
         stateReducer$,
         )
 

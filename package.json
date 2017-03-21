@@ -45,7 +45,7 @@
     "css-loader": "^0.26.1",
     "cycle-onionify": "^2.4.0",
     "cycle-proxy": "^3.0.0",
-    "cyclic-router": "^2.1.2",
+    "cyclic-router": "^3.0.1",
     "datalib": "^1.7.3",
     "file-loader": "^0.10.0",
     "jquery": "^3.1.1",

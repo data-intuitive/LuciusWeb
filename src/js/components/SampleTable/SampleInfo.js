@@ -24,7 +24,7 @@ export function SampleInfo(sources) {
         let hStyle = {style : { margin: '0px', fontWeight: 'bold'}}
         let pStyle = {style : { margin: '0px'}}
         let url = 'http://localhost:9999/molecule/' + encodeURIComponent(sample.smiles).replace(/%20/g,'+')
-        return div('.valign-wrapper', [
+        return div('', [
             div('.col .s4', [ 
                 p('.grey-text', hStyle, 'Sample Info:'),
                 p(pStyle, entry('Sample ID: ', sample.id)), 

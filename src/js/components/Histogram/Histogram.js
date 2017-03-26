@@ -74,7 +74,9 @@ export function Histogram(sources) {
 	// Extract the data from the result
 	// TODO: check for errors coming back
 	const resultData$ = response$.map(response => response.body.result.data);
-	const data$ = resultData$.startWith(emptyData);
+
+	// While doing a request and parsing the new vega spec, display render the empty spec:
+	const data$ = xs.merge(request$.mapTo(emptyData), resultData$).startWith(emptyData);
 
 	// Ingest the data in the spec and return to the driver
 	const vegaSpec$ = xs.combine(data$, width$, visible$)

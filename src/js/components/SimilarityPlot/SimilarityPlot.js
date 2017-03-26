@@ -39,6 +39,7 @@ export function SimilarityPlot(sources) {
     const modifiedState$ = state$
             .compose(dropRepeats((x, y) => x.query === y.query))
             .filter(state => state.query != null)
+			.remember()
 
 	const request$ = xs.combine(modifiedState$, visible$)
 		.filter(([state, visible]) => visible)
@@ -65,8 +66,11 @@ export function SimilarityPlot(sources) {
 
 	// Extract the data from the result
 	// TODO: check for errors coming back
+	// Please note: since the Vega driver looks for an element in the dom, it needs to exist prior to rendering it!
 	const resultData$ = response$.map(response => response.body.result.data);
-	const data$ = resultData$.startWith(emptyData);
+
+	// While doing a request and parsing the new vega spec, display render the empty spec:
+	const data$ = xs.merge(request$.mapTo(emptyData), resultData$).startWith(emptyData);
 
 	// Ingest the data in the spec and return to the driver
 	const vegaSpec$ = xs.combine(data$, width$, visible$)
@@ -82,9 +86,7 @@ export function SimilarityPlot(sources) {
 
 	// View
 	const vdom$ = data$
-			.map(data =>  makeChart(data))
-
-    const reducer$ = xs.of((prevState) => prevState);
+			.map((data) =>  div([makeChart(data)]))
 
   return { 
     	DOM: vdom$,

@@ -81,13 +81,13 @@ function SignatureCheck(sources) {
 
 			return ( 
 					div([
-							div('.row'),
-							div('.row', [table('.striped', tableContent)]),
 							div('.row', [
-								button('.collapseUpdate .btn .col .offset-s4 .s4 .pink .accent-4', 'Update/Validate'),
-								// button('.collapse .btn .col .offset-s2 .s4 .pink .accent-4', 'Collapse')
-								]),
-							div('.row')
+								div('.col .s6 .offset-s3', [table('.striped', tableContent)]),
+								div('.row .s6 .offset-s3', [
+									button('.collapseUpdate .btn .col .offset-s4 .s4 .pink .accent-4', 'Update/Validate'),
+									// button('.collapse .btn .col .offset-s2 .s4 .pink .accent-4', 'Collapse')
+									]),
+							])
 						])
 			);
 	}

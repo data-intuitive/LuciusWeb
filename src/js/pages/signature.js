@@ -130,13 +130,22 @@ function SignatureWorkflow(sources) {
 						tailTable,
 						feedback
 					]) => 
-						div('.row', [
+						div('.row  .green .lighten-5 ', [
+							// div('.col .s10 .offset-s1', pageStyle,
+							// 	[
+							// 		div('.row', []),
+							// div('.col .s12',
+							// 	[
+									form,
+							// 	]
+							// ),
 							div('.col .s10 .offset-s1', pageStyle,
 								[
+									// div('.row', []),
+									// form,
 									div('.row', []),
-									form,
-									div('.row', []),
-									div('.pre', [JSON.stringify(feedback)]),
+									// Don't show feedback for now!
+									// div('.pre', [JSON.stringify(feedback)]),
 									// on mobile: under each other
 									// on large screen: next to each other
 									div('.row ', [div('.col .s12 .l7', [

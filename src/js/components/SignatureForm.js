@@ -31,11 +31,10 @@ function SignatureForm(sources) {
 							const query = state.query
 							return div(
 									[  
-										 div('.row', []),
-										 div('.row', [ // {style : {'background-color': 'rgb(44,123,182)'}}, [
+										 div('.row  .green .darken-2 .white-text', {style : {padding: '20px 10px 10px 10px'}}, [ 
 											// label('Query: '),
 											div('.Default .waves-effect .col .s1', [
-												i('.large  .center-align .material-icons .grey-text', {style: {fontSize: '45px', fontColor: 'gray'}}, 'search'),
+												i('.large  .center-align .material-icons .green-text', {style: {fontSize: '45px', fontColor: 'gray'}}, 'search'),
 											]),
 											// textarea('.Query .col s11 .materialize-textarea', {style: {fontSize: '20px'} , props: {type: 'text', value: query.trim()}, value: query.trim()}),
 											input('.Query .col s10', {style: {fontSize: '20px'} , props: {type: 'text', value: query}, value: query}),
@@ -45,7 +44,7 @@ function SignatureForm(sources) {
 											? div('.SignatureCheck .waves-effect .col .s1 .right-align', [
 												i('.large .material-icons', {style: {fontSize: '45px', fontColor: 'grey'}}, ['play_arrow'])])
 											: div('.SignatureCheck .col .s1 .right-align', [
-												i('.large .material-icons .grey-text .text-lighten-2', {style: {fontSize: '45px', fontColor: 'grey'}}, 'play_arrow')])
+												i('.large .material-icons  .green-text', {style: {fontSize: '45px', fontColor: 'grey'}}, 'play_arrow')])
 											// ])
 										]),
 										(!validated) ? checkdom : div()

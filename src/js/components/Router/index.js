@@ -1,5 +1,5 @@
 import xs from 'xstream';
-import {div, nav, a, h3, p, ul, li, h2} from '@cycle/dom';
+import {div, nav, a, h3, p, ul, li, h2, i, footer, svg, g, path} from '@cycle/dom';
 import {merge, prop} from 'ramda';
 import BMI from '../../examples/bmi';
 import Hello from '../../examples/hello-world';
@@ -50,6 +50,17 @@ export default function Router(sources) {
 
   const makeLink = (path, label) => li([a({props: {href: path}}, label)]);
 
+  // const nav$ = xs.of(div([
+  //     ul('.slide-out .side-nav', [
+  //       li(['First Header']),
+  //       li(['Second Header'])
+  //     ]),
+  //     a('.button-collapse', {props: { href : "/", 'data-activates': "slide-out"}}, [i(".material-icons", 'menu'), 'menu'])
+  //   ])
+  // );
+
+  // const toggle$ = sources.DOM.select('.button-collapse').elements().filter(els => els.length === 1).debug().map(els => els[0].sideNav('show')).startWith(null)
+
   const nav$ = xs.of(nav('#navigation .grey .darken-4', [
       div('.nav-wrapper', [
         a('.brand-logo .right', {props: {href: "/"}}, "ComPass"),
@@ -64,10 +75,23 @@ export default function Router(sources) {
     ])
   );
 
+  const footer$ = xs.of(
+    footer('.page-footer .grey .darken-4 .grey-text', [
+        div('.row', [
+          div('.col .s12', [
+            p(['Please use the information provided in ComPass with care. ComPass does not make any claims.'])
+          ]),
+        ]),
+        div('.footer-copyright .row', [        
+          div('.col .s12', ['© 2017 By Data intuitive'])
+        ]),
+    ])
+  )
+
   const view$ = page$.map(prop('DOM')).flatten();
 
-  const vdom$ = xs.combine(nav$, view$)
-    .map(([navDom, viewDom]) => div([navDom, viewDom]));
+  const vdom$ = xs.combine(nav$, view$, footer$)
+    .map(([navDom, viewDom, footerDom]) => div([navDom, viewDom, footerDom]));
 
 	const defaultReducer$ = xs.of(prevState => {
 		console.log("index -- defaultReducer")

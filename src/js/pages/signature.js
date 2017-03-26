@@ -21,7 +21,7 @@ function SignatureWorkflow(sources) {
 		console.log(state)
 	});
 
-	// const feedback$ = vegaSource$.map(item => item.key).startWith(null);
+	const feedback$ = sources.vega.map(item => item).startWith(null).debug();
 	// const feedback$ = domSource$.select('.SignatureCheck').events('click').mapTo('click !').startWith(null);
 
 	// Queury Form
@@ -39,11 +39,11 @@ function SignatureWorkflow(sources) {
 					query : 'HSPA1A DNAJB1 DDIT4 -TSEN2',
 				})
 		} else {
-			// return prevState
-			return ({
-					settings : prevState.settings,
-					query : prevState.query,
-				})
+			return prevState
+			// return ({
+			// 		settings : prevState.settings,
+			// 		query : prevState.query,
+			// 	})
 		}
 	})
 
@@ -77,17 +77,17 @@ function SignatureWorkflow(sources) {
 			return merge(prevState,additionalState)
 	})
 
+	// Similarity plot components
+	const similarityPlot = isolate(SimilarityPlot, 'sim')(sources);
+
 	// histogram component
 	const histProps$ = state$
 				.compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
 				.startWith({settings: initSettings})
 				.map(state => state.settings.hist)
 	// const histProps$ = xs.of({hist : bins})
-
 	const histogram = isolate(Histogram, 'hist')(merge(sources, {props: histProps$}));
 
-	// Similarity plot components
-	const similarityPlot = isolate(SimilarityPlot, 'sim')(sources);
 
 	// tables
 	// const headTableProps$ = xs.of({ title: 'Top Table', version: 'v2', head : 10, color: 'rgb(44,123,182)'})
@@ -105,26 +105,38 @@ function SignatureWorkflow(sources) {
 	const headTable = isolate(Table, 'headTable')(merge(sources, {props: headTableProps$}));
 	const tailTable = isolate(Table, 'tailTable')(merge(sources, {props: tailTableProps$}));
 
+	const pageStyle = {style: 
+		{
+			fontSize: '14px', 
+			opacity: '0', 
+			transition: 'opacity 1s', 
+			delayed: {opacity: '1'}, 
+			destroy: {opacity: '0'}}
+	} 
+
     const vdom$ = xs.combine(
                         signatureForm.DOM,
                         histogram.DOM,
 						similarityPlot.DOM,
 						headTable.DOM,
 						tailTable.DOM,
+						feedback$
 				)
 					.map(([
 						form,
 						hist, 
 						simplot, 
 						headTable, 
-						tailTable
+						tailTable,
+						feedback
 					]) => 
-						div([
-							div('.container', {style: {fontSize: '14px'}},
+						div('.row', [
+							div('.col .s10 .offset-s1', pageStyle,
 								[
 									div('.row', []),
 									form,
 									div('.row', []),
+									div('.pre', [JSON.stringify(feedback)]),
 									// on mobile: under each other
 									// on large screen: next to each other
 									div('.row ', [div('.col .s12 .l7', [
@@ -133,9 +145,9 @@ function SignatureWorkflow(sources) {
 											hist,
 									])]),
 									div('.row', []),
-									div('.col .s6', [headTable]),
+									div('.col .s12', [headTable]),
 									div('.row', []),
-									div('.col .s6', [tailTable])
+									div('.col .s12', [tailTable])
 								])
 						])
 						);

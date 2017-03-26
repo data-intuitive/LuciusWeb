@@ -26,29 +26,42 @@ function makeVegaDriver() {
 
     const view$ = view$$.flatten();
 
-    view$.addListener({
-            next: (n) => {},
-            error: (e) => {
-                console.error('An error occured in the vegaDriver')
-                console.error(e)
-            },
-            complete: () => {}            
-        });
+    const click$$ = view$.map(view => {
 
-    const clicks$$ = view$.map(view => {
-        const click$ = xs.create({
+        const added$ = xs.create({
             start: (listener) => {
                 view.on('click', function(event, item) {
-                    listener.next(item);
+                    listener.next({obj: view.el, data: item.datum});
                 }
             )},
             stop: () => {}
-        });
+        })
 
-        return click$;
+        return added$
+
     });
 
-    const click$ = clicks$$.flatten();
+    const click$ = click$$.flatten()
+
+    view$.addListener({
+        next: (n) => {},
+        error: (e) => {
+            console.error('An error occured in the vegaDriver')
+            console.error(e)
+        },
+        complete: () => {}            
+    });
+
+    click$.addListener({
+        next: (n) => {
+            console.log(n)
+        },
+        error: (e) => {
+            console.error('An error occured in the click stream')
+            console.error(e)
+        },
+        complete: () => {}            
+    });
 
     return click$;
 

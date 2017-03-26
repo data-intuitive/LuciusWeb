@@ -25,6 +25,7 @@ export function Table(sources) {
 
     const modifiedState$ = state$
             .filter(state => state.query != '')
+            .filter(state => state.query != null)
 			.compose(dropRepeats((x, y) => x.query === y.query))
 
     const request$ = xs.combine(modifiedState$, props$)
@@ -44,16 +45,7 @@ export function Table(sources) {
 	// Extract the data from the result
 	// TODO: check for errors coming back
 	const resultData$ = response$.map(response => response.body.result.data);
-    const data$ = resultData$.startWith([]);
-
-    // This one makes sure the state is cycled by adding the resulting data to its child key
-    const defaultReducer$ = xs.of(prevState => {
-        if (typeof prevState === 'undefined') {
-            return {query : ''}
-        } else {
-            return omit(prevState, 'result')
-        }     
-    })
+    const data$ = resultData$;
 
     // Delegate effective rendering to SampleTable:
     const sampleTable = isolate(SampleTable, 'result')(sources);
@@ -68,12 +60,15 @@ export function Table(sources) {
                         dom
                     ])
                 ])
-            )
+            ).startWith(div([]))
 
-    const stateReducer$ = data$.map(data => prevState => merge(prevState, {result : data}))
+    // Make sure that the state is cycled in order for SampleTable to pick it up
+    const stateReducer$ = data$.map(data => prevState => {
+        console.log('table -- stateReducer')
+        return merge(prevState, {result : data})
+    })
 
     const reducer$ = xs.merge(
-        defaultReducer$,
         stateReducer$,
         )
 

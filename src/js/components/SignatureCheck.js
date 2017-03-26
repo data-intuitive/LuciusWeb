@@ -5,6 +5,8 @@ import sampleCombine from 'xstream/extra/sampleCombine'
 import {log, logThis} from '../utils/logger'
 import {ENTER_KEYCODE} from '../utils/keycodes.js'
 import dropRepeats from 'xstream/extra/dropRepeats'
+import debounce from 'xstream/extra/debounce'
+
 import { check, flash, play_arrow } from 'webpack-material-design-icons'
 
 const emptyData = {
@@ -28,6 +30,7 @@ function SignatureCheck(sources) {
 	// 			// .debug((x => console.log('----' + x)))
 
 	const request$ = state$
+		.compose(debounce(1000))
 		.filter(state => state !== '')
 		.compose(dropRepeats((x,y) => x === y))
 		.map(state =>  {

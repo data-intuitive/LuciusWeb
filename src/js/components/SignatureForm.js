@@ -30,25 +30,25 @@ function SignatureForm(sources) {
 						([state, checkdom, validated]) => {
 							const query = state.query
 							return div(
-									[  
-										 div('.row  .green .darken-2 .white-text', {style : {padding: '20px 10px 10px 10px'}}, [ 
-											// label('Query: '),
-											div('.Default .waves-effect .col .s1', [
-												i('.large  .center-align .material-icons .green-text', {style: {fontSize: '45px', fontColor: 'gray'}}, 'search'),
-											]),
-											// textarea('.Query .col s11 .materialize-textarea', {style: {fontSize: '20px'} , props: {type: 'text', value: query.trim()}, value: query.trim()}),
-											input('.Query .col s10', {style: {fontSize: '20px'} , props: {type: 'text', value: query}, value: query}),
-											// div('.row', [
-												// div('.col .s1'),
-											(validated) 
-											? div('.SignatureCheck .waves-effect .col .s1 .right-align', [
-												i('.large .material-icons', {style: {fontSize: '45px', fontColor: 'grey'}}, ['play_arrow'])])
-											: div('.SignatureCheck .col .s1 .right-align', [
-												i('.large .material-icons  .green-text', {style: {fontSize: '45px', fontColor: 'grey'}}, 'play_arrow')])
-											// ])
+								[  
+									div('.row  .green .darken-2 .white-text', {style : {padding: '20px 10px 10px 10px'}}, [ 
+									// label('Query: '),
+										div('.Default .waves-effect .col .s1', [
+											i('.large  .center-align .material-icons .green-text', {style: {fontSize: '45px', fontColor: 'gray'}}, 'search'),
 										]),
-										(!validated) ? checkdom : div()
-									])
+										// textarea('.Query .col .s10 .materialize-textarea', {style: {fontSize: '20px'} , props: {type: 'text', value: query.trim()}, value: query.trim()}),
+										input('.Query .col s10', {style: {fontSize: '20px'} , props: {type: 'text', value: query}, value: query}),
+										// div('.row', [
+											// div('.col .s1'),
+										(validated) 
+										? div('.SignatureCheck .waves-effect .col .s1 .center-align', [
+											i('.large .material-icons', {style: {fontSize: '45px', fontColor: 'grey'}}, ['play_arrow'])])
+										: div('.SignatureCheck .col .s1 .center-align', [
+											i('.large .material-icons .green-text', {style: {fontSize: '45px', fontColor: 'grey'}}, 'play_arrow')])
+										// ])
+									]),
+									(!validated) ? checkdom : div()
+								])
 	});
 
 	// Update in query, or simply ENTER

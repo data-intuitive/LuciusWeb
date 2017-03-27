@@ -61,6 +61,13 @@ export function Table(sources) {
         }
     }
 
+    const chipStyle = {
+        style : {
+            fontWeight : 'lighter', 
+            'color' : 'rgba(255, 255, 255, 0.5)', 
+            'background-color' : 'rgba(0, 0, 0, 0.2)'}
+    }
+
     const filterText$ = xs.combine(modifiedState$, props$)
         .map(([state,props]) => {
             if (isDefined(state.filter)) {
@@ -69,7 +76,7 @@ export function Table(sources) {
                 console.log(filters)
                 let nonEmptyFilters = filter(key => prop(key, state.filter).length > 0, filters)
                 console.log(nonEmptyFilters)
-                let divs = map(key => div('.chip', {style : {fontWeight : 'lighter', 'color' : 'rgba(255, 255, 255, 0.5)', 'background-color' : 'rgba(0, 0, 0, 0.2)'}}, [key, ': ', prop(key, state.filter)]), nonEmptyFilters)
+                let divs = map(key => div('.chip', chipStyle, [key, ': ', prop(key, state.filter)]), nonEmptyFilters)
                 console.log(divs)
                 return divs
             } else {
@@ -81,7 +88,7 @@ export function Table(sources) {
             .map(([dom, data, props, filterText]) => div([
                     div('.row .valign-wrapper', {style : {'margin-bottom' : '0px', 'padding-top' : '5px', 'background-color': props.color}}, [
                         h5('.white-text .col .s5 .valign', props.title),
-                        div('.white-text .col .s7 .valign', filterText)
+                        div('.white-text .col .s7 .valign .right-align', filterText)
                         // p('.white-text .col .s2', [ filterText ])
                         // i('.Add .white-text .material-icons', 'playlist_add')
                     ]),

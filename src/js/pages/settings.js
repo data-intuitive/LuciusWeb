@@ -35,7 +35,7 @@ export const initSettings = {
 			version: 'v2'
 		},
 		hist : {
-			bins : 10
+			bins : 20
 		},
 		api : {
 		    hostname : 'localhost',
@@ -89,9 +89,9 @@ export function Settings(sources) {
 			div('.row .container ', [
 				div('.col .s6', [
 					tableSubHeader('Top Table'),
-					div('.input-field ', [
-						input('.headTableCount', {style: {fontSize: '20px'} , props: {type: 'text', value: state.headTableSettings.head}}), 
+					div('.range-field ', [
 						label('.active', '# of entries in top tables'),
+						input('.headTableCount', {style: {fontSize: '20px'} , props: {type: 'range', min:0, max:100, value: state.headTableSettings.head}}), 
 					]),
 					div('.row', [
 						div('.input-field .col .s12', [
@@ -103,9 +103,9 @@ export function Settings(sources) {
 				]),
 				div('.col .s6' , [
 					tableSubHeader('Bottom Table'),
-					div('.input-field', [
-						input('.tailTableCount', {style: {fontSize: '20px'} , props: {type: 'text', value: state.tailTableSettings.tail}}), 
+					div('.range-field', [
 						label('.active', '# of entries in bottom tables'),
+						input('.tailTableCount', {style: {fontSize: '20px'} , props: {type: 'range', min:0, max:100, value: state.tailTableSettings.tail}}), 
 					]),
 					div('.input-field', [
 						input('.tailColor', {style: {fontSize: '20px'} , props: {type: 'text', value: state.tailTableSettings.color}}),
@@ -116,9 +116,9 @@ export function Settings(sources) {
 			// Histogram Settings
 			tableHeaderEl('Histogram Settings'),
 			div('.row .container', [
-				div('.input-field ', [
-					input('.hist-bins', {style: {fontSize: '20px'} , props: {type: 'text', value: state.hist.bins}}), 
+				div('.range-field ', [
 					label('.active', '# Bins for histogram'),
+					input('.hist-bins', {style: {fontSize: '20px'} , props: {type: 'range', min:10, max: 100, value: state.hist.bins}}), 
 				]),
 			]),
 			// API Settings 

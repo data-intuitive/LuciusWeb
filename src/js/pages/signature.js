@@ -11,6 +11,7 @@ import { Histogram } from '../components/Histogram/Histogram'
 import { SimilarityPlot } from '../components/SimilarityPlot/SimilarityPlot'
 import { Table } from '../components/Table'
 import { initSettings } from './settings'
+import { Filter } from '../components/Filter'
 
 const log = (x) => console.log(x);
 
@@ -25,10 +26,26 @@ function SignatureWorkflow(sources) {
 	// const feedback$ = domSource$.select('.SignatureCheck').events('click').mapTo('click !').startWith(null);
 
 	// Queury Form
-	const signatureForm = SignatureForm(sources);
+	const signatureForm = SignatureForm(sources)
+
+	const filter = isolate(Filter, 'filter')(sources)
+
+	// Propagate query to state of individual components
+	const filterReducer$ = filter.filter.map(f => prevState => {
+			console.log('signature -- filterReducer')
+			let additionalState = {
+				headTable : merge(prevState.headTable, {filter : f}),
+				tailTable : merge(prevState.tailTable, {filter : f}),
+				hist : merge(prevState.hist, {filter : f}),
+				sim : merge(prevState.sim, {filter : f})
+			}
+			return merge(prevState, additionalState)
+	})
+
 
 	// Query updated in signatureForm, so push it to the other components
 	const query$ = signatureForm.query
+					// .startWith('HSPA1A DNAJB1 DDIT4 -TSEN2')
 
 	const defaultReducer$ = xs.of(prevState => {
 		console.log('signature -- defaultReducer')
@@ -37,6 +54,7 @@ function SignatureWorkflow(sources) {
 				{
 					settings : initSettings,
 					query : 'HSPA1A DNAJB1 DDIT4 -TSEN2',
+					validated : true
 				})
 		} else {
 			return prevState
@@ -47,37 +65,19 @@ function SignatureWorkflow(sources) {
 		}
 	})
 
-	// If settings change, reflect that in state of subcomponents so they can be updated
-	// const settingsReducer$ = state$
-	// 	.compose(dropRepeats(equals))
-	// 	.map(state => prevState => {
-	// 		console.log('Settings reducer...')
-	// 		console.log(state)
-	// 		console.log(state.settings)
-	// 		let additionalState = {
-	// 			headTable : merge(prevState.headTable, state.settings.headTableSettings),
-	// 			tailTable : merge(prevState.tailTable, state.settings.tailTableSettings)
-	// 		}
-	// 		return merge(prevState,additionalState)
-	// })
-
 	// Propagate query to state of individual components
 	const stateReducer$ = query$.map(query => prevState => {
 			console.log('signature -- stateReducer')
 			let additionalState = {
 				headTable : merge(prevState.headTable, {query : query}),
 				tailTable : merge(prevState.tailTable, {query : query}),
-				hist : {
-					query : query
-				},
-				sim : {
-					query : query
-				}
+				hist : merge(prevState.hist, {query : query}),
+				sim : merge(prevState.sim, {query : query})
 			}
 			return merge(prevState,additionalState)
 	})
 
-	// Similarity plot components
+	// Similarity plot component
 	const similarityPlot = isolate(SimilarityPlot, 'sim')(sources);
 
 	// histogram component
@@ -87,7 +87,6 @@ function SignatureWorkflow(sources) {
 				.map(state => state.settings.hist)
 	// const histProps$ = xs.of({hist : bins})
 	const histogram = isolate(Histogram, 'hist')(merge(sources, {props: histProps$}));
-
 
 	// tables
 	// const headTableProps$ = xs.of({ title: 'Top Table', version: 'v2', head : 10, color: 'rgb(44,123,182)'})
@@ -116,6 +115,7 @@ function SignatureWorkflow(sources) {
 
     const vdom$ = xs.combine(
                         signatureForm.DOM,
+						filter.DOM,
                         histogram.DOM,
 						similarityPlot.DOM,
 						headTable.DOM,
@@ -124,6 +124,7 @@ function SignatureWorkflow(sources) {
 				)
 					.map(([
 						form,
+						filter,
 						hist, 
 						simplot, 
 						headTable, 
@@ -143,7 +144,7 @@ function SignatureWorkflow(sources) {
 								[
 									// div('.row', []),
 									// form,
-									div('.row', []),
+									div('.row', [filter]),
 									// Don't show feedback for now!
 									// div('.pre', [JSON.stringify(feedback)]),
 									// on mobile: under each other
@@ -165,8 +166,8 @@ function SignatureWorkflow(sources) {
 		DOM: vdom$,
 		onion: xs.merge(
 			defaultReducer$,
-			// settingsReducer$,
 			signatureForm.onion,
+			filterReducer$,
 			stateReducer$,
 			headTable.onion,
 			tailTable.onion

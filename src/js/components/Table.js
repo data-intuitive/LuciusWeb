@@ -26,7 +26,7 @@ export function Table(sources) {
     const modifiedState$ = state$
             .filter(state => state.query != '')
             .filter(state => state.query != null)
-			.compose(dropRepeats((x, y) => x.query === y.query))
+            .compose(dropRepeats((x, y) => equals(x,y)))
 
     const request$ = xs.combine(modifiedState$, props$)
             .map(([state, props]) => ({
@@ -39,6 +39,9 @@ export function Table(sources) {
 	// Catch the response in a stream
 	const response$ = httpSource$
         .select('topTable')
+        .map((response$) =>
+                response$.replaceError(() => xs.of([]))
+			)
         .flatten()
         .debug(log);
 

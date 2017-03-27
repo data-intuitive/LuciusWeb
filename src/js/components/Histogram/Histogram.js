@@ -47,19 +47,20 @@ export function Histogram(sources) {
 
     const modifiedState$ = state$
             .filter(state => state.query != '')
-			.compose(dropRepeats((x, y) => x.query === y.query))
+			.compose(dropRepeats((x, y) => equals(x,y)))
 
 	const request$ = xs.combine(modifiedState$, props$, visible$)
 		.filter(([state, props, visible]) => visible)
         .map(([state, props, visible]) => {
-			console.log('Props: ' + props.bins)
+			// console.log('Props: ' + props.bins)
 			let thisUrl = 'http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&appName=luciusapi&sync=true&classPath=com.dataintuitive.luciusapi.' + 'histogram';
 			return {
 				url : thisUrl,
 				method : 'POST',
 				send : {
 					query : state.query,
-					bins: props.bins
+					bins: props.bins,
+					filter : state.filter
 				},
 				'category' : 'histogram'
 		}})

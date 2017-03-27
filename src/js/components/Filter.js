@@ -50,6 +50,7 @@ function Filter(sources) {
                 .events('input')
                 .map(ev => ev.target.value)
                 .map(value => ({concentration : value}))
+                .startWith('')
                 .debug(console.log)
 
     const typeChanged$ = sources.DOM
@@ -57,6 +58,7 @@ function Filter(sources) {
                 .events('input')
                 .map(ev => ev.target.value)
                 .map(value => ({type : value}))
+                .startWith('')
                 .debug(console.log)
 
     const protocolChanged$ = sources.DOM
@@ -64,13 +66,14 @@ function Filter(sources) {
                 .events('input')
                 .map(ev => ev.target.value)
                 .map(value => ({protocol : value}))
+                .startWith('')
                 .debug(console.log)
 
-    const changes$ = xs.merge(
+    const changes$ = xs.combine(
         concentrationChanged$,
         typeChanged$,
         protocolChanged$
-    )
+    ).map((filters) => mergeAll(filters))
 
     // const filter$ = xs.combine(filterInput$, concentrationChanged$, typeChanged$, protocolChanged$)
     //     .map(([prevFilter, concentration, type, protocol]) => {
@@ -79,10 +82,10 @@ function Filter(sources) {
     //         return merge(prevFilter, merged)
     //     })
 
-    const filter$ = xs.combine(filterInput$, changes$)
-        .map(([prevFilter, change]) => {
-            return merge(prevFilter, change)
-        })
+    const filter$ = changes$
+        // .map(([prevFilter, change]) => {
+        //     return merge(prevFilter, change)
+        // })
 
 
   return { 

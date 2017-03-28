@@ -1,5 +1,6 @@
 import xs from 'xstream';
 import sampleCombine from 'xstream/extra/sampleCombine';
+import debounce from 'xstream/extra/debounce'
 import { a, h, p, div, br, label, input, code, table, tr, td, b, h2, button, svg, h5, th, thead, tbody, i, span } from '@cycle/dom';
 import { clone } from 'ramda';
 import { log } from '../utils/logger'
@@ -28,7 +29,22 @@ export function Table(sources) {
             .filter(state => state.query != null)
             .compose(dropRepeats((x, y) => equals(x,y)))
 
-    const request$ = xs.combine(modifiedState$, props$)
+    const updatedProps$ = xs.combine(                            
+                            props$, 
+                            sources.DOM.select('.plus5').events('click').mapTo(5).fold((x,y) => x+y, 0),
+                            sources.DOM.select('.min5').events('click').mapTo(5).fold((x,y) => x+y, 0)
+                            ).map(([props, add5, min5]) => {
+                                let isHead = (typeof props.head !== 'undefined')
+                                if (isHead) {
+                                    return merge(props, {head : props.head + add5 - min5})
+                                } else {
+                                    return merge(props, {tail : props.tail + add5 - min5})
+                                }
+                            })
+                            
+    const request$ = xs.combine(
+                            modifiedState$,
+                            updatedProps$)
             .map(([state, props]) => ({
                     send : merge(state, props),
                     method: 'POST',
@@ -84,6 +100,15 @@ export function Table(sources) {
             }
         })
 
+    const smallBtnStyle = bgcolor => ({
+        style : {
+            'margin-bottom' : '0px', 
+            'margin-top' : '0px', 
+            'background-color' : bgcolor,
+            opacity : 0.3,
+            fontWeight : 'lighter'}
+    })
+
     const vdom$ = xs.combine(sampleTable.DOM, data$, props$, filterText$)
             .map(([dom, data, props, filterText]) => div([
                     div('.row .valign-wrapper', {style : {'margin-bottom' : '0px', 'padding-top' : '5px', 'background-color': props.color}}, [
@@ -92,9 +117,15 @@ export function Table(sources) {
                         // p('.white-text .col .s2', [ filterText ])
                         // i('.Add .white-text .material-icons', 'playlist_add')
                     ]),
-                    div('.row', [
-                        dom
-                    ])
+                    div('.row', {style : {'margin-bottom' : '0px', 'margin-top' : '0px'}}, [
+                        dom,
+                        div('.col .s12 .right-align', [
+                            button('.min5 .btn-floating waves-effect waves-light', smallBtnStyle(props.color), [i('.material-icons', 'fast_rewind')]),
+                            button('.plus5 .btn-floating waves-effect waves-light', smallBtnStyle(props.color), [i('.material-icons', 'fast_forward')])
+                        ])
+                    ]),
+                    // div('.row', [
+                    // ])
                 ])
             ).startWith(div([]))
 
@@ -103,6 +134,7 @@ export function Table(sources) {
         console.log('table -- stateReducer')
         return merge(prevState, {result : data})
     })
+
 
     const reducer$ = xs.merge(
         stateReducer$,

@@ -30,7 +30,7 @@ export function SampleTable(sources) {
                     .compose(pick('DOM'))
                     .compose(mix(xs.combine))
                     .map(itemVNodes => {
-                        return ul('.collection', {style : {'margin-top' : '0px'}}, [
+                        return ul('.collection', {style : {'margin-top' : '0px', 'margin-bottom':'0px'}}, [
                                         // li('.collection-item .grey .darken-1 .white-text', 
                                         //     [
                                         //         div('.row', {style: {fontSize : 'normal', fontWeight : 500}}, [

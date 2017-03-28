@@ -25,23 +25,23 @@ export function SampleInfo(sources) {
         let pStyle = {style : { margin: '0px'}}
         let url = 'http://localhost:9999/molecule/' + encodeURIComponent(sample.smiles).replace(/%20/g,'+')
         return div('', [
-            div('.col .s4', [ 
-                p('.grey-text', hStyle, 'Sample Info:'),
+            div('.col .s12 .l4', {style : {margin : '15px 0px 0px 0px'}}, [ 
+                p('.col .s12 .grey-text', hStyle, 'Sample Info:'),
                 p(pStyle, entry('Sample ID: ', sample.id)), 
                 p(pStyle, entry('protocolname: ', sample.protocolname)),                
                 p(pStyle, entry('Concentration: ', sample.concentration)),
                 p(pStyle, entry('Year: ', sample.year)),
                 p(pStyle, entry('Plate ID: ', sample.plateid)),
             ]),
-            div('.col .s4', [ 
-                p('.grey-text', hStyle, 'Compound Info:'),
+            div('.col .s12 .l4', {style : {margin : '15px 0px 0px 0px'}}, [ 
+                p('.col .s12 .grey-text', hStyle, 'Compound Info:'),
                 p(pStyle, entry('Name: ', sample.compoundname)), 
                 p(pStyle, entry('JNJS: ', sample.jnjs)), 
                 p(pStyle, entry('JNJB: ', sample.jnjb)), 
                 p(pStyle, entry('Type: ', sample.Type)), 
                 p('.s12', pStyle, entry('Targets: ', sample.targets.join(', '))), 
             ]),            
-            div('.col .s4', [ 
+            div('.col .s6 .l4', {style : {margin : '20px 0px 0px 0px'}}, [ 
                 (sample.smiles != null && sample.smiles != 'NA')
                 ? img('.col .s12 .valign', {props: {src: url}})
                 : ''

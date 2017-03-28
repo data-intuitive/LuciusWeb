@@ -1,5 +1,5 @@
 import xs from 'xstream';
-import {div, nav, a, h3, p, ul, li, h2, i, footer, svg, g, path} from '@cycle/dom';
+import {div, nav, a, h3, p, ul, li, h2, i, footer, header, main, svg, g, path} from '@cycle/dom';
 import {merge, prop} from 'ramda';
 import BMI from '../../examples/bmi';
 import Hello from '../../examples/hello-world';
@@ -11,18 +11,36 @@ import {pick, mix} from 'cycle-onionify';
 import { initSettings } from '../../pages/settings'
 
 function Home(sources) {
-  const vdom$ = xs.of(div([
-    h3('Landing page under construction...'),
-    p('','... in the meantime, check out the examples above')
+  const vdom$ = xs.of(div('.row', [
+    h2('.col .s6 .offset-s3', 'Welcome to ComPass !'),
+    p('.col .s6 .offset-s3 .flow-text', [
+      'This application is the interface with L1000 data. Currently, ',
+      'there is support for working with disease profiles expressed using gene lists or signatures.'
+    ]),
+    div('.col .s6 .offset-s3', [
+      div('.col .s12 .green .darken-2 ',  {style : {padding : '10px 10px 10px 10px'}},
+      [
+        i('.green-text .text-lighten-1 .material-icons', 'play_arrow'),
+        a('.green-text .text-lighten-3', {props: {href: '/signature'}, style : {fontWeight : 'bolder', 'font-size' : '32px'}} , ' Disease Workflow')
+      ]),
+      div('.col .s12 .pink .darken-2 .pink-text', {style : {padding : '10px 10px 10px 10px'}},
+      [
+        i('.pink-text .text-lighten-1 .material-icons', 'play_arrow'),
+        a('.pink-text .text-lighten-3',{props: {href: '/signature'}, style : {fontWeight : 'bolder', 'font-size' : '32px'}} , ' Compound Workflow')
+      ]),
+    ]),
+    p('.col .s6 .offset-s3 .flow-text', [
+      'You can click on one of the workflows above to start it.'
+    ]),
   ]));
 
-const router = sources.DOM.select('a').events('click')
-    .debug(ev => ev.preventDefault())
-    .map(ev => ev.target.pathname)
+  // const router = sources.DOM.select('a').events('click')
+  //   .debug(ev => ev.preventDefault())
+  //   .map(ev => ev.target.pathname)
 
   return {
     DOM: vdom$,
-    router
+    // router
   };
 }
 
@@ -61,19 +79,20 @@ export default function Router(sources) {
 
   // const toggle$ = sources.DOM.select('.button-collapse').elements().filter(els => els.length === 1).debug().map(els => els[0].sideNav('show')).startWith(null)
 
-  const nav$ = xs.of(nav('#navigation .grey .darken-4', [
+  const nav$ = xs.of(header([nav('#navigation .grey .darken-4', [
       div('.nav-wrapper', [
         a('.brand-logo .right', {props: {href: "/"}}, "ComPass"),
         ul('.left .hide-on-med-and-down', [
             // makeLink('/bmi', 'BMI'),
             // makeLink('/hello', 'Hello'),
             // makeLink('/http', 'Http'),
-            makeLink('/signature', 'Signature'),
+            makeLink('/signature', 'Disease'),
+            makeLink('/signature', 'Compound'),
             makeLink('/settings', 'Settings')
             ])
       ])
     ])
-  );
+  ]));
 
   const footer$ = xs.of(
     footer('.page-footer .grey .darken-4 .grey-text', [
@@ -91,7 +110,7 @@ export default function Router(sources) {
   const view$ = page$.map(prop('DOM')).flatten();
 
   const vdom$ = xs.combine(nav$, view$, footer$)
-    .map(([navDom, viewDom, footerDom]) => div([navDom, viewDom, footerDom]));
+    .map(([navDom, viewDom, footerDom]) => div([navDom, main([viewDom]), footerDom]));
 
 	const defaultReducer$ = xs.of(prevState => {
 		console.log("index -- defaultReducer")
@@ -108,7 +127,7 @@ export default function Router(sources) {
 
   return {
     DOM: vdom$,
-    router: page$.map(c => c.router || xs.never()).flatten().startWith('/signature'), //.debug(console.log), //.filter(Boolean)
+    router: page$.map(c => c.router || xs.never()).flatten(), //.startWith('/signature'), //.debug(console.log), //.filter(Boolean)
     HTTP: page$.map(prop('HTTP')).filter(Boolean).flatten(),
     onion: xs.merge(defaultReducer$, page$.map(prop('onion')).flatten()), //.filter(Boolean).compose(flattenSequentially),
     vega: page$.map(prop('vega')).filter(Boolean).flatten(),

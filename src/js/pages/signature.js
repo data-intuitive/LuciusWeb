@@ -126,12 +126,12 @@ function SignatureWorkflow(sources) {
 						form,
 						filter,
 						hist, 
-						simplot, 
+						simplot,
 						headTable, 
 						tailTable,
 						feedback
 					]) => 
-						div('.row  .green .lighten-5 ', [
+						div('.row .green .lighten-5 ', [
 							// div('.col .s10 .offset-s1', pageStyle,
 							// 	[
 							// 		div('.row', []),

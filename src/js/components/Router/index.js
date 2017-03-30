@@ -9,6 +9,7 @@ import { IsolatedSettings } from '../../pages/settings'
 import flattenSequentially from 'xstream/extra/flattenSequentially'
 import {pick, mix} from 'cycle-onionify';
 import { initSettings } from '../../pages/settings'
+import dna from '../../dna.svg'
 
 function Home(sources) {
   const vdom$ = xs.of(div('.row', [
@@ -93,6 +94,18 @@ export default function Router(sources) {
       ])
     ])
   ]));
+
+  // Experiment
+  // const svg = svg([
+  //   svg.g([
+  //           svg.path(
+  //             ["M22.7,9.7l-1.4-1.4c-0.4,0.4-0.8,0.8-1.2,1.1l-5.4-5.4c0.3-0.4,0.7-0.8,1.1-1.2l-1.4-1.4c-3.4,3.4-3.6,6.7-3.4,9.6", 
+  //              "c-3-0.2-6.3,0-9.6,3.4l1.4,1.4c0.4-0.4,0.8-0.8,1.2-1.1l5.4,5.4c-0.3,0.4-0.7,0.8-1.1,1.2l1.4,1.4c3.4-3.4,3.5-6.6,3.4-9.6",
+  //              "C16,13.3,19.3,13.1,22.7,9.7z M19.2,9.9c-0.9,0.5-1.7,0.8-2.6,1l-3.6-3.6c0.2-0.9,0.5-1.7,1-2.6L19.2,9.9z M11.1,12.9",
+  //              "c0.1,0.8,0.1,1.6,0,2.4l-2.5-2.5C9.4,12.9,10.2,12.9,11.1,12.9z M4.8,14.1c0.9-0.5,1.7-0.8,2.6-1l3.6,3.6c-0.2,0.9-0.5,1.7-1,2.6",
+  //              "L4.8,14.1z M12.9,11.1c-0.1-0.8-0.1-1.7,0-2.5l2.5,2.5C14.6,11.2,13.8,11.1,12.9,11.1z"])
+  //     ])
+  //   ])
 
   const footer$ = xs.of(
     footer('.page-footer .grey .darken-4 .grey-text', [

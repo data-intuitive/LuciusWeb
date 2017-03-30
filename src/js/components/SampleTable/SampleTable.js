@@ -31,21 +31,9 @@ export function SampleTable(sources) {
                     .compose(mix(xs.combine))
                     .map(itemVNodes => {
                         return ul('.collection', {style : {'margin-top' : '0px', 'margin-bottom':'0px'}}, [
-                                        // li('.collection-item .grey .darken-1 .white-text', 
-                                        //     [
-                                        //         div('.row', {style: {fontSize : 'normal', fontWeight : 500}}, [
-                                        //             div('.col .s1', ['Zhang']),
-                                        //             div('.col .s2', ['Sample ID']),
-                                        //             div('.col .s1', ['Protocal']),
-                                        //             div('.col .s2', ['JNJS']),
-                                        //             div('.col .s3', ['Compound Name']),
-                                        //             div('.col .s3 .center-align', ['Structure']),
-                                        //         ])
-                                        // ])
                                 ].concat(itemVNodes))
                     })
                     .startWith(ul('.collection', [li('.collection-item .center-align .grey-text','no query yet...')]))
-
 
     return { 
             DOM: vdom$

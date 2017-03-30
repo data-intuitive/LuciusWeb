@@ -26,8 +26,8 @@ function SignatureCheck(sources) {
 	const state$ = sources.onion.state$
 
 	// const stateHistory$ = state$
-	// 			.fold((acc,x) => acc + '||' + x, 'History:')
-	// 			// .debug((x => console.log('----' + x)))
+	// 			.fold((acc,x) => acc + ' || ' + x, 'History: ')
+	// 			// .debug(console.log)
 
 	const request$ = state$
 		.compose(debounce(1000))

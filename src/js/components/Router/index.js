@@ -9,7 +9,6 @@ import { IsolatedSettings } from '../../pages/settings'
 import flattenSequentially from 'xstream/extra/flattenSequentially'
 import {pick, mix} from 'cycle-onionify';
 import { initSettings } from '../../pages/settings'
-import dna from '../../dna.svg'
 
 function Home(sources) {
   const vdom$ = xs.of(div('.row', [

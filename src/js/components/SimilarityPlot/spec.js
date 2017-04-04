@@ -255,7 +255,7 @@ export const similarityPlotSpec = (data) => ({
                     "grid": true,
                     "layer": "back",
                     "ticks": 20,
-                    "title": "Binned Zhang Score",
+                    "title": "",
                     "properties": {
                         "axis": {
                             "strokeWidth": {
@@ -331,7 +331,6 @@ export const similarityPlotSpec1 = (data) => {
         ],
         "axes": [
             {"type": "x", "scale": "xscale"},
-            {"type": "y", "scale": "yscale", ticks: 0}
         ],
         "marks": [
             {

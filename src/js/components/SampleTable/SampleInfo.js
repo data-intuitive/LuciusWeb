@@ -7,6 +7,7 @@ import dropRepeats from 'xstream/extra/dropRepeats'
 export function SampleInfo(sources) {
 
     const state$ = sources.onion.state$//.debug(log);
+    const props$ = sources.props.debug()
 
     const click$ = sources.DOM.select('.zoom').events('click').mapTo(1)
     const zoomed$ = click$
@@ -20,10 +21,10 @@ export function SampleInfo(sources) {
             ]
     }
 
-    const detail = sample => {
+    const detail = (sample, props) => {
         let hStyle = {style : { margin: '0px', fontWeight: 'bold'}}
         let pStyle = {style : { margin: '0px'}}
-        let url = 'http://localhost:9999/molecule/' + encodeURIComponent(sample.smiles).replace(/%20/g,'+')
+        let url = props.urlSourire + encodeURIComponent(sample.smiles).replace(/%20/g,'+')
         return div('', [
             div('.col .s12 .l4', {style : {margin : '15px 0px 0px 0px'}}, [ 
                 p('.col .s12 .grey-text', hStyle, 'Sample Info:'),
@@ -49,10 +50,10 @@ export function SampleInfo(sources) {
         ])
     }
 
-    const vdom$ = xs.combine(state$, zoomed$)
-       .map(([sample, zoom]) => {
+    const vdom$ = xs.combine(state$, zoomed$, props$)
+       .map(([sample, zoom, props]) => {
             let bgcolor = (sample.zhang >= 0) ? 'rgba(44,123,182, 0.08)' : 'rgba(215,25,28, 0.08)'
-            let url = 'http://localhost:9999/molecule/' + encodeURIComponent(sample.smiles).replace(/%20/g,'+')
+            let url = props.urlSourire + encodeURIComponent(sample.smiles).replace(/%20/g,'+')
             let zhangRounded = (sample.zhang != null) ? sample.zhang.toFixed(3) : 'NA'
 
             return li('.collection-item  .zoom', {style : {'background-color' : bgcolor}},    
@@ -69,7 +70,7 @@ export function SampleInfo(sources) {
                             : ''
                             ]),
                     ]),
-                    (zoom) ? div('.row', [ detail(sample) ]) : div()
+                    (zoom) ? div('.row', [ detail(sample, props) ]) : div()
                 ])
         })
 

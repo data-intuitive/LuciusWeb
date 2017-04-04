@@ -2,7 +2,7 @@ import { a, div, br, label, input, p, button, code, pre } from '@cycle/dom'
 import xs from 'xstream'
 import isolate from '@cycle/isolate'
 import { mergeWith, merge } from 'ramda'
-import { clone, equal, equals } from 'ramda';
+import { clone, equal, equals, mergeAll } from 'ramda';
 import dropRepeats from 'xstream/extra/dropRepeats'
 
 // Components
@@ -29,7 +29,11 @@ function SignatureWorkflow(sources) {
 	// const feedback$ = domSource$.select('.SignatureCheck').events('click').mapTo('click !').startWith(null);
 
 	// Queury Form
-	const signatureForm = SignatureForm(sources)
+	const formProps$ = state$
+			.compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
+			.startWith({settings: initSettings})
+			.map(state => merge(state.settings.form, state.settings.api))
+	const signatureForm = SignatureForm(merge(sources, {props: formProps$}))
 
 	// Filter Form
 	const filter = isolate(Filter, 'filter')(sources)
@@ -89,17 +93,15 @@ function SignatureWorkflow(sources) {
 	// const histProps$ = xs.of({hist : bins})
 	const histogram = isolate(Histogram, 'hist')(merge(sources, {props: histProps$}));
 
-	// tables
-	// const headTableProps$ = xs.of({ title: 'Top Table', version: 'v2', head : 10, color: 'rgb(44,123,182)'})
+	// tables: Join settings from api and sourire into props
 	const headTableProps$ = state$
 				.compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
 				.startWith({settings: initSettings})
-				.map(state => merge(state.settings.headTableSettings, state.settings.api))
-	// const tailTableProps$ = xs.of({ title: 'Bottom Table', version: 'v2', tail : 10, color: 'rgb(215,25,28)'})
+				.map(state => merge(merge(state.settings.headTableSettings, state.settings.api), state.settings.sourire))
 	const tailTableProps$ = state$
 				.compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
 				.startWith({settings: initSettings})
-				.map(state => merge(state.settings.tailTableSettings, state.settings.api))
+				.map(state =>merge(merge(state.settings.tailTableSettings, state.settings.api), state.settings.sourire))
 	const headTable = isolate(Table, 'headTable')(merge(sources, {props: headTableProps$}));
 	const tailTable = isolate(Table, 'tailTable')(merge(sources, {props: tailTableProps$}));
 

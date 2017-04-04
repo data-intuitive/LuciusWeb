@@ -30,6 +30,7 @@ export const initSettings = {
 			binsX : 20,
 			binsY : 20
 		},
+		form : {},
 		api : {
 		    hostname : 'localhost',
 			port : 8080,
@@ -37,7 +38,8 @@ export const initSettings = {
 		},
 		sourire : {
 		    hostname : 'localhost',
-			port : 9000
+			port : 9000,
+			urlSourire : 'http://localhost:9999/molecule/'
 		}
 };
 

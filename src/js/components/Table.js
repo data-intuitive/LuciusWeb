@@ -21,7 +21,7 @@ export function Table(sources) {
 	});
 	const domSource$ = sources.DOM;
 	const httpSource$ = sources.HTTP;
-    const props$ = sources.props
+    const props$ = sources.props.debug()
 
     const modifiedState$ = state$
             .filter(state => state.query != '')
@@ -47,7 +47,7 @@ export function Table(sources) {
             .map(([state, props]) => ({
                     send : merge(state, props),
                     method: 'POST',
-                    url: 'http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&appName=luciusapi&sync=true&classPath=com.dataintuitive.luciusapi.topTable',
+                    url: props.url + '&classPath=com.dataintuitive.luciusapi.topTable',
                     category : 'topTable'
      })).debug(log)
 
@@ -170,7 +170,7 @@ export function Table(sources) {
 
   return { 
     	DOM: vdom$,
-        HTTP: request$.compose(debounce(5000)),
+        HTTP: request$.compose(debounce(2000)),
         onion: reducer$
   };
 

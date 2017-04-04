@@ -46,18 +46,16 @@ export function SimilarityPlot(sources) {
             .filter(state => state.query != null)
 			// .remember()
 
-	const request$ = xs.combine(modifiedState$, visible$)
-		.filter(([state, visible]) => visible)
-		.map(([state, visible]) => state)
-        .map(state => {
-			let thisUrl = 'http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&appName=luciusapi&sync=true&classPath=com.dataintuitive.luciusapi.' + 'binnedZhang';
+	const request$ = xs.combine(modifiedState$, props$, visible$)
+		.filter(([state, props, visible]) => visible)
+        .map(([state, props, visible]) => {
 			return {
-				url : thisUrl,
+				url : props.url + '&classPath=com.dataintuitive.luciusapi.binnedZhang',
 				method : 'POST',
 				send : {
 					query : state.query,
-					binsX: 20,
-					binxY: 20,
+					binsX: props.binsX,
+					binsY: props.binsY,
 					filter : (typeof state.filter !== 'undefined') ? state.filter : ''
 				},
 				'category' : 'binnedZhang'
@@ -94,7 +92,7 @@ export function SimilarityPlot(sources) {
 	const loadingVdom$ = xs.combine(state$, data$)
 							.map(([state, data]) =>  div([
 									div('.preloader-wrapper .small .active', {style : {'z-index':1, position: 'absolute' }}, [
-										div('.spinner-layer .spinner-blue-only', [
+										div('.spinner-layer .spinner-green-only', [
 											div('.circle-clipper .left', [
 												div('.circle')
 											])

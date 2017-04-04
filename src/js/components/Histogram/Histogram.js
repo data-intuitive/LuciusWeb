@@ -54,10 +54,8 @@ export function Histogram(sources) {
 	const request$ = xs.combine(modifiedState$, props$, visible$)
 		.filter(([state, props, visible]) => visible)
         .map(([state, props, visible]) => {
-			// console.log('Props: ' + props.bins)
-			let thisUrl = 'http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&appName=luciusapi&sync=true&classPath=com.dataintuitive.luciusapi.' + 'histogram';
 			return {
-				url : thisUrl,
+				url : props.url + '&classPath=com.dataintuitive.luciusapi.histogram',
 				method : 'POST',
 				send : {
 					query : state.query,
@@ -98,7 +96,7 @@ export function Histogram(sources) {
 	const loadingVdom$ = xs.combine(state$, data$)
 							.map(([state, data]) =>  div([
 									div('.preloader-wrapper .small .active', {style : {'z-index':1, position: 'absolute' }}, [
-										div('.spinner-layer .spinner-blue-only', [
+										div('.spinner-layer .spinner-green-only', [
 											div('.circle-clipper .left', [
 												div('.circle')
 											])

@@ -5,17 +5,6 @@ import { mergeWith, merge, mergeAll } from 'ramda'
 import { clone } from 'ramda';
 import sampleCombine from 'xstream/extra/sampleCombine'
 
-
-// const settings = {
-// }
-
-// const initState = {
-// 	settings : {
-// 		tableCount : 2,
-// 		url : 'http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&appName=luciusapi&sync=true&classPath=com.dataintuitive.luciusapi.',
-// 	}
-// };
-
 export const initSettings = {
 		commmon : {
 			version: 'v2', 
@@ -37,10 +26,14 @@ export const initSettings = {
 		hist : {
 			bins : 20
 		},
+		sim : {
+			binsX : 20,
+			binsY : 20
+		},
 		api : {
 		    hostname : 'localhost',
 			port : 8080,
-			url : 'http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&appName=luciusapi&sync=true&classPath=com.dataintuitive.luciusapi.',
+			url : 'http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&appName=luciusapi&sync=true',
 		},
 		sourire : {
 		    hostname : 'localhost',

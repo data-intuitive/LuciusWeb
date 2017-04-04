@@ -22,15 +22,19 @@ function SignatureWorkflow(sources) {
 		console.log(state)
 	});
 
+	/** 
+	 * Parse feedback from vega components. Not used yet...
+	 */
 	const feedback$ = sources.vega.map(item => item).startWith(null).debug();
 	// const feedback$ = domSource$.select('.SignatureCheck').events('click').mapTo('click !').startWith(null);
 
 	// Queury Form
 	const signatureForm = SignatureForm(sources)
 
+	// Filter Form
 	const filter = isolate(Filter, 'filter')(sources)
 
-	// Propagate query to state of individual components
+	// Propagate filter to state of individual components
 	const filterReducer$ = filter.filter.map(f => prevState => {
 			console.log('signature -- filterReducer')
 			let additionalState = {
@@ -42,26 +46,19 @@ function SignatureWorkflow(sources) {
 			return merge(prevState, additionalState)
 	})
 
-
 	// Query updated in signatureForm, so push it to the other components
 	const query$ = signatureForm.query
-					// .startWith('HSPA1A DNAJB1 DDIT4 -TSEN2')
 
+	// Initialize if not yet done in parent (i.e. router) component (useful for testing)
 	const defaultReducer$ = xs.of(prevState => {
 		console.log('signature -- defaultReducer')
 		if (typeof prevState === 'undefined') {
 			return (
 				{
 					settings : initSettings,
-					query : 'HSPA1A DNAJB1 DDIT4 -TSEN2',
-					validated : true
 				})
 		} else {
 			return prevState
-			// return ({
-			// 		settings : prevState.settings,
-			// 		query : prevState.query,
-			// 	})
 		}
 	})
 
@@ -78,13 +75,17 @@ function SignatureWorkflow(sources) {
 	})
 
 	// Similarity plot component
-	const similarityPlot = isolate(SimilarityPlot, 'sim')(sources);
+	const simProps$ = state$
+				.compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
+				.startWith({settings: initSettings})
+				.map(state => merge(state.settings.sim, state.settings.api))
+	const similarityPlot = isolate(SimilarityPlot, 'sim')(merge(sources, {props: simProps$}));
 
 	// histogram component
 	const histProps$ = state$
 				.compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
 				.startWith({settings: initSettings})
-				.map(state => state.settings.hist)
+				.map(state => merge(state.settings.hist, state.settings.api))
 	// const histProps$ = xs.of({hist : bins})
 	const histogram = isolate(Histogram, 'hist')(merge(sources, {props: histProps$}));
 
@@ -93,14 +94,12 @@ function SignatureWorkflow(sources) {
 	const headTableProps$ = state$
 				.compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
 				.startWith({settings: initSettings})
-				.map(state => state.settings.headTableSettings)
-				// .remember()
+				.map(state => merge(state.settings.headTableSettings, state.settings.api))
 	// const tailTableProps$ = xs.of({ title: 'Bottom Table', version: 'v2', tail : 10, color: 'rgb(215,25,28)'})
 	const tailTableProps$ = state$
 				.compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
 				.startWith({settings: initSettings})
-				.map(state => state.settings.tailTableSettings)
-				// .remember()
+				.map(state => merge(state.settings.tailTableSettings, state.settings.api))
 	const headTable = isolate(Table, 'headTable')(merge(sources, {props: headTableProps$}));
 	const tailTable = isolate(Table, 'tailTable')(merge(sources, {props: tailTableProps$}));
 

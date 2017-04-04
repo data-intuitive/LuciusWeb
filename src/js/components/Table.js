@@ -1,17 +1,15 @@
 import xs from 'xstream';
 import sampleCombine from 'xstream/extra/sampleCombine';
 import debounce from 'xstream/extra/debounce'
-import delay from 'xstream/extra/delay'
 import { a, h, p, div, br, label, input, code, table, tr, td, b, h2, button, svg, h5, th, thead, tbody, i, span, ul, li } from '@cycle/dom';
-import { clone } from 'ramda';
 import { log } from '../utils/logger'
 import { ENTER_KEYCODE } from '../utils/keycodes.js'
-import { keys, filter, head, equals, omit, map, prop } from 'ramda'
+import { keys, filter, head, equals, map, prop, clone, omit, merge  } from 'ramda'
 import { SampleTable } from './SampleTable/SampleTable'
 import isolate from '@cycle/isolate'
-import { merge } from 'ramda'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import dropUntil from 'xstream/extra/dropUntil'
+import { between } from '../utils/utils'
 
 export function Table(sources) {
 
@@ -28,7 +26,7 @@ export function Table(sources) {
     const modifiedState$ = state$
             .filter(state => state.query != '')
             .filter(state => state.query != null)
-            .compose(dropRepeats((x, y) => equals(x,y)))
+            .compose(dropRepeats((x, y) => equals(omit(['result'], x), omit(['result'], y))))
 
     const updatedProps$ = xs.combine(                            
                             props$, 
@@ -111,24 +109,6 @@ export function Table(sources) {
             fontWeight : 'lighter'}
     })
 
-    // 3 states: empty - loading - filled
-    // empty: startWith covers this
-    // 2 states remaining: loading - filled
-    // loading is between query and result
-    // []-------Request (start animation) oooooooRa
-    // two vdom streams and between/notbetween and merge/flatten?
-
-    /**
-     * source: --a--b----c----d---e-f--g----h---i--j-----
-     * first:  -------F------------------F---------------
-     * second: -----------------S-----------------S------
-     *                         between
-     * output: ----------c----d-------------h---i--------
-     */
-    function between(first, second) {
-        return (source) => first.mapTo(source.endWhen(second)).flatten()
-    }
-
     // Keeping track of when an HTTP request is ongoing...
     const loadingVdom$ = xs.combine(
                                 state$, 
@@ -139,7 +119,7 @@ export function Table(sources) {
                                 filterText$
                             )
                             .map(([state, dom, data, props, filterText]) => div([
-                                        div('.row .valign-wrapper', {style : {'margin-bottom' : '0px', 'padding-top' : '5px', 'background-color': props.color}}, [
+                                        div('.row .valign-wrapper', {style : {'margin-bottom' : '0px', 'padding-top' : '5px', 'background-color': props.color, opacity:0.5}}, [
                                             h5('.white-text .col .s5 .valign', props.title),
                                             div('.white-text .col .s7 .valign .right-align', filterText)
                                         ]),

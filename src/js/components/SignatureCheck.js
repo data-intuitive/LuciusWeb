@@ -24,19 +24,19 @@ function SignatureCheck(sources) {
 	const domSource$ = sources.DOM;
 	const httpSource$ = sources.HTTP;
 	const state$ = sources.onion.state$
+	const props$ = sources.props
 
 	// const stateHistory$ = state$
 	// 			.fold((acc,x) => acc + ' || ' + x, 'History: ')
 	// 			// .debug(console.log)
 
-	const request$ = state$
-		.compose(debounce(1000))
-		.filter(state => state !== '')
+	const request$ = xs.combine(state$, props$)
+		.compose(debounce(200))
+		.filter(([state, props]) => state !== '')
 		.compose(dropRepeats((x,y) => x === y))
-		.map(state =>  {
-			let thisUrl = 'http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&appName=luciusapi&sync=true&classPath=com.dataintuitive.luciusapi.' + 'checkSignature';
+		.map(([state, props]) =>  {
 			return {
-				url : thisUrl,
+				url : props.url + '&classPath=com.dataintuitive.luciusapi.checkSignature',
 				method : 'POST',
 				send : {
 					version : 'v2',

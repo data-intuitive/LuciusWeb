@@ -170,7 +170,7 @@ export function Table(sources) {
 
   return { 
     	DOM: vdom$,
-        HTTP: request$.compose(debounce(2000)),
+        HTTP: request$, //.compose(debounce(2000)),
         onion: reducer$
   };
 

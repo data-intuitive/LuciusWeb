@@ -47,7 +47,9 @@ function SignatureForm(sources) {
 											i('.large .material-icons .green-text', {style: {fontSize: '45px', fontColor: 'grey'}}, 'play_arrow')])
 										// ])
 									]),
-									(!validated) ? checkdom : div()
+									div([ 
+										(!validated) ? div([checkdom]) : div()
+									])
 								])
 	});
 

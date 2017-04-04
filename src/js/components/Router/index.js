@@ -124,6 +124,7 @@ export default function Router(sources) {
   const vdom$ = xs.combine(nav$, view$, footer$)
     .map(([navDom, viewDom, footerDom]) => div([navDom, main([viewDom]), footerDom]));
 
+  // Initialize state
 	const defaultReducer$ = xs.of(prevState => {
 		console.log("index -- defaultReducer")
 		if (typeof prevState === 'undefined') {

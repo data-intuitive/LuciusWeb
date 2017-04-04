@@ -117,7 +117,7 @@ export function Histogram(sources) {
 
   return { 
     	DOM: vdom$,
-		HTTP: request$.compose(debounce(5000)),
+		HTTP: request$,//.compose(debounce(5000)),
 		vega: vegaSpec$,
         // onion: reducer$
   };

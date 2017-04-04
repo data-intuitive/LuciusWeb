@@ -1,12 +1,14 @@
 import xs from 'xstream';
 import sampleCombine from 'xstream/extra/sampleCombine';
 import dropRepeats from 'xstream/extra/dropRepeats';
+import debounce from 'xstream/extra/debounce'
 import { h, p, div, br, label, input, code, table, tr, td, b, h2, button, svg, h1 } from '@cycle/dom';
 import { clone, equals } from 'ramda';
 import { vegaHistogramSpec, exampleData, emptyData } from './spec.js'
-import { widthStream } from '../../utils/width'
+import { widthStream } from '../../utils/utils'
 import {log} from '../../utils/logger'
 import {ENTER_KEYCODE} from '../../utils/keycodes.js'
+import { between } from '../../utils/utils'
 
 const elementID = '#hist'
 
@@ -77,7 +79,8 @@ export function Histogram(sources) {
 	const resultData$ = response$.map(response => response.body.result.data);
 
 	// While doing a request and parsing the new vega spec, display render the empty spec:
-	const data$ = xs.merge(request$.mapTo(emptyData), resultData$).startWith(emptyData);
+	// const data$ = xs.merge(request$.mapTo(emptyData), resultData$)//.startWith(emptyData);
+	const data$ = resultData$.startWith(emptyData);
 
 	// Ingest the data in the spec and return to the driver
 	const vegaSpec$ = xs.combine(data$, width$, visible$)
@@ -85,19 +88,38 @@ export function Histogram(sources) {
 				return {spec : vegaHistogramSpec(data) , el : elementID, width : newwidth}
 		});
 
-    const makeHistogram = (data) => {
+    const makeHistogram = () => {
             return (
-				div('.card-panel .center-align', [div(elementID)])
+				div('.card-panel .center-align', {style: {height:'400px'}}, [div(elementID)])
             )
     };
 
-	// View
-    const vdom$ = xs.combine(data$)
-            .map((data) =>  makeHistogram(data) )
+    // Keeping track of when an HTTP request is ongoing...
+	const loadingVdom$ = xs.combine(state$, data$)
+							.map(([state, data]) =>  div([
+									div('.preloader-wrapper .small .active', {style : {'z-index':1, position: 'absolute' }}, [
+										div('.spinner-layer .spinner-blue-only', [
+											div('.circle-clipper .left', [
+												div('.circle')
+											])
+										])
+									]),
+									div({style: {opacity: 0.4}}, [makeHistogram()]),
+								]))
+                            .compose(between(request$, vegaSpec$))
+    // Show table when query is not in progress
+    const renderVdom$ = xs.combine(state$, data$)
+							.map(([state, data]) =>  div([
+									div([makeHistogram()])
+								]))
+							.compose(between(data$, request$))
+							// .startWith(div([makeHistogram()]))      // Initial state not needed, data is initialized
+
+    const vdom$ = xs.merge(renderVdom$, loadingVdom$)
 
   return { 
     	DOM: vdom$,
-		HTTP: request$,
+		HTTP: request$.compose(debounce(5000)),
 		vega: vegaSpec$,
         // onion: reducer$
   };

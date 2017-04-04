@@ -19,3 +19,15 @@ export function widthStream(domSource$, el) {
                 .compose(dropRepeats())
                 // .debug(log)
 }
+
+/**
+ * source: --a--b----c----d---e-f--g----h---i--j-----
+ * first:  -------F------------------F---------------
+ * second: -----------------S-----------------S------
+ *                         between
+ * output: ----------c----d-------------h---i--------
+ */
+export function between(first, second) {
+    return (source) => first.mapTo(source.endWhen(second)).flatten()
+}
+

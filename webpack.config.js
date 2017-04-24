@@ -8,27 +8,36 @@ const sassLoaders = [
   'sass-loader?indentedSyntax=sass&includePaths[]=' + path.resolve(__dirname, './src')
 ]
 
-var ENV = process.env.NODE_ENV;
+var DEVELOPMENT = process.env.NODE_ENV === 'development';
+var PRODUCTION = process.env.NODE_ENV === 'production';
 
 var PATH = {
     WWW: path.resolve(__dirname, "dist"),
     BUILD: path.resolve(__dirname, "build")
 };
 
+var entry = PRODUCTION 
+            ? ['./src/js/main']
+            : [
+                'webpack-dev-server/client?http://localhost:8080',
+                // 'webpack/hot/dev-server',
+                './src/js/main'
+             ];
+
 module.exports = {
-  //   entry: ( ENV == 'production' ?
-  //          ['./src/js/main']
-  //          :
-  //          [
-  //           'webpack-dev-server/client?http://localhost:8080',
-  //           'webpack/hot/dev-server',
-  //           './src/js/main'
-  //          ]
-  // ),
-  entry: {
-    // bundle: [ path.resolve('src/js', "main") ],
-    bundle: './src/js/main'
-    // vendors: ["webpack-material-design-icons"]
+    entry: entry,
+  // entry: {
+  //   bundle: './src/js/main'
+  // },
+  output: {
+    path: path.join(__dirname, 'dist'),
+    publicPath: '/dist/',
+    filename: 'bundle.js',
+  },
+  devServer: {
+    historyApiFallback: true,
+    contentBase: './',
+    hot: true
   },
   module: {
     rules: [
@@ -52,17 +61,7 @@ module.exports = {
       // }
     ]
   },
-  output: {
-    filename: 'dist/bundle.js',
-    // path: path.resolve(__dirname, 'dist'),
-    // path: path.resolve(__dirname, "dist"),
-    // filename: "[name].js",
-    // chunkFilename: "[name].js"
-  },
   plugins: [
-    // new webpack.optimize.CommonsChunkPlugin({
-    //         names: ["vendors"]
-    //     }),
     new ExtractTextPlugin('[name].css'),
     new webpack.ProvidePlugin({
       $: 'jquery',
@@ -70,7 +69,9 @@ module.exports = {
       'window.$': 'jquery',
       'window.jQuery': 'jquery',
       "Hammer": "hammerjs/hammer"
-    })
+    }),
+    new webpack.HotModuleReplacementPlugin(),
+    new webpack.NamedModulesPlugin()
   ],
   resolve: {
     extensions: ['.js', '.sass'],
@@ -114,9 +115,4 @@ module.exports = {
 //              :
 //              [new webpack.HotModuleReplacementPlugin()]
 //   ),
-//   devServer: {
-//     historyApiFallback: true,
-//     contentBase: './',
-//     hot: true
-//   }
 // };

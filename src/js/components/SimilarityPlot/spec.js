@@ -331,6 +331,7 @@ export const similarityPlotSpec1 = (data) => {
         ],
         "axes": [
             {"type": "x", "scale": "xscale"},
+            {"type": "y", "scale": "yscale", ticks: 0}
         ],
         "marks": [
             {

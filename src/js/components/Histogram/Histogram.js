@@ -6,8 +6,8 @@ import { h, p, div, br, label, input, code, table, tr, td, b, h2, button, svg, h
 import { clone, equals } from 'ramda';
 import { vegaHistogramSpec, exampleData, emptyData } from './spec.js'
 import { widthStream } from '../../utils/utils'
-import {log} from '../../utils/logger'
-import {ENTER_KEYCODE} from '../../utils/keycodes.js'
+import { log } from '../../utils/logger'
+import { ENTER_KEYCODE } from '../../utils/keycodes.js'
 import { between } from '../../utils/utils'
 
 const elementID = '#hist'
@@ -22,9 +22,12 @@ export function Histogram(sources) {
 
 	console.log('Starting component: Histogram...');
 
-    const ENTER_KEYCODE = 13
+	const ENTER_KEYCODE = 13
 
-	const state$ = sources.onion.state$;
+	const state$ = sources.onion.state$.debug(state => {
+		console.log('== State in Sim')
+		console.log(state)
+	});;
 	const domSource$ = sources.DOM;
 	const httpSource$ = sources.HTTP;
 	const vegaSource$ = sources.vega;
@@ -34,12 +37,12 @@ export function Histogram(sources) {
 	// Visible?
 	// const visible$ = xs.of(document.getElementById("hist") != null).debug(visible => console.log('Visibility: ' + visible))
 	const visible$ = sources.DOM.select(elementID)
-								 .elements()
-								 .map(els => els[0])
-								 .map(el => (typeof el !== 'undefined'))
- 								 .compose(dropRepeats())
-								 .startWith(false)
-								//  .debug(visible => console.log('Visibility: ' + visible))
+		.elements()
+		.map(els => els[0])
+		.map(el => (typeof el !== 'undefined'))
+		.compose(dropRepeats())
+		.startWith(false)
+	//  .debug(visible => console.log('Visibility: ' + visible))
 
 	// Size stream
 	const width$ = widthStream(domSource$, elementID)
@@ -47,30 +50,34 @@ export function Histogram(sources) {
 	// This component is active only when the signature is validated
 	// const active$ = state$.map(state => state.validated)
 
-    const modifiedState$ = state$
-            .filter(state => state.query != '')
-			.compose(dropRepeats((x, y) => equals(x,y)))
+	// const modifiedState$ = state$
+	// 	.filter(state => state.query != '')
+	// 	.compose(dropRepeats((x, y) => equals(x, y)))
+	const modifiedState$ = state$
+		.compose(dropRepeats((x, y) => equals(x, y)))
+		.filter(state => state.query != null)
 
 	const request$ = xs.combine(modifiedState$, props$, visible$)
 		.filter(([state, props, visible]) => visible)
-        .map(([state, props, visible]) => {
+		.map(([state, props, visible]) => {
 			return {
-				url : props.url + '&classPath=com.dataintuitive.luciusapi.histogram',
-				method : 'POST',
-				send : {
-					query : state.query,
+				url: props.url + '&classPath=com.dataintuitive.luciusapi.histogram',
+				method: 'POST',
+				send: {
+					query: state.query,
 					bins: props.bins,
-					filter : state.filter
+					filter: state.filter
 				},
-				'category' : 'histogram'
-		}})
-		.debug(log);
+				'category': 'histogram'
+			}
+		})
+		.debug();
 
 	// Catch the response in a stream
 	const response$ = httpSource$
-        .select('histogram')
-        .flatten()
-        .debug(log);
+		.select('histogram')
+		.flatten()
+		.debug()
 
 	// Extract the data from the result
 	// TODO: check for errors coming back
@@ -78,48 +85,49 @@ export function Histogram(sources) {
 
 	// While doing a request and parsing the new vega spec, display render the empty spec:
 	// const data$ = xs.merge(request$.mapTo(emptyData), resultData$)//.startWith(emptyData);
-	const data$ = resultData$.startWith(emptyData);
+	const data$ = resultData$.startWith(emptyData)
 
 	// Ingest the data in the spec and return to the driver
 	const vegaSpec$ = xs.combine(data$, width$, visible$)
 		.map(([data, newwidth, visible]) => {
-				return {spec : vegaHistogramSpec(data) , el : elementID, width : newwidth}
+			return { spec: vegaHistogramSpec(data), el: elementID, width: newwidth }
 		});
 
-    const makeHistogram = () => {
-            return (
-				div('.card-panel .center-align', {style: {height:'400px'}}, [div(elementID)])
-            )
-    };
+	const makeHistogram = () => {
+		return (
+			div('.card-panel .center-align', { style: { height: '400px' } }, [div(elementID)])
+		)
+	};
 
-    // Keeping track of when an HTTP request is ongoing...
+	// Keeping track of when an HTTP request is ongoing...
 	const loadingVdom$ = xs.combine(state$, data$)
-							.map(([state, data]) =>  div([
-									div('.preloader-wrapper .small .active', {style : {'z-index':1, position: 'absolute' }}, [
-										div('.spinner-layer .spinner-green-only', [
-											div('.circle-clipper .left', [
-												div('.circle')
-											])
-										])
-									]),
-									div({style: {opacity: 0.4}}, [makeHistogram()]),
-								]))
-                            .compose(between(request$, vegaSpec$))
-    // Show table when query is not in progress
-    const renderVdom$ = xs.combine(state$, data$)
-							.map(([state, data]) =>  div([
-									div([makeHistogram()])
-								]))
-							.compose(between(data$, request$))
-							// .startWith(div([makeHistogram()]))      // Initial state not needed, data is initialized
+		.map(([state, data]) => div([
+			div('.preloader-wrapper .small .active', { style: { 'z-index': 1, position: 'absolute' } }, [
+				div('.spinner-layer .spinner-green-only', [
+					div('.circle-clipper .left', [
+						div('.circle')
+					])
+				])
+			]),
+			div({ style: { opacity: 0.4 } }, [makeHistogram()]),
+		]))
+		.compose(between(request$, vegaSpec$))
 
-    const vdom$ = xs.merge(renderVdom$, loadingVdom$)
+	// Show table when query is not in progress
+	const renderVdom$ = xs.combine(state$, data$)
+		.map(([state, data]) => div([
+			(equals(data, emptyData))
+				? div({ style: { visibility: 'hidden' } }, [makeHistogram()])
+				: div([makeHistogram()])
+		]))
+		.compose(between(data$, request$))
 
-  return { 
-    	DOM: vdom$,
+	const vdom$ = xs.merge(renderVdom$, loadingVdom$)
+
+	return {
+		DOM: vdom$,
 		HTTP: request$,//.compose(debounce(5000)),
-		vega: vegaSpec$,
-        // onion: reducer$
-  };
+		vega: vegaSpec$
+	};
 
 }

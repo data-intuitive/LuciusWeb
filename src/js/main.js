@@ -25,3 +25,10 @@ const drivers = {
 
 let StatifiedMain = onionify(Router);
 run(StatifiedMain, drivers);
+
+if (module.hot) {
+		module.hot.accept(() => {
+			main = require('./main').default;
+			rerun(StateifiedMain, drivers);
+		});
+	}

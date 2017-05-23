@@ -43,7 +43,7 @@ export function SampleInfo(sources) {
                 p('.s12', pStyle, entry('Targets: ', sample.targets.join(', '))), 
             ]),            
             div('.col .s6 .l4', {style : {margin : '20px 0px 0px 0px'}}, [ 
-                (sample.smiles != null && sample.smiles != 'NA')
+                (sample.smiles != null && sample.smiles != 'NA' && sample.smiles != 'No Smiles')
                 ? img('.col .s12 .valign', {props: {src: url}})
                 : ''
             ]),            
@@ -65,7 +65,7 @@ export function SampleInfo(sources) {
                         div('.col .s2', [(sample.jnjs != "NA") ? sample.jnjs : '']),
                         div('.col .s3', [sample.compoundname]),
                         div('.col .s3 .center-align',  [
-                            ((sample.smiles != null && sample.smiles != 'NA') && zoom == false)
+                            ((sample.smiles != null && sample.smiles != 'NA' && sample.smiles != 'No Smiles') && zoom == false)
                             ? img({props: {src: url, height:50, 'object-fit': 'contain'}})
                             : ''
                             ]),

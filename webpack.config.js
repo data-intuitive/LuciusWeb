@@ -25,10 +25,7 @@ var entry = PRODUCTION
              ];
 
 module.exports = {
-    entry: entry,
-  // entry: {
-  //   bundle: './src/js/main'
-  // },
+  entry: entry,
   output: {
     path: path.join(__dirname, 'dist'),
     publicPath: '/dist/',

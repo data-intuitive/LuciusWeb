@@ -13,11 +13,12 @@ function Filter(sources) {
 
 	const domSource$ = sources.DOM;
 
-    const filterInput$ = xs.of({
+    // Make sure the input is generated only when some state is active.
+    const filterInput$ = sources.onion.state$.mapTo(x => ({
         concentration : '',
         protocol : '',
         type : ''
-    })
+    }))
 
     const vdom$ = filterInput$.map( filter =>
         div([
@@ -43,7 +44,8 @@ function Filter(sources) {
                     ]),
                 ]),
         ])
-    );
+    )
+    .startWith(div([]))
 
     const concentrationChanged$ = sources.DOM
                 .select('.concentration')

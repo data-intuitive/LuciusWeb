@@ -79,7 +79,7 @@ function CompoundCheck(sources) {
                         div('.Default .waves-effect .col .s1 .center-align', [
                             i('.large  .center-align .material-icons .orange-text', { style: { fontSize: '45px', fontColor: 'gray' } }, 'search'),
                         ]),
-                        div('.col .s10 .input-field', [
+                        div('.col .s10 .input-field', {style : {margin : '0px 0px 0px 0px'}}, [
                             input('.compoundQuery .col .s12 .autocomplete-input', { style: { fontSize: '20px' }, props: { type: 'text', value: query }, value: query }),
                             (state.showSuggestions)
                                 ? ul('.autocomplete-content .dropdown-content .col .s12 .orange .lighten-4 .z-depth-5',

@@ -30,11 +30,14 @@ function SignatureCheck(sources) {
 	// 			.fold((acc,x) => acc + ' || ' + x, 'History: ')
 	// 			// .debug(console.log)
 
-	const request$ = xs.combine(state$, props$)
+	const request$ = xs.combine(
+		state$.compose(dropRepeats((x,y) => x === y)), 
+		props$.compose(dropRepeats((x,y) => equals(x,y)))
+		)
 		.compose(debounce(200))
+		.debug()
 		.filter(([state, props]) => state !== '')
-		.compose(dropRepeats((x,y) => x === y))
-		.map(([state, props]) =>  {
+				.map(([state, props]) =>  {
 			return {
 				url : props.url + '&classPath=com.dataintuitive.luciusapi.checkSignature',
 				method : 'POST',
@@ -58,7 +61,7 @@ function SignatureCheck(sources) {
 
 	const data$ = response$
 		.map(res => res.body)
-		.startWith(emptyData.body)
+		// .startWith(emptyData.body)
 		.map(json => json.result.data)
 
 	// Helper function for rendering the table, based on the state
@@ -84,7 +87,7 @@ function SignatureCheck(sources) {
 							div('.row', [
 								div('.col .s6 .offset-s3', [table('.striped', tableContent)]),
 								div('.row .s6 .offset-s3', [
-									button('.collapseUpdate .btn .col .offset-s4 .s4 .green .darken-2', 'Update/Validate'),
+									button('.collapseUpdate .btn .col .offset-s4 .s4 .pink .darken-2', 'Update/Validate'),
 									]),
 							])
 						])
@@ -94,6 +97,7 @@ function SignatureCheck(sources) {
 	// vdom
 	const vdom$ = data$
 					.map((data) => makeTable(data))
+					.startWith(div())
 
 	// Update and Collapse button updates the query and collapses the window
 	const collapseUpdate$ = domSource$.select('.collapseUpdate').events('click');

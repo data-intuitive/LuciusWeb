@@ -18,7 +18,7 @@ const log = (x) => console.log(x);
 function SignatureWorkflow(sources) {
 
 	const state$ = sources.onion.state$.debug(state => {
-		console.log('== State in signature =================')
+		console.log('== State in signature')
 		console.log(state)
 	});
 
@@ -30,24 +30,24 @@ function SignatureWorkflow(sources) {
 
 	// Queury Form
 	const formProps$ = state$
-			.compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
-			.startWith({settings: initSettings})
-			.map(state => merge(state.settings.form, state.settings.api))
-	const signatureForm = SignatureForm(merge(sources, {props: formProps$}))
+		.compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
+		.startWith({ settings: initSettings })
+		.map(state => merge(state.settings.form, state.settings.api))
+	const signatureForm = isolate(SignatureForm, 'diseaseWorkflow')(merge(sources, { props: formProps$ }))
 
 	// Filter Form
-	const filter = isolate(Filter, 'filter')(sources)
+	const filterForm = isolate(Filter, 'filter')(sources)
 
 	// Propagate filter to state of individual components
-	const filterReducer$ = filter.filter.map(f => prevState => {
-			console.log('signature -- filterReducer')
-			let additionalState = {
-				headTable : merge(prevState.headTable, {filter : f}),
-				tailTable : merge(prevState.tailTable, {filter : f}),
-				hist : merge(prevState.hist, {filter : f}),
-				sim : merge(prevState.sim, {filter : f})
-			}
-			return merge(prevState, additionalState)
+	const filterReducer$ = filterForm.filter.map(f => prevState => {
+		console.log('signature -- filterReducer')
+		let additionalState = {
+			headTable: merge(prevState.headTable, { filter: f }),
+			tailTable: merge(prevState.tailTable, { filter: f }),
+			hist: merge(prevState.hist, { filter: f }),
+			sim: merge(prevState.sim, { filter: f })
+		}
+		return merge(prevState, additionalState)
 	})
 
 	// Query updated in signatureForm, so push it to the other components
@@ -59,109 +59,102 @@ function SignatureWorkflow(sources) {
 		if (typeof prevState === 'undefined') {
 			return (
 				{
-					settings : initSettings,
+					settings: initSettings,
 				})
 		} else {
 			return prevState
-		}
+			// return (
+			// 	{
+			// 		settings: initSettings,
+			// 	})
+			}
 	})
 
 	// Propagate query to state of individual components
 	const stateReducer$ = query$.map(query => prevState => {
-			console.log('signature -- stateReducer')
-			let additionalState = {
-				headTable : merge(prevState.headTable, {query : query}),
-				tailTable : merge(prevState.tailTable, {query : query}),
-				hist : merge(prevState.hist, {query : query}),
-				sim : merge(prevState.sim, {query : query})
-			}
-			return merge(prevState,additionalState)
+		console.log('signature -- stateReducer')
+		let additionalState = {
+			headTable: merge(prevState.headTable, { query: query }),
+			tailTable: merge(prevState.tailTable, { query: query }),
+			hist: merge(prevState.hist, { query: query }),
+			sim: merge(prevState.sim, { query: query }),
+			filter: {}
+		}
+		return merge(prevState, additionalState)
 	})
 
 	// Similarity plot component
 	const simProps$ = state$
-				.compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
-				.startWith({settings: initSettings})
-				.map(state => merge(state.settings.sim, state.settings.api))
-	const similarityPlot = isolate(SimilarityPlot, 'sim')(merge(sources, {props: simProps$}));
+		.compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
+		.startWith({ settings: initSettings })
+		.map(state => merge(state.settings.sim, state.settings.api))
+	const similarityPlot = isolate(SimilarityPlot, 'sim')(merge(sources, { props: simProps$ }));
 
 	// histogram component
 	const histProps$ = state$
-				.compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
-				.startWith({settings: initSettings})
-				.map(state => merge(state.settings.hist, state.settings.api))
-	// const histProps$ = xs.of({hist : bins})
-	const histogram = isolate(Histogram, 'hist')(merge(sources, {props: histProps$}));
+		.compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
+		.startWith({ settings: initSettings })
+		.map(state => merge(state.settings.hist, state.settings.api))
+	const histogram = isolate(Histogram, 'hist')(merge(sources, { props: histProps$ }));
 
 	// tables: Join settings from api and sourire into props
 	const headTableProps$ = state$
-				.compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
-				.startWith({settings: initSettings})
-				.map(state => merge(merge(state.settings.headTableSettings, state.settings.api), state.settings.sourire))
+		.compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
+		.startWith({ settings: initSettings })
+		.map(state => merge(merge(state.settings.headTableSettings, state.settings.api), state.settings.sourire))
 	const tailTableProps$ = state$
-				.compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
-				.startWith({settings: initSettings})
-				.map(state =>merge(merge(state.settings.tailTableSettings, state.settings.api), state.settings.sourire))
-	const headTable = isolate(Table, 'headTable')(merge(sources, {props: headTableProps$}));
-	const tailTable = isolate(Table, 'tailTable')(merge(sources, {props: tailTableProps$}));
+		.compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
+		.startWith({ settings: initSettings })
+		.map(state => merge(merge(state.settings.tailTableSettings, state.settings.api), state.settings.sourire))
+	const headTable = isolate(Table, 'headTable')(merge(sources, { props: headTableProps$ }));
+	const tailTable = isolate(Table, 'tailTable')(merge(sources, { props: tailTableProps$ }));
 
-	const pageStyle = {style: 
+	const pageStyle = {
+		style:
 		{
-			fontSize: '14px', 
-			opacity: '0', 
-			transition: 'opacity 1s', 
-			delayed: {opacity: '1'}, 
-			destroy: {opacity: '0'}}
-	} 
+			fontSize: '14px',
+			opacity: '0',
+			transition: 'opacity 1s',
+			delayed: { opacity: '1' },
+			destroy: { opacity: '0' }
+		}
+	}
 
-    const vdom$ = xs.combine(
-                        signatureForm.DOM,
-						filter.DOM,
-                        histogram.DOM,
-						similarityPlot.DOM,
-						headTable.DOM,
-						tailTable.DOM,
-						feedback$
-				)
-					.map(([
-						form,
-						filter,
-						hist, 
-						simplot,
-						headTable, 
-						tailTable,
-						feedback
-					]) => 
-						div('.row .green .lighten-5 ', [
-							// div('.col .s10 .offset-s1', pageStyle,
-							// 	[
-							// 		div('.row', []),
-							// div('.col .s12',
-							// 	[
-									form,
-							// 	]
-							// ),
-							div('.col .s10 .offset-s1', pageStyle,
-								[
-									// div('.row', []),
-									// form,
-									div('.row', [filter]),
-									// Don't show feedback for now!
-									// div('.pre', [JSON.stringify(feedback)]),
-									// on mobile: under each other
-									// on large screen: next to each other
-									div('.row ', [div('.col .s12 .l7', [
-											simplot,
-												]), div('.col .s12 .l5', [
-											hist,
-									])]),
-									div('.row', []),
-									div('.col .s12', [headTable]),
-									div('.row', []),
-									div('.col .s12', [tailTable])
-								])
-						])
-						);
+	const vdom$ = xs.combine(
+		signatureForm.DOM,
+		filterForm.DOM,
+		histogram.DOM,
+		similarityPlot.DOM,
+		headTable.DOM,
+		tailTable.DOM,
+		feedback$
+	)
+		.map(([
+			form,
+			filter,
+			hist,
+			simplot,
+			headTable,
+			tailTable,
+			feedback
+		]) =>
+			div('.row .pink .lighten-5  ', [
+				form,
+				div('.col .s10 .offset-s1', pageStyle,
+					[
+						div('.row', [filter]),
+						div('.row ', [div('.col .s12 .l7', [
+							simplot,
+						]), div('.col .s12 .l5', [
+							hist,
+						])]),
+						div('.row', []),
+						div('.col .s12', [headTable]),
+						div('.row', []),
+						div('.col .s12', [tailTable])
+					])
+			])
+		);
 
 	return {
 		DOM: vdom$,
@@ -172,18 +165,18 @@ function SignatureWorkflow(sources) {
 			stateReducer$,
 			headTable.onion,
 			tailTable.onion
-			),
+		),
 		vega: xs.merge(
 			histogram.vega,
 			similarityPlot.vega
-			),
+		),
 		HTTP: xs.merge(
 			signatureForm.HTTP,
-			histogram.HTTP, 
+			histogram.HTTP,
 			similarityPlot.HTTP,
-			headTable.HTTP, 
+			headTable.HTTP,
 			tailTable.HTTP
-			),
+		),
 		// router: xs.of('/signature')
 	};
 }

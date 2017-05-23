@@ -154,7 +154,7 @@ export function Settings(sources) {
 	const headTableSettings$ = xs.combine(settings$.map(state => state.headTableSettings), headTableCount$, headColor$)
 		.map((settings) => ({ 
 				headTableSettings : mergeAll(settings),
-		}))//.debug(console.log)
+		})).debug()
 
 	const tailTableSettings$ = xs.combine(settings$.map(state => state.tailTableSettings), tailTableCount$, tailColor$)
 		.map((settings) => ({ 

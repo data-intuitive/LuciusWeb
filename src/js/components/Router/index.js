@@ -1,33 +1,57 @@
 import xs from 'xstream';
-import {div, nav, a, h3, p, ul, li, h2, i, footer, header, main, svg, g, path} from '@cycle/dom';
-import {merge, prop} from 'ramda';
+import { div, nav, a, h3, p, ul, li, h1, h2, i, footer, header, main, svg, g, path } from '@cycle/dom';
+import { merge, prop } from 'ramda';
 import BMI from '../../examples/bmi';
 import Hello from '../../examples/hello-world';
-import {HttpRequest} from "../../examples/http-request";
-import SignatureWorkflow from '../../pages/signature';
+import { HttpRequest } from "../../examples/http-request"
+import SignatureWorkflow from '../../pages/signature'
+import CompoundWorkflow from '../../pages/compound'
 import { IsolatedSettings } from '../../pages/settings'
 import flattenSequentially from 'xstream/extra/flattenSequentially'
-import {pick, mix} from 'cycle-onionify';
+import { pick, mix } from 'cycle-onionify';
 import { initSettings } from '../../pages/settings'
+
+function TargetWorkflow(sources) {
+  const vdom$ = xs.of(
+    div([
+      div('.row .red .darken-4', [
+        h2('.col .s10 .s-offset-1 .red-text .text-lighten-4', ['This workflow is under construction']),
+      ]),
+      div('.row .red .lighten-5', {style : { height : '500px'}})
+    ])
+  )
+  return {
+    DOM: vdom$
+  }
+}
+
+
 
 function Home(sources) {
   const vdom$ = xs.of(div('.row', [
     h2('.col .s6 .offset-s3', 'Welcome to ComPass !'),
     p('.col .s6 .offset-s3 .flow-text', [
       'This application is the interface with L1000 data. Currently, ',
-      'there is support for working with disease profiles expressed using gene lists or signatures.'
+      'there is support for working with disease profiles expressed using gene lists or signatures and compound similarity.'
     ]),
     div('.col .s6 .offset-s3', [
-      div('.col .s12 .green .darken-2 ',  {style : {padding : '10px 10px 10px 10px'}},
-      [
-        i('.green-text .text-lighten-1 .material-icons', 'play_arrow'),
-        a('.green-text .text-lighten-3', {props: {href: '/signature'}, style : {fontWeight : 'bolder', 'font-size' : '32px'}} , ' Disease Workflow')
-      ]),
-      div('.col .s12 .pink .darken-2 .pink-text', {style : {padding : '10px 10px 10px 10px'}},
-      [
-        i('.pink-text .text-lighten-1 .material-icons', 'play_arrow'),
-        a('.pink-text .text-lighten-3',{props: {href: '/signature'}, style : {fontWeight : 'bolder', 'font-size' : '32px'}} , ' Compound Workflow')
-      ]),
+      div('.col .s12 .pink .darken-4', { style: { padding: '10px 10px 10px 10px' } },
+        [
+          i('.pink-text .text-lighten-1 .material-icons', 'play_arrow'),
+          a('.pink-text .text-lighten-3', { props: { href: '/disease' }, style: { fontWeight: 'bolder', 'font-size': '32px' } }, ' Disease Workflow')
+        ]),
+      div('.row', []),
+      div('.col .s12 .orange .darken-4 .pink-text', { style: { padding: '10px 10px 10px 10px' } },
+        [
+          i('.orange-text .text-lighten-1 .material-icons', 'play_arrow'),
+          a('.orange-text .text-lighten-3', { props: { href: '/compound' }, style: { fontWeight: 'bolder', 'font-size': '32px' } }, ' Compound Workflow')
+        ]),
+      div('.row', []),
+      div('.col .s12 .red .darken-4 .pink-text', { style: { padding: '10px 10px 10px 10px' } },
+        [
+          i('.red-text .text-lighten-1 .material-icons', 'play_arrow'),
+          a('.red-text .text-lighten-4', { props: { href: '/target' }, style: { fontWeight: 'bolder', 'font-size': '32px' } }, ' Target Workflow')
+        ]),
     ]),
     p('.col .s6 .offset-s3 .flow-text', [
       'You can click on one of the workflows above to start it.'
@@ -45,28 +69,32 @@ function Home(sources) {
 }
 
 export default function Router(sources) {
-  const {router} = sources;
+  const { router } = sources;
 
   const state$ = sources.onion.state$.debug(state => {
-		console.log('== State in index =================')
-		console.log(state)
-	});
+    console.log('== State in index =================')
+    console.log(state)
+  });
 
   const match$ = router.define({
     '/': Home,
     '/bmi': BMI,
     '/hello': Hello,
     '/http': HttpRequest,
-    '/signature': SignatureWorkflow,
+    '/disease': SignatureWorkflow,
+    '/compound': CompoundWorkflow,
+    '/target': TargetWorkflow,
     '/settings': IsolatedSettings,
-    '*': SignatureWorkflow
+    '*': Home
   });
 
-  const page$ = match$.map(({path, value}) => value(merge(sources, {
-    router: router.path(path)
-  })))
+  const page$ = match$
+    .map(({ path, value }) =>
+      value(
+        merge(sources, { router: router.path(path) })
+      )).debug()
 
-  const makeLink = (path, label) => li([a({props: {href: path}}, label)]);
+  const makeLink = (path, label) => li([a({ props: { href: path } }, label)]);
 
   // const nav$ = xs.of(div([
   //     ul('.slide-out .side-nav', [
@@ -80,18 +108,19 @@ export default function Router(sources) {
   // const toggle$ = sources.DOM.select('.button-collapse').elements().filter(els => els.length === 1).debug().map(els => els[0].sideNav('show')).startWith(null)
 
   const nav$ = xs.of(header([nav('#navigation .grey .darken-4', [
-      div('.nav-wrapper', [
-        a('.brand-logo .right', {props: {href: "/"}}, "ComPass"),
-        ul('.left .hide-on-med-and-down', [
-            // makeLink('/bmi', 'BMI'),
-            // makeLink('/hello', 'Hello'),
-            // makeLink('/http', 'Http'),
-            makeLink('/signature', 'Disease'),
-            makeLink('/signature', 'Compound'),
-            makeLink('/settings', 'Settings')
-            ])
+    div('.nav-wrapper', [
+      a('.brand-logo .right', { props: { href: "/" } }, "ComPass"),
+      ul('.left .hide-on-med-and-down', [
+        // makeLink('/bmi', 'BMI'),
+        // makeLink('/hello', 'Hello'),
+        // makeLink('/http', 'Http'),
+        makeLink('/disease', 'Disease'),
+        makeLink('/compound', 'Compound'),
+        makeLink('/target', 'Target'),
+        makeLink('/settings', 'Settings')
       ])
     ])
+  ])
   ]));
 
   // Experiment
@@ -108,43 +137,52 @@ export default function Router(sources) {
 
   const footer$ = xs.of(
     footer('.page-footer .grey .darken-4 .grey-text', [
-        div('.row', [
-          div('.col .s12', [
-            p(['Please use the information provided in ComPass with care. ComPass does not make any claims.'])
-          ]),
+      div('.row', [
+        div('.col .s12', [
+          p(['Please use the information provided in ComPass with care. ComPass does not make any claims.'])
         ]),
-        div('.footer-copyright .row', [        
-          div('.col .s12', ['© 2017 By Data intuitive'])
-        ]),
+      ]),
+      div('.footer-copyright .row', [
+        div('.col .s12', ['© 2017 By Data intuitive'])
+      ]),
     ])
   )
 
-  const view$ = page$.map(prop('DOM')).flatten();
+  const view$ = page$.map(prop('DOM')).filter(Boolean).flatten();
 
   const vdom$ = xs.combine(nav$, view$, footer$)
-    .map(([navDom, viewDom, footerDom]) => div([navDom, main([viewDom]), footerDom]));
+    .map(([navDom, viewDom, footerDom]) => div(
+      [
+        navDom,
+        main([viewDom]),
+        footerDom
+      ]));
 
   // Initialize state
-	const defaultReducer$ = xs.of(prevState => {
-		console.log("index -- defaultReducer")
-		if (typeof prevState === 'undefined') {
-			return (
-				{
-					settings : initSettings,
-					query : 'HSPA1A DNAJB1 DDIT4 -TSEN2',
-				})
-		} else {
-			return prevState
-		}
-	})
+  const defaultReducer$ = xs.of(prevState => {
+    console.log("index -- defaultReducer")
+    if (typeof prevState === 'undefined') {
+      return (
+        {
+          settings: initSettings,
+        })
+    } else {
+      return prevState
+    }
+  })
 
   return {
     DOM: vdom$,
-    router: page$.map(c => c.router || xs.never()).flatten(), //.startWith('/signature'), //.debug(console.log), //.filter(Boolean)
+    // router: page$.map(c => c.router || xs.never()).flatten(), //.startWith('/signature'), //.debug(console.log), //.filter(Boolean)
     HTTP: page$.map(prop('HTTP')).filter(Boolean).flatten(),
-    onion: xs.merge(defaultReducer$, page$.map(prop('onion')).flatten()), //.filter(Boolean).compose(flattenSequentially),
+    // onion: page$.map(prop('onion')).filter(Boolean).flatten(),
+    onion: xs.merge(
+      defaultReducer$,
+      page$.map(prop('onion')
+      ).filter(Boolean).flatten()), //.filter(Boolean).compose(flattenSequentially),
     vega: page$.map(prop('vega')).filter(Boolean).flatten(),
-    }
+  }
+
 }
 
 // sources.DOM.select('a').events('click')

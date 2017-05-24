@@ -76,12 +76,19 @@ export function Histogram(sources) {
 	// Catch the response in a stream
 	const response$ = httpSource$
 		.select('histogram')
+		.map((response$) =>
+			response$
+				.map(response => response.body.result.data)
+				.replaceError((err) => {
+					return xs.of(emptyData)
+				})
+		)
 		.flatten()
-		.debug()
+		.debug();
 
 	// Extract the data from the result
 	// TODO: check for errors coming back
-	const resultData$ = response$.map(response => response.body.result.data);
+	const resultData$ = response$
 
 	// While doing a request and parsing the new vega spec, display render the empty spec:
 	// const data$ = xs.merge(request$.mapTo(emptyData), resultData$)//.startWith(emptyData);

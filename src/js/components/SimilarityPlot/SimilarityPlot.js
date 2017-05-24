@@ -8,8 +8,6 @@ import { similarityPlotSpec, exampleData, emptyData } from './spec.js'
 import { widthStream } from '../../utils/utils'
 import { between } from '../../utils/utils'
 
-const log = (x) => console.log(x);
-
 const elementID = '#vega'
 
 const ENTER_KEYCODE = 13
@@ -66,13 +64,20 @@ export function SimilarityPlot(sources) {
 	// Catch the response in a stream
 	const response$ = httpSource$
 		.select('binnedZhang')
+		.map((response$) =>
+			response$
+				.map(response => response.body.result.data)
+				.replaceError((err) => {
+					return xs.of(emptyData)
+				})
+		)
 		.flatten()
 		.debug();
 
 	// Extract the data from the result
 	// TODO: check for errors coming back
 	// Please note: since the Vega driver looks for an element in the dom, it needs to exist prior to rendering it!
-	const resultData$ = response$.map(response => response.body.result.data);
+	const resultData$ = response$
 
 	// While doing a request and parsing the new vega spec, display render the empty spec:
 	const data$ = resultData$.startWith(emptyData);

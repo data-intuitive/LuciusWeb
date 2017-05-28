@@ -21,7 +21,7 @@ export function Table(sources) {
     });
     const domSource$ = sources.DOM;
     const httpSource$ = sources.HTTP;
-    const props$ = sources.props.debug()
+    const props$ = sources.props
 
     const modifiedState$ = state$
         .filter(state => state.query != '')
@@ -30,14 +30,16 @@ export function Table(sources) {
 
     const updatedProps$ = xs.combine(
         props$,
-        sources.DOM.select('.plus5').events('click').mapTo(5).fold((x, y) => x + y, 0),
-        sources.DOM.select('.min5').events('click').mapTo(5).fold((x, y) => x + y, 0)
+        sources.DOM.select('.plus5').events('click').mapTo(5).startWith(0).fold((x, y) => x + y, 0),
+        sources.DOM.select('.min5').events('click').mapTo(5).startWith(0).fold((x, y) => x + y, 0)
     ).map(([props, add5, min5]) => {
         let isHead = (typeof props.head !== 'undefined')
         if (isHead) {
-            return merge(props, { head: props.head + add5 - min5 })
+            const count = parseInt(props.head) + add5 - min5
+            return merge(props, { head: count })
         } else {
-            return merge(props, { tail: props.tail + add5 - min5 })
+            const count = parseInt(props.tail) + add5 - min5
+            return merge(props, { tail: count + add5 - min5 })
         }
     })
 
@@ -64,9 +66,6 @@ export function Table(sources) {
     // TODO: check for errors coming back
     const resultData$ = response$.map(response => response.body.result.data);
     const data$ = resultData$
-        // .startWith([])
-        .debug('data here! -----------------')
-    // .startWith([])
 
     // Delegate effective rendering to SampleTable:
     const sampleTable = isolate(SampleTable, 'result')(sources);
@@ -122,17 +121,17 @@ export function Table(sources) {
         filterText$
     )
         .map(([
-            state, 
-            dom, 
+            state,
+            dom,
             // data, 
             props,
             filterText]) => div([
-            div('.row .valign-wrapper', { style: { 'margin-bottom': '0px', 'padding-top': '5px', 'background-color': props.color, opacity: 0.5 } }, [
-                h5('.white-text .col .s5 .valign', props.title),
-                div('.white-text .col .s7 .valign .right-align', filterText)
+                div('.row .valign-wrapper', { style: { 'margin-bottom': '0px', 'padding-top': '5px', 'background-color': props.color, opacity: 0.5 } }, [
+                    h5('.white-text .col .s5 .valign', props.title),
+                    div('.white-text .col .s7 .valign .right-align', filterText)
+                ]),
+                div('.progress ', [div('.indeterminate')])
             ]),
-            div('.progress ', [div('.indeterminate')])
-        ]),
     )
         .compose(between(request$, data$))
 
@@ -145,23 +144,23 @@ export function Table(sources) {
         filterText$
     )
         .map(([
-            state, 
-            dom, 
+            state,
+            dom,
             // data, 
-            props, 
+            props,
             filterText]) => div([
-            div('.row .valign-wrapper', { style: { 'margin-bottom': '0px', 'padding-top': '5px', 'background-color': props.color } }, [
-                h5('.white-text .col .s5 .valign', props.title),
-                div('.white-text .col .s7 .valign .right-align', filterText)
-            ]),
-            div('.row', { style: { 'margin-bottom': '0px', 'margin-top': '0px' } }, [
-                dom,
-                div('.col .s12 .right-align', [
-                    button('.min5 .btn-floating waves-effect waves-light', smallBtnStyle(props.color), [i('.material-icons', 'fast_rewind')]),
-                    button('.plus5 .btn-floating waves-effect waves-light', smallBtnStyle(props.color), [i('.material-icons', 'fast_forward')])
-                ])
-            ]),
-        ])
+                div('.row .valign-wrapper', { style: { 'margin-bottom': '0px', 'padding-top': '5px', 'background-color': props.color } }, [
+                    h5('.white-text .col .s5 .valign', props.title),
+                    div('.white-text .col .s7 .valign .right-align', filterText)
+                ]),
+                div('.row', { style: { 'margin-bottom': '0px', 'margin-top': '0px' } }, [
+                    dom,
+                    div('.col .s12 .right-align', [
+                        button('.min5 .btn-floating waves-effect waves-light', smallBtnStyle(props.color), [i('.material-icons', 'fast_rewind')]),
+                        button('.plus5 .btn-floating waves-effect waves-light', smallBtnStyle(props.color), [i('.material-icons', 'fast_forward')])
+                    ])
+                ]),
+            ])
         )
         .compose(between(data$, request$))
         .startWith(div([]))      // Initial state!!!!
@@ -176,15 +175,12 @@ export function Table(sources) {
         return merge(prevState, { result: data })
     })
 
-
-    const reducer$ = xs.merge(
-        stateReducer$,
-    )
-
     return {
         DOM: vdom$,
         HTTP: request$, //.compose(debounce(2000)),
-        onion: reducer$
+        onion: xs.merge(
+            stateReducer$,
+        )
     };
 
 }

@@ -12,6 +12,7 @@
   ],
   "scripts": {
     "serve": "webpack-dev-server -d --progress --colors --inline --host 0.0.0.0",
+    "prod": "NODE_ENV=production webpack-dev-server -d --progress --colors --inline --host 0.0.0.0",
     "start": "npm install && npm run serve",
     "build": "NODE_ENV=production webpack"
   },
@@ -37,14 +38,13 @@
     "webpack-material-design-icons": "^0.1.0"
   },
   "dependencies": {
-    "@cycle/dom": "^14.3.0",
-    "@cycle/history": "^4.1.0",
-    "@cycle/http": "^11.3.0",
-    "@cycle/isolate": "^1.4.0",
-    "@cycle/xstream-run": "^4.2.0",
+    "@cycle/dom": "^16.0.0",
+    "@cycle/history": "6.1.0",
+    "@cycle/http": "^13.1.0",
+    "@cycle/isolate": "^2.1.0",
+    "@cycle/run": "^1.0.0",
     "css-loader": "^0.26.1",
     "cycle-onionify": "^2.4.0",
-    "cycle-proxy": "^3.0.0",
     "cyclic-router": "^3.0.1",
     "datalib": "^1.7.3",
     "file-loader": "^0.10.0",

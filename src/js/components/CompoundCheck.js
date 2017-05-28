@@ -123,7 +123,7 @@ function CompoundCheck(sources) {
     const setDefault$ = sources.DOM.select('.Default').events('click')
     const setDefaultReducer$ = setDefault$.map(events => prevState => {
         let newState = clone(prevState)
-        newState.query = '1211912'
+        newState.query = '7108491'
         newState.validated = true
         return newState
     })

@@ -49,7 +49,7 @@ export function Table(sources) {
             method: 'POST',
             url: props.url + '&classPath=com.dataintuitive.luciusapi.topTable',
             category: 'topTable'
-        })).debug(log)
+        })).debug()
 
     // Catch the response in a stream
     const response$ = httpSource$
@@ -58,7 +58,7 @@ export function Table(sources) {
             response$.replaceError(() => xs.of([]))
         )
         .flatten()
-        .debug(log);
+        .debug();
 
     // Extract the data from the result
     // TODO: check for errors coming back

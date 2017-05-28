@@ -1,4 +1,4 @@
-import { a, div, br, label, input, p, button, code, pre, h2, h4, i, h3, h5 } from '@cycle/dom'
+import { a, div, br, label, input, p, button, code, pre, h2, h4, i, h3, h5, span } from '@cycle/dom'
 import xs from 'xstream'
 import isolate from '@cycle/isolate'
 import { mergeWith, merge, mergeAll } from 'ramda'
@@ -6,41 +6,47 @@ import { clone } from 'ramda';
 import sampleCombine from 'xstream/extra/sampleCombine'
 
 export const initSettings = {
-		commmon : {
-			version: 'v2', 
-		},
-		headTableSettings : {
-			title: 'Top Table 123',
-			head : 5,
-			color: 'rgb(44,123,182)',
-			title: 'Top Table', 
-			version: 'v2'
-		},
-		tailTableSettings : {
-			title: 'Bottom Table 123',
-			tail : 5,
-			color: 'rgb(215,25,28)',
-			title: 'Bottom Table', 
-			version: 'v2'
-		},
-		hist : {
-			bins : 20
-		},
-		sim : {
-			binsX : 20,
-			binsY : 20
-		},
-		form : {},
-		api : {
-		    hostname : 'localhost',
-			port : 8080,
-			url : 'http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&appName=luciusapi&sync=true',
-		},
-		sourire : {
-		    hostname : 'localhost',
-			port : 9000,
-			urlSourire : 'http://localhost:9999/molecule/'
-		}
+	commmon: {
+		version: 'v2',
+	},
+	headTableSettings: {
+		title: 'Top Table 123',
+		head: 5,
+		color: 'rgb(44,123,182)',
+		title: 'Top Table',
+		version: 'v2'
+	},
+	tailTableSettings: {
+		title: 'Bottom Table 123',
+		tail: 5,
+		color: 'rgb(215,25,28)',
+		title: 'Bottom Table',
+		version: 'v2'
+	},
+	stats: {
+		endpoint: 'classPath=com.dataintuitive.luciusapi.statistics',
+		dummy: 1
+	},
+	hist: {
+		bins: 20
+	},
+	sim: {
+		binsX: 20,
+		binsY: 20
+	},
+	form: {},
+	api: {
+		hostname: 'localhost',
+		port: 8080,
+		context: 'luciusapi',
+		appName: 'luciusapi',
+		url: 'http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&appName=luciusapi&sync=true',
+	},
+	sourire: {
+		hostname: 'localhost',
+		port: 9000,
+		urlSourire: 'http://localhost:9999/molecule/'
+	}
 };
 
 export function IsolatedSettings(sources) {
@@ -49,9 +55,9 @@ export function IsolatedSettings(sources) {
 
 export function Settings(sources) {
 
-//   const router = sources.DOM.select('a').events('click')
-//     .debug(ev => ev.preventDefault())
-//     .map(ev => ev.target.pathname)
+	//   const router = sources.DOM.select('a').events('click')
+	//     .debug(ev => ev.preventDefault())
+	//     .map(ev => ev.target.pathname)
 
 	const state$ = sources.onion.state$
 
@@ -60,74 +66,87 @@ export function Settings(sources) {
 		console.log(state)
 	})
 
-	const tableHeader = (content) => [ h4( [
-			i('.material-icons .tiny', 'settings'), 
-			content 
-		])]
+	const tableHeader = (content) => [h4([
+		content
+	])]
 
-	const tableSubHeader = (content) => 
+	const tableSubHeader = (content) =>
 		div([
-			h5( [
-				content 
+			h5([
+				content
 			]),
 			div('.row', []),
 		])
 
-	const tableHeaderEl = (content) => 
-			div('.row', [
-				div('.col .s12 .offset-s1', tableHeader(content))
-			])
+	const tableHeaderEl = (content) =>
+		div('.row', [
+			div('.col .s12', tableHeader(content))
+		])
 
 	const vdom$ = settings$.map(state =>
-		div([
-			tableHeaderEl('Table Settings'),
-			div('.row .container ', [
-				div('.col .s6', [
-					tableSubHeader('Top Table'),
-					div('.range-field ', [
-						label('.active', '# of entries in top tables'),
-						input('.headTableCount', {style: {fontSize: '20px'} , props: {type: 'range', min:0, max:100, value: state.headTableSettings.head}}), 
-					]),
-					div('.row', [
-						div('.input-field .col .s12', [
-							input('.headColor', {style: {fontSize: '20px'} , props: {type: 'text', value: state.headTableSettings.color}}), 
-							label('.active', 'Color for top tables'),
+		div('.row', [
+			div('.col .s8 .offset-s2', [
+				tableHeaderEl('Table Settings'),
+				// Top Tables
+				div('.card .col .s6', [
+					div('.card-content', [
+						span('.card-title', 'Top Table Settings'),
+						div('.range-field ', [
+							label('.active', '# of entries in top tables'),
+							input('.headTableCount', { style: { fontSize: '20px' }, props: { type: 'range', min: 0, max: 50, value: state.headTableSettings.head } }),
 						]),
-						// div('.col .s1', {style: {'background-color': state.headTableSettings.color}}, [p('')])
-					])
-				]),
-				div('.col .s6' , [
-					tableSubHeader('Bottom Table'),
-					div('.range-field', [
-						label('.active', '# of entries in bottom tables'),
-						input('.tailTableCount', {style: {fontSize: '20px'} , props: {type: 'range', min:0, max:100, value: state.tailTableSettings.tail}}), 
-					]),
-					div('.input-field', [
-						input('.tailColor', {style: {fontSize: '20px'} , props: {type: 'text', value: state.tailTableSettings.color}}),
-						label('.active', 'Color for tail tables'),
+						div('.input-field', [
+							input('.headColor', { style: { fontSize: '20px' }, props: { type: 'text', value: state.headTableSettings.color } }),
+							label('.active', 'Color for top tables'),
+						])
 					]),
 				]),
-			]),
-			// Histogram Settings
-			tableHeaderEl('Histogram Settings'),
-			div('.row .container', [
-				div('.range-field ', [
-					label('.active', '# Bins for histogram'),
-					input('.hist-bins', {style: {fontSize: '20px'} , props: {type: 'range', min:10, max: 100, value: state.hist.bins}}), 
+				// Bottom Tables
+				div('.card  .col .s6', [
+					div('.card-content', [
+						span('.card-title', 'Bottom Table Settings'),
+						div('.range-field', [
+							label('.active', '# of entries in bottom tables'),
+							input('.tailTableCount', { style: { fontSize: '20px' }, props: { type: 'range', min: 0, max: 50, value: state.tailTableSettings.tail } }),
+						]),
+						div('.input-field', [
+							input('.tailColor', { style: { fontSize: '20px' }, props: { type: 'text', value: state.tailTableSettings.color } }),
+							label('.active', 'Color for tail tables'),
+						]),
+					]),
 				]),
-			]),
-			// API Settings 
-			tableHeaderEl('API Settings'),
-			div('.row .container', [
-				div('.input-field', [
-					input('.api-hostname', {style: {fontSize: '20px'} , props: {type: 'text', value: state.api.hostname}}), 
-					label('.active', 'API Hostname'),
+				// Histogram Settings
+				tableHeaderEl('Histogram Settings'),
+				div('.card', [
+					div('.card-content', [
+						// div('.row .container', [
+						div('.range-field ', [
+							label('.active', '# Bins for histogram'),
+							input('.hist-bins', { style: { fontSize: '20px' }, props: { type: 'range', min: 10, max: 50, value: state.hist.bins } }),
+						]),
+						// ]),
+					]),
 				]),
-				div('.input-field ', [
-					input('.api-port', {style: {fontSize: '20px'} , props: {type: 'text', value: state.api.port}}), 
-					label('.active', 'API Port'),
+				// API Settings 
+				tableHeaderEl('API Settings'),
+				div('.card', [
+					div('.card-content', [
+						div('.input-field', [
+							input('.api-hostname', { style: { fontSize: '20px' }, props: { type: 'text', value: state.api.hostname } }),
+							label('.active', 'API Hostname'),
+						]),
+						div('.input-field ', [
+							input('.api-port', { style: { fontSize: '20px' }, props: { type: 'text', value: state.api.port } }),
+							label('.active', 'API Port'),
+						]),
+					]),
 				]),
+
+				div('.row .container', [
+				]),
+
 			]),
+
 			div('.row .container', [
 				button('.apply .col .s3 .offset-s2 .btn', 'Apply'),
 				button('.reset .col .s3 .offset-s2 .btn', 'Reset')
@@ -142,7 +161,7 @@ export function Settings(sources) {
 	// )
 
 	const makeConfigStream = (id, key) => {
-		return sources.DOM.select(id).events('input').map(event => ({[key] : event.target.value})).startWith({})
+		return sources.DOM.select(id).events('input').map(event => ({ [key]: event.target.value })).startWith({})
 	}
 
 	// Table Settings
@@ -152,13 +171,13 @@ export function Settings(sources) {
 	const tailColor$ = makeConfigStream('.tailColor', 'color')
 
 	const headTableSettings$ = xs.combine(settings$.map(state => state.headTableSettings), headTableCount$, headColor$)
-		.map((settings) => ({ 
-				headTableSettings : mergeAll(settings),
+		.map((settings) => ({
+			headTableSettings: mergeAll(settings),
 		})).debug()
 
 	const tailTableSettings$ = xs.combine(settings$.map(state => state.tailTableSettings), tailTableCount$, tailColor$)
-		.map((settings) => ({ 
-				tailTableSettings : mergeAll(settings),
+		.map((settings) => ({
+			tailTableSettings: mergeAll(settings),
 		}))//.debug(console.log)
 
 	// Table Settings
@@ -166,16 +185,16 @@ export function Settings(sources) {
 	const apiPort$ = makeConfigStream('.api-port', 'port')
 
 	const apiSettings$ = xs.combine(settings$.map(state => state.api), apiHostname$, apiPort$)
-		.map((settings) => ({ 
-				api : mergeAll(settings)
+		.map((settings) => ({
+			api: mergeAll(settings)
 		}))//.debug(console.log)
 
 	// Histogram Settings
 	const histBins$ = makeConfigStream('.hist-bins', 'bins')//.debug(console.log)
 
 	const histSettings$ = xs.combine(settings$.map(state => state.hist), histBins$)
-		.map((settings) => ({ 
-				hist : mergeAll(settings)
+		.map((settings) => ({
+			hist: mergeAll(settings)
 		}))//.debug(console.log)
 
 	// const nrHostname$ = sources.DOM.select('.hostname').events('input').map(event => ({hostname : event.target.value})).debug(console.log)
@@ -210,11 +229,11 @@ export function Settings(sources) {
 		})
 
 
-//   const pageReducers$ = page$.map(prop('onion')).flatten()//.debug(console.log)
-//   const reducers$ = pageReducers$.startWith(initReducer$)
+	//   const pageReducers$ = page$.map(prop('onion')).flatten()//.debug(console.log)
+	//   const reducers$ = pageReducers$.startWith(initReducer$)
 
 	return {
-        DOM: vdom$,
+		DOM: vdom$,
 		onion: xs.merge(
 			defaultReducer$,
 			updateReducer$,

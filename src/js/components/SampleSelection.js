@@ -65,7 +65,7 @@ function SampleSelection(sources) {
             td(entry.concentration),
             td(entry.batch),
             td(entry.year),
-            td((entry.targets.length > 0) ? entry.targets.length : 0),
+            td(entry.significantGenes),
             td('.selection', { props: { id: entry.id } }, [
                 input('.switch', { props: { type: 'checkbox', checked: entry.use, id: entry.id } }),
                 label('', { props: { id: entry.id } })
@@ -79,7 +79,7 @@ function SampleSelection(sources) {
             th('Conc'),
             th('Batch'),
             th('Year'),
-            th('Nr. Targets'),
+            th('Sign. Genes'),
             th('Use?')
         ]);
 

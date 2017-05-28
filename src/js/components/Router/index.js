@@ -112,7 +112,7 @@ export default function Router(sources) {
 
   const nav$ = xs.of(header([nav('#navigation .grey .darken-4', [
     div('.nav-wrapper', [
-      a('.brand-logo .right', { props: { href: "/" } }, "ComPass"),
+      a('.brand-logo .right .grey-text', { props: { href: "/" } }, "ComPass"),
       ul('.left .hide-on-med-and-down', [
         // makeLink('/bmi', 'BMI'),
         // makeLink('/hello', 'Hello'),
@@ -120,7 +120,7 @@ export default function Router(sources) {
         makeLink('/disease', 'Disease'),
         makeLink('/compound', 'Compound'),
         makeLink('/target', 'Target'),
-        makeLink('/statistics', 'Statistics'),
+        // makeLink('/statistics', 'Statistics'),
         makeLink('/settings', 'Settings')
       ])
     ])
@@ -131,7 +131,8 @@ export default function Router(sources) {
     footer('.page-footer .grey .darken-4 .grey-text', [
       div('.row', [
         div('.col .s12', [
-          p(['Please use the information provided in ComPass with care. ComPass does not make any claims.'])
+          p(['Please use ', a({ props: { href: '/statistics' } }, 'the information'), ' provided in ComPass with care. ComPass does not make any claims.']),
+          p(['General statistics: ', ]),
         ]),
       ]),
       div('.footer-copyright .row', [

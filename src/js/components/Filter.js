@@ -25,9 +25,11 @@ function Filter(sources) {
             div('.input-field .concentration .col .s12 .l4', [
                 select('.browser-default', [
                     option('.disabled .selected', { props: { value: ''} }, 'Concentration'),
-                    option({ props: { value: '1' } }, 1),
-                    option({ props: { value: '10' } }, 10)
-                ]),
+                    option({ props: { value: '0.1' } }, 0.1),
+                     option({ props: { value: '1' } }, 1),
+                    option({ props: { value: '10' } }, 10),
+                    option({ props: { value: '30' } }, 30)
+                 ]),
             ]),
             div('.input-field .protocol .col .s12 .l4', [
                 select('.browser-default', [

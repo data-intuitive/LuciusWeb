@@ -6,26 +6,35 @@ import Hello from '../../examples/hello-world';
 import { HttpRequest } from "../../examples/http-request"
 import SignatureWorkflow from '../../pages/signature'
 import CompoundWorkflow from '../../pages/compound'
+import StatisticsWorkflow from '../../pages/statistics'
 import { IsolatedSettings } from '../../pages/settings'
 import flattenSequentially from 'xstream/extra/flattenSequentially'
 import { pick, mix } from 'cycle-onionify';
 import { initSettings } from '../../pages/settings'
-
+import debounce from 'xstream/extra/debounce'
+import dropRepeats from 'xstream/extra/dropRepeats'
 function TargetWorkflow(sources) {
+
   const vdom$ = xs.of(
     div([
       div('.row .red .darken-4', [
         h2('.col .s10 .s-offset-1 .red-text .text-lighten-4', ['This workflow is under construction']),
       ]),
-      div('.row .red .lighten-5', {style : { height : '500px'}})
+      div('.row .red .lighten-5', { style: { height: '500px' } })
     ])
   )
+
+  const router$ = sources.DOM.select('a').events('click')
+    .debug(ev => ev.preventDefault())
+    .map(ev => ev.target.pathname)
+    .debug()
+
   return {
-    DOM: vdom$
-  }
+    DOM: vdom$,
+    // router: router$
+  };
+
 }
-
-
 
 function Home(sources) {
   const vdom$ = xs.of(div('.row', [
@@ -58,13 +67,13 @@ function Home(sources) {
     ]),
   ]));
 
-  // const router = sources.DOM.select('a').events('click')
-  //   .debug(ev => ev.preventDefault())
-  //   .map(ev => ev.target.pathname)
+  const router$ = sources.DOM.select('a').events('click')
+    .debug(ev => ev.preventDefault())
+    .map(ev => ev.target.pathname)
 
   return {
     DOM: vdom$,
-    // router
+    router: router$
   };
 }
 
@@ -76,36 +85,30 @@ export default function Router(sources) {
     console.log(state)
   });
 
+  console.log(router)
+
   const match$ = router.define({
     '/': Home,
-    '/bmi': BMI,
-    '/hello': Hello,
-    '/http': HttpRequest,
     '/disease': SignatureWorkflow,
     '/compound': CompoundWorkflow,
     '/target': TargetWorkflow,
+    '/statistics': StatisticsWorkflow,
     '/settings': IsolatedSettings,
+    // '/bmi': BMI,
+    // '/hello': Hello,
+    // '/http': HttpRequest,
     '*': Home
-  });
+  })
+  .remember();
 
-  const page$ = match$
-    .map(({ path, value }) =>
-      value(
-        merge(sources, { router: router.path(path) })
-      )).debug()
+  const page$ = match$.map(({path, value}) => {
+    return value(Object.assign({}, sources, {
+      router: sources.router.path(path)
+    }))
+  })
+  .remember()
 
   const makeLink = (path, label) => li([a({ props: { href: path } }, label)]);
-
-  // const nav$ = xs.of(div([
-  //     ul('.slide-out .side-nav', [
-  //       li(['First Header']),
-  //       li(['Second Header'])
-  //     ]),
-  //     a('.button-collapse', {props: { href : "/", 'data-activates': "slide-out"}}, [i(".material-icons", 'menu'), 'menu'])
-  //   ])
-  // );
-
-  // const toggle$ = sources.DOM.select('.button-collapse').elements().filter(els => els.length === 1).debug().map(els => els[0].sideNav('show')).startWith(null)
 
   const nav$ = xs.of(header([nav('#navigation .grey .darken-4', [
     div('.nav-wrapper', [
@@ -117,23 +120,12 @@ export default function Router(sources) {
         makeLink('/disease', 'Disease'),
         makeLink('/compound', 'Compound'),
         makeLink('/target', 'Target'),
+        makeLink('/statistics', 'Statistics'),
         makeLink('/settings', 'Settings')
       ])
     ])
   ])
   ]));
-
-  // Experiment
-  // const svg = svg([
-  //   svg.g([
-  //           svg.path(
-  //             ["M22.7,9.7l-1.4-1.4c-0.4,0.4-0.8,0.8-1.2,1.1l-5.4-5.4c0.3-0.4,0.7-0.8,1.1-1.2l-1.4-1.4c-3.4,3.4-3.6,6.7-3.4,9.6", 
-  //              "c-3-0.2-6.3,0-9.6,3.4l1.4,1.4c0.4-0.4,0.8-0.8,1.2-1.1l5.4,5.4c-0.3,0.4-0.7,0.8-1.1,1.2l1.4,1.4c3.4-3.4,3.5-6.6,3.4-9.6",
-  //              "C16,13.3,19.3,13.1,22.7,9.7z M19.2,9.9c-0.9,0.5-1.7,0.8-2.6,1l-3.6-3.6c0.2-0.9,0.5-1.7,1-2.6L19.2,9.9z M11.1,12.9",
-  //              "c0.1,0.8,0.1,1.6,0,2.4l-2.5-2.5C9.4,12.9,10.2,12.9,11.1,12.9z M4.8,14.1c0.9-0.5,1.7-0.8,2.6-1l3.6,3.6c-0.2,0.9-0.5,1.7-1,2.6",
-  //              "L4.8,14.1z M12.9,11.1c-0.1-0.8-0.1-1.7,0-2.5l2.5,2.5C14.6,11.2,13.8,11.1,12.9,11.1z"])
-  //     ])
-  //   ])
 
   const footer$ = xs.of(
     footer('.page-footer .grey .darken-4 .grey-text', [
@@ -146,9 +138,9 @@ export default function Router(sources) {
         div('.col .s12', ['© 2017 By Data intuitive'])
       ]),
     ])
-  )
+  );
 
-  const view$ = page$.map(prop('DOM')).filter(Boolean).flatten();
+  const view$ = page$.map(prop('DOM')).flatten()
 
   const vdom$ = xs.combine(nav$, view$, footer$)
     .map(([navDom, viewDom, footerDom]) => div(
@@ -167,19 +159,18 @@ export default function Router(sources) {
           settings: initSettings,
         })
     } else {
-      return prevState
+      return clone(prevState)
     }
-  })
+  });
 
   return {
-    DOM: vdom$,
-    // router: page$.map(c => c.router || xs.never()).flatten(), //.startWith('/signature'), //.debug(console.log), //.filter(Boolean)
+    DOM: vdom$, 
+    router: page$.map(c => c.router || xs.never()).flatten(),
     HTTP: page$.map(prop('HTTP')).filter(Boolean).flatten(),
-    // onion: page$.map(prop('onion')).filter(Boolean).flatten(),
     onion: xs.merge(
       defaultReducer$,
-      page$.map(prop('onion')
-      ).filter(Boolean).flatten()), //.filter(Boolean).compose(flattenSequentially),
+      page$.map(prop('onion')).filter(Boolean).flatten()
+    ),
     vega: page$.map(prop('vega')).filter(Boolean).flatten(),
   }
 

@@ -1,4 +1,4 @@
-import { a, div, br, label, input, p, button, code, pre } from '@cycle/dom'
+import { a, div, br, label, input, p, button, code, pre, span } from '@cycle/dom'
 import xs from 'xstream'
 import isolate from '@cycle/isolate'
 import { mergeWith, merge } from 'ramda'
@@ -41,7 +41,7 @@ function Statistics(sources) {
                 .replaceError(error => xs.of(error)) // emit error
         )
         .flatten()
-        .compose(debounce(2000))
+        // .compose(debounce(2000))
         .debug()
 
     const validResponse$ = response$$
@@ -50,23 +50,34 @@ function Statistics(sources) {
                 .replaceError(error => xs.empty())
         )
         .flatten()
-        .compose(debounce(2000))
+        // .compose(debounce(2000))
         .debug()
 
     const data$ = validResponse$
         .map(result => result.body.result.data)
     // .debug()
 
-    const initVdom$ = xs.of(div([p('Init')]))
+    const initVdom$ = xs.of(div([p('Initializing...')]))
 
     const loadingVdom$ = request$
         .mapTo(div([p('Loading...')]))
 
-    const loadedVdom$ = xs.combine(
-        data$,
-        // xs.periodic(1000)
+    const loadedVdom$ = data$
+        .map(data => div([
+            div('.row', [
+                div('.col .s6 .offset-s3', [
+                    div('.card .grey .lighten-2', [
+                        div('.card-content', [
+                            span('.card-title', ['Statistics:']),
+                            p(['# Compounds: ', data.compounds]),
+                            p(['# Samples: ', data.samples]),
+                            p(['# Genes: ', data.genes]),
+                        ])
+                    ])
+                ])
+            ])
+        ])
         )
-        .map(([data]) => code(JSON.stringify(data) + ' '))
 
     const errorVdom$ = invalidResponse$.mapTo(div([p('An error occured !!!')]))
 

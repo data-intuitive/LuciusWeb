@@ -25,16 +25,16 @@ var entry = PRODUCTION
              ];
 
 module.exports = {
-  entry: entry,
+  entry: ['./src/js/main'], //entry,
   output: {
     path: path.join(__dirname, 'dist'),
     publicPath: '/dist/',
     filename: 'bundle.js',
   },
   devServer: {
-    historyApiFallback: true,
+    historyApiFallback: false,
     contentBase: './',
-    hot: true
+    hot: true 
   },
   module: {
     rules: [

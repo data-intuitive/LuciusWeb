@@ -17,7 +17,6 @@ import { initSettings } from '../../pages/settings'
 import debounce from 'xstream/extra/debounce'
 import dropRepeats from 'xstream/extra/dropRepeats'
 
-
 export default function Router(sources) {
   const { router } = sources;
 

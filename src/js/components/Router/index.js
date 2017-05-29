@@ -7,6 +7,8 @@ import { HttpRequest } from "../../examples/http-request"
 import SignatureWorkflow from '../../pages/signature'
 import CompoundWorkflow from '../../pages/compound'
 import StatisticsWorkflow from '../../pages/statistics'
+import TargetWorkflow from '../../pages/target'
+import Home from '../../pages/home'
 import { Check } from '../Check'
 import { IsolatedSettings } from '../../pages/settings'
 import flattenSequentially from 'xstream/extra/flattenSequentially'
@@ -15,83 +17,6 @@ import { initSettings } from '../../pages/settings'
 import debounce from 'xstream/extra/debounce'
 import dropRepeats from 'xstream/extra/dropRepeats'
 
-function TargetWorkflow(sources) {
-
-  const vdom$ = xs.of(
-    div([
-      div('.row .red .darken-4', [
-        h2('.col .s10 .s-offset-1 .red-text .text-lighten-4', ['This workflow is under construction']),
-      ]),
-      div('.row .red .lighten-5', { style: { height: '500px' } })
-    ])
-  )
-
-  const router$ = sources.DOM.select('a').events('click')
-    .debug(ev => ev.preventDefault())
-    .map(ev => ev.target.pathname)
-    .debug()
-
-  return {
-    DOM: vdom$,
-    // router: router$
-  };
-
-}
-
-function Home(sources) {
-
-  const checkProps$ = sources.onion.state$
-    .compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
-    .startWith({ settings: initSettings })
-    .map(state => merge(state.settings.form, state.settings.api))
-  const CheckSink = Check(merge(sources, { props: checkProps$ }))
-
-  const vdom$ = xs.combine(CheckSink.DOM, xs.of(''))
-    .map(([check, r]) => div('.row', [
-      h2('.col .s6 offset-s3', ['Welcome to ComPass', check]),
-      p('.col .s6 .offset-s3 .flow-text', [
-        'This application is the interface with L1000 data. Currently, ',
-        'there is support for working with disease profiles expressed using gene lists or signatures and compound similarity.'
-      ]),
-      div('.col .s6 .offset-s3', [
-        div('.col .s12 .pink .darken-4', { style: { padding: '10px 10px 10px 10px' } },
-          [
-            i('.pink-text .text-lighten-1 .material-icons', 'play_arrow'),
-            a('.pink-text .text-lighten-3', { props: { href: '/disease' }, style: { fontWeight: 'bolder', 'font-size': '32px' } }, ' Disease Workflow')
-          ]),
-        div('.row', []),
-        div('.col .s12 .orange .darken-4 .pink-text', { style: { padding: '10px 10px 10px 10px' } },
-          [
-            i('.orange-text .text-lighten-1 .material-icons', 'play_arrow'),
-            a('.orange-text .text-lighten-3', { props: { href: '/compound' }, style: { fontWeight: 'bolder', 'font-size': '32px' } }, ' Compound Workflow')
-          ]),
-        div('.row', []),
-        div('.col .s12 .red .darken-4 .pink-text', { style: { padding: '10px 10px 10px 10px' } },
-          [
-            i('.red-text .text-lighten-1 .material-icons', 'play_arrow'),
-            a('.red-text .text-lighten-4', { props: { href: '/target' }, style: { fontWeight: 'bolder', 'font-size': '32px' } }, ' Target Workflow')
-          ]),
-      ]),
-      p('.col .s6 .offset-s3 .flow-text', [
-        'You can click on one of the workflows above to start it.'
-      ]),
-      // p('.col .s6 .offset-s3', [
-      //   'Interface status: ', 
-      //   check
-      // ]),
-    ]));
-
-  const router$ = sources.DOM.select('a').events('click')
-    .debug(ev => ev.preventDefault())
-    .map(ev => ev.target.pathname)
-
-  return {
-    DOM: vdom$,
-    router: router$,
-    HTTP: CheckSink.HTTP,
-    onion: CheckSink.onion
-  };
-}
 
 export default function Router(sources) {
   const { router } = sources;

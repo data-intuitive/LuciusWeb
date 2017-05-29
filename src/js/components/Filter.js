@@ -1,6 +1,6 @@
 import sampleCombine from 'xstream/extra/sampleCombine'
 import isolate from '@cycle/isolate'
-import { i, p, div, br, label, input, code, table, tr, td, b, h2, button, textarea, a, select, option } from '@cycle/dom';
+import { i, p, div, br, label, input, code, table, tr, td, b, h2, button, textarea, a, select, option, span } from '@cycle/dom';
 import { clone, equals, merge, mergeAll } from 'ramda';
 import xs from 'xstream';
 import { logThis, log } from '../utils/logger'
@@ -22,25 +22,30 @@ function Filter(sources) {
 
     const vdom$ = filterInput$.map(filter =>
         div([
-            div('.input-field .concentration .col .s12 .l4', [
-                select('.browser-default', [
-                    option('.disabled .selected', { props: { value: ''} }, 'Concentration'),
+           div('.input-field .concentration .col .s12 .l4', [
+                 span(['Concentration']),
+                 select('.browser-default', [
+                    option('.selected', { props: { value: '' } }, ''),
                     option({ props: { value: '0.1' } }, 0.1),
-                     option({ props: { value: '1' } }, 1),
+                    option({ props: { value: '1' } }, 1),
                     option({ props: { value: '10' } }, 10),
                     option({ props: { value: '30' } }, 30)
-                 ]),
+                ]),
+
+
             ]),
             div('.input-field .protocol .col .s12 .l4', [
+                span(['Protocol']),
                 select('.browser-default', [
-                    option('.disabled .selected', { props: { value: '' } }, 'Protocol'),
+                    option('.selected', { props: { value: '' } }, ''),
                     option({ props: { value: 'MCF7' } }, 'MCF7'),
                     option({ props: { value: 'PBMC' } }, 'PBMC')
                 ]),
             ]),
             div('.input-field .type .col .s12 .l4', [
+                span(['Type']),
                 select('.browser-default', [
-                    option('.disabled .selected', { props: { value: '' } }, 'Type'),
+                    option('.selected', { props: { value: '' } }, ''),
                     option({ props: { value: 'test' } }, 'test'),
                     option({ props: { value: 'poscon' } }, 'poscon')
                 ]),
@@ -77,7 +82,7 @@ function Filter(sources) {
         concentrationChanged$,
         typeChanged$,
         protocolChanged$
-    ).map((filters) => mergeAll(filters))
+    ).map((filters) => mergeAll(filters)).debug()
 
     // const filter$ = xs.combine(filterInput$, concentrationChanged$, typeChanged$, protocolChanged$)
     //     .map(([prevFilter, concentration, type, protocol]) => {

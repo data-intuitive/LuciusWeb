@@ -63,11 +63,12 @@ function SignatureWorkflow(sources) {
 				})
 		} else {
 			// Reset this workflow 
-			return merge(prevState, {diseaseWorkflow : {}, headTable : {}})
-			// return (
-			// 	{
-			// 		settings: initSettings,
-			// 	})
+			// return prevState
+			// return merge(prevState, {diseaseWorkflow : {}, headTable : {}})
+			return (
+				{
+					settings: prevState.settings,
+				})
 			}
 	})
 
@@ -163,6 +164,7 @@ function SignatureWorkflow(sources) {
 			defaultReducer$,
 			signatureForm.onion,
 			filterReducer$,
+			similarityPlot.onion,
 			stateReducer$,
 			headTable.onion,
 			tailTable.onion

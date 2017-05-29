@@ -35,11 +35,11 @@ export default function CompoundWorkflow(sources) {
                     settings: initSettings,
                 })
         } else {
-            // return (
-            //     {
-            //         settings: initSettings,
-            //     })
-             return prevState
+            return (
+                {
+                    settings: prevState.settings,
+                })
+            //  return prevState
         }
     })
 
@@ -49,15 +49,15 @@ export default function CompoundWorkflow(sources) {
         let additionalState = {
             headTable: merge(prevState.headTable, { query: query }),
             tailTable: merge(prevState.tailTable, { query: query }),
-            hist: merge(prevState.hist, { query: query }),
-            sim: merge(prevState.sim, { query: query }),
-            filter: {}
+            compoundhist: merge(prevState.compoundhist, { query: query }),
+            compoundsim: merge(prevState.compoundsim, { query: query }),
+            compoundfilter: {}
         }
         return merge(prevState, additionalState)
     })
 
     // Filter Form
-    const filterForm = isolate(Filter, 'filter')(sources)
+    const filterForm = isolate(Filter, 'compoundfilter')(sources)
 
     // Propagate filter to state of individual components
     const filterReducer$ = filterForm.filter.map(f => prevState => {
@@ -65,8 +65,8 @@ export default function CompoundWorkflow(sources) {
         let additionalState = {
             headTable: merge(prevState.headTable, { filter: f }),
             tailTable: merge(prevState.tailTable, { filter: f }),
-            hist: merge(prevState.hist, { filter: f }),
-            sim: merge(prevState.sim, { filter: f })
+            compoundhist: merge(prevState.compoundhist, { filter: f }),
+            compoundsim: merge(prevState.compoundsim, { filter: f })
         }
         return merge(prevState, additionalState)
     })
@@ -76,14 +76,14 @@ export default function CompoundWorkflow(sources) {
         .compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
         .startWith({ settings: initSettings })
         .map(state => merge(state.settings.sim, state.settings.api))
-    const similarityPlot = isolate(SimilarityPlot, 'sim')(merge(sources, { props: simProps$ }));
+    const similarityPlot = isolate(SimilarityPlot, 'compoundsim')(merge(sources, { props: simProps$ }));
 
     // histogram component
     const histProps$ = state$
         .compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
         .startWith({ settings: initSettings })
         .map(state => merge(state.settings.hist, state.settings.api))
-    const histogram = isolate(Histogram, 'hist')(merge(sources, { props: histProps$ }));
+    const histogram = isolate(Histogram, 'compoundhist')(merge(sources, { props: histProps$ }));
 
     // tables: Join settings from api and sourire into props
     const headTableProps$ = state$
@@ -109,7 +109,7 @@ export default function CompoundWorkflow(sources) {
     }
 
     const vdom$ = xs.combine(
-        CompoundFormSink.DOM,
+        CompoundFormSink.DOM.startWith(div()),
         filterForm.DOM,
         similarityPlot.DOM, //.DOM.startWith(''),
         histogram.DOM, //.startWith(''),

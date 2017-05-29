@@ -53,19 +53,27 @@ export function Table(sources) {
             category: 'topTable'
         })).debug()
 
-    // Catch the response in a stream
-    const response$ = httpSource$
+
+    const response$$ = sources.HTTP
         .select('topTable')
-        .map((response$) =>
-            response$.replaceError(() => xs.of([]))
+
+    const invalidResponse$ = response$$
+        .map(response$ =>
+            response$
+                .filter(response => false) // ignore regular event
+                .replaceError(error => xs.of(error)) // emit error
         )
         .flatten()
-        .debug();
 
-    // Extract the data from the result
-    // TODO: check for errors coming back
-    const resultData$ = response$.map(response => response.body.result.data);
-    const data$ = resultData$
+    const validResponse$ = response$$
+        .map(response$ =>
+            response$
+                .replaceError(error => xs.empty())
+        )
+        .flatten()
+
+    const data$ = validResponse$
+        .map(result => result.body.result.data)
 
     // Delegate effective rendering to SampleTable:
     const sampleTable = isolate(SampleTable, 'result')(sources);
@@ -112,43 +120,34 @@ export function Table(sources) {
         }
     })
 
-    // Keeping track of when an HTTP request is ongoing...
-    const loadingVdom$ = xs.combine(
-        state$,
-        sampleTable.DOM,
-        // data$.startWith([]),
-        props$,
-        filterText$
-    )
-        .map(([
-            state,
-            dom,
-            // data, 
-            props,
-            filterText]) => div([
-                div('.row .valign-wrapper', { style: { 'margin-bottom': '0px', 'padding-top': '5px', 'background-color': props.color, opacity: 0.5 } }, [
-                    h5('.white-text .col .s5 .valign', props.title),
-                    div('.white-text .col .s7 .valign .right-align', filterText)
-                ]),
-                div('.progress ', [div('.indeterminate')])
-            ]),
-    )
-        .compose(between(request$, data$))
+    const initVdom$ = xs.of(div())
 
-    // Show table when query is not in progress
-    const renderVdom$ = xs.combine(
-        state$,
+    const loadingVdom$ = xs.combine(request$, filterText$, props$)
+        .map(([
+            r,
+            filterText,
+            props,
+        ]) => div([
+            div('.row .valign-wrapper', { style: { 'margin-bottom': '0px', 'padding-top': '5px', 'background-color': props.color, opacity: 0.5 } }, [
+                h5('.white-text .col .s5 .valign', props.title),
+                div('.white-text .col .s7 .valign .right-align', filterText)
+            ]),
+            div('.progress ', [div('.indeterminate')])
+        ]),
+    )
+
+     const loadedVdom$ = xs.combine(
+        data$,
         sampleTable.DOM,
-        // data$.startWith([]),
         props$,
         filterText$
     )
         .map(([
-            state,
+            data,
             dom,
-            // data, 
             props,
-            filterText]) => div([
+            filterText
+            ]) => div([
                 div('.row .valign-wrapper', { style: { 'margin-bottom': '0px', 'padding-top': '5px', 'background-color': props.color } }, [
                     h5('.white-text .col .s5 .valign', props.title),
                     div('.white-text .col .s7 .valign .right-align', filterText)
@@ -162,12 +161,15 @@ export function Table(sources) {
                 ]),
             ])
         )
-        .compose(between(data$, request$))
-        .startWith(div([]))      // Initial state!!!!
+     
+    const errorVdom$ = invalidResponse$.mapTo(div('.red .white-text', [p('An error occured !!!')]))
 
-    const vdom$ = xs.merge(renderVdom$, loadingVdom$)
+    const vdom$ = xs.merge(initVdom$, loadingVdom$, loadedVdom$, errorVdom$)
 
-    // const vdom$ = renderVdom$ //, loadingVdom$).flatten()//.startWith(div())
+    const defaultReducer$ = xs.of(prevState => {
+        console.log('table -- defaultReducer')
+        return {}
+    })
 
     // Make sure that the state is cycled in order for SampleTable to pick it up
     const stateReducer$ = data$.map(data => prevState => {
@@ -179,6 +181,7 @@ export function Table(sources) {
         DOM: vdom$,
         HTTP: request$, //.compose(debounce(2000)),
         onion: xs.merge(
+            defaultReducer$,
             stateReducer$,
         )
     };

@@ -138,7 +138,7 @@ export function Histogram(sources) {
 
 	const errorVdom$ = invalidResponse$.mapTo(div('.red .white-text', [p('An error occured !!!')]))
 
-	const vdom$ = xs.merge(initVdom$, loadingVdom$, loadedVdom$, errorVdom$)
+	const vdom$ = xs.merge(initVdom$, loadedVdom$, loadingVdom$, errorVdom$)
 
 	const defaultReducer$ = xs.of(prevState => {
 		console.log('hist -- defaultReducer')

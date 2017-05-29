@@ -24,7 +24,7 @@ export function Table(sources) {
     const props$ = sources.props
 
     const modifiedState$ = state$
-        .filter(state => state.query != '')
+        // .filter(state => state.query != '')
         .filter(state => state.query != null)
         .compose(dropRepeats((x, y) => equals(omit(['result'], x), omit(['result'], y))))
 
@@ -164,7 +164,7 @@ export function Table(sources) {
      
     const errorVdom$ = invalidResponse$.mapTo(div('.red .white-text', [p('An error occured !!!')]))
 
-    const vdom$ = xs.merge(initVdom$, loadingVdom$, loadedVdom$, errorVdom$)
+    const vdom$ = xs.merge(initVdom$, loadedVdom$, loadingVdom$, errorVdom$)
 
     const defaultReducer$ = xs.of(prevState => {
         console.log('table -- defaultReducer')

@@ -25,7 +25,7 @@ export function Histogram(sources) {
 	const ENTER_KEYCODE = 13
 
 	const state$ = sources.onion.state$.debug(state => {
-		console.log('== State in Sim')
+		console.log('== State in Histogram')
 		console.log(state)
 	});;
 	const domSource$ = sources.DOM;
@@ -142,7 +142,7 @@ export function Histogram(sources) {
 
 	const defaultReducer$ = xs.of(prevState => {
 		console.log('hist -- defaultReducer')
-		return prevState
+		return { query : '' }
 		// return merge(prevState, {})
 	})
 
@@ -150,7 +150,8 @@ export function Histogram(sources) {
 	return {
 		DOM: vdom$,
 		HTTP: request$,//.compose(debounce(5000)),
-		vega: vegaSpec$
+		vega: vegaSpec$,
+		onion: defaultReducer$
 	};
 
 }

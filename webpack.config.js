@@ -32,9 +32,10 @@ module.exports = {
     filename: 'bundle.js',
   },
   devServer: {
-    historyApiFallback: false,
+    inline: true,
+    historyApiFallback: true,
     contentBase: './',
-    hot: true 
+    hot: false
   },
   module: {
     rules: [
@@ -65,7 +66,6 @@ module.exports = {
       jQuery: 'jquery',
       'window.$': 'jquery',
       'window.jQuery': 'jquery',
-      "Hammer": "hammerjs/hammer"
     }),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NamedModulesPlugin()
@@ -80,36 +80,3 @@ module.exports = {
   }
 };
 
-
-// module.exports = {
-//   entry: ( ENV == 'production' ?
-//            ['./js/main']
-//            :
-//            [
-//             'webpack-dev-server/client?http://localhost:8080',
-//             'webpack/hot/dev-server',
-//             './js/main'
-//            ]
-//   ),
-//   output: {
-//     filename: './dist/bundle.js'
-//   },
-//   module: {
-//     loaders: [
-//       {
-//         test: /\.js$/,
-//         loaders: ['babel-loader'],
-// 	      include: path.join(__dirname, 'src'),
-//         // include: __dirname,
-//         exclude: /node_modules/
-//       }
-//     ]
-//   },
-//   plugins: ( ENV == 'production' ?
-//              [
-//               new webpack.optimize.UglifyJsPlugin({minimize: true}),
-//              ]
-//              :
-//              [new webpack.HotModuleReplacementPlugin()]
-//   ),
-// };

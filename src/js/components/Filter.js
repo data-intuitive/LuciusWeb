@@ -1,6 +1,6 @@
 import sampleCombine from 'xstream/extra/sampleCombine'
 import isolate from '@cycle/isolate'
-import { i, p, div, br, label, input, code, table, tr, td, b, h2, button, textarea, a, select, option, span } from '@cycle/dom';
+import { i, p, div, br, label, input, code, table, tr, td, b, h2, h5, button, textarea, a, select, option, span } from '@cycle/dom';
 import { clone, equals, merge, mergeAll } from 'ramda';
 import xs from 'xstream';
 import { logThis, log } from '../utils/logger'
@@ -23,7 +23,7 @@ function Filter(sources) {
     const vdom$ = filterInput$.map(filter =>
         div([
            div('.input-field .concentration .col .s12 .l4', [
-                 span(['Concentration']),
+                 span('.blue-grey-text',  ['Concentration']),
                  select('.browser-default', [
                     option('.selected', { props: { value: '' } }, ''),
                     option({ props: { value: '0.1' } }, 0.1),
@@ -31,11 +31,9 @@ function Filter(sources) {
                     option({ props: { value: '10' } }, 10),
                     option({ props: { value: '30' } }, 30)
                 ]),
-
-
             ]),
             div('.input-field .protocol .col .s12 .l4', [
-                span(['Protocol']),
+                span('.blue-grey-text',  ['Protocol']),
                 select('.browser-default', [
                     option('.selected', { props: { value: '' } }, ''),
                     option({ props: { value: 'MCF7' } }, 'MCF7'),
@@ -43,7 +41,7 @@ function Filter(sources) {
                 ]),
             ]),
             div('.input-field .type .col .s12 .l4', [
-                span(['Type']),
+                span('.blue-grey-text',  ['Type']),
                 select('.browser-default', [
                     option('.selected', { props: { value: '' } }, ''),
                     option({ props: { value: 'test' } }, 'test'),

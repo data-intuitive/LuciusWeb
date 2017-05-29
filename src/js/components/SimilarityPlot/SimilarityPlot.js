@@ -44,9 +44,9 @@ export function SimilarityPlot(sources) {
 		.filter(state => state.query != null)
 	// .remember()
 
-	const request$ = xs.combine(modifiedState$, props$, visible$)
-		.filter(([state, props, visible]) => visible)
-		.map(([state, props, visible]) => {
+	const request$ = xs.combine(modifiedState$, props$)//, visible$)
+		// .filter(([state, props, visible]) => visible)
+		.map(([state, props]) => {
 			return {
 				url: props.url + '&classPath=com.dataintuitive.luciusapi.binnedZhang',
 				method: 'POST',
@@ -61,26 +61,31 @@ export function SimilarityPlot(sources) {
 		})
 		.debug();
 
-	// Catch the response in a stream
-	const response$ = httpSource$
+	const response$$ = sources.HTTP
 		.select('binnedZhang')
-		.map((response$) =>
+
+	const invalidResponse$ = response$$
+		.map(response$ =>
 			response$
-				.map(response => response.body.result.data)
-				.replaceError((err) => {
-					return xs.of(emptyData)
-				})
+				.filter(response => false) // ignore regular event
+				.replaceError(error => xs.of(error)) // emit error
 		)
 		.flatten()
-		.debug();
+		.debug()
 
-	// Extract the data from the result
-	// TODO: check for errors coming back
-	// Please note: since the Vega driver looks for an element in the dom, it needs to exist prior to rendering it!
-	const resultData$ = response$
+	const validResponse$ = response$$
+		.map(response$ =>
+			response$
+				.replaceError(error => xs.empty())
+		)
+		.flatten()
+		.debug()
 
-	// While doing a request and parsing the new vega spec, display render the empty spec:
-	const data$ = resultData$.startWith(emptyData);
+	const data$ = validResponse$
+		.map(result => result.body.result.data)
+		// It need startWith in order to initialize the vega component.
+		// Be sure to drop(1) it later!!!
+		.startWith(emptyData)
 
 	// Ingest the data in the spec and return to the driver
 	const vegaSpec$ = xs.combine(data$, width$, visible$)
@@ -94,9 +99,10 @@ export function SimilarityPlot(sources) {
 		)
 	};
 
-	// Keeping track of when an HTTP request is ongoing...
-	const loadingVdom$ = xs.combine(state$, data$)
-		.map(([state, data]) => div([
+	const initVdom$ = xs.of(div())
+
+	const loadingVdom$ = request$.mapTo(
+		div([
 			div('.preloader-wrapper .small .active', { style: { 'z-index': 1, position: 'absolute' } }, [
 				div('.spinner-layer .spinner-green-only', [
 					div('.circle-clipper .left', [
@@ -105,29 +111,35 @@ export function SimilarityPlot(sources) {
 				])
 			]),
 			div({ style: { opacity: 0.4 } }, [makeChart()]),
-		]))
-		.compose(between(request$, vegaSpec$))
+		])
+	)
 
-	// Show table when query is not in progress
-	const renderVdom$ = xs.combine(state$, data$)
-		.map(([state, data]) => div([
+	const loadedVdom$ = xs.combine(
+		data$.drop(1),
+		state$
+	)
+		.map(([data, state]) => div([
 			(equals(data, emptyData))
 				? div({ style: { visibility: 'hidden' } }, [makeChart()])
 				: div([makeChart()])
 		]))
-		.compose(between(data$, request$))
 
-	// View
-	const vdom$ = xs.merge(renderVdom$, loadingVdom$)
+	const errorVdom$ = invalidResponse$.mapTo(div('.red .white-text', [p('An error occured !!!')]))
 
-	// const defaultReducer$ = xs.of(prevState => {})
+	const vdom$ = xs.merge(initVdom$, loadingVdom$, loadedVdom$, errorVdom$)
+
+	const defaultReducer$ = xs.of(prevState => {
+		console.log('sim -- defaultReducer')
+		return prevState
+		// return merge(prevState, {})
+	})
 
 
 	return {
 		DOM: vdom$,
-		HTTP: request$, //.compose(debounce(5000)),
+		HTTP: request$,
 		vega: vegaSpec$,
-		// onion: defaultReducer$
+		onion: defaultReducer$
 	};
 
 }

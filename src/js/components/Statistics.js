@@ -57,27 +57,32 @@ function Statistics(sources) {
         .map(result => result.body.result.data)
     // .debug()
 
-    const initVdom$ = xs.of(div([p('Initializing...')]))
 
-    const loadingVdom$ = request$
-        .mapTo(div([p('Loading...')]))
-
-    const loadedVdom$ = data$
-        .map(data => div([
-            div('.row', [
-                div('.col .s6 .offset-s3', [
-                    div('.card .grey .lighten-2', [
-                        div('.card-content', [
-                            span('.card-title', ['Statistics:']),
-                            p(['# Compounds: ', data.compounds]),
-                            p(['# Samples: ', data.samples]),
-                            p(['# Genes: ', data.genes]),
-                        ])
+    const container = (el) => div([
+        div('.row', [
+            div('.col .s6 .offset-s3', [
+                div('.card .grey .lighten-2', [
+                    div('.card-content', [
+                        span('.card-title', ['Statistics:']),
+                        span(el)
                     ])
                 ])
             ])
         ])
-        )
+    ])
+
+    const initVdom$ = xs.of(container([p('Initializing...')]))
+
+    const loadingVdom$ = request$
+        .mapTo(container([p('Loading...')]))
+
+    const loadedVdom$ = data$
+        .map(data => container([
+            p(['# Compounds: ', data.compounds]),
+            p(['# Samples: ', data.samples]),
+            p(['# Genes: ', data.genes]),
+        ])
+    )
 
     const errorVdom$ = invalidResponse$.mapTo(div([p('An error occured !!!')]))
 

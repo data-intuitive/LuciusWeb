@@ -62,7 +62,8 @@ function SignatureWorkflow(sources) {
 					settings: initSettings,
 				})
 		} else {
-			return prevState
+			// Reset this workflow 
+			return merge(prevState, {diseaseWorkflow : {}, headTable : {}})
 			// return (
 			// 	{
 			// 		settings: initSettings,

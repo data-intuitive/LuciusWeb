@@ -48,7 +48,7 @@ export default function Router(sources) {
     .debug('-------------PAGE-----------')
     .remember()
 
-  const makeLink = (path, label, options) => li([a(options,{ props: { href: path } }, label)]);
+  const makeLink = (path, label, options) => li([a(options, { props: { href: path } }, label)]);
 
   const nav$ = xs.of(header([nav('#navigation .grey .darken-4', [
     div('.nav-wrapper', [
@@ -57,10 +57,10 @@ export default function Router(sources) {
         // makeLink('/bmi', 'BMI'),
         // makeLink('/hello', 'Hello'),
         // makeLink('/http', 'Http'),
-        makeLink('/disease', 'Disease', '.pink-text'),
         makeLink('/compound', 'Compound', '.orange-text'),
         makeLink('/target', 'Target', '.red-text'),
-        makeLink('/settings', 'Settings', '')
+        makeLink('/disease', 'Disease', '.pink-text'),
+        makeLink('/settings', 'Settings', ''),
       ])
     ])
   ])

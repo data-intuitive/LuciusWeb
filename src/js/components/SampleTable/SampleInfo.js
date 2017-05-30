@@ -7,7 +7,7 @@ import dropRepeats from 'xstream/extra/dropRepeats'
 export function SampleInfo(sources) {
 
     const state$ = sources.onion.state$//.debug(log);
-    const props$ = sources.props.debug()
+    const props$ = sources.props //.debug()
 
     const click$ = sources.DOM.select('.zoom').events('click').mapTo(1)
     const zoomed$ = click$

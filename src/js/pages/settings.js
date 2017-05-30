@@ -6,8 +6,9 @@ import { clone } from 'ramda';
 import sampleCombine from 'xstream/extra/sampleCombine'
 
 export const initSettings = {
-	commmon: {
-		version: 'v2',
+	common: {
+		version: "v2",
+		blur: 0
 	},
 	headTableSettings: {
 		title: 'Top Table 123',
@@ -141,6 +142,20 @@ export function Settings(sources) {
 						]),
 					]),
 				]),
+				// API Settings 
+				tableHeaderEl('Common'),
+				div('.card', [
+					div('.card-content', [
+						div('.input-field', [
+							input('.common-version', { style: { fontSize: '20px' }, props: { type: 'text', value: state.common.version } }),
+							label('.active', 'Version'),
+						]),
+						div('.input-field ', [
+							input('.common-blur', { style: { fontSize: '20px' }, props: { type: 'text', value: state.common.blur } }),
+							label('.active', 'Blur'),
+						]),
+					]),
+				]),
 
 				div('.row .container', [
 				]),
@@ -180,7 +195,7 @@ export function Settings(sources) {
 			tailTableSettings: mergeAll(settings),
 		}))//.debug(console.log)
 
-	// Table Settings
+	// API Settings
 	const apiHostname$ = makeConfigStream('.api-hostname', 'hostname')
 	const apiPort$ = makeConfigStream('.api-port', 'port')
 
@@ -197,10 +212,25 @@ export function Settings(sources) {
 			hist: mergeAll(settings)
 		}))//.debug(console.log)
 
+	// API Settings
+	const commonVersion$ = makeConfigStream('.common-version', 'version')
+	const commonBlur$ = makeConfigStream('.common-blur', 'blur')
+
+	const commonSettings$ = xs.combine(settings$.map(state => state.common), commonVersion$, commonBlur$)
+		.map((settings) => ({
+			common: mergeAll(settings)
+		}))//.debug(console.log)
+
 	// const nrHostname$ = sources.DOM.select('.hostname').events('input').map(event => ({hostname : event.target.value})).debug(console.log)
 	// const nrSourire$ = sources.DOM.select('.sourire').events('input').map(event => ({sourire : event.target.value})).debug(console.log)
 
-	const all$ = xs.combine(headTableSettings$, tailTableSettings$, apiSettings$, histSettings$)
+	const all$ = xs.combine(
+		headTableSettings$, 
+		tailTableSettings$, 
+		apiSettings$, 
+		histSettings$,
+		commonSettings$
+		)
 		.map((settings) => mergeAll(settings))//.debug(console.log)
 
 	const apply$ = sources.DOM.select('.apply').events('click')

@@ -7,75 +7,82 @@ import dropRepeats from 'xstream/extra/dropRepeats'
 export function SampleInfo(sources) {
 
     const state$ = sources.onion.state$//.debug(log);
-    const props$ = sources.props //.debug()
+    const props$ = sources.props.debug()
 
     const click$ = sources.DOM.select('.zoom').events('click').mapTo(1)
     const zoomed$ = click$
-                        .fold((x,y) => x + y, 0)
-                        .map(count => (count % 2 == 0) ? false : true)
+        .fold((x, y) => x + y, 0)
+        .map(count => (count % 2 == 0) ? false : true)
 
     function entry(key, value) {
         return [
-            span('.col .s4', {style : { fontWeight: 'lighter'}}, key), 
+            span('.col .s4', { style: { fontWeight: 'lighter' } }, key),
             span('.col .s8', (value.length != 0) ? value : '')
-            ]
+        ]
     }
 
-    const detail = (sample, props) => {
-        let hStyle = {style : { margin: '0px', fontWeight: 'bold'}}
-        let pStyle = {style : { margin: '0px'}}
-        let url = props.urlSourire + encodeURIComponent(sample.smiles).replace(/%20/g,'+')
+    const blur$ = props$
+        .filter(props => props.blur != undefined)
+        .map(props => ({ filter : 'blur(' + props.blur + 'px)'}) )
+        .startWith({ filter : 'blur(0px)'})
+
+    const detail = (sample, props, blur) => {
+        let hStyle = { style: { margin: '0px', fontWeight: 'bold' } }
+        let pStyle = { style: { margin: '0px' } }
+        let hStylewBlur = { style: merge(blur, { margin: '0px', fontWeight: 'bold' } ) }
+        let pStylewBlur = { style: merge(blur, { margin: '0px' } ) }
+        let url = props.urlSourire + encodeURIComponent(sample.smiles).replace(/%20/g, '+')
         return div('', [
-            div('.col .s12 .l4', {style : {margin : '15px 0px 0px 0px'}}, [ 
+            div('.col .s12 .l4', { style: { margin: '15px 0px 0px 0px' } }, [
                 p('.col .s12 .grey-text', hStyle, 'Sample Info:'),
-                p(pStyle, entry('Sample ID: ', sample.id)), 
-                p(pStyle, entry('protocolname: ', sample.protocolname)),                
+                p(pStyle, entry('Sample ID: ', sample.id)),
+                p(pStyle, entry('protocolname: ', sample.protocolname)),
                 p(pStyle, entry('Concentration: ', sample.concentration)),
                 p(pStyle, entry('Year: ', sample.year)),
                 p(pStyle, entry('Plate ID: ', sample.plateid)),
             ]),
-            div('.col .s12 .l4', {style : {margin : '15px 0px 0px 0px'}}, [ 
+            div('.col .s12 .l4', { style: { margin: '15px 0px 0px 0px' } }, [
                 p('.col .s12 .grey-text', hStyle, 'Compound Info:'),
-                p(pStyle, entry('Name: ', sample.compoundname)), 
-                p(pStyle, entry('JNJS: ', sample.jnjs)), 
-                p(pStyle, entry('JNJB: ', sample.jnjb)), 
-                p(pStyle, entry('Type: ', sample.Type)), 
-                p('.s12', pStyle, entry('Targets: ', sample.targets.join(', '))), 
-            ]),            
-            div('.col .s6 .l4', {style : {margin : '20px 0px 0px 0px'}}, [ 
+                p(pStylewBlur, entry('Name: ', sample.compoundname)),
+                p(pStylewBlur, entry('JNJS: ', sample.jnjs)),
+                p(pStylewBlur, entry('JNJB: ', sample.jnjb)),
+                p(pStyle, entry('Type: ', sample.Type)),
+                p('.s12', pStyle, entry('Targets: ', sample.targets.join(', '))),
+            ]),
+            div('.col .s6 .l4', { style: merge(blur, { margin: '20px 0px 0px 0px' } ) }, [
                 (sample.smiles != null && sample.smiles != 'NA' && sample.smiles != 'No Smiles')
-                ? img('.col .s12 .valign', {props: {src: url}})
-                : ''
-            ]),            
+                    ? img('.col .s12 .valign', { props: { src: url } })
+                    : ''
+            ]),
         ])
     }
 
-    const vdom$ = xs.combine(state$, zoomed$, props$)
-       .map(([sample, zoom, props]) => {
+    const vdom$ = xs.combine(state$, zoomed$, props$, blur$)
+        .map(([sample, zoom, props, blur]) => {
             let bgcolor = (sample.zhang >= 0) ? 'rgba(44,123,182, 0.08)' : 'rgba(215,25,28, 0.08)'
-            let url = props.urlSourire + encodeURIComponent(sample.smiles).replace(/%20/g,'+')
+            let url = props.urlSourire + encodeURIComponent(sample.smiles).replace(/%20/g, '+')
             let zhangRounded = (sample.zhang != null) ? sample.zhang.toFixed(3) : 'NA'
 
-            return li('.collection-item  .zoom', {style : {'background-color' : bgcolor}},    
+            return li('.collection-item  .zoom', { style: { 'background-color': bgcolor } },
                 [
-                    div('.row', {style: {fontWeight : 'small'}}, [
-                        div('.col .s1 .left-align', {style: {fontWeight: 'bold'}}, [zhangRounded]),
+                    div('.row', { style: { fontWeight: 'small' } }, [
+                        div('.col .s1 .left-align', { style: { fontWeight: 'bold' } }, [zhangRounded]),
                         div('.col .s2', [sample.id]),
                         div('.col .s1', [sample.protocolname]),
-                        div('.col .s2', [(sample.jnjs != "NA") ? sample.jnjs : '']),
-                        div('.col .s3', [sample.compoundname]),
-                        div('.col .s3 .center-align',  [
+                        div('.col .s2', {style : blur}, [(sample.jnjs != "NA") ? sample.jnjs : '']),
+                        div('.col .s3', {style : blur}, [sample.compoundname]),
+                        div('.col .s3 .center-align', {style : blur}, [
                             ((sample.smiles != null && sample.smiles != 'NA' && sample.smiles != 'No Smiles') && zoom == false)
-                            ? img({props: {src: url, height:50, 'object-fit': 'contain'}})
-                            : ''
-                            ]),
+                                ? img({ props: { src: url, height: 50, 'object-fit': 'contain' } })
+                                : ''
+                        ]),
                     ]),
-                    (zoom) ? div('.row', [ detail(sample, props) ]) : div()
+                    (zoom) ? div('.row', [detail(sample, props, blur)]) : div()
                 ])
         })
 
-    return { 
-    	DOM: vdom$
-  };
+    return {
+        DOM: vdom$
+    };
 
 }

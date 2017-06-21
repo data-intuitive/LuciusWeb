@@ -89,11 +89,11 @@ export default function CompoundWorkflow(sources) {
     const headTableProps$ = state$
         .compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
         .startWith({ settings: initSettings })
-        .map(state => merge(merge(state.settings.headTableSettings, state.settings.api), state.settings.sourire))
+		.map(state => merge(merge(merge(state.settings.headTableSettings, state.settings.common), state.settings.api), state.settings.sourire)).debug()
     const tailTableProps$ = state$
         .compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
         .startWith({ settings: initSettings })
-        .map(state => merge(merge(state.settings.tailTableSettings, state.settings.api), state.settings.sourire))
+		.map(state => merge(merge(merge(state.settings.tailTableSettings, state.settings.common), state.settings.api), state.settings.sourire))
     const headTable = isolate(Table, 'headTable')(merge(sources, { props: headTableProps$ }));
     const tailTable = isolate(Table, 'tailTable')(merge(sources, { props: tailTableProps$ }));
 

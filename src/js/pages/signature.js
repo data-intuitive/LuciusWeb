@@ -164,7 +164,6 @@ function SignatureWorkflow(sources) {
 			defaultReducer$,
 			signatureForm.onion,
 			filterReducer$,
-			similarityPlot.onion,
 			stateReducer$,
 			headTable.onion,
 			tailTable.onion

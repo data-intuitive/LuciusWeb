@@ -41,8 +41,11 @@ export function SimilarityPlot(sources) {
 
 	const modifiedState$ = state$
 		.compose(dropRepeats((x, y) => equals(x, y)))
-		.filter(state => state.query != null)
-	// .remember()
+		.filter(state => state.query != null && state.query != '')
+
+	const emptyState$ = state$
+		.compose(dropRepeats((x, y) => equals(x, y)))
+		.filter(state => state.query == null || state.query == '')
 
 	const request$ = xs.combine(modifiedState$, props$)//, visible$)
 		// .filter(([state, props, visible]) => visible)
@@ -99,7 +102,7 @@ export function SimilarityPlot(sources) {
 		)
 	};
 
-	const initVdom$ = xs.of(div())
+	const initVdom$ = emptyState$.mapTo(div())
 
 	const loadingVdom$ = request$.mapTo(
 		div([
@@ -126,7 +129,7 @@ export function SimilarityPlot(sources) {
 
 	const errorVdom$ = invalidResponse$.mapTo(div('.red .white-text', [p('An error occured !!!')]))
 
-	const vdom$ = xs.merge(initVdom$, loadedVdom$, loadingVdom$, errorVdom$)
+	const vdom$ = xs.merge(loadedVdom$, loadingVdom$, errorVdom$, initVdom$)
 
 	return {
 		DOM: vdom$,

@@ -42,7 +42,13 @@ function SignatureGenerator(sources) {
         .flatten()
         .debug()
 
-    const signature$ = response$.map(r => r.body.result.join(" "))
+    const validSignature$ = response$
+                        .map(r => r.body.result.join(" "))
+                        .filter(s => s != '')
+
+    const invalidSignature$ = response$
+                        .map(r => r.body.result.join(" "))
+                        .filter(s => s == '')
 
     const geneStyle = {
         style : {
@@ -52,18 +58,32 @@ function SignatureGenerator(sources) {
         }
     }
 
-    const vdom$ = signature$
+    const validVdom$ = validSignature$
         .map(s => div('.card .orange .lighten-3', [
             div('.card-content .orange-text .text-darken-4', [
                 span('.card-title', 'Signature:'),
-                div('.row', {style: {fontSize: "16px", fontStyle: 'bold'}}, s.split(" ").map(gene => div('.col .orange .lighten-4', geneStyle, gene)))
+                div('.row', {style: {fontSize: "16px", fontStyle: 'bold'}}, 
+                    s.split(" ").map(gene => div('.col .orange .lighten-4', geneStyle, gene)))
             ])
         ]))
         .startWith(div('.card .orange .lighten-3', []))
 
+    const invalidVdom$ = invalidSignature$
+        .map(s => div('.card .orange .lighten-3', [
+            div('.card-content .red-text .text-darken-1', [
+                div('.row', {style: {fontSize: "16px", fontStyle: 'bold'}}, [
+                    p('.center', {style: {fontSize: "26px"}}, "The resulting signature is empty, please check the sample selection!") 
+                ])
+            ])
+        ]))
+        .startWith(div('.card .orange .lighten-3', []))
+
+    const vdom$ = xs.merge(invalidVdom$, validVdom$)
+    const signature$ = xs.merge(validSignature$, invalidSignature$)
+
     return {
         DOM: vdom$,
-        signature: signature$.debug(),
+        signature: signature$,
         HTTP: request$,
     }
 

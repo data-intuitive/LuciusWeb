@@ -55,7 +55,11 @@ export function Histogram(sources) {
 	// 	.compose(dropRepeats((x, y) => equals(x, y)))
 	const modifiedState$ = state$
 		.compose(dropRepeats((x, y) => equals(x, y)))
-		.filter(state => state.query != null)
+		.filter(state => state.query != null && state.query != '')
+
+	const emptyState$ = state$
+		.compose(dropRepeats((x, y) => equals(x, y)))
+		.filter(state => state.query == null || state.query == '')
 
 	const request$ = xs.combine(modifiedState$, props$)
 		// .filter(([state, props, visible]) => visible)
@@ -111,7 +115,8 @@ export function Histogram(sources) {
 			div('.card-panel .center-align', { style: { height: '400px' } }, [div(elementID)])
 		)
 	};
-	const initVdom$ = xs.of(div())
+
+	const initVdom$ = emptyState$.mapTo(div())
 
 	const loadingVdom$ = request$.mapTo(
 		div([
@@ -138,11 +143,11 @@ export function Histogram(sources) {
 
 	const errorVdom$ = invalidResponse$.mapTo(div('.red .white-text', [p('An error occured !!!')]))
 
-	const vdom$ = xs.merge(initVdom$, loadedVdom$, loadingVdom$, errorVdom$)
+	const vdom$ = xs.merge(loadedVdom$, loadingVdom$, errorVdom$, initVdom$) 
 
 	return {
 		DOM: vdom$,
-		HTTP: request$,//.compose(debounce(5000)),
+		HTTP: request$,
 		vega: vegaSpec$,
 	};
 

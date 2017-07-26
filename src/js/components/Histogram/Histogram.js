@@ -140,18 +140,10 @@ export function Histogram(sources) {
 
 	const vdom$ = xs.merge(initVdom$, loadedVdom$, loadingVdom$, errorVdom$)
 
-	const defaultReducer$ = xs.of(prevState => {
-		console.log('hist -- defaultReducer')
-		return { query : '' }
-		// return merge(prevState, {})
-	})
-
-
 	return {
 		DOM: vdom$,
 		HTTP: request$,//.compose(debounce(5000)),
 		vega: vegaSpec$,
-		onion: defaultReducer$
 	};
 
 }

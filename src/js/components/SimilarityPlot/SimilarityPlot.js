@@ -128,18 +128,10 @@ export function SimilarityPlot(sources) {
 
 	const vdom$ = xs.merge(initVdom$, loadedVdom$, loadingVdom$, errorVdom$)
 
-	const defaultReducer$ = xs.of(prevState => {
-		console.log('sim -- defaultReducer')
-		return prevState
-		// return merge(prevState, {})
-	})
-
-
 	return {
 		DOM: vdom$,
 		HTTP: request$,
 		vega: vegaSpec$,
-		onion: defaultReducer$
 	};
 
 }

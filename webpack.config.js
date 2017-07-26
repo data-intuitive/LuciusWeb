@@ -20,7 +20,7 @@ var entry = PRODUCTION
             ? ['./src/js/main']
             : [
                 'webpack-dev-server/client?http://localhost:8080',
-                // 'webpack/hot/dev-server',
+                //'webpack/hot/dev-server',
                 './src/js/main'
              ];
 

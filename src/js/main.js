@@ -2,10 +2,12 @@ import 'materialize-css/bin/materialize.css';
 import 'materialize-css/bin/materialize.js';
 import './main.css'
 
-import {run} from '@cycle/xstream-run';
+import {run} from '@cycle/run';
 import {makeDOMDriver} from '@cycle/dom';
 import {makeHTTPDriver} from '@cycle/http';
-import { createHistory } from 'history';
+// import { createHistory } from 'history';
+import {makeHistoryDriver, captureClicks} from '@cycle/history'
+
 import {makeRouterDriver} from 'cyclic-router';
 import Router from './components/Router/index';
 import onionify from 'cycle-onionify';
@@ -17,7 +19,7 @@ const drivers = {
   DOM: makeDOMDriver('#root'),
   vega: makeVegaDriver(),
   HTTP: makeHTTPDriver(),
-  router: makeRouterDriver(createHistory(), switchPath, {capture: true})
+  router: makeRouterDriver(captureClicks(makeHistoryDriver()), switchPath, {capture: true})
 };
 
 // let StatifiedMain = onionify(SignatureWorkflow);

@@ -1,6 +1,6 @@
 {
   "name": "LuciusWeb",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "Web interface for ComPass aka Lucius",
   "repository": {
     "type": "git",
@@ -43,8 +43,10 @@
     "@cycle/http": "^14.0.0",
     "@cycle/isolate": "^3.0.0",
     "@cycle/run": "^3.1.0",
+    "@cycle/storage": "^4.0.0",
     "@cycle/xstream-run": "^4.2.0",
     "cycle-onionify": "^3.3.0",
+    "cycle-storageify": "^3.0.0",
     "cyclic-router": "^4.0.5",
     "datalib": "^1.8.0",
     "file-loader": "^0.10.1",

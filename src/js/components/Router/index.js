@@ -99,7 +99,7 @@ export default function Router(sources) {
           settings: initSettings,
         })
     } else {
-      return clone(prevState)
+      return prevState
     }
   });
 

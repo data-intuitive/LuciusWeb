@@ -6,10 +6,12 @@ import {run} from '@cycle/run';
 import {makeDOMDriver} from '@cycle/dom';
 import {makeHTTPDriver} from '@cycle/http';
 import {makeHistoryDriver, makeServerHistoryDriver, makeHashHistoryDriver, captureClicks} from '@cycle/history'
-
+import storageDriver from '@cycle/storage';
 import {makeRouterDriver} from 'cyclic-router';
-import Router from './components/Router/index';
 import onionify from 'cycle-onionify';
+import storageify from "cycle-storageify";
+
+import Router from './components/Router/index';
 import {makeVegaDriver} from './makeVegaDriver';
 import SignatureWorkflow from './pages/signature';
 import switchPath from 'switch-path'
@@ -19,13 +21,14 @@ const drivers = {
   vega: makeVegaDriver(),
   HTTP: makeHTTPDriver(),
   router: makeRouterDriver(captureClicks(makeServerHistoryDriver()), switchPath),
-  preventDefault: event$ => event$.subscribe({ next: e => e.preventDefault() })
+  preventDefault: event$ => event$.subscribe({ next: e => e.preventDefault() }),
+  storage: storageDriver
 };
 
 // let StatifiedMain = onionify(SignatureWorkflow);
 // run(StatifiedMain, drivers);
 
-let StatifiedMain = onionify(Router);
+let StatifiedMain = onionify(storageify(Router, {key: 'ComPass'}));
 run(StatifiedMain, drivers);
 
 if (module.hot) {

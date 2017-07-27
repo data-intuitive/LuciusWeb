@@ -156,7 +156,7 @@ export default function CompoundWorkflow(sources) {
             tailTable.HTTP
         ),
         vega: xs.merge(
-           histogram.vega,
+            histogram.vega,
             similarityPlot.vega,
          )
     };

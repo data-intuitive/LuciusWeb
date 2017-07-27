@@ -179,7 +179,6 @@ function SignatureWorkflow(sources) {
 			headTable.HTTP,
 			tailTable.HTTP
 		),
-		// router: xs.of('/signature')
 	};
 }
 

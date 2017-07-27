@@ -54,19 +54,10 @@ function Home(sources) {
             p('.col .s6 .offset-s3 .flow-text', [
                 'You can click on one of the workflows above to start it.'
             ]),
-            // p('.col .s6 .offset-s3', [
-            //   'Interface status: ', 
-            //   check
-            // ]),
-        ]));
-
-    const router$ = sources.DOM.select('a').events('click')
-        .debug(ev => ev.preventDefault())
-        .map(ev => ev.target.pathname)
+       ]));
 
     return {
         DOM: vdom$,
-        router: router$,
         HTTP: CheckSink.HTTP,
         onion: CheckSink.onion
     };

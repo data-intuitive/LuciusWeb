@@ -258,6 +258,9 @@ export function Settings(sources) {
 			return clone(initSettings)
 		})
 
+    // const router$ = sources.DOM.select('a').events('click')
+    //     .debug(ev => ev.preventDefault())
+    //     .map(ev => ev.target.pathname)
 
 	//   const pageReducers$ = page$.map(prop('onion')).flatten()//.debug(console.log)
 	//   const reducers$ = pageReducers$.startWith(initReducer$)
@@ -269,6 +272,7 @@ export function Settings(sources) {
 			updateReducer$,
 			resetReducer$
 		),
+		// router: router$
 		// router: router
 		// router : xs.of('/settings')
 	};

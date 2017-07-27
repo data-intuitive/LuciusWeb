@@ -5,8 +5,7 @@ import './main.css'
 import {run} from '@cycle/run';
 import {makeDOMDriver} from '@cycle/dom';
 import {makeHTTPDriver} from '@cycle/http';
-// import { createHistory } from 'history';
-import {makeHistoryDriver, captureClicks} from '@cycle/history'
+import {makeHistoryDriver, makeServerHistoryDriver, makeHashHistoryDriver, captureClicks} from '@cycle/history'
 
 import {makeRouterDriver} from 'cyclic-router';
 import Router from './components/Router/index';
@@ -19,7 +18,8 @@ const drivers = {
   DOM: makeDOMDriver('#root'),
   vega: makeVegaDriver(),
   HTTP: makeHTTPDriver(),
-  router: makeRouterDriver(captureClicks(makeHistoryDriver()), switchPath, {capture: true})
+  router: makeRouterDriver(captureClicks(makeServerHistoryDriver()), switchPath),
+  preventDefault: event$ => event$.subscribe({ next: e => e.preventDefault() })
 };
 
 // let StatifiedMain = onionify(SignatureWorkflow);

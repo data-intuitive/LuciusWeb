@@ -103,19 +103,23 @@ export default function Router(sources) {
     }
   });
 
+  // Capture link targets and send to router driver
+  const router$ = sources.DOM.select('a').events('click')
+      .map(ev => ev.target.pathname)
+
+  // All clicks on links should be sent to the preventDefault driver
+  const prevent$ = sources.DOM.select('a').events('click');
+
   return {
-    DOM: vdom$,
-    router: page$.map(c => c.router || xs.never()).flatten(),
+   DOM: vdom$,
+    router: router$,
     HTTP: page$.map(prop('HTTP')).filter(Boolean).flatten(),
     onion: xs.merge(
       defaultReducer$,
       page$.map(prop('onion')).filter(Boolean).flatten()
     ),
     vega: page$.map(prop('vega')).filter(Boolean).flatten(),
-  }
+    preventDefault: prevent$,
+   }
 
 }
-
-// sources.DOM.select('a').events('click')
-//                 .debug(ev => ev.preventDefault())
-//                 .map(ev => ev.target.pathname),

@@ -252,15 +252,11 @@ export function Settings(sources) {
 			return merge(prevState, value)
 		})
 
-	const resetReducer$ = reset$.compose(sampleCombine(all$))
-		.map(([click, value]) => prevState => {
+	const resetReducer$ = reset$
+		.map(click => prevState => {
 			console.log('settings -- resetReducer')
 			return clone(initSettings)
 		})
-
-    // const router$ = sources.DOM.select('a').events('click')
-    //     .debug(ev => ev.preventDefault())
-    //     .map(ev => ev.target.pathname)
 
 	//   const pageReducers$ = page$.map(prop('onion')).flatten()//.debug(console.log)
 	//   const reducers$ = pageReducers$.startWith(initReducer$)
@@ -272,8 +268,5 @@ export function Settings(sources) {
 			updateReducer$,
 			resetReducer$
 		),
-		// router: router$
-		// router: router
-		// router : xs.of('/settings')
 	};
 }

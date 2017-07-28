@@ -9,11 +9,9 @@ import dropRepeats from 'xstream/extra/dropRepeats'
 import { SignatureForm, formLens } from '../components/SignatureForm'
 import { Histogram, histLens } from '../components/Histogram/Histogram'
 import { SimilarityPlot, simLens } from '../components/SimilarityPlot/SimilarityPlot'
-import { Table } from '../components/Table'
+import { Table, headTableLens, tailTableLens } from '../components/Table'
 import { initSettings } from './settings'
 import { Filter } from '../components/Filter'
-
-const log = (x) => console.log(x);
 
 function SignatureWorkflow(sources) {
 
@@ -84,16 +82,8 @@ function SignatureWorkflow(sources) {
 	const histogram = isolate(Histogram, {onion: histLens})(sources);
 
 	// tables: Join settings from api and sourire into props
-	const headTableProps$ = state$
-		.compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
-		.startWith({ settings: initSettings })
-		.map(state => merge(merge(merge(state.settings.headTableSettings, state.settings.common), state.settings.api), state.settings.sourire)).debug()
-	const tailTableProps$ = state$
-		.compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
-		.startWith({ settings: initSettings })
-		.map(state => merge(merge(merge(state.settings.tailTableSettings, state.settings.common), state.settings.api), state.settings.sourire))
-	const headTable = isolate(Table, 'headTable')(merge(sources, { props: headTableProps$ }));
-	const tailTable = isolate(Table, 'tailTable')(merge(sources, { props: tailTableProps$ }));
+	const headTable = isolate(Table, {onion: headTableLens})(sources);
+	const tailTable = isolate(Table, {onion: tailTableLens})(sources);
 
 	const pageStyle = {
 		style:
@@ -122,7 +112,7 @@ function SignatureWorkflow(sources) {
 			simplot,
 			headTable,
 			tailTable,
-			feedback
+			// feedback
 		]) =>
 			div('.row .pink .lighten-5  ', [
 				form,

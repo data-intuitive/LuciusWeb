@@ -13,16 +13,23 @@ export function SampleTable(sources) {
 
 	console.log('Starting component: SampleTable...');
 
-    const state$ = sources.onion.state$
+    const state$ = sources.onion.state$.debug(state => {
+        console.log('== State in SampleTable =================')
+        console.log(state)
+    });
 	const domSource$ = sources.DOM;
 
 	// This component is active only when the signature is validated
 	// const active$ = state$.map(state => state.validated).startWith(false).debug(log)
 
     // This will become an object representing the JSON table
-    const array$ = sources.onion.state$//.debug(log); 
+    const array$ = sources.onion.state$.map(state => {
+        console.log(state)
+        return state
+    })
 
     const childrenSinks$ = array$.map(array => {
+        console.log(array)
         return array.map((item, index) => isolate(SampleInfo, index)(sources))
     });
 
@@ -35,8 +42,17 @@ export function SampleTable(sources) {
                     })
                     .startWith(ul('.collection', [li('.collection-item .center-align .grey-text','no query yet...')]))
 
+    // const defaultReducer$ = xs.of(prevState => {
+    //     return {
+    //         table : {
+    //             content : []
+    //         }
+    //     }
+    // })
+
     return { 
-            DOM: vdom$
+            DOM: vdom$,
+            // onion: defaultReducer$
     };
 
 }

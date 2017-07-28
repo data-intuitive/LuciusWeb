@@ -6,7 +6,7 @@ import dropRepeats from 'xstream/extra/dropRepeats'
 
 export function SampleInfo(sources) {
 
-    const state$ = sources.onion.state$//.debug(log);
+    const state$ = sources.onion.state$.debug(log);
     const props$ = sources.props.debug()
 
     const click$ = sources.DOM.select('.zoom').events('click').mapTo(1)
@@ -22,7 +22,7 @@ export function SampleInfo(sources) {
     }
 
     const blur$ = props$
-        .filter(props => props.blur != undefined)
+        .filter(props => props.common.blur != undefined)
         .map(props => ({ filter : 'blur(' + props.blur + 'px)'}) )
         .startWith({ filter : 'blur(0px)'})
 
@@ -31,7 +31,9 @@ export function SampleInfo(sources) {
         let pStyle = { style: { margin: '0px' } }
         let hStylewBlur = { style: merge(blur, { margin: '0px', fontWeight: 'bold' } ) }
         let pStylewBlur = { style: merge(blur, { margin: '0px' } ) }
-        let url = props.urlSourire + encodeURIComponent(sample.smiles).replace(/%20/g, '+')
+        console.log(props)
+        let urlSourire = props.sourire.url
+        let url = urlSourire + encodeURIComponent(sample.smiles).replace(/%20/g, '+')
         return div('', [
             div('.col .s12 .l4', { style: { margin: '15px 0px 0px 0px' } }, [
                 p('.col .s12 .grey-text', hStyle, 'Sample Info:'),
@@ -59,8 +61,9 @@ export function SampleInfo(sources) {
 
     const vdom$ = xs.combine(state$, zoomed$, props$, blur$)
         .map(([sample, zoom, props, blur]) => {
+            let urlSourire = props.sourire.url
             let bgcolor = (sample.zhang >= 0) ? 'rgba(44,123,182, 0.08)' : 'rgba(215,25,28, 0.08)'
-            let url = props.urlSourire + encodeURIComponent(sample.smiles).replace(/%20/g, '+')
+            let url = urlSourire + encodeURIComponent(sample.smiles).replace(/%20/g, '+')
             let zhangRounded = (sample.zhang != null) ? sample.zhang.toFixed(3) : 'NA'
 
             return li('.collection-item  .zoom', { style: { 'background-color': bgcolor } },
@@ -80,6 +83,7 @@ export function SampleInfo(sources) {
                     (zoom) ? div('.row', [detail(sample, props, blur)]) : div()
                 ])
         })
+        .startWith(li('.collection-itm .zoom', [p('Just one item!!!')]))
 
     return {
         DOM: vdom$

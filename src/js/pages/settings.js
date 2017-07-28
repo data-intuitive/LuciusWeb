@@ -10,14 +10,14 @@ export const initSettings = {
 		version: "v2",
 		blur: 0
 	},
-	headTableSettings: {
+	headTable: {
 		title: 'Top Table 123',
 		head: 5,
 		color: 'rgb(44,123,182)',
 		title: 'Top Table',
 		version: 'v2'
 	},
-	tailTableSettings: {
+	tailTable: {
 		title: 'Bottom Table 123',
 		tail: 5,
 		color: 'rgb(215,25,28)',
@@ -46,7 +46,7 @@ export const initSettings = {
 	sourire: {
 		hostname: 'localhost',
 		port: 9000,
-		urlSourire: 'http://localhost:9999/molecule/'
+		url: 'http://localhost:9999/molecule/'
 	}
 };
 
@@ -55,10 +55,6 @@ export function IsolatedSettings(sources) {
 }
 
 export function Settings(sources) {
-
-	//   const router = sources.DOM.select('a').events('click')
-	//     .debug(ev => ev.preventDefault())
-	//     .map(ev => ev.target.pathname)
 
 	const state$ = sources.onion.state$
 

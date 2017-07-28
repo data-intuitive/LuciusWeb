@@ -16,8 +16,9 @@ const stateTemplate = {
 	settings: 'settings passed from root state'
 }
 
+// Granular access to global state and parts of settings
 const formLens = { 
-	get: state => ({form: state.form, settings: state.settings}),
+	get: state => ({form: state.form, settings: {form: state.settings.form, api: state.settings.api}}),
 	set: (state, childState) => ({...state, form: childState.form})
 };
 

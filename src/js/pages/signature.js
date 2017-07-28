@@ -8,7 +8,7 @@ import dropRepeats from 'xstream/extra/dropRepeats'
 // Components
 import { SignatureForm, formLens } from '../components/SignatureForm'
 import { Histogram } from '../components/Histogram/Histogram'
-import { SimilarityPlot } from '../components/SimilarityPlot/SimilarityPlot'
+import { SimilarityPlot, simLens } from '../components/SimilarityPlot/SimilarityPlot'
 import { Table } from '../components/Table'
 import { initSettings } from './settings'
 import { Filter } from '../components/Filter'
@@ -36,7 +36,8 @@ function SignatureWorkflow(sources) {
 	// Propagate filter to state of individual components
 	const filterReducer$ = filterForm.filter.map(f => prevState => {
 		console.log('signature -- filterReducer')
-		let additionalState = {
+		console.log(prevState)
+			let additionalState = {
 			headTable: merge(prevState.headTable, { filter: f }),
 			tailTable: merge(prevState.tailTable, { filter: f }),
 			hist: merge(prevState.hist, { filter: f }),
@@ -56,7 +57,7 @@ function SignatureWorkflow(sources) {
 				settings: initSettings,
 				}
 		} else {
-			return {
+			return {...prevState,
 				settings: prevState.settings
 			}
 		}
@@ -65,6 +66,7 @@ function SignatureWorkflow(sources) {
 	// Propagate query to state of individual components
 	const stateReducer$ = query$.map(query => prevState => {
 		console.log('signature -- stateReducer')
+		console.log(prevState)
 		let additionalState = {
 			headTable: merge(prevState.headTable, { query: query }),
 			tailTable: merge(prevState.tailTable, { query: query }),
@@ -76,11 +78,7 @@ function SignatureWorkflow(sources) {
 	})
 
 	// Similarity plot component
-	const simProps$ = state$
-		.compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
-		.startWith({ settings: initSettings })
-		.map(state => merge(state.settings.sim, state.settings.api))
-	const similarityPlot = isolate(SimilarityPlot, 'sim')(merge(sources, { props: simProps$ }));
+	const similarityPlot = isolate(SimilarityPlot, {onion: simLens})(sources);
 
 	// histogram component
 	const histProps$ = state$

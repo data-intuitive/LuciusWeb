@@ -12,21 +12,34 @@ const elementID = '#vega'
 
 const ENTER_KEYCODE = 13
 
-export function SimilarityPlot(sources) {
+const stateTemplate = {
+	sim: {
+		query: 'Passed through to check as well',
+	},
+	settings: 'settings passed from root state'
+}
+
+// Granular access to the settings, only api and sim keys
+const simLens = { 
+	get: state => ({sim: state.sim, settings: {sim: state.settings.sim, api: state.settings.api}}),
+	set: (state, childState) => ({...state, sim: childState.sim})
+};
+
+const stateDebug = component => state => {
+		console.log('== State in <<' + component + '>>')
+		console.log(state)	
+}
+
+function SimilarityPlot(sources) {
 
 	console.log('Starting component: SimilarityPlot...');
 
 	const ENTER_KEYCODE = 13
 
-	const state$ = sources.onion.state$.debug(state => {
-		console.log('== State in Sim')
-		console.log(state)
-	});;
+	const state$ = sources.onion.state$.debug(stateDebug('SimilarityPlot'));
 	const domSource$ = sources.DOM;
 	const httpSource$ = sources.HTTP;
 	const vegaSource$ = sources.vega;
-
-	const props$ = sources.props
 
 	const visible$ = sources.DOM.select(elementID)
 		.elements()
@@ -41,22 +54,23 @@ export function SimilarityPlot(sources) {
 
 	const modifiedState$ = state$
 		.compose(dropRepeats((x, y) => equals(x, y)))
-		.filter(state => state.query != null && state.query != '')
+		.filter(state => state.sim.query != null && state.sim.query != '')
 
 	const emptyState$ = state$
 		.compose(dropRepeats((x, y) => equals(x, y)))
-		.filter(state => state.query == null || state.query == '')
+		.filter(state => state.sim.query == null || state.sim.query == '')
 
-	const request$ = xs.combine(modifiedState$, props$)//, visible$)
+
+	const request$ = modifiedState$//, visible$)
 		// .filter(([state, props, visible]) => visible)
-		.map(([state, props]) => {
+		.map(state => {
 			return {
-				url: props.url + '&classPath=com.dataintuitive.luciusapi.binnedZhang',
+				url: state.settings.api.url + '&classPath=com.dataintuitive.luciusapi.binnedZhang',
 				method: 'POST',
 				send: {
-					query: state.query,
-					binsX: props.binsX,
-					binsY: props.binsY,
+					query: state.sim.query,
+					binsX: state.settings.sim.binsX,
+					binsY: state.settings.sim.binsY,
 					filter: (typeof state.filter !== 'undefined') ? state.filter : ''
 				},
 				'category': 'binnedZhang'
@@ -131,10 +145,35 @@ export function SimilarityPlot(sources) {
 
 	const vdom$ = xs.merge(loadedVdom$, loadingVdom$, errorVdom$, initVdom$)
 
+	// const defaultReducer$ = xs.of(prevState => {
+	// 	// console.log('Signatureform -- defaultReducer')
+    //     if (typeof prevState === 'undefined') {
+	// 		// Settings are handled higher up, but in case we use this component standalone, ...
+	// 		console.log('prevState not exists')
+	// 		return {
+	// 			sim: {
+	// 				initialized: true,
+	// 				query: ''
+	// 			},
+	// 		}
+    //     } else {
+	// 		console.log('prevState exists:')
+	// 		return ({...prevState,
+	// 			sim: {
+	// 				initialized: true,
+	// 				query: ''
+	// 			},
+	// 	})
+    // }
+	// }).debug()
+
 	return {
 		DOM: vdom$,
 		HTTP: request$,
 		vega: vegaSpec$,
+		// onion: defaultReducer$
 	};
 
 }
+
+export { SimilarityPlot, simLens };

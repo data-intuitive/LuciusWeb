@@ -12,27 +12,33 @@ import { between } from '../../utils/utils'
 
 const elementID = '#hist'
 
+// Granular access to the settings, only api and sim keys
+const histLens = { 
+	get: state => ({hist: state.hist, settings: {hist: state.settings.hist, api: state.settings.api}}),
+	set: (state, childState) => ({...state, hist: childState.hist})
+};
+
+const stateDebug = component => state => {
+		console.log('== State in <<' + component + '>>')
+		console.log(state)	
+}
+
 /**
  * Be careful, the vega driver expects the DOM to be available in order to insert the canvas node.
  * This means that this component should not run before the actual DOM (not vdom) is rendered!
  * 
  * In other words, we have a visible variable that toggles when necessary.
  */
-export function Histogram(sources) {
+function Histogram(sources) {
 
 	console.log('Starting component: Histogram...');
 
 	const ENTER_KEYCODE = 13
 
-	const state$ = sources.onion.state$.debug(state => {
-		console.log('== State in Histogram')
-		console.log(state)
-	});;
+	const state$ = sources.onion.state$.debug(stateDebug('Histogram'));
 	const domSource$ = sources.DOM;
 	const httpSource$ = sources.HTTP;
 	const vegaSource$ = sources.vega;
-
-	const props$ = sources.props
 
 	// Visible?
 	// const visible$ = xs.of(document.getElementById("hist") != null).debug(visible => console.log('Visibility: ' + visible))
@@ -50,27 +56,23 @@ export function Histogram(sources) {
 	// This component is active only when the signature is validated
 	// const active$ = state$.map(state => state.validated)
 
-	// const modifiedState$ = state$
-	// 	.filter(state => state.query != '')
-	// 	.compose(dropRepeats((x, y) => equals(x, y)))
-	const modifiedState$ = state$
+const modifiedState$ = state$
 		.compose(dropRepeats((x, y) => equals(x, y)))
-		.filter(state => state.query != null && state.query != '')
+		.filter(state => state.hist.query != null && state.hist.query != '')
 
 	const emptyState$ = state$
 		.compose(dropRepeats((x, y) => equals(x, y)))
-		.filter(state => state.query == null || state.query == '')
+		.filter(state => state.hist.query == null || state.hist.query == '')
 
-	const request$ = xs.combine(modifiedState$, props$)
-		// .filter(([state, props, visible]) => visible)
-		.map(([state, props]) => {
+	const request$ = modifiedState$
+		.map(state => {
 			return {
-				url: props.url + '&classPath=com.dataintuitive.luciusapi.histogram',
+				url: state.settings.api.url + '&classPath=com.dataintuitive.luciusapi.histogram',
 				method: 'POST',
 				send: {
-					query: state.query,
-					bins: props.bins,
-					filter: state.filter
+					query: state.hist.query,
+					bins: state.settings.hist.bins,
+					filter: state.hist.filter
 				},
 				'category': 'histogram'
 			}
@@ -152,3 +154,5 @@ export function Histogram(sources) {
 	};
 
 }
+
+export {Histogram, histLens}

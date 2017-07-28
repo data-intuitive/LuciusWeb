@@ -71,7 +71,7 @@ function SimilarityPlot(sources) {
 					query: state.sim.query,
 					binsX: state.settings.sim.binsX,
 					binsY: state.settings.sim.binsY,
-					filter: (typeof state.filter !== 'undefined') ? state.filter : ''
+					filter: (typeof state.sim.filter !== 'undefined') ? state.sim.filter : ''
 				},
 				'category': 'binnedZhang'
 			}

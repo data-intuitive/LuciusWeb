@@ -7,7 +7,7 @@ import dropRepeats from 'xstream/extra/dropRepeats'
 
 // Components
 import { SignatureForm, formLens } from '../components/SignatureForm'
-import { Histogram } from '../components/Histogram/Histogram'
+import { Histogram, histLens } from '../components/Histogram/Histogram'
 import { SimilarityPlot, simLens } from '../components/SimilarityPlot/SimilarityPlot'
 import { Table } from '../components/Table'
 import { initSettings } from './settings'
@@ -81,11 +81,7 @@ function SignatureWorkflow(sources) {
 	const similarityPlot = isolate(SimilarityPlot, {onion: simLens})(sources);
 
 	// histogram component
-	const histProps$ = state$
-		.compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
-		.startWith({ settings: initSettings })
-		.map(state => merge(state.settings.hist, state.settings.api))
-	const histogram = isolate(Histogram, 'hist')(merge(sources, { props: histProps$ }));
+	const histogram = isolate(Histogram, {onion: histLens})(sources);
 
 	// tables: Join settings from api and sourire into props
 	const headTableProps$ = state$

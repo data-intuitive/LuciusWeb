@@ -3,7 +3,6 @@ import isolate from '@cycle/isolate'
 import { i, p, div, br, label, input, code, table, tr, td, b, h2, h5, button, textarea, a, select, option, span } from '@cycle/dom';
 import { clone, equals, merge, mergeAll } from 'ramda';
 import xs from 'xstream';
-import { logThis, log } from '../utils/logger'
 import { ENTER_KEYCODE } from '../utils/keycodes.js'
 import dropRepeats from 'xstream/extra/dropRepeats'
 
@@ -58,7 +57,6 @@ function Filter(sources) {
         .map(ev => ev.target.value)
         .map(value => ({ concentration: value }))
         .startWith('')
-        .debug(console.log)
 
     const typeChanged$ = sources.DOM
         .select('.type')
@@ -66,7 +64,6 @@ function Filter(sources) {
         .map(ev => ev.target.value)
         .map(value => ({ type: value }))
         .startWith('')
-        .debug(console.log)
 
     const protocolChanged$ = sources.DOM
         .select('.protocol')
@@ -74,13 +71,12 @@ function Filter(sources) {
         .map(ev => ev.target.value)
         .map(value => ({ protocol: value }))
         .startWith('')
-        .debug(console.log)
 
     const changes$ = xs.combine(
         concentrationChanged$,
         typeChanged$,
         protocolChanged$
-    ).map((filters) => mergeAll(filters)).debug()
+    ).map((filters) => mergeAll(filters))
 
     // const filter$ = xs.combine(filterInput$, concentrationChanged$, typeChanged$, protocolChanged$)
     //     .map(([prevFilter, concentration, type, protocol]) => {

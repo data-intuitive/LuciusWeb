@@ -12,14 +12,14 @@ export const initSettings = {
 	},
 	headTable: {
 		title: 'Top Table 123',
-		head: 5,
+		count: 5,
 		color: 'rgb(44,123,182)',
 		title: 'Top Table',
 		version: 'v2'
 	},
 	tailTable: {
 		title: 'Bottom Table 123',
-		tail: 5,
+		count: 5,
 		color: 'rgb(215,25,28)',
 		title: 'Bottom Table',
 		version: 'v2'
@@ -35,7 +35,9 @@ export const initSettings = {
 		binsX: 20,
 		binsY: 20
 	},
-	form: {},
+	form: {
+		// DEBUG: true
+	},
 	api: {
 		hostname: 'localhost',
 		port: 8080,
@@ -90,10 +92,10 @@ export function Settings(sources) {
 						span('.card-title', 'Top Table Settings'),
 						div('.range-field ', [
 							label('.active', '# of entries in top tables'),
-							input('.headTableCount', { style: { fontSize: '20px' }, props: { type: 'range', min: 0, max: 50, value: state.headTableSettings.head } }),
+							input('.headTableCount', { style: { fontSize: '20px' }, props: { type: 'range', min: 0, max: 50, value: state.headTable.count} }),
 						]),
 						div('.input-field', [
-							input('.headColor', { style: { fontSize: '20px' }, props: { type: 'text', value: state.headTableSettings.color } }),
+							input('.headColor', { style: { fontSize: '20px' }, props: { type: 'text', value: state.headTable.color } }),
 							label('.active', 'Color for top tables'),
 						])
 					]),
@@ -104,10 +106,10 @@ export function Settings(sources) {
 						span('.card-title', 'Bottom Table Settings'),
 						div('.range-field', [
 							label('.active', '# of entries in bottom tables'),
-							input('.tailTableCount', { style: { fontSize: '20px' }, props: { type: 'range', min: 0, max: 50, value: state.tailTableSettings.tail } }),
+							input('.tailTableCount', { style: { fontSize: '20px' }, props: { type: 'range', min: 0, max: 50, value: state.tailTable.count} }),
 						]),
 						div('.input-field', [
-							input('.tailColor', { style: { fontSize: '20px' }, props: { type: 'text', value: state.tailTableSettings.color } }),
+							input('.tailColor', { style: { fontSize: '20px' }, props: { type: 'text', value: state.tailTable.color } }),
 							label('.active', 'Color for tail tables'),
 						]),
 					]),
@@ -176,19 +178,19 @@ export function Settings(sources) {
 	}
 
 	// Table Settings
-	const headTableCount$ = makeConfigStream('.headTableCount', 'head')
-	const tailTableCount$ = makeConfigStream('.tailTableCount', 'tail')
+	const headTableCount$ = makeConfigStream('.headTableCount', 'count')
+	const tailTableCount$ = makeConfigStream('.tailTableCount', 'count')
 	const headColor$ = makeConfigStream('.headColor', 'color')
 	const tailColor$ = makeConfigStream('.tailColor', 'color')
 
-	const headTableSettings$ = xs.combine(settings$.map(state => state.headTableSettings), headTableCount$, headColor$)
+	const headTableSettings$ = xs.combine(settings$.map(state => state.headTable), headTableCount$, headColor$)
 		.map((settings) => ({
-			headTableSettings: mergeAll(settings),
+			headTable: mergeAll(settings),
 		}))
 
-	const tailTableSettings$ = xs.combine(settings$.map(state => state.tailTableSettings), tailTableCount$, tailColor$)
+	const tailTableSettings$ = xs.combine(settings$.map(state => state.tailTable), tailTableCount$, tailColor$)
 		.map((settings) => ({
-			tailTableSettings: mergeAll(settings),
+			tailTable: mergeAll(settings),
 		}))//.debug(console.log)
 
 	// API Settings
@@ -216,9 +218,6 @@ export function Settings(sources) {
 		.map((settings) => ({
 			common: mergeAll(settings)
 		}))//.debug(console.log)
-
-	// const nrHostname$ = sources.DOM.select('.hostname').events('input').map(event => ({hostname : event.target.value})).debug(console.log)
-	// const nrSourire$ = sources.DOM.select('.sourire').events('input').map(event => ({sourire : event.target.value})).debug(console.log)
 
 	const all$ = xs.combine(
 		headTableSettings$, 

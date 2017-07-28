@@ -95,12 +95,13 @@ export default function Router(sources) {
   const defaultReducer$ = xs.of(prevState => {
     console.log("index -- defaultReducer")
     if (typeof prevState === 'undefined' || typeof prevState.settings === 'undefined') {
-      return (
-        {
+      return {
           settings: initSettings,
-        })
+        }
     } else {
-      return {settings: prevState.settings}
+      return {
+          settings: prevState.settings
+      }
     }
   });
 

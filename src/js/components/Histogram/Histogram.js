@@ -8,7 +8,7 @@ import { vegaHistogramSpec, exampleData, emptyData } from './spec.js'
 import { widthStream } from '../../utils/utils'
 import { log } from '../../utils/logger'
 import { ENTER_KEYCODE } from '../../utils/keycodes.js'
-import { between } from '../../utils/utils'
+import { stateDebug } from '../../utils/utils'
 
 const elementID = '#hist'
 
@@ -17,11 +17,6 @@ const histLens = {
 	get: state => ({hist: state.hist, settings: {hist: state.settings.hist, api: state.settings.api}}),
 	set: (state, childState) => ({...state, hist: childState.hist})
 };
-
-const stateDebug = component => state => {
-		console.log('== State in <<' + component + '>>')
-		console.log(state)	
-}
 
 /**
  * Be careful, the vega driver expects the DOM to be available in order to insert the canvas node.
@@ -35,8 +30,9 @@ function Histogram(sources) {
 
 	const ENTER_KEYCODE = 13
 
-	const state$ = sources.onion.state$.debug(stateDebug('Histogram'));
-	const domSource$ = sources.DOM;
+	const state$ = sources.onion.state$
+	                    .debug(stateDebug('hist'));
+ 	const domSource$ = sources.DOM;
 	const httpSource$ = sources.HTTP;
 	const vegaSource$ = sources.vega;
 

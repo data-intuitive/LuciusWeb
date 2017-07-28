@@ -27,11 +27,6 @@ function SignatureForm(sources) {
 	console.log('Starting component: SignatureForm...');
 
 	const state$ = sources.onion.state$
-	// .compose(dropRepeats())
-	.debug(state => {
-		console.log('== State in SignatureForm')
-		console.log(state)
-	});
 	const domSource$ = sources.DOM;
 	const props$ = sources.props;
 

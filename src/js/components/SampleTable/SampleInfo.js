@@ -3,11 +3,12 @@ import { i, a, h, p, div, br, label, input, code, table, tr, td, b, h2, button, 
 import { log } from '../../utils/logger'
 import { merge } from 'ramda'
 import dropRepeats from 'xstream/extra/dropRepeats'
+import { stateDebug } from '../../utils/utils'
 
 export function SampleInfo(sources) {
 
-    const state$ = sources.onion.state$.debug(log);
-    const props$ = sources.props.debug()
+    const state$ = sources.onion.state$
+    const props$ = sources.props
 
     const click$ = sources.DOM.select('.zoom').events('click').mapTo(1)
     const zoomed$ = click$
@@ -31,7 +32,6 @@ export function SampleInfo(sources) {
         let pStyle = { style: { margin: '0px' } }
         let hStylewBlur = { style: merge(blur, { margin: '0px', fontWeight: 'bold' } ) }
         let pStylewBlur = { style: merge(blur, { margin: '0px' } ) }
-        console.log(props)
         let urlSourire = props.sourire.url
         let url = urlSourire + encodeURIComponent(sample.smiles).replace(/%20/g, '+')
         return div('', [

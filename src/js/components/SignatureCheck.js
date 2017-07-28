@@ -33,10 +33,11 @@ function SignatureCheck(sources) {
 
 	const domSource$ = sources.DOM;
 	const httpSource$ = sources.HTTP;
-	const state$ = sources.onion.state$.debug(state => {
-		console.log('== State in Signaturecheck')
-		console.log(state)
-	});
+	const state$ = sources.onion.state$
+	// .debug(state => {
+	// 	console.log('== State in Signaturecheck')
+	// 	console.log(state)
+	// });
 
 	const request$ = state$
 		.filter((state) => state.query !== '')

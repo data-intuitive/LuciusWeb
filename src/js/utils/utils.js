@@ -1,6 +1,15 @@
 import dropRepeats from 'xstream/extra/dropRepeats'
+import { prop } from 'ramda'
 
-const log = (x) => console.log(x);
+// const log = (x) => console.log(x);
+
+export const stateDebug = component => state => {
+	if (prop(component, state.settings).DEBUG == true) {
+		console.log('== State in <<' + component + '>>')
+		console.log(state)	
+	} else {
+	}
+}
 
 // Size stream, make it dependent on the size of container which is managed by CSS.
 // TODO: Make it update immediately, currently only updates on new query

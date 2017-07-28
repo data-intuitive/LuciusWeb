@@ -39,7 +39,8 @@ function SignatureWorkflow(sources) {
 			headTable: merge(prevState.headTable, { filter: f }),
 			tailTable: merge(prevState.tailTable, { filter: f }),
 			hist: merge(prevState.hist, { filter: f }),
-			sim: merge(prevState.sim, { filter: f })
+			sim: merge(prevState.sim, { filter: f }),
+			form: merge(prevState.form, {filter: f})
 		}
 		return merge(prevState, additionalState)
 	})
@@ -53,11 +54,21 @@ function SignatureWorkflow(sources) {
 		if (typeof prevState === 'undefined') {
 			return {
 				settings: initSettings,
+				form: {},
+				headTable: {},
+				tailTable: {},
+				hist: {},
+				sim: {}
 				}
 		} else {
-			return {...prevState,
-				settings: prevState.settings
-			}
+			return {
+				settings: prevState.settings,
+				form: {},
+				headTable: {},
+				tailTable: {},
+				hist: {},
+				sim: {}
+				}
 		}
 	})
 
@@ -135,7 +146,7 @@ function SignatureWorkflow(sources) {
 	return {
 		DOM: vdom$,
 		onion: xs.merge(
-			defaultReducer$,
+			// defaultReducer$,
 			signatureForm.onion,
 			filterReducer$,
 			stateReducer$,

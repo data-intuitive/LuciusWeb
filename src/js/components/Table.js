@@ -9,7 +9,7 @@ import { SampleTable } from './SampleTable/SampleTable'
 import isolate from '@cycle/isolate'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import dropUntil from 'xstream/extra/dropUntil'
-import { between } from '../utils/utils'
+import { stateDebug } from '../utils/utils'
 
 // Granular access to the settings
 // We _copy_ the results array to the root of this element's scope.
@@ -49,10 +49,8 @@ function Table(sources) {
 
     console.log('Starting component: Table...');
 
-    const state$ = sources.onion.state$.debug(state => {
-        console.log('== State in table =================')
-        console.log(state)
-    });
+    const state$ = sources.onion.state$
+                    .debug(stateDebug('table'));
     const domSource$ = sources.DOM;
     const httpSource$ = sources.HTTP;
 
@@ -66,15 +64,21 @@ function Table(sources) {
 
     const emptyState$ = state$
          .filter(state => state.table.query == null || state.table.query == '')
-        .compose(dropRepeats((x, y) => equals(omit(['results'], x), omit(['results'], y))))
+         .compose(dropRepeats((x, y) => equals(x.results, y.results)))
 
     const updatedSettings$ = xs.combine(
             modifiedState$,
             sources.DOM.select('.plus5').events('click').mapTo(5).startWith(0).fold((x, y) => x + y, 0),
             sources.DOM.select('.min5').events('click').mapTo(5).startWith(0).fold((x, y) => x + y, 0)
         ).map(([state, add5, min5]) => {
-            const count = parseInt(state.settings.table.head) + add5 - min5
-            return {...state, table: {...table,  head: count }}
+            let isHead = (state.settings.table.title === 'Top Table')
+            const count = parseInt(state.settings.table.count) + add5 - min5
+            if (isHead) {
+                return {...state, table: {...state.table,  head: count }}
+            } else {
+                return {...state, table: {...state.table,  tail: count }}
+            }
+            
     }).debug()
 
     const request$ = updatedSettings$
@@ -206,7 +210,12 @@ function Table(sources) {
     // Make sure that the state is cycled in order for SampleTable to pick it up
     const stateReducer$ = data$.map(data => prevState => {
         console.log('table -- stateReducer')
-        let newState = {...prevState,  table: {...table, results: data}}
+        let newState = {
+            ...prevState,  
+            table: {...prevState.table, 
+                results: data
+            }
+        }
         console.log(prevState)
         console.log(newState)
         return newState
@@ -217,7 +226,6 @@ function Table(sources) {
         HTTP: request$, //.compose(debounce(2000)),
         onion: xs.merge(
             stateReducer$,
-            // sampleTable.onion
         )
     };
 

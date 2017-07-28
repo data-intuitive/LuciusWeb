@@ -13,10 +13,7 @@ export function SampleTable(sources) {
 
 	console.log('Starting component: SampleTable...');
 
-    const state$ = sources.onion.state$.debug(state => {
-        console.log('== State in SampleTable =================')
-        console.log(state)
-    });
+    const state$ = sources.onion.state$;
 	const domSource$ = sources.DOM;
 
 	// This component is active only when the signature is validated
@@ -42,17 +39,8 @@ export function SampleTable(sources) {
                     })
                     .startWith(ul('.collection', [li('.collection-item .center-align .grey-text','no query yet...')]))
 
-    // const defaultReducer$ = xs.of(prevState => {
-    //     return {
-    //         table : {
-    //             content : []
-    //         }
-    //     }
-    // })
-
     return { 
             DOM: vdom$,
-            // onion: defaultReducer$
     };
 
 }

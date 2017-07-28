@@ -6,7 +6,7 @@ import { h, p, div, br, label, input, code, table, tr, td, b, h2, button, svg, h
 import { clone, equals } from 'ramda';
 import { similarityPlotSpec, exampleData, emptyData } from './spec.js'
 import { widthStream } from '../../utils/utils'
-import { between } from '../../utils/utils'
+import { stateDebug } from '../../utils/utils'
 
 const elementID = '#vega'
 
@@ -25,18 +25,14 @@ const simLens = {
 	set: (state, childState) => ({...state, sim: childState.sim})
 };
 
-const stateDebug = component => state => {
-		console.log('== State in <<' + component + '>>')
-		console.log(state)	
-}
-
 function SimilarityPlot(sources) {
 
 	console.log('Starting component: SimilarityPlot...');
 
 	const ENTER_KEYCODE = 13
 
-	const state$ = sources.onion.state$.debug(stateDebug('SimilarityPlot'));
+	const state$ = sources.onion.state$
+				.debug(stateDebug('sim'));
 	const domSource$ = sources.DOM;
 	const httpSource$ = sources.HTTP;
 	const vegaSource$ = sources.vega;

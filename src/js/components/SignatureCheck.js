@@ -17,37 +17,41 @@ const emptyData = {
 	}
 }
 
+const stateTemplate = {
+	query: 'The query to send to the checkSignature endpoint',
+	settings: 'settings passed from root state'
+}
+
+const checkLens = { 
+	get: state => ({query: state.form.query, settings: state.settings}),
+	set: (state, childState) => ({...state, form : {...state.form, query: childState.query}})
+};
+
 function SignatureCheck(sources) {
 
 	console.log('Starting component: SignatureCheck...');
 
 	const domSource$ = sources.DOM;
 	const httpSource$ = sources.HTTP;
-	const state$ = sources.onion.state$
-	const props$ = sources.props
+	const state$ = sources.onion.state$.debug(state => {
+		console.log('== State in Signaturecheck')
+		console.log(state)
+	});
 
-	// const stateHistory$ = state$
-	// 			.fold((acc,x) => acc + ' || ' + x, 'History: ')
-	// 			// .debug(console.log)
-
-	const request$ = xs.combine(
-		state$.compose(dropRepeats((x,y) => x === y)), 
-		props$.compose(dropRepeats((x,y) => equals(x,y)))
-		)
+	const request$ = state$
+		.filter((state) => state.query !== '')
 		.compose(debounce(200))
-		.debug()
-		.filter(([state, props]) => state !== '')
-				.map(([state, props]) =>  {
+		.map(state =>  {
 			return {
-				url : props.url + '&classPath=com.dataintuitive.luciusapi.checkSignature',
+				url : state.settings.api.url + '&classPath=com.dataintuitive.luciusapi.checkSignature',
 				method : 'POST',
 				send : {
 					version : 'v2',
-					query : state
+					query : state.query
 				},
 				'category' : 'checkSignature'
 		}})
-		.debug(log);
+		.debug();
 
 	// Catch the response in a stream
 	// Handle errors by returning an empty object
@@ -61,7 +65,6 @@ function SignatureCheck(sources) {
 
 	const data$ = response$
 		.map(res => res.body)
-		// .startWith(emptyData.body)
 		.map(json => json.result.data)
 
 	// Helper function for rendering the table, based on the state
@@ -102,17 +105,21 @@ function SignatureCheck(sources) {
 	// Update and Collapse button updates the query and collapses the window
 	const collapseUpdate$ = domSource$.select('.collapseUpdate').events('click');
 	const collapseUpdateReducer$ = collapseUpdate$.compose(sampleCombine(data$))
-		.map(([collapse, data]) => function reducer(prevState) {
-			return data.map(x => (x.inL1000) ? x.symbol : '').join(" ").replace(/\s\s+/g, ' ').trim();
+		.map(([collapse, data]) => prevState => {
+			return ({...prevState, query : data.map(x => (x.inL1000) ? x.symbol : '').join(" ").replace(/\s\s+/g, ' ').trim()});
 		});
 
 	// The result of this component is an event when valid
+	// XXX: stays true the whole cycle, so maybe tackle this as well!!!!
 	const validated$ = collapseUpdate$.map(update => true)
+
+	// const defaultReducer$ = xs.of(prevState => {return {query : 'TEST123'}})
 
   return { 
     HTTP: request$,
     DOM: vdom$,
 	onion: xs.merge(
+		// defaultReducer$.debug(),
 		collapseUpdateReducer$, 
 		),
 	validated : validated$
@@ -120,4 +127,4 @@ function SignatureCheck(sources) {
 
 };
 
-export { SignatureCheck };
+export { SignatureCheck, checkLens };

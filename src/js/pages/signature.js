@@ -6,7 +6,7 @@ import { clone, equal, equals, mergeAll } from 'ramda';
 import dropRepeats from 'xstream/extra/dropRepeats'
 
 // Components
-import { SignatureForm } from '../components/SignatureForm'
+import { SignatureForm, formLens } from '../components/SignatureForm'
 import { Histogram } from '../components/Histogram/Histogram'
 import { SimilarityPlot } from '../components/SimilarityPlot/SimilarityPlot'
 import { Table } from '../components/Table'
@@ -25,15 +25,10 @@ function SignatureWorkflow(sources) {
 	/** 
 	 * Parse feedback from vega components. Not used yet...
 	 */
-	const feedback$ = sources.vega.map(item => item).startWith(null).debug();
+	// const feedback$ = sources.vega.map(item => item).startWith(null).debug();
 	// const feedback$ = domSource$.select('.SignatureCheck').events('click').mapTo('click !').startWith(null);
 
-	// Queury Form
-	const formProps$ = state$
-		.compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
-		.startWith({ settings: initSettings })
-		.map(state => merge(state.settings.form, state.settings.api))
-	const signatureForm = isolate(SignatureForm, 'diseaseWorkflow')(merge(sources, { props: formProps$ }))
+	const signatureForm = isolate(SignatureForm, {onion: formLens})(sources)
 
 	// Filter Form
 	const filterForm = isolate(Filter, 'filter')(sources)
@@ -57,19 +52,14 @@ function SignatureWorkflow(sources) {
 	const defaultReducer$ = xs.of(prevState => {
 		console.log('signature -- defaultReducer')
 		if (typeof prevState === 'undefined') {
-			return (
-				{
-					settings: initSettings,
-				})
+			return {
+				settings: initSettings,
+				}
 		} else {
-			// Reset this workflow 
-			// return prevState
-			// return merge(prevState, {diseaseWorkflow : {}, headTable : {}})
-			return (
-				{
-					settings: prevState.settings,
-				})
+			return {
+				settings: prevState.settings
 			}
+		}
 	})
 
 	// Propagate query to state of individual components
@@ -129,7 +119,7 @@ function SignatureWorkflow(sources) {
 		similarityPlot.DOM,
 		headTable.DOM,
 		tailTable.DOM,
-		feedback$
+		// feedback$
 	)
 		.map(([
 			form,

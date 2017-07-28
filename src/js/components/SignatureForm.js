@@ -5,30 +5,48 @@ import { clone, equals } from 'ramda';
 import xs from 'xstream';
 import { logThis, log } from '../utils/logger'
 import { ENTER_KEYCODE } from '../utils/keycodes.js'
-import { SignatureCheck } from '../components/SignatureCheck'
+import { SignatureCheck, checkLens } from '../components/SignatureCheck'
 import dropRepeats from 'xstream/extra/dropRepeats'
+
+const stateTemplate = {
+	form: {
+		query: 'Passed through to check as well',
+		validated: 'Has this query been validated?'
+	},
+	settings: 'settings passed from root state'
+}
+
+const formLens = { 
+	get: state => ({form: state.form, settings: state.settings}),
+	set: (state, childState) => ({...state, form: childState.form})
+};
 
 function SignatureForm(sources) {
 
 	console.log('Starting component: SignatureForm...');
 
-	const state$ = sources.onion.state$//.debug(console.log)
+	const state$ = sources.onion.state$
+	// .compose(dropRepeats())
+	.debug(state => {
+		console.log('== State in SignatureForm')
+		console.log(state)
+	});
 	const domSource$ = sources.DOM;
 	const props$ = sources.props;
 
 	// Check Signature subcomponent, via isolation
-	const signatureCheckSink = isolate(SignatureCheck, 'query')(sources)
+	const signatureCheckSink = isolate(SignatureCheck, {onion: checkLens})(sources)
 	const signatureCheckDom$ = signatureCheckSink.DOM;
 	const signatureCheckHTTP$ = signatureCheckSink.HTTP;
 	const signatureCheckReducer$ = signatureCheckSink.onion;
 
 	// Valid query?
-	const validated$ = state$.map(state => state.validated)
+	const validated$ = state$.map(state => state.form.validated)
 
 	const vdom$ = xs.combine(state$, signatureCheckDom$, validated$)
 					.map(
 						([state, checkdom, validated]) => {
-							const query = state.query
+							const query = state.form.query
 							return div(
 								[  
 									div('.row  .pink .darken-4 .white-text', {style : {padding: '20px 10px 10px 10px'}}, [ 
@@ -48,7 +66,7 @@ function SignatureForm(sources) {
 										// ])
 									]),
 									div([ 
-										(!validated) ? div([checkdom]) : div()
+										(!validated || query == '') ? div([checkdom]) : div()
 									])
 								])
 	});
@@ -68,8 +86,8 @@ function SignatureForm(sources) {
 	const setDefault$ = sources.DOM.select('.Default').events('click')
 	const setDefaultReducer$ = setDefault$.map(events => prevState => {
 		let newState = clone(prevState)
-		newState.query = 'ENSG00000012048 -WRONG HSPA1A DNAJB1 DDIT4 -TSEN2'
-		newState.validated = false
+		newState.form.query = 'ENSG00000012048 -WRONG HSPA1A DNAJB1 DDIT4 -TSEN2'
+		newState.form.validated = false
 		return newState
 	})
 
@@ -77,16 +95,24 @@ function SignatureForm(sources) {
 	const defaultReducer$ = xs.of(function defaultReducer(prevState) {
 		console.log('Signatureform -- defaultReducer')
         if (typeof prevState === 'undefined') {
-			// console.log('prevState not exists')
+			// Settings are handled higher up, but in case we use this component standalone, ...
+			console.log('prevState not exists')
 			return {
-				query : '', //ENSG00000012048 -WRONG HSPA1A DNAJB1 DDIT4 -TSEN2',
-				validated : false
+				form: {
+					query : '',
+					validated : false
+				},
+				settings : initSettings
 			}
         } else {
-			// console.log('prevState exists')
-			let newState = clone(prevState)
-			// newState.validated = false
-            return newState;
+			console.log('prevState exists:')
+			console.log(prevState)
+			return ({...prevState,
+				form: {
+					query : '',
+					validated : false
+				},
+		})
         }
     });
 
@@ -95,7 +121,7 @@ function SignatureForm(sources) {
 		console.log('Signatureform -- queryReducer')
 		let newState = clone(prevState)
 		// console.log(newState)
-		newState.query = query
+		newState.form.query = query
 		return newState
 	})
 
@@ -103,7 +129,7 @@ function SignatureForm(sources) {
 	const invalidateReducer$ = newQuery$.map(query => prevState => {
 		console.log('Signatureform -- invalidateReducer')
 		let newState = clone(prevState)
-		newState.validated = false
+		newState.form.validated = false
 		return newState
 	})
 
@@ -112,7 +138,7 @@ function SignatureForm(sources) {
 		.map(signal => prevState => {
 			console.log('Signatureform -- validateReducer')
 			let newState = clone(prevState)
-			newState.validated = true
+			newState.form.validated = true
 			return newState
 		})
 
@@ -123,7 +149,7 @@ function SignatureForm(sources) {
 	// Maybe catch when no valid query?
 	const query$ = update$
 		.compose(sampleCombine(state$))
-		.map(([update, state]) => state.query)
+		.map(([update, state]) => state.form.query)
 		// .startWith(null).debug(log)
 
   return { 
@@ -137,9 +163,9 @@ function SignatureForm(sources) {
 			validateReducer$,
 			),
 		HTTP: signatureCheckHTTP$,
-		query: query$
+		query: query$.debug()
   };
 
 }
 
-export { SignatureForm };
+export { SignatureForm, formLens };

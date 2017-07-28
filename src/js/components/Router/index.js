@@ -91,15 +91,16 @@ export default function Router(sources) {
       ]));
 
   // Initialize state
+  // Since we use storageify, we only keep the settings
   const defaultReducer$ = xs.of(prevState => {
     console.log("index -- defaultReducer")
-    if (typeof prevState === 'undefined') {
+    if (typeof prevState === 'undefined' || typeof prevState.settings === 'undefined') {
       return (
         {
           settings: initSettings,
         })
     } else {
-      return prevState
+      return {settings: prevState.settings}
     }
   });
 
@@ -119,7 +120,7 @@ export default function Router(sources) {
       page$.map(prop('onion')).filter(Boolean).flatten()
     ),
     vega: page$.map(prop('vega')).filter(Boolean).flatten(),
-    preventDefault: prevent$,
+    // preventDefault: prevent$,
    }
 
 }

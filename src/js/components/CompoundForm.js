@@ -5,52 +5,93 @@ import { clone, equals } from 'ramda';
 import xs from 'xstream';
 import { logThis, log } from '../utils/logger'
 import { ENTER_KEYCODE } from '../utils/keycodes.js'
-import { CompoundCheck } from './CompoundCheck'
-import { SampleSelection } from './SampleSelection'
+import { CompoundCheck, checkLens } from './CompoundCheck'
+import { SampleSelection, sampleSelectionLens } from './SampleSelection'
 import { mergeWith, merge } from 'ramda'
 import { SignatureGenerator } from './SignatureGenerator'
+import { stateDebug } from '../utils/utils'
 
 function CompoundForm(sources) {
 
-    const CompoundCheckSink = isolate(CompoundCheck, 'compoundQuery')(sources)
+    const state$ = sources.onion.state$
+                    // .debug(stateDebug('form'))
 
-    const compoundQuery$ = CompoundCheckSink.query
 
-    const SampleSelectionSink = isolate(SampleSelection, 'sampleSelection')(merge(sources, { query: compoundQuery$ }))
-    const sampleSelection$ = SampleSelectionSink.selection
+    // sources.HTTP.select('compounds').flatten().debug()
 
-    const SignatureGeneratorSink = isolate(SignatureGenerator, 'signatureGenerator')(merge(sources, { query: sampleSelection$ }))
-    const signature$ = SignatureGeneratorSink.signature
+    const CompoundCheckSink = isolate(CompoundCheck, {onion: checkLens} )(sources)
+
+    const compoundQuery$ = CompoundCheckSink.output
+
+    const SampleSelectionSink = isolate(SampleSelection, {onion: sampleSelectionLens})({...sources, input: compoundQuery$})
+    const sampleSelection$ = SampleSelectionSink.output
+
+    // const SignatureGeneratorSink = isolate(SignatureGenerator, 'signatureGenerator')(merge(sources, { query: sampleSelection$ }))
+    // const signature$ = SignatureGeneratorSink.signature
 
     const vdom$ = xs.combine(
         CompoundCheckSink.DOM,
-        SampleSelectionSink.DOM.startWith(''),
-        SignatureGeneratorSink.DOM)
-        .map(([formDom, selectionDOM, signatureDOM]) =>
+        SampleSelectionSink.DOM,
+        // SignatureGeneratorSink.DOM
+        )
+        .map(([
+            formDom, 
+            selectionDOM, 
+            // signatureDOM
+            ]) =>
             div([
                 formDom,
                 selectionDOM,
                 div('.col .s10 .offset-s1', [
                     div('.row', [
                         div('.col .s12', [
-                            signatureDOM
+                            // signatureDOM
                         ])
                     ])
                 ])
-            ]))
+            ])).startWith(div())
+
+	// Takes care of initialization
+	const defaultReducer$ = xs.of(function defaultReducer(prevState) {
+		console.log('CompoundForm -- defaultReducer')
+        if (typeof prevState === 'undefined') {
+			// Settings are handled higher up, but in case we use this component standalone, ...
+			console.log('prevState not exists')
+			return {
+				form: {
+					check : {
+                        query: ''
+                    },
+				},
+				settings : initSettings
+			}
+        } else {
+			console.log('prevState exists:')
+			console.log(prevState)
+            let newState = {...prevState,
+				form: {
+                    check: {},
+                    sampleSelection: {}
+				},
+		    }
+            console.log(newState)
+			return (prevState) // !!!!!!!!!!!!!
+        }
+    });
 
     return {
         DOM: vdom$,
         onion: xs.merge(
+            // defaultReducer$,
             CompoundCheckSink.onion,
             SampleSelectionSink.onion,
         ),
         HTTP: xs.merge(
             CompoundCheckSink.HTTP,
             SampleSelectionSink.HTTP,
-            SignatureGeneratorSink.HTTP
+            // SignatureGeneratorSink.HTTP
         ),
-        signature: signature$
+        // signature: signature$
     }
 }
 

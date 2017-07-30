@@ -18,43 +18,63 @@ export default function CompoundWorkflow(sources) {
         console.log(state)
     });
 
-    const formProps$ = state$
-        .compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
-        .startWith({ settings: initSettings })
-        .map(state => merge(state.settings.form, state.settings.api))
-    const CompoundFormSink = isolate(CompoundForm, 'compoundWorkflow')(merge(sources, { props: formProps$ }))
+    // const formProps$ = state$
+    //     .compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
+    //     .startWith({ settings: initSettings })
+    //     .map(state => merge(state.settings.form, state.settings.api))
+    // Granular access to global state and parts of settings
+    const formLens = { 
+        get: state => ({form: state.form, settings: {form: state.settings.form, api: state.settings.api}}),
+        set: (state, childState) => ({...state, form: childState.form})
+    };
 
-    const signature$ = CompoundFormSink.signature.debug()
+    const CompoundFormSink = isolate(CompoundForm, {onion: formLens})(sources)
+    // const signature$ = CompoundFormSink.output.debug()
 
     // Initialize if not yet done in parent (i.e. router) component (useful for testing)
     const defaultReducer$ = xs.of(prevState => {
         console.log('compound -- defaultReducer')
-        if (typeof prevState === 'undefined') {
+        console.log(prevState)
+        let newState = {
+                    settings: prevState.settings,
+                    headTable: {}, 
+                    tailTable: {},
+                    hist: {},
+                    sim: {},
+                    form: {...prevState.form}
+                }
+        console.log(newState)
+         if (typeof prevState === 'undefined') {
             return (
                 {
                     settings: initSettings,
                 })
         } else {
-            return (
-                {
-                    settings: prevState.settings,
-                })
-            //  return prevState
+            // return (
+            //     {
+            //         settings: prevState.settings,
+            //         headTable: {}, 
+            //         tailTable: {},
+            //         hist: {},
+            //         sim: {},
+            //         form: {}
+            //     })
+             return prevState
         }
     })
 
     // Propagate query to state of individual components
-    const stateReducer$ = signature$.map(query => prevState => {
-        console.log('compound -- stateReducer')
-        let additionalState = {
-            headTable: merge(prevState.headTable, { query: query }),
-            tailTable: merge(prevState.tailTable, { query: query }),
-            compoundhist: merge(prevState.compoundhist, { query: query }),
-            compoundsim: merge(prevState.compoundsim, { query: query }),
-            compoundfilter: {}
-        }
-        return merge(prevState, additionalState)
-    })
+    // const stateReducer$ = signature$.map(query => prevState => {
+    //     console.log('compound -- stateReducer')
+    //     let additionalState = {
+    //         headTable: merge(prevState.headTable, { query: query }),
+    //         tailTable: merge(prevState.tailTable, { query: query }),
+    //         compoundhist: merge(prevState.compoundhist, { query: query }),
+    //         compoundsim: merge(prevState.compoundsim, { query: query }),
+    //         compoundfilter: {}
+    //     }
+    //     return merge(prevState, additionalState)
+    // })
 
     // Filter Form
     const filterForm = isolate(Filter, 'compoundfilter')(sources)
@@ -66,7 +86,8 @@ export default function CompoundWorkflow(sources) {
             headTable: merge(prevState.headTable, { filter: f }),
             tailTable: merge(prevState.tailTable, { filter: f }),
             compoundhist: merge(prevState.compoundhist, { filter: f }),
-            compoundsim: merge(prevState.compoundsim, { filter: f })
+            compoundsim: merge(prevState.compoundsim, { filter: f }),
+            form: merge(prevState.form, {filter: f})
         }
         return merge(prevState, additionalState)
     })
@@ -110,54 +131,54 @@ export default function CompoundWorkflow(sources) {
 
     const vdom$ = xs.combine(
         CompoundFormSink.DOM.startWith(div()),
-        filterForm.DOM,
-        similarityPlot.DOM, //.DOM.startWith(''),
-        histogram.DOM, //.startWith(''),
-        headTable.DOM,
-        tailTable.DOM
+        // filterForm.DOM,
+        // similarityPlot.DOM, //.DOM.startWith(''),
+        // histogram.DOM, //.startWith(''),
+        // headTable.DOM,
+        // tailTable.DOM
     )
         .map(([
             formDOM,
-            filter,
-            simplot,
-            hist,
-            headTable,
-            tailTable
+            // filter,
+            // simplot,
+            // hist,
+            // headTable,
+            // tailTable
         ]) => div('.row .orange .lighten-5 ', [
             formDOM,
             div('.col .s10 .offset-s1', pageStyle, [
-                div('.row', [filter]),
+                // div('.row', [filter]),
                  div('.row ', [
-                    div('.col .s12 .l7', [simplot]),
-                    div('.col .s12 .l5', [hist])
+                    // div('.col .s12 .l7', [simplot]),
+                    // div('.col .s12 .l5', [hist])
                 ]),
                div('.row', []),
-                div('.col .s12', [headTable]),
+                // div('.col .s12', [headTable]),
                 div('.row', []),
-                div('.col .s12', [tailTable])
+                // div('.col .s12', [tailTable])
             ])
         ]))
 
     return {
         DOM: vdom$,
         onion: xs.merge(
-            defaultReducer$,
+            // defaultReducer$,
             CompoundFormSink.onion,
-            stateReducer$,
-            filterReducer$,
-            headTable.onion,
-            tailTable.onion
+            // stateReducer$,
+            // filterReducer$,
+            // headTable.onion,
+            // tailTable.onion
         ),
         HTTP: xs.merge(
             CompoundFormSink.HTTP,
-            similarityPlot.HTTP,
-            histogram.HTTP,
-            headTable.HTTP,
-            tailTable.HTTP
+            // similarityPlot.HTTP,
+            // histogram.HTTP,
+            // headTable.HTTP,
+            // tailTable.HTTP
         ),
         vega: xs.merge(
-            histogram.vega,
-            similarityPlot.vega,
+            // histogram.vega,
+            // similarityPlot.vega,
          )
     };
 }

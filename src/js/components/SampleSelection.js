@@ -18,8 +18,8 @@ const emptyData = {
 }
 
 const sampleSelectionLens = { 
-    get: state => ({sampleSelection: state.form.sampleSelection, settings: state.settings}),
-    set: (state, childState) => ({...state, form: {...state.form, sampleSelection: childState.sampleSelection}})
+    get: state => ({core: state.form.sampleSelection, settings: state.settings}),
+    set: (state, childState) => ({...state, form: {...state.form, sampleSelection: childState.core}})
 };
 
 /**
@@ -38,12 +38,12 @@ function SampleSelection(sources) {
     const input$ = sources.input
 
     const emptyState$ = state$
-         .filter(state => state.sampleSelection.input == null || state.sampleSelection.input == '')
+         .filter(state => state.core.input == null || state.core.input == '')
          .compose(dropRepeats((x, y) => equals(x, y)))
 
     // When the state is cycled because of an internal update
     const modifiedState$ = 	state$
-        .filter(state => state.sampleSelection.input != '')
+        .filter(state => state.core.input != '')
         .compose(dropRepeats((x,y) => equals(x,y)))
         // .debug()
 
@@ -51,13 +51,13 @@ function SampleSelection(sources) {
             input$, 
             state$
         )
-        .map(([newinput, state]) => ({...state, sampleSelection: {...state.sampleSelection, input: newinput}}))
-        .compose(dropRepeats((x,y) => equals(x.sampleSelection.input,y.sampleSelection.input)))
+        .map(([newinput, state]) => ({...state, core: {...state.core, input: newinput}}))
+        .compose(dropRepeats((x,y) => equals(x.core.input, y.core.input)))
         // .debug()
 
     // When a new query is required
     const updatedState$ = state$
-		.compose(dropRepeats((x, y) => equals(x.sampleSelection, y.sampleSelection)))
+		.compose(dropRepeats((x, y) => equals(x.core, y.core)))
         .debug()
 
     const request$ = newInput$
@@ -67,7 +67,7 @@ function SampleSelection(sources) {
                 method: 'POST',
                 send: {
                     version: 'v2',
-                    query: state.sampleSelection.input
+                    query: state.core.input
                 },
                 'category': 'samples'
             }
@@ -141,19 +141,19 @@ function SampleSelection(sources) {
     const loadingVdom$ = xs.combine(request$, modifiedState$).mapTo(div())
 
     const loadedVdom$ = modifiedState$
-        .map(state => makeTable(state.sampleSelection.data))
+        .map(state => makeTable(state.core.data))
 
     const vdom$ = xs.merge(initVdom$, loadingVdom$, loadedVdom$)
 
     const dataReducer$ = data$.map(data => prevState => {
         const newData = data.map(el => merge(el, { use: true }))
-        return {...prevState, sampleSelection: {...prevState.sampleSelection, 
+        return {...prevState, core: {...prevState.core, 
             data: newData,
             output: newData.filter(x => x.use).map(x => x.id) }}
     })
 
     const selectReducer$ = useClick$.map(id => prevState => {
-        const newData = prevState.sampleSelection.data.map(el => {
+        const newData = prevState.core.data.map(el => {
                     // One sample object
                     var newEl = clone(el)
                     const switchUse = (id === el.id)
@@ -161,19 +161,19 @@ function SampleSelection(sources) {
                     return newEl
                 })
         return ({...prevState, 
-            sampleSelection: {...prevState.sampleSelection,
+            core: {...prevState.core,
                 data: newData,
                 output: newData.filter(x => x.use).map(x => x.id) 
         }})
     })
 
-   const defaultReducer$ = xs.of(prevState => ({...prevState, sampleSelection: {input: '', data: []}}))
-   const inputReducer$ = input$.map(i => prevState => ({...prevState, sampleSelection: {...prevState.sampleSelection, input: i}}))
-   const requestReducer$ = request$.map(req => prevState => ({...prevState, sampleSelection: {...prevState.sampleSelection, request: req}}))
+   const defaultReducer$ = xs.of(prevState => ({...prevState, core: {input: '', data: []}}))
+   const inputReducer$ = input$.map(i => prevState => ({...prevState, core: {...prevState.core, input: i}}))
+   const requestReducer$ = request$.map(req => prevState => ({...prevState, core: {...prevState.core, request: req}}))
 
    const sampleSelection$ = sources.DOM.select('.doSelect').events('click')
         .compose(sampleCombine(state$))
-        .map(([ev, state]) => state.sampleSelection.output)
+        .map(([ev, state]) => state.core.output)
 
     return {
         DOM: vdom$,

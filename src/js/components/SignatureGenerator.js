@@ -15,24 +15,49 @@ const emptyData = {
         }
     }
 }
+
+const signatureLens = { 
+    get: state => ({core: state.form.signature, settings: state.settings}),
+    set: (state, childState) => ({...state, form: {...state.form, signature: childState.core}})
+};
+
+/**
+ * Generate a signature from a list of samples.
+ * 
+ * Input: List of samples (array)
+ * Output: Signature (can be empty!)
+ */
 function SignatureGenerator(sources) {
 
-    const state$ = sources.onion.state$.debug()
+    const state$ = sources.onion.state$.debug(state => {
+        console.log('== State in signature =================')
+        console.log(state)
+    });
 
-    const samplesQuery$ = sources.query//.startWith(["GJA127_J10"])
+    const input$ = sources.input
 
-    const request$ = xs.combine(samplesQuery$, sources.props)
-        .map(([query, props]) => {
+    const newInput$ = xs.combine(
+            input$, 
+            state$
+        )
+        .map(([newinput, state]) => ({...state, core: {...state.core, input: newinput}}))
+        .compose(dropRepeats((x,y) => equals(x.core.input, y.core.input)))
+
+    const triggerRequest$ = newInput$
+            
+    const request$ = triggerRequest$
+        .map(state => {
             return {
-                url: props.url + '&classPath=com.dataintuitive.luciusapi.generateSignature',
+                url: state.settings.api.url + '&classPath=com.dataintuitive.luciusapi.generateSignature',
                 method: 'POST',
                 send: {
                     version: 'v2',
-                    samples: query.join(" ")
+                    samples: state.core.input.join(" ")
                 },
                 'category': 'generateSignature'
             }
         })
+        .debug()
 
     const response$ = sources.HTTP
         .select('generateSignature')
@@ -50,6 +75,9 @@ function SignatureGenerator(sources) {
                         .map(r => r.body.result.join(" "))
                         .filter(s => s == '')
 
+    const data$ = response$
+                        .map(r => r.body.result)
+
     const geneStyle = {
         style : {
             'border-style': 'solid',
@@ -63,7 +91,7 @@ function SignatureGenerator(sources) {
             div('.card-content .orange-text .text-darken-4', [
                 span('.card-title', 'Signature:'),
                 div('.row', {style: {fontSize: "16px", fontStyle: 'bold'}}, 
-                    s.split(" ").map(gene => div('.col .orange .lighten-4', geneStyle, gene)))
+                    s.split(" ").map(gene => div('.col .orange .lighten-4', geneStyle, ' ' + gene + ' ')))
             ])
         ]))
         .startWith(div('.card .orange .lighten-3', []))
@@ -79,14 +107,30 @@ function SignatureGenerator(sources) {
         .startWith(div('.card .orange .lighten-3', []))
 
     const vdom$ = xs.merge(invalidVdom$, validVdom$)
+
     const signature$ = xs.merge(validSignature$, invalidSignature$)
 
+    // Initialization
+    const defaultReducer$ = xs.of(prevState => ({...prevState, core: {input: ''}}))
+    // Add input to state
+    const inputReducer$ = input$.map(i => prevState => ({...prevState, core: {...prevState.core, input: i}}))
+    // Add request body to state
+    const requestReducer$ = request$.map(req => prevState => ({...prevState, core: {...prevState.core, request: req}}))
+    // Add data from API to state, update output key when relevant
+    const dataReducer$ = data$.map(newData => prevState => ({...prevState, core: {...prevState.core, data: newData, output: newData.join(" ")}}))
+ 
     return {
         DOM: vdom$,
-        signature: signature$,
+        output: signature$,
         HTTP: request$,
+        onion: xs.merge(
+            defaultReducer$,
+            inputReducer$,
+            dataReducer$,
+            requestReducer$
+        )
     }
 
 }
 
-export { SignatureGenerator }
+export { SignatureGenerator, signatureLens }

@@ -7,8 +7,31 @@ import { logThis, log } from '../utils/logger'
 import { ENTER_KEYCODE } from '../utils/keycodes.js'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import debounce from 'xstream/extra/debounce'
+import { prop } from 'ramda'
 
+const checkLens = { 
+    get: state => {
+        var result = {core: state.form.check, settings: state.settings}
+        return result
+    },
+    set: (state, childState) => {
+        var result = {...state, form : {...state.form, check: childState.core}}
+        return result
+    }};
+
+/**
+ * Form for entering compounds with autocomplete.
+ * 
+ * Input: Form input
+ * Output: compound (string)
+ */
 function CompoundCheck(sources) {
+    // States of autosuggestion field:
+    // - Less than N characters -> no query, no suggestions
+    // - N or more -> with every character a query is done (after 500ms). suggestions are shown
+    // - Clicking on a suggestion activates it in the search field and sets validated to true
+    // - At that point, the dropdown should dissapear!!!
+    // - The suggestions appear again whenever something changes in the input...
 
     console.log('Starting component: CompoundCheck...')
 
@@ -17,42 +40,53 @@ function CompoundCheck(sources) {
         console.log(state)
     });
 
-    const validated$ = state$.map(state => state.validated)
-
     const input$ = sources.DOM
         .select('.compoundQuery')
         .events('input')
         .map(ev => ev.target.value)
         .startWith('')
 
-    const triggerRequest$ = input$
-        .map(x => x.trim())
-        .compose(dropRepeats())
-        .filter(x => x.length >= 2)
-        .compose(debounce(500))
+    // When the state is cycled because of an internal update
+    const modifiedState$ = 	state$
+        // .filter(state => state.core.input != '')
+        .compose(dropRepeats((x,y) => equals(x,y)))
 
-    const request$ = xs.combine(triggerRequest$, sources.props)
-            .map(([substring, props]) => {
+    // An update to the input$, join it with state$
+    const newInput$ = xs.combine(
+            input$, 
+            state$
+        )
+        .map(([newinput, state]) => ({...state, core: {...state.core, input: newinput}}))
+        .compose(dropRepeats((x,y) => equals(x.core.input, y.core.input)))
+ 
+    const triggerRequest$ = newInput$
+            .filter(state => state.core.input.length >= 2)
+            .compose(debounce(500))
+ 
+    const request$ = triggerRequest$ 
+           .map(state => {
             return {
-                url:  props.url + '&classPath=com.dataintuitive.luciusapi.compounds',
+                url:  state.settings.api.url + '&classPath=com.dataintuitive.luciusapi.compounds',
                 method: 'POST',
                 send: {
                     version: 'v2',
-                    query: substring
+                    query: state.core.input
                 },
                 'category': 'compounds'
             }
         })
+        .debug()
 
     const response$ = sources.HTTP
         .select('compounds')
         .map((response$) =>
-            response$.replaceError(() => xs.of([]))
+            response$.replaceError(() => xs.of([1,2,3]))
         )
         .flatten()
-        .map(res => res.body.result.data)
         .debug()
-
+    
+    const data$ = response$
+        .map(res => res.body.result.data)
 
     const suggestionStyle = {
         style: {
@@ -62,17 +96,14 @@ function CompoundCheck(sources) {
         }
     }
 
-    // States of autosuggestion field:
-    // - Less than N characters -> no query, no suggestions
-    // - N or more -> with every character a query is done (after 500ms). suggestions are shown
-    // - Clicking on a suggestion activates it in the search field and sets validated to true
-    // - At that point, the dropdown should dissapear!!!
-    // - The suggestions appear again whenever something changes in the input...
+   const initVdom$ = xs.of(div())
 
-    const vdom$ = xs.combine(state$, validated$, input$, response$.startWith([]))
-        .map(
-        ([state, validated, q, response]) => {
-            const query = state.query
+    const loadedVdom$ = modifiedState$
+        .map(state => {
+            // console.log(state)
+            const query = state.core.input
+            const validated = state.core.validated
+            const showSuggestions = state.core.showSuggestions
             return div(
                 [
                     div('.row  .orange .darken-4 .white-text', { style: { padding: '20px 10px 10px 10px' } }, [
@@ -80,10 +111,10 @@ function CompoundCheck(sources) {
                             i('.large  .center-align .material-icons .orange-text', { style: { fontSize: '45px', fontColor: 'gray' } }, 'search'),
                         ]),
                         div('.col .s10 .input-field', {style : {margin : '0px 0px 0px 0px'}}, [
-                            input('.compoundQuery .col .s12 .autocomplete-input', { style: { fontSize: '20px' }, props: { type: 'text', value: query }, value: query }),
-                            (state.showSuggestions)
+                            input('.compoundQuery .col .s12 .autocomplete-input', { style: { fontSize: '20px' }, props: { type: 'text', value: query }, value: query}),
+                            (showSuggestions)
                                 ? ul('.autocomplete-content .dropdown-content .col .s12 .orange .lighten-4 .z-depth-5',
-                                    response.map(x => li({ attrs: { 'data-index': x.jnjs } }, [
+                                    state.core.data.map(x => li({ attrs: { 'data-index': x.jnjs } }, [
                                         div('.col .s3 .compoundComplete', suggestionStyle, [x.jnjs]),
                                         div('.col .s9 .compoundComplete ', suggestionStyle, [x.name])
                                     ])))
@@ -98,46 +129,56 @@ function CompoundCheck(sources) {
                 ])
         });
 
-    // Handle processing this compound (list)
-    // Encapsulate compound selection in seapr
+    const vdom$ = xs.merge(initVdom$, loadedVdom$)
 
     // Set a initial reducer, showing suggestions
-    const initialReducer$ = xs.of(prevState => {
-        let newState = {}
-        newState.showSuggestions = true
-        // newState.query = ''
-        newState.validated = false
+    const defaultReducer$ = xs.of(prevState => {
+        console.log('-- CompoundCheck -- defaultReducer$')
+        console.log(prevState)
+        let newState = {...prevState, 
+            core : {...prevState.core,
+                showSuggestions : true, 
+                validated: false, 
+                input: '',
+                data: []
+            }
+        }
+        console.log(newState)
         return newState
     })
 
     // Reducer for showing suggestions again after an input event
-    const inputReducer$ = input$.map(value => prevState => {
-        let newState = clone(prevState)
-        newState.showSuggestions = true
-        newState.validated = false
-        newState.query = value
-        return newState
-    })
+    const inputReducer$ = input$.map(value => prevState => ({...prevState, core: {...prevState.core, 
+        showSuggestions: true,
+        validated: false,
+        input: value,
+    }}))
 
     // Set a default signature for demo purposes
     const setDefault$ = sources.DOM.select('.Default').events('click')
-    const setDefaultReducer$ = setDefault$.map(events => prevState => {
-        let newState = clone(prevState)
-        newState.query = '7108491'
-        newState.validated = true
-        return newState
-    })
+    const setDefaultReducer$ = setDefault$.map(events => prevState => ({...prevState, core: {...prevState.core, 
+        showSuggestions: false,
+        validated: true,
+        input: '7108491',
+    }}))
 
     // When a suggestion is clicked, update the state so the query becomes this
     const autocomplete$ = sources.DOM.select('.compoundComplete').events('click')
     const autocompleteReducer$ = autocomplete$.map(event => prevState => {
-        console.log(event.target.parentNode.dataset.index)
-        let newState = clone(prevState)
-        newState.query = event.target.parentNode.dataset.index
-        newState.showSuggestions = false
-        newState.validated = true
-        return newState
+        const newInput = event.target.parentNode.dataset.index
+        return ({...prevState, core: {...prevState.core, 
+            input: newInput,
+            showSuggestions: false,
+            validated:true,
+            output: newInput
+        }})
     })
+
+    // Add request body to state
+    const requestReducer$ = request$.map(req => prevState => ({...prevState, core: {...prevState.core, request: req}}))
+    // Add data from API to state, update output key when relevant
+    const dataReducer$ = data$.map(newData => prevState => ({...prevState, core: {...prevState.core, data: newData}}))
+
 
     // GO!!!
     const run$ = sources.DOM
@@ -147,21 +188,23 @@ function CompoundCheck(sources) {
 
     const query$ = run$
         .compose(sampleCombine(state$))
-        .map(([ev, state]) => state.query)
+        .map(([ev, state]) => state.core.input)
         .debug()
 
     return {
         DOM: vdom$,
         onion: xs.merge(
-            initialReducer$,
+            defaultReducer$,
             inputReducer$,
+            dataReducer$,
+            requestReducer$,
             setDefaultReducer$,
             autocompleteReducer$
         ),
         HTTP: request$,
-        query: query$
+        output: query$.debug()
     };
 
 }
 
-export { CompoundCheck }
+export { CompoundCheck, checkLens }

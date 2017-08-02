@@ -13,7 +13,7 @@ import { stateDebug } from '../utils/utils'
 
 function CompoundForm(sources) {
 
-    const state$ = sources.onion.state$
+    const state$ = sources.onion.state$.debug()
 
     const CompoundCheckSink = isolate(CompoundCheck, {onion: checkLens} )(sources)
     const compoundQuery$ = CompoundCheckSink.output
@@ -22,18 +22,20 @@ function CompoundForm(sources) {
     const sampleSelection$ = SampleSelectionSink.output
 
     const SignatureGeneratorSink = isolate(SignatureGenerator, {onion: signatureLens})({...sources, input: sampleSelection$ })
-    const signature$ = SignatureGeneratorSink.signature
+    const signature$ = SignatureGeneratorSink.output
 
     const vdom$ = xs.combine(
         CompoundCheckSink.DOM,
         SampleSelectionSink.DOM,
-        SignatureGeneratorSink.DOM
+        SignatureGeneratorSink.DOM,
+        // state$
         )
         .map(([
             formDom, 
             selectionDOM, 
-            signatureDOM
-            ]) =>
+            signatureDOM,
+            // state
+        ]) =>
             div([
                 formDom,
                 selectionDOM,
@@ -45,10 +47,16 @@ function CompoundForm(sources) {
                     ])
                 ])
             ]))
-            
+
+    const defaultReducer$ = xs.of(prevState => {
+        console.log('CompoundForm -- default Reducer')
+        return ({...prevState, sampleSelection: {}, check: {}, signature: {}})
+    })
+
     return {
         DOM: vdom$,
         onion: xs.merge(
+            // defaultReducer$,
             CompoundCheckSink.onion,
             SampleSelectionSink.onion,
             SignatureGeneratorSink.onion

@@ -7,11 +7,16 @@ import { logThis, log } from '../utils/logger'
 import { ENTER_KEYCODE } from '../utils/keycodes.js'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import debounce from 'xstream/extra/debounce'
+import concat from 'xstream/extra/concat'
 import { prop } from 'ramda'
 
 const checkLens = { 
     get: state => {
+        console.log('global state:')
+        console.log(state)
         var result = {core: state.form.check, settings: state.settings}
+        console.log('local state:')
+        console.log(result)
         return result
     },
     set: (state, childState) => {
@@ -46,9 +51,12 @@ function CompoundCheck(sources) {
         .map(ev => ev.target.value)
         .startWith('')
 
+    const emptyState$ = state$
+        .filter(state => typeof state.core === 'undefined')
+
     // When the state is cycled because of an internal update
     const modifiedState$ = 	state$
-        // .filter(state => state.core.input != '')
+        .filter(state => typeof state.core !== 'undefined')
         .compose(dropRepeats((x,y) => equals(x,y)))
 
     // An update to the input$, join it with state$
@@ -96,7 +104,7 @@ function CompoundCheck(sources) {
         }
     }
 
-   const initVdom$ = xs.of(div())
+   const initVdom$ = emptyState$.mapTo(div())
 
     const loadedVdom$ = modifiedState$
         .map(state => {
@@ -204,7 +212,6 @@ function CompoundCheck(sources) {
         HTTP: request$,
         output: query$.debug()
     };
-
 }
 
 export { CompoundCheck, checkLens }

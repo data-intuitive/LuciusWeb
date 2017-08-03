@@ -25,13 +25,14 @@ function SampleTable(sources) {
 	// const active$ = state$.map(state => state.validated).startWith(false).debug(log)
 
     // This will become an object representing the JSON table
-    const array$ = sources.onion.state$.map(state => {
-        console.log(state)
-        return state
-    })
+    const array$ = sources.onion.state$
+    // .map(state => {
+    //     // console.log(state)
+    //     return state
+    // })
 
     const childrenSinks$ = array$.map(array => {
-        console.log(array)
+        // console.log(array)
         return array.map((item, index) => isolate(SampleInfo, index)(sources))
     });
 

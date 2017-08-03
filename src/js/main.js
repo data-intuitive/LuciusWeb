@@ -22,7 +22,8 @@ const drivers = {
   HTTP: makeHTTPDriver(),
   router: makeRouterDriver(captureClicks(makeServerHistoryDriver()), switchPath),
   preventDefault: event$ => event$.subscribe({ next: e => e.preventDefault() }),
-  storage: storageDriver
+  storage: storageDriver,
+  log: logDriver
 };
 
 // let StatifiedMain = onionify(SignatureWorkflow);
@@ -31,6 +32,16 @@ const drivers = {
 let StatifiedMain = onionify(storageify(Router, {key: 'ComPass'}));
 // let StatifiedMain = onionify(Router);
 run(StatifiedMain, drivers);
+
+
+function logDriver(stream$) {
+  stream$.addListener({
+    next: message => message.map(m => console.log(m)),
+    error: e => console.error(e),
+    complete: () => {}
+  })
+}
+
 
 // if (module.hot) {
 // 		module.hot.accept(() => {

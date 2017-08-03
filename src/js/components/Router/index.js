@@ -122,6 +122,7 @@ export default function Router(sources) {
       page$.map(prop('onion')).filter(Boolean).flatten()
     ),
     vega: page$.map(prop('vega')).filter(Boolean).flatten(),
+    log: page$.map(prop('log')).filter(Boolean).flatten()
     // preventDefault: prevent$,
    }
 

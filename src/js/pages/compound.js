@@ -14,10 +14,13 @@ import concat from 'xstream/extra/dropRepeats'
 
 export default function CompoundWorkflow(sources) {
 
-    const state$ = sources.onion.state$.debug(state => {
-        console.log('== State in compound =================')
-        console.log(state)
-    });
+    const state$ = sources.onion.state$
+    
+    const stateLogger$ = state$
+        .map(state => ([
+            '>> State in compound =================\n', 
+            state
+        ]))
 
     const formLens = { 
         get: state => ({form: state.form, settings: {form: state.settings.form, api: state.settings.api}}),
@@ -119,7 +122,8 @@ export default function CompoundWorkflow(sources) {
         similarityPlot.DOM, 
         histogram.DOM, 
         headTable.DOM,
-        tailTable.DOM
+        tailTable.DOM,
+        // state$
     )
         .map(([
             formDOM,
@@ -164,6 +168,7 @@ export default function CompoundWorkflow(sources) {
         vega: xs.merge(
             histogram.vega,
             similarityPlot.vega
-        )
+        ),
+        log: stateLogger$
     };
 }

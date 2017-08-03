@@ -78,7 +78,7 @@ function SampleSelection(sources) {
     // When a new query is required
     const updatedState$ = state$
 		.compose(dropRepeats((x, y) => equals(x.core, y.core)))
-        .debug()
+        // .debug()
 
     const request$ = newInput$
         .map(state => {
@@ -91,7 +91,8 @@ function SampleSelection(sources) {
                 },
                 'category': 'samples'
             }
-        }).debug()
+        })
+        .debug()
 
     const response$ = sources.HTTP
         .select('samples')

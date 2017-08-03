@@ -105,7 +105,7 @@ function CompoundCheck(sources) {
     const response$ = sources.HTTP
         .select('compounds')
         .map((response$) =>
-            response$.replaceError(() => xs.of([1,2,3]))
+            response$.replaceError(() => xs.of([]))
         )
         .flatten()
         .debug()
@@ -123,7 +123,7 @@ function CompoundCheck(sources) {
 
    const initVdom$ = emptyState$
         .mapTo(div())
-        .debug()
+        // .debug()
 
     const loadedVdom$ = modifiedState$
         .map(state => {
@@ -155,7 +155,7 @@ function CompoundCheck(sources) {
                     ]),
                 ])
         })
-        .debug()
+        // .debug()
 
     const vdom$ = xs.merge(initVdom$, loadedVdom$).startWith(div()).remember()
 
@@ -211,13 +211,13 @@ function CompoundCheck(sources) {
     const run$ = sources.DOM
         .select('.CompoundCheck')
         .events('click')
-        .debug()
+        // .debug()
 
     const query$ = run$
         .compose(sampleCombine(state$))
         .map(([ev, state]) => state.core.input)
         .remember()
-        .debug()
+        // .debug()
 
     return {
         DOM: vdom$,

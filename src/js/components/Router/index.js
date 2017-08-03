@@ -117,7 +117,7 @@ export default function Router(sources) {
     router: router$,
     HTTP: page$.map(prop('HTTP')).filter(Boolean).flatten(), 
     onion: xs.merge(
-      // defaultReducer$,
+      defaultReducer$,
       page$.map(prop('onion')).filter(Boolean).flatten()
     ),
     vega: page$.map(prop('vega')).filter(Boolean).flatten(),

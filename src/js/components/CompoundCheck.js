@@ -14,7 +14,7 @@ const checkLens = {
     get: state => {
         // console.log('global state:')
         // console.log(state)
-        var result = {core: state.form.check, settings: state.settings}
+        var result = {core: (typeof state.form !== 'undefined') ? state.form.check : {}, settings: state.settings}
         // console.log('local state:')
         // console.log(result)
         return result

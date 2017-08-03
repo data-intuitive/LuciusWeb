@@ -39,12 +39,11 @@ export default function CompoundWorkflow(sources) {
                     hist: {},
                 })
         } else {
-             return ({
+             return ({...prevState,
                 settings: prevState.settings, 
                 form: {},
                 sim: {},
                 hist: {},
-                headTable: {}
              })
         }
     })

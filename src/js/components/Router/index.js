@@ -94,16 +94,16 @@ export default function Router(sources) {
   // Since we use storageify, we only keep the settings
   const defaultReducer$ = xs.of(prevState => {
     console.log("index -- defaultReducer")
-    if (typeof prevState === 'undefined' || typeof prevState.settings === 'undefined') {
-      return {
+    if (typeof prevState === 'undefined') {
+      return ({
           settings: initSettings,
-        }
+        })
     } else {
-      return {
-          settings: prevState.settings
-      }
+      // return prevState
+      return (prevState)
     }
-  });
+  })
+  .debug()
 
   // Capture link targets and send to router driver
   const router$ = sources.DOM.select('a').events('click')
@@ -115,9 +115,9 @@ export default function Router(sources) {
   return {
    DOM: vdom$,
     router: router$,
-    HTTP: page$.map(prop('HTTP')).filter(Boolean).flatten(),
+    HTTP: page$.map(prop('HTTP')).filter(Boolean).flatten(), 
     onion: xs.merge(
-      defaultReducer$,
+      // defaultReducer$,
       page$.map(prop('onion')).filter(Boolean).flatten()
     ),
     vega: page$.map(prop('vega')).filter(Boolean).flatten(),

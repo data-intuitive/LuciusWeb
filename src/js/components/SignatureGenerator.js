@@ -108,7 +108,7 @@ function SignatureGenerator(sources) {
 
     const vdom$ = xs.merge(invalidVdom$, validVdom$)
 
-    const signature$ = xs.merge(validSignature$, invalidSignature$).debug()
+    const signature$ = xs.merge(validSignature$, invalidSignature$).remember().debug()
 
     // Initialization
     const defaultReducer$ = xs.of(prevState => ({...prevState, core: {input: ''}}))

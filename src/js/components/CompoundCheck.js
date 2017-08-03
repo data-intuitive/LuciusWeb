@@ -12,11 +12,11 @@ import { prop } from 'ramda'
 
 const checkLens = { 
     get: state => {
-        console.log('global state:')
-        console.log(state)
+        // console.log('global state:')
+        // console.log(state)
         var result = {core: state.form.check, settings: state.settings}
-        console.log('local state:')
-        console.log(result)
+        // console.log('local state:')
+        // console.log(result)
         return result
     },
     set: (state, childState) => {
@@ -51,12 +51,27 @@ function CompoundCheck(sources) {
         .map(ev => ev.target.value)
         .startWith('')
 
+	// When the component should not be shown, including empty signature
+	const isEmptyState = (state) => {
+		if (typeof state.core === 'undefined') {
+			return true 
+		} else {
+			if (typeof state.core.input === 'undefined') {
+				return true 
+			} else {
+                return false
+			}
+		}
+	}
+
     const emptyState$ = state$
-        .filter(state => typeof state.core === 'undefined')
+        .filter(state => isEmptyState(state))
+        // .filter(state => typeof state.core === 'undefined')
 
     // When the state is cycled because of an internal update
     const modifiedState$ = 	state$
-        .filter(state => typeof state.core !== 'undefined')
+        .filter(state => ! isEmptyState(state))
+        // .filter(state => typeof state.core !== 'undefined')
         .compose(dropRepeats((x,y) => equals(x,y)))
 
     // An update to the input$, join it with state$

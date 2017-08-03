@@ -6,7 +6,7 @@ import { clone, equal, equals, mergeAll } from 'ramda'
 import { CompoundForm } from '../components/CompoundForm'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import { initSettings } from './settings'
-import { Table } from '../components/Table'
+import { Table, headTableLens, tailTableLens } from '../components/Table'
 import { Histogram, histLens } from '../components/Histogram/Histogram'
 import { SimilarityPlot, simLens } from '../components/SimilarityPlot/SimilarityPlot'
 import { Filter } from '../components/Filter'
@@ -19,18 +19,14 @@ export default function CompoundWorkflow(sources) {
         console.log(state)
     });
 
-    // const formProps$ = state$
-    //     .compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
-    //     .startWith({ settings: initSettings })
-    //     .map(state => merge(state.settings.form, state.settings.api))
-    // Granular access to global state and parts of settings
     const formLens = { 
         get: state => ({form: state.form, settings: {form: state.settings.form, api: state.settings.api}}),
         set: (state, childState) => ({...state, form: childState.form})
     };
 
     const CompoundFormSink = isolate(CompoundForm, {onion: formLens})(sources)
-    const signature$ = CompoundFormSink.output.startWith('BRCA1')
+    const signature1$ = CompoundFormSink.output//.startWith('BRCA1')
+    const signature2$ = CompoundFormSink.output//.startWith('BRCA1')
 
     // Initialize if not yet done in parent (i.e. router) component (useful for testing)
     const defaultReducer$ = xs.of(prevState => {
@@ -40,16 +36,20 @@ export default function CompoundWorkflow(sources) {
                 {
                     settings: initSettings,
                     form: {},
-                    sim: {}
+                    sim: {},
+                    hist: {},
+                    headTable: {}
                 })
         } else {
-             return ({
-                 settings: prevState.settings, 
-                 form: {},
-                 sim: {}
-                })
+             return ({...prevState,
+                settings: prevState.settings, 
+                form: {},
+                sim: {},
+                hist: {},
+                headTable: {}
+             })
         }
-    })
+    }).debug()
 
     // Propagate query to state of individual components
     // const stateReducer$ = signature$.map(query => prevState => {
@@ -80,28 +80,23 @@ export default function CompoundWorkflow(sources) {
     //     return merge(prevState, additionalState)
     // })
 
-    // const fixedSignature$ = .of('BRCA1')
-    // // const testFilter$ = xs.never()
-
-    // const testSignature$ = fixedSignature$.compose(concat(signature$))
-
 	// Similarity plot component
-	const similarityPlot = isolate(SimilarityPlot, {onion: simLens})({...sources, input: xs.combine(signature$).map(([s, f]) => ({signature: s, filter: f})).remember()});
+	const similarityPlot = isolate(SimilarityPlot, {onion: simLens})
+                                  ({...sources, input: xs.combine(signature2$).map(([s, f]) => ({signature: s, filter: f})).remember()});
 
-	// histogram component
-	// const histogram = isolate(Histogram, {onion: histLens})(sources);
+	// Histogram plot component
+	const histogram = isolate(Histogram, {onion: histLens})
+                            ({...sources, input: xs.combine(signature1$).map(([s, f]) => ({signature: s, filter: f})).remember()});
 
     // tables: Join settings from api and sourire into props
-    const headTableProps$ = state$
-        .compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
-        .startWith({ settings: initSettings })
-		.map(state => merge(merge(merge(state.settings.headTableSettings, state.settings.common), state.settings.api), state.settings.sourire)).debug()
-    const tailTableProps$ = state$
-        .compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
-        .startWith({ settings: initSettings })
-		.map(state => merge(merge(merge(state.settings.tailTableSettings, state.settings.common), state.settings.api), state.settings.sourire))
-    const headTable = isolate(Table, 'headTable')(merge(sources, { props: headTableProps$ }));
-    const tailTable = isolate(Table, 'tailTable')(merge(sources, { props: tailTableProps$ }));
+    // const headTable = isolate(Table, {onion: headTableLens})
+    //                          ({...sources, input: xs.combine(signature1$).map(([s, f]) => ({signature: s, filter: f})).remember()});
+
+    // const tailTableProps$ = state$
+    //     .compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
+    //     .startWith({ settings: initSettings })
+	// 	.map(state => merge(merge(merge(state.settings.tailTableSettings, state.settings.common), state.settings.api), state.settings.sourire))
+    // const tailTable = isolate(Table, 'tailTable')(merge(sources, { props: tailTableProps$ }));
 
     const pageStyle = {
         style:
@@ -118,16 +113,16 @@ export default function CompoundWorkflow(sources) {
         CompoundFormSink.DOM,
         // filterForm.DOM,
         similarityPlot.DOM, //.DOM.startWith(''),
-        // histogram.DOM, //.startWith(''),
-        // headTable.DOM,
+        histogram.DOM, //.startWith(''),
+        //    headTable.DOM,
         // tailTable.DOM
     )
         .map(([
             formDOM,
             // filter,
             simplot,
-            // hist,
-            // headTable,
+            hist,
+        //    headTable,
             // tailTable
         ]) => div('.row .orange .lighten-5 ', [
             formDOM,
@@ -135,9 +130,9 @@ export default function CompoundWorkflow(sources) {
                 // div('.row', [filter]),
                  div('.row ', [
                     div('.col .s12 .l7', [simplot]),
-                    // div('.col .s12 .l5', [hist])
+                    div('.col .s12 .l5', [hist]),
                 ]),
-               div('.row', []),
+              div('.row', []),
                 // div('.col .s12', [headTable]),
                 div('.row', []),
                 // div('.col .s12', [tailTable])
@@ -150,6 +145,7 @@ export default function CompoundWorkflow(sources) {
             defaultReducer$,
             CompoundFormSink.onion,
             similarityPlot.onion,
+            histogram.onion
             // stateReducer$,
             // filterReducer$,
             // headTable.onion,
@@ -157,14 +153,14 @@ export default function CompoundWorkflow(sources) {
         ),
         HTTP: xs.merge(
             CompoundFormSink.HTTP,
-            similarityPlot.HTTP,
-            // histogram.HTTP,
+            histogram.HTTP,
+            similarityPlot.HTTP
             // headTable.HTTP,
             // tailTable.HTTP
         ),
         vega: xs.merge(
-            // histogram.vega,
-            similarityPlot.vega,
-         )
+            histogram.vega,
+            similarityPlot.vega
+        )
     };
 }

@@ -22,7 +22,7 @@ function CompoundForm(sources) {
     const sampleSelection$ = SampleSelectionSink.output
 
     const SignatureGeneratorSink = isolate(SignatureGenerator, {onion: signatureLens})({...sources, input: sampleSelection$ })
-    const signature$ = SignatureGeneratorSink.output
+    const signature$ = SignatureGeneratorSink.output.remember()
 
     const vdom$ = xs.combine(
         CompoundCheckSink.DOM,

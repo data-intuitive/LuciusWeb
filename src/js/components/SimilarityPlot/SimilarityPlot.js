@@ -24,10 +24,12 @@ function SimilarityPlot(sources) {
 
 	const ENTER_KEYCODE = 13
 
-	const state$ = sources.onion.state$.debug(state => {
-        console.log('== State in SimilarityPlot =================')
-        console.log(state)
-    });
+	const state$ = sources.onion.state$
+		// .remember()
+		.debug(state => {
+			console.log('== State in SimilarityPlot =================')
+			console.log(state)
+		});
 
 	const domSource$ = sources.DOM;
 	const httpSource$ = sources.HTTP;
@@ -43,16 +45,30 @@ function SimilarityPlot(sources) {
 	// Size stream
 	const width$ = widthStream(domSource$, elementID)
 
-    const input$ = sources.input.debug()
+	// Input handling
+    const input$ = sources.input
 
-	const isInitState = (state) => {
+	const newInput$ = xs.combine(
+		input$, 
+		state$
+	)
+	.map(([newInput, state]) => ({...state, core: {...state.core, input : newInput}}))
+	.compose(dropRepeats((x,y) => equals(x.core.input, y.core.input)))
+	.remember()
+	.debug()
+
+	// No requests when signature is empty!
+	const triggerRequest$ = newInput$
+		.filter(state => state.core.input.signature != '')
+
+	// When the component should not be shown, including empty signature
+	const isEmptyState = (state) => {
 		if (typeof state.core === 'undefined') {
-			return true
+			return true 
 		} else {
 			if (typeof state.core.input === 'undefined') {
-				return true
+				return true 
 			} else {
-				// return false
 				if (state.core.input.signature === '') {
 					return true
 				} else {
@@ -64,33 +80,11 @@ function SimilarityPlot(sources) {
 
 	// state$ handling
 	const modifiedState$ = state$
-		.filter(state => ! isInitState(state))
-		// .filter(state => state.core.input.signature != '')
-		// .compose(dropRepeats((x, y) => equals(omit(['request', 'data', 'output'], x.core), omit(['request', 'data', 'output'], y.core))))
-		// .compose(dropRepeats((x, y) => equals(x, y)))
-		.remember()
-
+		.filter(state => ! isEmptyState(state))
+		.compose(dropRepeats(equals))	
+	
 	const initState$ = state$
-		.filter(state => isInitState(state))
-		// .remember()
-		// .compose(dropRepeats((x, y) => equals(x, y)))
-
-	const newInput$ = xs.combine(
-		input$, 
-		state$)
-	.map(([newInput, state]) => ({...state, core: {...state.core, input : newInput}}))
-	.compose(dropRepeats((x,y) => equals(x.core.input, y.core.input)))
-	.remember()
-	.debug()
-
-	// const newInput$ = modifiedState$
-	// // .map(([state]) => ({...state, core: {...state.core, input : newinput}}))
-	// // .compose(dropRepeats((x,y) => equals(x.core.input, y.core.input)))
-	// .debug()
-
-	// No requests when signature is empty!
-	const triggerRequest$ = newInput$
-		.filter(state => state.core.input.signature != '')
+		.filter(state => isEmptyState(state))
 
 	const request$ = triggerRequest$
 		.map(state => {
@@ -107,7 +101,7 @@ function SimilarityPlot(sources) {
 			}
 		})
 		.remember()
-		.debug();
+		.debug()
 
 	const response$$ = sources.HTTP
 		.select('binnedZhang')
@@ -131,25 +125,23 @@ function SimilarityPlot(sources) {
 
 	const data$ = validResponse$
 		.map(result => result.body.result.data)
-		// It need startWith in order to initialize the vega component.
-		// Be sure to drop(1) it later!!!
-		// .startWith(emptyData)
 
 	// Ingest the data in the spec and return to the driver
 	const vegaSpec$ = xs.combine(data$, width$, visible$)
 		.map(([data, newwidth, visible]) => {
 			return { spec: similarityPlotSpec(data), el: elementID, width: newwidth }
-		}).remember();
+		})
 
 	const makeChart = () => {
 		return (
 			div('.card-panel .center-align', { style: { height: '400px' } }, [div(elementID)])
 		)
-	};
+	}
 
-	const initVdom$ = initState$.mapTo(div()).debug()
+	const initVdom$ = initState$.mapTo(div())//.debug()
 
-	const loadingVdom$ = xs.merge(request$).mapTo(
+	const loadingVdom$ = request$
+	.mapTo(
 		div([
 			div('.preloader-wrapper .small .active', { style: { 'z-index': 1, position: 'absolute' } }, [
 				div('.spinner-layer .spinner-green-only', [
@@ -160,14 +152,17 @@ function SimilarityPlot(sources) {
 			]),
 			div({ style: { opacity: 0.4 } }, [makeChart()]),
 		])
-	).debug()
+	)
+	.remember()
+	// .debug()
 
-	const loadedVdom$ = modifiedState$
-		.map(state => div([
-			(equals(state.core.data, emptyData))
+	const loadedVdom$ = xs.combine(data$, modifiedState$)
+		.map(([data, state]) => div([
+			(equals(data, emptyData))
 				? div({ style: { visibility: 'hidden' } }, [makeChart()])
 				: div([makeChart()])
-		])).debug()
+		]))
+		// .debug()
 
 	const errorVdom$ = invalidResponse$.mapTo(div('.red .white-text', [p('An error occured !!!')]))
 
@@ -178,7 +173,7 @@ function SimilarityPlot(sources) {
 		loadedVdom$
 	)
 
-	const defaultReducer$ = xs.of(prevState => ({...prevState, core: {...prevState.core, input: {signature: ''}}})).debug()
+	const defaultReducer$ = xs.of(prevState => ({...prevState, core: {...prevState.core, input: {signature: ''}}}))
 
 	// Add input to state
     const inputReducer$ = input$.map(i => prevState => 
@@ -186,9 +181,9 @@ function SimilarityPlot(sources) {
 		({...prevState, core: {...prevState.core, input: i}})
 	)
     // Add request body to state
-    const requestReducer$ = request$.map(req => prevState => ({...prevState, core: {...prevState.core, request: req}})).debug()
+    const requestReducer$ = request$.map(req => prevState => ({...prevState, core: {...prevState.core, request: req}}))
     // Add data from API to state, update output key when relevant
-    const dataReducer$ = data$.map(newData => prevState => ({...prevState, core: {...prevState.core, data: newData}})).debug()
+    const dataReducer$ = data$.map(newData => prevState => ({...prevState, core: {...prevState.core, data: newData}}))
  
 	return {
 		DOM: vdom$,

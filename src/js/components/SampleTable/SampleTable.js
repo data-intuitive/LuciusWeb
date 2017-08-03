@@ -9,7 +9,12 @@ import { pick, mix } from 'cycle-onionify';
 import isolate from '@cycle/isolate'
 import { SampleInfo } from './SampleInfo'
 
-export function SampleTable(sources) {
+const sampleTableLens = {
+    get: state => (state.core.data),
+    set: (state, childState) => state
+}
+
+function SampleTable(sources) {
 
 	console.log('Starting component: SampleTable...');
 
@@ -44,3 +49,5 @@ export function SampleTable(sources) {
     };
 
 }
+
+export { SampleTable, sampleTableLens }

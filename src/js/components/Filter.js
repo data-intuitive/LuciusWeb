@@ -6,20 +6,61 @@ import xs from 'xstream';
 import { ENTER_KEYCODE } from '../utils/keycodes.js'
 import dropRepeats from 'xstream/extra/dropRepeats'
 
+/**
+ * Provide a filter form. We inject (via input) a signature in order to hide the form when an empty signature is present.
+ * 
+ */
 function Filter(sources) {
 
     console.log('Starting component: Filter...');
 
     const domSource$ = sources.DOM;
+    const state$ = sources.onion.state$
+        .debug(state => {
+			console.log('== State in Filter =================')
+			console.log(state)
+		});
+
+    const input$ = sources.input
+
+	// When the component should not be shown, including empty signature
+	const isEmptyState = (state) => {
+		if (typeof state.core === 'undefined') {
+			return true 
+		} else {
+			if (typeof state.core.input === 'undefined') {
+				return true
+			} else {
+				if (state.core.input === '') {
+					return true
+				} else {
+					return false
+				}
+			}
+		}
+	}
+
+    const emptyState$ = state$
+        .filter(input => isEmptyState(input))
+        .debug()
+
+    const modifiedState$ = xs.combine(input$, state$)
+        .filter(([input, state]) => ! isEmptyState(state))
+        .map(([input, state]) => state.core.input)
+        // .compose(dropRepeats(equals))
+        .debug()
 
     // Make sure the input is generated only when some state is active.
-    const filterInput$ = sources.onion.state$.mapTo(x => ({
+    const filterInput$ = xs.of(x => ({
         concentration: '',
         protocol: '',
         type: ''
     }))
 
-    const vdom$ = filterInput$.map(filter =>
+    const emptyVdom$ = emptyState$.mapTo(div())
+
+    const loadedVdom$ = xs.combine(filterInput$, modifiedState$)
+    .map(([filter, state]) =>
         div([
            div('.input-field .concentration .col .s12 .l4', [
                  span('.blue-grey-text',  ['Concentration']),
@@ -49,7 +90,11 @@ function Filter(sources) {
             ]),
         ])
     )
-        .startWith(div([]))
+
+    const vdom$ = xs.merge(
+        emptyVdom$, 
+        loadedVdom$.startWith(div())
+        )
 
     const concentrationChanged$ = sources.DOM
         .select('.concentration')
@@ -77,23 +122,23 @@ function Filter(sources) {
         typeChanged$,
         protocolChanged$
     ).map((filters) => mergeAll(filters))
+    .debug()
 
-    // const filter$ = xs.combine(filterInput$, concentrationChanged$, typeChanged$, protocolChanged$)
-    //     .map(([prevFilter, concentration, type, protocol]) => {
-    //         let merged = mergeAll(concentration, type, protocol)
-    //         console.log(merged)
-    //         return merge(prevFilter, merged)
-    //     })
+    // To be sent to sink as output
+    const filter$ = changes$.remember()
 
-    const filter$ = changes$
-    // .map(([prevFilter, change]) => {
-    //     return merge(prevFilter, change)
-    // })
-
-
+    const defaultReducer$ = xs.of(prevState => ({...prevState, core: { input: '' }}))
+    const inputReducer$ = input$.map(i => prevState => ({...prevState, core: {...prevState.core, input: i}}))
+    const outputReducer$ = filter$.map(i => prevState => ({...prevState, core: {...prevState.core, output: i}}))
+ 
     return {
         DOM: vdom$,
-        filter: filter$
+        output: filter$,
+        onion: xs.merge(
+            defaultReducer$,
+            inputReducer$,
+            outputReducer$
+        )
     };
 
 }

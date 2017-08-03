@@ -5,7 +5,7 @@ import { a, h, p, div, br, label, input, code, table, tr, td, b, h2, button, svg
 import { log } from '../utils/logger'
 import { ENTER_KEYCODE } from '../utils/keycodes.js'
 import { keys, filter, head, equals, map, prop, clone, omit, merge } from 'ramda'
-import { SampleTable } from './SampleTable/SampleTable'
+import { SampleTable, sampleTableLens } from './SampleTable/SampleTable'
 import isolate from '@cycle/isolate'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import dropUntil from 'xstream/extra/dropUntil'
@@ -16,8 +16,7 @@ import { stateDebug } from '../utils/utils'
 // This makes it easier to apply fixed scope later in the process
 const headTableLens = { 
     get: state => ({
-        table: state.headTable,
-        results: state.headTable.results, 
+        core: state.headTable,
         settings: {
             table: state.settings.headTable, 
             api: state.settings.api, 
@@ -25,7 +24,7 @@ const headTableLens = {
             sourire: state.settings.sourire
         }
     }),
-    set: (state, childState) => ({...state, headTable: childState.table})
+    set: (state, childState) => ({...state, headTable: childState.core})
 };
 
 // Granular access to the settings
@@ -33,8 +32,7 @@ const headTableLens = {
 // This makes it easier to apply fixed scope later in the process
 const tailTableLens = { 
     get: state => ({
-        table: state.tailTable,
-        results: state.tailTable.results, 
+        core: state.tailTable,
         settings: {
             table: state.settings.tailTable, 
             api: state.settings.api, 
@@ -42,7 +40,7 @@ const tailTableLens = {
             sourire: state.settings.sourire
          }
     }),
-    set: (state, childState) => ({...state, tailTable: childState.table})
+    set: (state, childState) => ({...state, tailTable: childState.core})
 };
 
 function Table(sources) {
@@ -50,44 +48,93 @@ function Table(sources) {
     console.log('Starting component: Table...');
 
     const state$ = sources.onion.state$
-                    .debug(stateDebug('table'));
+        .remember()
+ 		.debug(state => {
+			console.log('== State in Table =================')
+			console.log(state)
+		});
     const domSource$ = sources.DOM;
     const httpSource$ = sources.HTTP;
 
+	console.log('here...')
+
+	// Input handling
+    const input$ = sources.input
+
+	const newInput$ = xs.combine(
+		input$, 
+		state$
+	)
+	.map(([newInput, state]) => ({...state, core: {...state.core, input : newInput}}))
+	.compose(dropRepeats((x,y) => equals(x.core.input, y.core.input)))
+	.remember()
+	.debug()
+
+    // When the component should not be shown, including empty signature
+	const isEmptyState = (state) => {
+		if (typeof state.core === 'undefined') {
+			return true 
+		} else {
+			if (typeof state.core.input === 'undefined') {
+				return true 
+			} else {
+				if (state.core.input.signature === '') {
+					return true
+				} else {
+					return false
+				}
+			}
+		}
+	}
+
     // Split off properties in separate stream to make life easier in subcomponents
-    const props$ = state$.map(state => state.settings).debug()
+    const props$ = state$
+        .filter(state => ! isEmptyState(state))
+        .map(state => state.settings)
+        .remember()
+        .debug()
 
     const modifiedState$ = state$
-        .filter(state => state.table.query != null && state.table.query != '')
-        .compose(dropRepeats((x, y) => equals(x.results, y.results)))
+        .filter(state => ! isEmptyState(state))
+        // .compose(dropRepeats(equals))
         .debug()
 
     const emptyState$ = state$
-         .filter(state => state.table.query == null || state.table.query == '')
-         .compose(dropRepeats((x, y) => equals(x.results, y.results)))
+        .filter(state => isEmptyState(state))
 
-    const updatedSettings$ = xs.combine(
-            modifiedState$,
-            sources.DOM.select('.plus5').events('click').mapTo(5).startWith(0).fold((x, y) => x + y, 0),
-            sources.DOM.select('.min5').events('click').mapTo(5).startWith(0).fold((x, y) => x + y, 0)
-        ).map(([state, add5, min5]) => {
+    const plus5$ = sources.DOM.select('.plus5').events('click').mapTo(5).startWith(0).fold((x, y) => x + y, 0).remember()
+    const min5$  = sources.DOM.select('.min5').events('click').mapTo(5).startWith(0).fold((x, y) => x + y, 0).remember()
+
+    const triggerRequest$ = xs.combine(
+            newInput$,
+            plus5$,
+            min5$            
+        ).map(([state, plus5, min5]) => {
             let isHead = (state.settings.table.title === 'Top Table')
-            const count = parseInt(state.settings.table.count) + add5 - min5
-            if (isHead) {
-                return {...state, table: {...state.table,  head: count }}
-            } else {
-                return {...state, table: {...state.table,  tail: count }}
+            const cnt = parseInt(state.settings.table.count) + plus5 - min5
+            return (isHead) 
+                ? ({...state, core: {...state.core,  count: {head: cnt }}})
+                : ({...state, core: {...state.core,  count: {tail: cnt }}})
             }
-            
-    }).debug()
+    )
+    .compose(dropRepeats((x,y) => equals(x.core.input, y.core.input)))
+    .filter(state => state.core.input.signature != '')
+    .debug()
 
-    const request$ = updatedSettings$
+    const request$ = triggerRequest$
         .map(state => ({
-            send: merge(state.table, state.settings.table),
+            send: merge(state.core.count, {
+                    query: state.core.input.signature,
+                    version: 'v2',
+                    filter: (typeof state.core.input.filter !== 'undefined') ? state.core.input.filter : ''
+                }
+            ),
             method: 'POST',
             url: state.settings.api.url + '&classPath=com.dataintuitive.luciusapi.topTable',
             category: 'topTable'
-        })).debug()
+        }))
+        .remember()
+        .debug()
 
     const response$$ = sources.HTTP
         .select('topTable')
@@ -111,8 +158,8 @@ function Table(sources) {
     const data$ = validResponse$
         .map(result => result.body.result.data)
 
-    // Delegate effective rendering to SampleTable:
-    const sampleTable = isolate(SampleTable, 'results')({...sources, props: props$});
+    // const sampleTable = isolate(SampleTable, 'core.data')({...sources, props: props$});
+    const sampleTable = isolate(SampleTable, {onion: sampleTableLens})({...sources, props: props$});
 
     function isDefined(obj) {
         if (typeof obj !== 'undefined') {
@@ -132,13 +179,13 @@ function Table(sources) {
 
     const filterText$ = modifiedState$
         .map(state => {
-            if (isDefined(state.filter)) {
-                console.log(state.table.filter)
-                let filters = keys(state.table.filter)
+            if (isDefined(state.core.input.filter)) {
+                console.log(state.core.input.filter)
+                let filters = keys(state.core.input.filter)
                 console.log(filters)
-                let nonEmptyFilters = filter(key => prop(key, state.table.filter).length > 0, filters)
+                let nonEmptyFilters = filter(key => prop(key, state.core.input.filter).length > 0, filters)
                 console.log(nonEmptyFilters)
-                let divs = map(key => div('.chip', chipStyle, [key, ': ', prop(key, state.table.filter)]), nonEmptyFilters)
+                let divs = map(key => div('.chip', chipStyle, [key, ': ', prop(key, state.core.input.filter)]), nonEmptyFilters)
                 console.log(divs)
                 return divs
             } else {
@@ -158,7 +205,7 @@ function Table(sources) {
 
     const initVdom$ = emptyState$.mapTo(div())
 
-    const loadingVdom$ = xs.combine(request$, filterText$, modifiedState$)
+    const loadingVdom$ = request$.compose(sampleCombine(filterText$, modifiedState$))
         .map(([
             r,
             filterText,
@@ -172,17 +219,14 @@ function Table(sources) {
         ]),
     )
 
-     const loadedVdom$ = xs.combine(
-        data$,
-        sampleTable.DOM,
-        filterText$,
-        modifiedState$
-    )
+
+
+     const loadedVdom$ = xs.combine(sampleTable.DOM, data$, filterText$, modifiedState$)
         .map(([
-            data,
-            dom,
-            filterText,
-            state
+                dom,
+                data,
+                filterText,
+                state
             ]) => div([
                 div('.row .valign-wrapper', { style: { 'margin-bottom': '0px', 'padding-top': '5px', 'background-color': state.settings.table.color } }, [
                     h5('.white-text .col .s5 .valign', state.settings.table.title),
@@ -201,31 +245,53 @@ function Table(sources) {
     const errorVdom$ = invalidResponse$.mapTo(div('.red .white-text', [p('An error occured !!!')]))
 
     const vdom$ = xs.merge(
-        loadingVdom$, 
-        loadedVdom$, 
+        initVdom$,
         errorVdom$, 
-        initVdom$
+        loadingVdom$,
+        loadedVdom$
         )
+        .startWith(div())
+
+    // Default Re
+	const defaultReducer$ = xs.of(prevState => ({...prevState, core: {...prevState.core, input: {signature: ''}}}))
+        .debug()
+
+	// Add input to state
+    const inputReducer$ = input$.map(i => prevState => 
+		// inputReducer
+		({...prevState, core: {...prevState.core, input: i}})
+	)
+        .debug()
+    // Add request body to state
+    const requestReducer$ = request$.map(req => prevState => ({...prevState, core: {...prevState.core, request: req}}))
+        .debug()
 
     // Make sure that the state is cycled in order for SampleTable to pick it up
-    const stateReducer$ = data$.map(data => prevState => {
-        console.log('table -- stateReducer')
-        let newState = {
-            ...prevState,  
-            table: {...prevState.table, 
-                results: data
-            }
-        }
-        console.log(prevState)
-        console.log(newState)
-        return newState
-    })
+    // const dataReducer$ = data$.map(newData => prevState => {
+    //     console.log('table -- stateReducer')
+    //     let newState = {...prevState,  
+    //         core: {...prevState.core, 
+    //             data: newData
+    //         }
+    //     }
+    //     console.log(prevState)
+    //     console.log(newState)
+    //     return newState
+    // })
+    // .debug()
+
+   const dataReducer$ = data$.map(newData => prevState => ({...prevState, core: {...prevState.core, data: newData}}))
+        .debug()
+ 
 
     return {
         DOM: vdom$,
-        HTTP: request$, //.compose(debounce(2000)),
+        HTTP: request$,
         onion: xs.merge(
-            stateReducer$,
+            defaultReducer$,
+            inputReducer$,
+            requestReducer$,
+            dataReducer$,
         )
     };
 

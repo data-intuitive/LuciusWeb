@@ -36,7 +36,7 @@ export const initSettings = {
 		binsY: 20
 	},
 	form: {
-		// DEBUG: true
+		DEBUG: true
 	},
 	api: {
 		hostname: 'localhost',

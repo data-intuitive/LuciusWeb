@@ -8,6 +8,7 @@ import SignatureWorkflow from '../../pages/signature'
 import CompoundWorkflow from '../../pages/compound'
 import StatisticsWorkflow from '../../pages/statistics'
 import TargetWorkflow from '../../pages/target'
+import Debug from '../../pages/debug'
 import Home from '../../pages/home'
 import { Check } from '../Check'
 import { IsolatedSettings } from '../../pages/settings'
@@ -32,6 +33,7 @@ export default function Router(sources) {
     '/target': TargetWorkflow,
     '/statistics': StatisticsWorkflow,
     '/settings': IsolatedSettings,
+    '/debug': Debug,
     '*': Home
     // '/bmi': BMI,
     // '/hello': Hello,
@@ -66,19 +68,22 @@ export default function Router(sources) {
   ])
   ]));
 
-
   const footer$ = xs.of(
     footer('.page-footer .grey .darken-4 .grey-text', [
-      div('.row', [
-        div('.col .s12', [
-          p(['Please use ', a({ props: { href: '/statistics' } }, 'the information'), ' provided in ComPass with care. ComPass does not make any claims.']),
-        ]),
+      div('.row', {style : {margin: '0px'}}, [
+        div('.col .s12', {style : {margin: '0px'}}, [
+          p( {style : {margin: '0px'}}, ['Please use ', a({ props: { href: '/statistics' } }, 'the information'), ' provided in ComPass with care. ComPass does not make any claims.']),
+          p( {style : {margin: '0px'}}, ['In case of issues, please include the contents of ', a({ props: { href: '/debug' } }, 'this page'), ' in your bug report'])
+        ])
       ]),
-      div('.footer-copyright .row', [
-        div('.col .s12', ['© 2017 By Data intuitive'])
+      div('.footer-copyright .row', {style : {margin: '0px'}}, [
+        div('.col .s12 .right-align', ['© 2017 By Data intuitive']),
       ]),
+      // div('.row .grey-text', {style : {margin: '0px'}}, [
+      //   p('.col .s12', {style : {margin: '0px'}}, ['Debug link:', a({ props: { href: '/debug' } }, 'debug')]),
+      // ]),
     ])
-  );
+  )
 
   const view$ = page$.map(prop('DOM')).flatten().remember()
 
@@ -101,7 +106,9 @@ export default function Router(sources) {
         })
     } else {
       // return prevState
-      return (prevState)
+      return ({
+        settings: prevState.settings
+      })
     }
   })
   .debug()
@@ -111,7 +118,14 @@ export default function Router(sources) {
       .map(ev => ev.target.pathname)
 
   // All clicks on links should be sent to the preventDefault driver
-  const prevent$ = sources.DOM.select('a').events('click');
+  const prevent$ = sources.DOM.select('a').events('click').filter(ev => ev.target.pathname == '/debug');
+
+  const preventLogger$ = prevent$.map(c => (['prevent$ triggered', c]))
+
+  const logger$ = xs.merge(
+    // stateLogger$,
+    preventLogger$
+  )
 
   return {
    DOM: vdom$,
@@ -122,8 +136,8 @@ export default function Router(sources) {
       page$.map(prop('onion')).filter(Boolean).flatten()
     ),
     vega: page$.map(prop('vega')).filter(Boolean).flatten(),
-    log: page$.map(prop('log')).filter(Boolean).flatten()
-    // preventDefault: prevent$,
+    log: xs.merge(logger$, page$.map(prop('log')).filter(Boolean).flatten()),
+    preventDefault: prevent$,
    }
 
 }

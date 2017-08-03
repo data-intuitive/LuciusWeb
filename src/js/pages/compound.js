@@ -26,8 +26,6 @@ export default function CompoundWorkflow(sources) {
 
     const CompoundFormSink = isolate(CompoundForm, {onion: formLens})(sources)
     const signature$ = CompoundFormSink.output//.startWith('BRCA1')
-    // const signature2$ = CompoundFormSink.output.startWith('BRCA1')
-    // const signature3$ = CompoundFormSink.output.startWith('BRCA1')
 
     // Initialize if not yet done in parent (i.e. router) component (useful for testing)
     const defaultReducer$ = xs.of(prevState => {
@@ -39,10 +37,9 @@ export default function CompoundWorkflow(sources) {
                     form: {},
                     sim: {},
                     hist: {},
-                    headTable: {}
                 })
         } else {
-             return ({...prevState,
+             return ({
                 settings: prevState.settings, 
                 form: {},
                 sim: {},
@@ -50,7 +47,8 @@ export default function CompoundWorkflow(sources) {
                 headTable: {}
              })
         }
-    }).debug()
+    })
+    .debug()
 
     // Propagate query to state of individual components
     // const stateReducer$ = signature$.map(query => prevState => {
@@ -153,7 +151,6 @@ export default function CompoundWorkflow(sources) {
             CompoundFormSink.onion,
             similarityPlot.onion,
             histogram.onion,
-            // stateReducer$,
             filterForm.onion,
             headTable.onion,
             tailTable.onion

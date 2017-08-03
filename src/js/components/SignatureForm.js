@@ -146,6 +146,7 @@ function SignatureForm(sources) {
 	const query$ = update$
 		.compose(sampleCombine(state$))
 		.map(([update, state]) => state.form.query)
+		.remember()
 		// .startWith(null).debug(log)
 
   return { 
@@ -159,7 +160,7 @@ function SignatureForm(sources) {
 			validateReducer$,
 			),
 		HTTP: signatureCheckHTTP$,
-		query: query$.debug()
+		output: query$//.debug()
   };
 
 }

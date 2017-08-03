@@ -26,6 +26,7 @@ export function widthStream(domSource$, el) {
                     }
                     })
                 .compose(dropRepeats())
+                .remember()
                 // .debug(log)
 }
 

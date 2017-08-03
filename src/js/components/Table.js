@@ -117,7 +117,7 @@ function Table(sources) {
                 : ({...state, core: {...state.core,  count: {tail: cnt }}})
             }
     )
-    .compose(dropRepeats((x,y) => equals(x.core.input, y.core.input)))
+    .compose(dropRepeats((x,y) => equals(x.core, y.core)))
     .filter(state => state.core.input.signature != '')
     .debug()
 

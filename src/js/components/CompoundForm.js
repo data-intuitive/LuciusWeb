@@ -28,13 +28,11 @@ function CompoundForm(sources) {
         CompoundCheckSink.DOM,
         SampleSelectionSink.DOM,
         SignatureGeneratorSink.DOM,
-        // state$
         )
         .map(([
             formDom, 
             selectionDOM, 
             signatureDOM,
-            // state
         ]) =>
             div([
                 formDom,
@@ -50,7 +48,7 @@ function CompoundForm(sources) {
 
     const defaultReducer$ = xs.of(prevState => {
         console.log('CompoundForm -- default Reducer')
-        return ({...prevState, sampleSelection: {}, check: {}, signature: {}})
+        return ({...prevState, sampleSelection: {}, signature: {}})
     })
 
     return {

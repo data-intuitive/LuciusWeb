@@ -66,6 +66,7 @@ function CompoundCheck(sources) {
 
     const emptyState$ = state$
         .filter(state => isEmptyState(state))
+        .compose(dropRepeats(equals))
         // .filter(state => typeof state.core === 'undefined')
 
     // When the state is cycled because of an internal update
@@ -98,6 +99,7 @@ function CompoundCheck(sources) {
                 'category': 'compounds'
             }
         })
+        .remember()
         .debug()
 
     const response$ = sources.HTTP
@@ -119,7 +121,9 @@ function CompoundCheck(sources) {
         }
     }
 
-   const initVdom$ = emptyState$.mapTo(div())
+   const initVdom$ = emptyState$
+        .mapTo(div())
+        .debug()
 
     const loadedVdom$ = modifiedState$
         .map(state => {
@@ -150,9 +154,10 @@ function CompoundCheck(sources) {
                                 i('.large .material-icons .orange-text', { style: { fontSize: '45px', fontColor: 'grey' } }, 'play_arrow')]),
                     ]),
                 ])
-        });
+        })
+        .debug()
 
-    const vdom$ = xs.merge(initVdom$, loadedVdom$)
+    const vdom$ = xs.merge(initVdom$, loadedVdom$).startWith(div()).remember()
 
     // Set a initial reducer, showing suggestions
     const defaultReducer$ = xs.of(prevState => {
@@ -202,7 +207,6 @@ function CompoundCheck(sources) {
     // Add data from API to state, update output key when relevant
     const dataReducer$ = data$.map(newData => prevState => ({...prevState, core: {...prevState.core, data: newData}}))
 
-
     // GO!!!
     const run$ = sources.DOM
         .select('.CompoundCheck')
@@ -212,6 +216,7 @@ function CompoundCheck(sources) {
     const query$ = run$
         .compose(sampleCombine(state$))
         .map(([ev, state]) => state.core.input)
+        .remember()
         .debug()
 
     return {
@@ -225,7 +230,7 @@ function CompoundCheck(sources) {
             autocompleteReducer$
         ),
         HTTP: request$,
-        output: query$.debug()
+        output: query$
     };
 }
 

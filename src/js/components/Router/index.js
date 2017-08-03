@@ -80,7 +80,7 @@ export default function Router(sources) {
     ])
   );
 
-  const view$ = page$.map(prop('DOM')).flatten()
+  const view$ = page$.map(prop('DOM')).flatten().remember()
 
   const vdom$ = xs.combine(nav$, view$, footer$)
     .map(([navDom, viewDom, footerDom]) => div(
@@ -88,7 +88,8 @@ export default function Router(sources) {
         navDom,
         main([viewDom]),
         footerDom
-      ]));
+      ]))
+      .remember()
 
   // Initialize state
   // Since we use storageify, we only keep the settings

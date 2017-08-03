@@ -18,7 +18,8 @@ const emptyData = {
 }
 
 const sampleSelectionLens = { 
-    get: state => ({core: state.form.sampleSelection, settings: state.settings}),
+    get: state => ({core: (typeof state.form !== 'undefined') ? state.form.sampleSelection : {}, settings: state.settings}),
+    // get: state => ({core: state.form.sampleSelection, settings: state.settings}),
     set: (state, childState) => ({...state, form: {...state.form, sampleSelection: childState.core}})
 };
 
@@ -37,13 +38,32 @@ function SampleSelection(sources) {
 
     const input$ = sources.input
 
+	// When the component should not be shown, including empty signature
+	const isEmptyState = (state) => {
+		if (typeof state.core === 'undefined') {
+			return true 
+		} else {
+			if (typeof state.core.input === 'undefined') {
+				return true 
+			} else {
+                if (state.core.input == '') {
+                    return true
+                } else {
+                    return false
+                }
+			}
+		}
+	}
+
     const emptyState$ = state$
-         .filter(state => state.core.input == null || state.core.input == '')
+        // .filter(state => state.core.input == null || state.core.input == '')
+          .filter(state => isEmptyState(state))
          .compose(dropRepeats((x, y) => equals(x, y)))
 
     // When the state is cycled because of an internal update
     const modifiedState$ = 	state$
-        .filter(state => state.core.input != '')
+        // .filter(state => state.core.input != '')
+         .filter(state => ! isEmptyState(state))
         .compose(dropRepeats((x,y) => equals(x,y)))
         // .debug()
 

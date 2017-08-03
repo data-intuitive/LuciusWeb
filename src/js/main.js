@@ -28,8 +28,8 @@ const drivers = {
 // let StatifiedMain = onionify(SignatureWorkflow);
 // run(StatifiedMain, drivers);
 
-// let StatifiedMain = onionify(storageify(Router, {key: 'ComPass'}));
-let StatifiedMain = onionify(Router);
+let StatifiedMain = onionify(storageify(Router, {key: 'ComPass'}));
+// let StatifiedMain = onionify(Router);
 run(StatifiedMain, drivers);
 
 // if (module.hot) {

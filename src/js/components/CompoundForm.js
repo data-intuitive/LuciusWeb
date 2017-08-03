@@ -16,16 +16,16 @@ function CompoundForm(sources) {
     const state$ = sources.onion.state$.debug()
 
     const CompoundCheckSink = isolate(CompoundCheck, {onion: checkLens} )(sources)
-    const compoundQuery$ = CompoundCheckSink.output
+    const compoundQuery$ = CompoundCheckSink.output.remember()
 
     const SampleSelectionSink = isolate(SampleSelection, {onion: sampleSelectionLens})({...sources, input: compoundQuery$})
-    const sampleSelection$ = SampleSelectionSink.output
+    const sampleSelection$ = SampleSelectionSink.output.remember()
 
     const SignatureGeneratorSink = isolate(SignatureGenerator, {onion: signatureLens})({...sources, input: sampleSelection$ })
     const signature$ = SignatureGeneratorSink.output.remember()
 
     const vdom$ = xs.combine(
-        CompoundCheckSink.DOM,
+        CompoundCheckSink.DOM.startWith(div()),
         SampleSelectionSink.DOM,
         SignatureGeneratorSink.DOM,
         )
@@ -48,13 +48,13 @@ function CompoundForm(sources) {
 
     const defaultReducer$ = xs.of(prevState => {
         console.log('CompoundForm -- default Reducer')
-        return ({...prevState, sampleSelection: {}, signature: {}})
+        return ({...prevState, form: {}, sampleSelection: {}, signature: {}})
     })
 
     return {
         DOM: vdom$,
         onion: xs.merge(
-            // defaultReducer$,
+            defaultReducer$,
             CompoundCheckSink.onion,
             SampleSelectionSink.onion,
             SignatureGeneratorSink.onion

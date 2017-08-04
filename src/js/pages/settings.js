@@ -6,13 +6,17 @@ import { clone } from 'ramda';
 import sampleCombine from 'xstream/extra/sampleCombine'
 
 export const initSettings = {
-    version: 1.0,
+    version: 1.10,
 	debug : true,
+    filter: {
+        debug: true
+    },
 	common: {
 		version: "v2",
 		blur: 0
 	},
 	headTable: {
+        debug: true,
 		count: 5,
 		color: 'rgb(44,123,182)',
 		title: 'Top Table',
@@ -29,14 +33,16 @@ export const initSettings = {
 		dummy: 1
 	},
 	hist: {
+        debug: false,
 		bins: 20
 	},
 	sim: {
+        debug: false,
 		binsX: 20,
 		binsY: 20
 	},
 	form: {
-		DEBUG: true
+		debug: false
 	},
 	api: {
 		hostname: 'localhost',
@@ -60,10 +66,7 @@ export function Settings(sources) {
 
 	const state$ = sources.onion.state$
 
-	const settings$ = sources.onion.state$.debug(state => {
-		console.log('== State in settings =================')
-		console.log(state)
-	})
+	const settings$ = sources.onion.state$
 
 	const tableHeader = (content) => [h4([
 		content
@@ -232,8 +235,6 @@ export function Settings(sources) {
 	const reset$ = sources.DOM.select('.reset').events('click')
 
 	const defaultReducer$ = xs.of(prevState => {
-		console.log("settings -- defaultReducer")
-		console.log(prevState)
 		if (typeof prevState === 'undefined') {
 			return clone(initSettings)
 		} else {
@@ -243,18 +244,13 @@ export function Settings(sources) {
 
 	const updateReducer$ = apply$.compose(sampleCombine(all$))
 		.map(([click, value]) => prevState => {
-			console.log('settings -- updateReducer')
 			return merge(prevState, value)
 		})
 
 	const resetReducer$ = reset$
 		.map(click => prevState => {
-			console.log('settings -- resetReducer')
 			return clone(initSettings)
 		})
-
-	//   const pageReducers$ = page$.map(prop('onion')).flatten()//.debug(console.log)
-	//   const reducers$ = pageReducers$.startWith(initReducer$)
 
 	return {
 		DOM: vdom$,

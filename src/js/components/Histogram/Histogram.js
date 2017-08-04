@@ -9,6 +9,7 @@ import { widthStream } from '../../utils/utils'
 import { log } from '../../utils/logger'
 import { ENTER_KEYCODE } from '../../utils/keycodes.js'
 import { stateDebug } from '../../utils/utils'
+import { loggerFactory } from '~/../../src/js/utils/logger'
 
 const elementID = '#hist'
 
@@ -26,14 +27,11 @@ const histLens = {
  */
 function Histogram(sources) {
 
-	console.log('Starting component: Histogram...');
+   const logger = loggerFactory('histogram', sources.onion.state$, 'settings.hist.debug')
 
 	const ENTER_KEYCODE = 13
 
-	const state$ = sources.onion.state$.debug(state => {
-        console.log('== State in Histogram =================')
-        console.log(state)
-    });
+	const state$ = sources.onion.state$
 
 	const domSource$ = sources.DOM;
 	const httpSource$ = sources.HTTP;
@@ -49,7 +47,7 @@ function Histogram(sources) {
 	// Size stream
 	const width$ = widthStream(domSource$, elementID)
 
-    const input$ = sources.input.debug()
+    const input$ = sources.input
 
 	const newInput$ = xs.combine(
 		input$, 
@@ -58,7 +56,6 @@ function Histogram(sources) {
 	.map(([newInput, state]) => ({...state, core: {...state.core, input : newInput}}))
 	.compose(dropRepeats((x,y) => equals(x.core.input, y.core.input)))
 	.remember()
-	.debug()
 
 	// No requests when signature is empty!
 	const triggerRequest$ = newInput$
@@ -103,7 +100,6 @@ function Histogram(sources) {
 			}
 		})
 		.remember()
-		.debug()
 
 	const response$$ = sources.HTTP
 		.select('histogram')
@@ -115,7 +111,7 @@ function Histogram(sources) {
 				.replaceError(error => xs.of(error)) // emit error
 		)
 		.flatten()
-		.debug()
+        .remember()
 
 	const validResponse$ = response$$
 		.map(response$ =>
@@ -123,7 +119,7 @@ function Histogram(sources) {
 				.replaceError(error => xs.empty())
 		)
 		.flatten()
-		.debug()
+        .remember()
 
 	const data$ = validResponse$
 		.map(result => result.body.result.data)
@@ -142,7 +138,6 @@ function Histogram(sources) {
 	}
 
 	const initVdom$ = initState$.mapTo(div())
-	// .debug()
 
 	const loadingVdom$ = request$
 	.mapTo(
@@ -158,7 +153,6 @@ function Histogram(sources) {
 		])
 	)
 	.remember()
-	// .debug()
 
 	const loadedVdom$ = xs.combine(data$, modifiedState$)
 		.map(([data, state]) => div([
@@ -166,7 +160,6 @@ function Histogram(sources) {
 				? div({ style: { visibility: 'hidden' } }, [makeHistogram()])
 				: div([makeHistogram()])
 		]))
-		// .debug()
 
 	const errorVdom$ = invalidResponse$.mapTo(div('.red .white-text', [p('An error occured !!!')]))
 
@@ -187,9 +180,15 @@ function Histogram(sources) {
     // Add request body to state
     const requestReducer$ = request$.map(req => prevState => ({...prevState, core: {...prevState.core, request: req}}))
     // Add data from API to state, update output key when relevant
-    const dataReducer$ = data$.map(newData => prevState => ({...prevState, core: {...prevState.core, data: newData}})).debug()
- 
+    const dataReducer$ = data$.map(newData => prevState => ({...prevState, core: {...prevState.core, data: newData}})) 
+
 	return {
+        log: xs.merge(
+            logger(state$, 'state$'),
+            logger(request$, 'request$'),
+            logger(validResponse$, 'validResponse$'),
+            logger(invalidResponse$, 'invalidResponse$')
+        ),
 		DOM: vdom$,
 		HTTP: request$,
 		vega: vegaSpec$,

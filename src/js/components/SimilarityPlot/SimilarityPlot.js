@@ -7,6 +7,7 @@ import { clone, equals, omit } from 'ramda';
 import { similarityPlotSpec, exampleData, emptyData } from './spec.js'
 import { widthStream } from '../../utils/utils'
 import { stateDebug } from '../../utils/utils'
+import { loggerFactory } from '~/../../src/js/utils/logger'
 
 const elementID = '#vega'
 
@@ -20,16 +21,11 @@ const simLens = {
 
 function SimilarityPlot(sources) {
 
-	console.log('Starting component: SimilarityPlot...');
+    const logger = loggerFactory('similarityPlot', sources.onion.state$, 'settings.sim.debug')
 
 	const ENTER_KEYCODE = 13
 
 	const state$ = sources.onion.state$
-		// .remember()
-		.debug(state => {
-			console.log('== State in SimilarityPlot =================')
-			console.log(state)
-		});
 
 	const domSource$ = sources.DOM;
 	const httpSource$ = sources.HTTP;
@@ -55,7 +51,6 @@ function SimilarityPlot(sources) {
 	.map(([newInput, state]) => ({...state, core: {...state.core, input : newInput}}))
 	.compose(dropRepeats((x,y) => equals(x.core.input, y.core.input)))
 	.remember()
-	.debug()
 
 	// No requests when signature is empty!
 	const triggerRequest$ = newInput$
@@ -101,7 +96,6 @@ function SimilarityPlot(sources) {
 			}
 		})
 		.remember()
-		.debug()
 
 	const response$$ = sources.HTTP
 		.select('binnedZhang')
@@ -113,7 +107,7 @@ function SimilarityPlot(sources) {
 				.replaceError(error => xs.of(error)) // emit error
 		)
 		.flatten()
-		.debug()
+        .remember()
 
 	const validResponse$ = response$$
 		.map(response$ =>
@@ -121,7 +115,7 @@ function SimilarityPlot(sources) {
 				.replaceError(error => xs.empty())
 		)
 		.flatten()
-		.debug()
+        .remember()
 
 	const data$ = validResponse$
 		.map(result => result.body.result.data)
@@ -154,7 +148,6 @@ function SimilarityPlot(sources) {
 		])
 	)
 	.remember()
-	// .debug()
 
 	const loadedVdom$ = xs.combine(data$, modifiedState$)
 		.map(([data, state]) => div([
@@ -162,7 +155,6 @@ function SimilarityPlot(sources) {
 				? div({ style: { visibility: 'hidden' } }, [makeChart()])
 				: div([makeChart()])
 		]))
-		// .debug()
 
 	const errorVdom$ = invalidResponse$.mapTo(div('.red .white-text', [p('An error occured !!!')]))
 
@@ -186,6 +178,12 @@ function SimilarityPlot(sources) {
     const dataReducer$ = data$.map(newData => prevState => ({...prevState, core: {...prevState.core, data: newData}}))
  
 	return {
+        log: xs.merge(
+            logger(state$, 'state$'),
+            logger(request$, 'request$'),
+            logger(validResponse$, 'validResponse$'),
+            logger(invalidResponse$, 'invalidResponse$')
+        ),
 		DOM: vdom$,
 		HTTP: request$,
 		vega: vegaSpec$,

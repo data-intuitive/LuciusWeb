@@ -7,6 +7,7 @@ import { logThis, log } from '../utils/logger'
 import { ENTER_KEYCODE } from '../utils/keycodes.js'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import debounce from 'xstream/extra/debounce'
+import { loggerFactory } from '~/../../src/js/utils/logger'
 
 const emptyData = {
     body: {
@@ -29,11 +30,10 @@ const signatureLens = {
  */
 function SignatureGenerator(sources) {
 
-    const state$ = sources.onion.state$.debug(state => {
-        console.log('== State in signature =================')
-        console.log(state)
-    });
+    const logger = loggerFactory('signatureGenerator', sources.onion.state$, 'settings.form.debug')
 
+    const state$ = sources.onion.state$
+    
     const input$ = sources.input
 
     const newInput$ = xs.combine(
@@ -57,7 +57,6 @@ function SignatureGenerator(sources) {
                 'category': 'generateSignature'
             }
         })
-        .debug()
 
     const response$ = sources.HTTP
         .select('generateSignature')
@@ -65,7 +64,6 @@ function SignatureGenerator(sources) {
             response$.replaceError(() => xs.of(emptyData))
         )
         .flatten()
-        .debug()
 
     const validSignature$ = response$
                         .map(r => r.body.result.join(" "))
@@ -121,6 +119,11 @@ function SignatureGenerator(sources) {
     const dataReducer$ = data$.map(newData => prevState => ({...prevState, core: {...prevState.core, data: newData, output: newData.join(" ")}}))
  
     return {
+        log: xs.merge(
+            logger(state$, 'state$'),
+            logger(request$, 'request$'),
+            logger(response$, 'response$')
+        ),
         DOM: vdom$,
         output: signature$,
         HTTP: request$,

@@ -16,8 +16,6 @@ const sampleTableLens = {
 
 function SampleTable(sources) {
 
-	console.log('Starting component: SampleTable...');
-
     const state$ = sources.onion.state$;
 	const domSource$ = sources.DOM;
 
@@ -26,13 +24,8 @@ function SampleTable(sources) {
 
     // This will become an object representing the JSON table
     const array$ = sources.onion.state$
-    // .map(state => {
-    //     // console.log(state)
-    //     return state
-    // })
 
     const childrenSinks$ = array$.map(array => {
-        // console.log(array)
         return array.map((item, index) => isolate(SampleInfo, index)(sources))
     });
 

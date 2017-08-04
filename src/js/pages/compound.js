@@ -11,28 +11,25 @@ import { Histogram, histLens } from '../components/Histogram/Histogram'
 import { SimilarityPlot, simLens } from '../components/SimilarityPlot/SimilarityPlot'
 import { Filter } from '../components/Filter'
 import concat from 'xstream/extra/dropRepeats'
+import { loggerFactory } from '~/../../src/js/utils/logger'
 
 export default function CompoundWorkflow(sources) {
 
+    const logger = loggerFactory('compound', sources.onion.state$, 'settings.form.debug')
+
     const state$ = sources.onion.state$
     
-    const stateLogger$ = state$
-        .map(state => ([
-            '>> State in compound =================\n', 
-            state
-        ]))
-
     const formLens = { 
         get: state => ({form: state.form, settings: {form: state.settings.form, api: state.settings.api}}),
         set: (state, childState) => ({...state, form: childState.form})
     };
 
     const CompoundFormSink = isolate(CompoundForm, {onion: formLens})(sources)
-    const signature$ = CompoundFormSink.output//.startWith('BRCA1')
+    const signature$ = CompoundFormSink.output
 
     // Initialize if not yet done in parent (i.e. router) component (useful for testing)
     const defaultReducer$ = xs.of(prevState => {
-        console.log('compound -- defaultReducer')
+        // compound -- defaultReducer
         if (typeof prevState === 'undefined') {
             return (
                 {
@@ -50,37 +47,10 @@ export default function CompoundWorkflow(sources) {
              })
         }
     })
-    .debug()
-
-    // Propagate query to state of individual components
-    // const stateReducer$ = signature$.map(query => prevState => {
-    //     console.log('compound -- stateReducer')
-    //     let additionalState = {
-    //         headTable: merge(prevState.headTable, { query: query }),
-    //         tailTable: merge(prevState.tailTable, { query: query }),
-    //         compoundhist: merge(prevState.compoundhist, { query: query }),
-    //         compoundsim: merge(prevState.compoundsim, { query: query }),
-    //         compoundfilter: {}
-    //     }
-    //     return merge(prevState, additionalState)
-    // })
 
     // Filter Form
     const filterForm = isolate(Filter, 'compoundfilter')({...sources, input: signature$})
     const filter$ = filterForm.output
-
-    // Propagate filter to state of individual components
-    // const filterReducer$ = filterForm.filter.map(f => prevState => {
-    //     console.log('signature -- filterReducer')
-    //     let additionalState = {
-    //         headTable: merge(prevState.headTable, { filter: f }),
-    //         tailTable: merge(prevState.tailTable, { filter: f }),
-    //         compoundhist: merge(prevState.compoundhist, { filter: f }),
-    //         compoundsim: merge(prevState.compoundsim, { filter: f }),
-    //         form: merge(prevState.form, {filter: f})
-    //     }
-    //     return merge(prevState, additionalState)
-    // })
 
 	// Similarity plot component
 	const similarityPlot = isolate(SimilarityPlot, {onion: simLens})
@@ -98,12 +68,6 @@ export default function CompoundWorkflow(sources) {
     const tailTable = isolate(Table, {onion: tailTableLens})
                              ({...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({signature: s, filter: f})).remember()});
 
-
-    // const tailTableProps$ = state$
-    //     .compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
-    //     .startWith({ settings: initSettings })
-	// 	.map(state => merge(merge(merge(state.settings.tailTableSettings, state.settings.common), state.settings.api), state.settings.sourire))
-    // const tailTable = isolate(Table, 'tailTable')(merge(sources, { props: tailTableProps$ }));
 
     const pageStyle = {
         style:
@@ -148,6 +112,13 @@ export default function CompoundWorkflow(sources) {
         ]))
 
     return {
+        log: xs.merge(
+            logger(state$, 'state$'),
+            CompoundFormSink.log,
+            similarityPlot.log,
+            histogram.log,
+            headTable.log
+        ),
         DOM: vdom$,
         onion: xs.merge(
             defaultReducer$,
@@ -169,6 +140,5 @@ export default function CompoundWorkflow(sources) {
             histogram.vega,
             similarityPlot.vega
         ),
-        log: stateLogger$
     };
 }

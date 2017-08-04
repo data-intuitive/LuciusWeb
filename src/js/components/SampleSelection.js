@@ -7,7 +7,7 @@ import { logThis, log } from '../utils/logger'
 import { ENTER_KEYCODE } from '../utils/keycodes.js'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import debounce from 'xstream/extra/debounce'
-
+import { loggerFactory } from '~/../../src/js/utils/logger'
 
 const emptyData = {
     body: {
@@ -31,10 +31,9 @@ const sampleSelectionLens = {
  */
 function SampleSelection(sources) {
 
-    const state$ = sources.onion.state$.debug(state => {
-        console.log('== State in SampleSelection =================')
-        console.log(state)
-    });
+    const logger = loggerFactory('sampleSelection', sources.onion.state$, 'settings.form.debug')
+
+    const state$ = sources.onion.state$
 
     const input$ = sources.input
 
@@ -65,7 +64,6 @@ function SampleSelection(sources) {
         // .filter(state => state.core.input != '')
          .filter(state => ! isEmptyState(state))
         .compose(dropRepeats((x,y) => equals(x,y)))
-        // .debug()
 
     const newInput$ = xs.combine(
             input$, 
@@ -73,12 +71,10 @@ function SampleSelection(sources) {
         )
         .map(([newinput, state]) => ({...state, core: {...state.core, input: newinput}}))
         .compose(dropRepeats((x,y) => equals(x.core.input, y.core.input)))
-        // .debug()
 
     // When a new query is required
     const updatedState$ = state$
 		.compose(dropRepeats((x, y) => equals(x.core, y.core)))
-        // .debug()
 
     const request$ = newInput$
         .map(state => {
@@ -92,7 +88,7 @@ function SampleSelection(sources) {
                 'category': 'samples'
             }
         })
-        .debug()
+        .remember()
 
     const response$ = sources.HTTP
         .select('samples')
@@ -100,7 +96,7 @@ function SampleSelection(sources) {
             response$.replaceError(() => xs.of(emptyData))
         )
         .flatten()
-        .debug()
+        .remember()
 
     const data$ = response$
         .map(res => res.body)
@@ -109,12 +105,10 @@ function SampleSelection(sources) {
     const useClick$ = sources.DOM
         .select('.selection')
         .events('click')
-        .debug()
         .map(ev => ev.ownerTarget.id)
 
     // Helper function for rendering the table, based on the state
     const makeTable = (data) => {
-        console.log(data)
         let rows = data.map(entry => [
             td(entry.jnjs),
             td((entry.compoundname.length > 10) ? entry.compoundname.substring(0, 10) : entry.compoundname),
@@ -197,6 +191,11 @@ function SampleSelection(sources) {
         .map(([ev, state]) => state.core.output)
 
     return {
+        log: xs.merge(
+            logger(state$, 'state$'),
+            logger(request$, 'request$'),
+            logger(response$, 'response$')
+        ),
         DOM: vdom$,
         HTTP: request$,//.compose(debounce(2000)),
         onion: xs.merge(

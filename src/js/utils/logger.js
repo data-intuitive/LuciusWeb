@@ -19,7 +19,7 @@ const loggerFactory = (elementID, thisState$, location = 'settings.debug') => (s
                         ])
                     : xs.never()
             )
-    return debug$$.flatten()
+    return debug$$.flatten().remember()
 }
 
 export { loggerFactory }

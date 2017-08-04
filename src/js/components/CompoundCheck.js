@@ -9,20 +9,12 @@ import dropRepeats from 'xstream/extra/dropRepeats'
 import debounce from 'xstream/extra/debounce'
 import concat from 'xstream/extra/concat'
 import { prop } from 'ramda'
+import { loggerFactory } from '~/../../src/js/utils/logger'
 
 const checkLens = { 
-    get: state => {
-        // console.log('global state:')
-        // console.log(state)
-        var result = {core: (typeof state.form !== 'undefined') ? state.form.check : {}, settings: state.settings}
-        // console.log('local state:')
-        // console.log(result)
-        return result
-    },
-    set: (state, childState) => {
-        var result = {...state, form : {...state.form, check: childState.core}}
-        return result
-    }};
+    get: state => ({core: (typeof state.form !== 'undefined') ? state.form.check : {}, settings: state.settings}),
+    set: (state, childState) => ({...state, form : {...state.form, check: childState.core}})
+}
 
 /**
  * Form for entering compounds with autocomplete.
@@ -38,12 +30,9 @@ function CompoundCheck(sources) {
     // - At that point, the dropdown should dissapear!!!
     // - The suggestions appear again whenever something changes in the input...
 
-    console.log('Starting component: CompoundCheck...')
+    const logger = loggerFactory('compoundCheck', sources.onion.state$, 'settings.form.debug')
 
-    const state$ = sources.onion.state$.debug(state => {
-        console.log('== State in compoundCheck =================')
-        console.log(state)
-    });
+    const state$ = sources.onion.state$
 
     const input$ = sources.DOM
         .select('.compoundQuery')
@@ -100,7 +89,6 @@ function CompoundCheck(sources) {
             }
         })
         .remember()
-        .debug()
 
     const response$ = sources.HTTP
         .select('compounds')
@@ -108,7 +96,7 @@ function CompoundCheck(sources) {
             response$.replaceError(() => xs.of([]))
         )
         .flatten()
-        .debug()
+        .remember()
     
     const data$ = response$
         .map(res => res.body.result.data)
@@ -123,11 +111,9 @@ function CompoundCheck(sources) {
 
    const initVdom$ = emptyState$
         .mapTo(div())
-        // .debug()
 
     const loadedVdom$ = modifiedState$
         .map(state => {
-            // console.log(state)
             const query = state.core.input
             const validated = state.core.validated
             const showSuggestions = state.core.showSuggestions
@@ -155,14 +141,12 @@ function CompoundCheck(sources) {
                     ]),
                 ])
         })
-        // .debug()
 
     const vdom$ = xs.merge(initVdom$, loadedVdom$).startWith(div()).remember()
 
     // Set a initial reducer, showing suggestions
     const defaultReducer$ = xs.of(prevState => {
-        console.log('-- CompoundCheck -- defaultReducer$')
-        console.log(prevState)
+        // CompoundCheck -- defaultReducer$')
         let newState = {...prevState, 
             core : {...prevState.core,
                 showSuggestions : true, 
@@ -171,7 +155,6 @@ function CompoundCheck(sources) {
                 data: []
             }
         }
-        console.log(newState)
         return newState
     })
 
@@ -211,15 +194,18 @@ function CompoundCheck(sources) {
     const run$ = sources.DOM
         .select('.CompoundCheck')
         .events('click')
-        // .debug()
 
     const query$ = run$
         .compose(sampleCombine(state$))
         .map(([ev, state]) => state.core.input)
         .remember()
-        // .debug()
 
     return {
+        log: xs.merge(
+            logger(state$, 'state$'),
+            logger(request$, 'request$'),
+            logger(response$, 'response$')
+        ),
         DOM: vdom$,
         onion: xs.merge(
             defaultReducer$,

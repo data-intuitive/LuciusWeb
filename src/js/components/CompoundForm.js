@@ -10,10 +10,13 @@ import { SampleSelection, sampleSelectionLens } from './SampleSelection'
 import { mergeWith, merge } from 'ramda'
 import { SignatureGenerator, signatureLens } from './SignatureGenerator'
 import { stateDebug } from '../utils/utils'
+import { loggerFactory } from '~/../../src/js/utils/logger'
 
 function CompoundForm(sources) {
 
-    const state$ = sources.onion.state$.debug()
+    const logger = loggerFactory('compoundForm', sources.onion.state$, 'settings.debug')
+
+    const state$ = sources.onion.state$
 
     const CompoundCheckSink = isolate(CompoundCheck, {onion: checkLens} )(sources)
     const compoundQuery$ = CompoundCheckSink.output.remember()
@@ -47,11 +50,17 @@ function CompoundForm(sources) {
             ]))
 
     const defaultReducer$ = xs.of(prevState => {
-        console.log('CompoundForm -- default Reducer')
+        // CompoundForm -- default Reducer
         return ({...prevState, form: {}, sampleSelection: {}, signature: {}})
     })
 
     return {
+        log: xs.merge(
+            logger(state$, 'state$'),
+            CompoundCheckSink.log,
+            SampleSelectionSink.log,
+            SignatureGeneratorSink.log
+        ),
         DOM: vdom$,
         onion: xs.merge(
             defaultReducer$,

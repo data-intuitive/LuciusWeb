@@ -125,17 +125,17 @@ export default function Router(sources) {
             logger(page$, 'page$', '>> ', ' > ', ''),
             logger(state$, 'state$'),
             logger(history$, 'history$'),
-            logger(defaultReducer$, '', '-- ', ' -- '),
+            logger(defaultReducer$, 'defaultReducer$', '-- ', ' -- ', ''),
             logger(prevent$, 'prevent$'),
             page$.map(prop('log')).filter(Boolean).flatten()
         ),
-        DOM: vdom$,
-        router: router$,
-        HTTP: page$.map(prop('HTTP')).filter(Boolean).flatten(),
         onion: xs.merge(
             defaultReducer$,
             page$.map(prop('onion')).filter(Boolean).flatten()
         ),
+        DOM: vdom$,
+        router: router$,
+        HTTP: page$.map(prop('HTTP')).filter(Boolean).flatten(),
         vega: page$.map(prop('vega')).filter(Boolean).flatten(),
         preventDefault: xs.merge(
             prevent$,

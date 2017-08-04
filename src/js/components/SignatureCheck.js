@@ -6,6 +6,7 @@ import {log, logThis} from '../utils/logger'
 import {ENTER_KEYCODE} from '../utils/keycodes.js'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import debounce from 'xstream/extra/debounce'
+import { loggerFactory } from '~/../../src/js/utils/logger'
 
 import { check, flash, play_arrow } from 'webpack-material-design-icons'
 
@@ -29,15 +30,11 @@ const checkLens = {
 
 function SignatureCheck(sources) {
 
-	console.log('Starting component: SignatureCheck...');
+   const logger = loggerFactory('signatureCheck', sources.onion.state$, 'settings.form.debug')
 
 	const domSource$ = sources.DOM;
 	const httpSource$ = sources.HTTP;
 	const state$ = sources.onion.state$
-	// .debug(state => {
-	// 	console.log('== State in Signaturecheck')
-	// 	console.log(state)
-	// });
 
 	const request$ = state$
 		.filter((state) => state.query !== '')
@@ -52,7 +49,7 @@ function SignatureCheck(sources) {
 				},
 				'category' : 'checkSignature'
 		}})
-		.debug();
+        .remember()
 
 	// Catch the response in a stream
 	// Handle errors by returning an empty object
@@ -62,7 +59,7 @@ function SignatureCheck(sources) {
 				response$.replaceError(() => xs.of(emptyData))
 			)		
 		.flatten()
-		.debug(log);
+        .remember()
 
 	const data$ = response$
 		.map(res => res.body)
@@ -114,13 +111,15 @@ function SignatureCheck(sources) {
 	// XXX: stays true the whole cycle, so maybe tackle this as well!!!!
 	const validated$ = collapseUpdate$.map(update => true)
 
-	// const defaultReducer$ = xs.of(prevState => {return {query : 'TEST123'}})
-
   return { 
+    log: xs.merge(
+        logger(state$, 'state$'),
+        logger(request$, 'request$'),
+        logger(response$, 'response$')
+    ),
     HTTP: request$,
     DOM: vdom$,
 	onion: xs.merge(
-		// defaultReducer$.debug(),
 		collapseUpdateReducer$, 
 		),
 	validated : validated$

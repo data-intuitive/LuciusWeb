@@ -4,7 +4,7 @@ import debounce from 'xstream/extra/debounce'
 import { a, h, p, div, br, label, input, code, table, tr, td, b, h2, button, svg, h5, th, thead, tbody, i, span, ul, li } from '@cycle/dom';
 import { log } from '../utils/logger'
 import { ENTER_KEYCODE } from '../utils/keycodes.js'
-import { keys, filter, head, equals, map, prop, clone, omit, merge } from 'ramda'
+import { keys, values, filter, head, equals, map, prop, clone, omit, merge } from 'ramda'
 import { SampleTable, sampleTableLens } from './SampleTable/SampleTable'
 import isolate from '@cycle/isolate'
 import dropRepeats from 'xstream/extra/dropRepeats'
@@ -25,7 +25,7 @@ const headTableLens = {
             sourire: state.settings.sourire
         }
     }),
-    set: (state, childState) => ({ ...state, headTable: childState.core })
+    set: (state, childState) => ({ ...state, headTable: childState.core, settings: { ...state.settings, headTable: childState.settings.table } })
 };
 
 // Granular access to the settings
@@ -41,7 +41,7 @@ const tailTableLens = {
             sourire: state.settings.sourire
         }
     }),
-    set: (state, childState) => ({ ...state, tailTable: childState.core })
+    set: (state, childState) => ({ ...state, tailTable: childState.core, settings: { ...state.settings, tailTable: childState.settings.table } })
 };
 
 function Table(sources) {
@@ -95,14 +95,18 @@ function Table(sources) {
 
     const plus5$ = sources.DOM.select('.plus5').events('click').mapTo(5).startWith(0).fold((x, y) => x + y, 0).remember()
     const min5$ = sources.DOM.select('.min5').events('click').mapTo(5).startWith(0).fold((x, y) => x + y, 0).remember()
+    const plus10$ = sources.DOM.select('.plus10').events('click').mapTo(10).startWith(0).fold((x, y) => x + y, 0).remember()
+    const min10$ = sources.DOM.select('.min10').events('click').mapTo(10).startWith(0).fold((x, y) => x + y, 0).remember()
 
     const triggerRequest$ = xs.combine(
         newInput$,
         plus5$,
-        min5$
-    ).map(([state, plus5, min5]) => {
+        min5$,
+        plus10$,
+        min10$
+    ).map(([state, plus5, min5, plus10, min10]) => {
         let isHead = (state.settings.table.title === 'Top Table')
-        const cnt = parseInt(state.settings.table.count) + plus5 - min5
+        const cnt = parseInt(state.settings.table.count) + plus5 - min5 + plus10 - min10
         return (isHead)
             ? ({ ...state, core: { ...state.core, count: { head: cnt } } })
             : ({ ...state, core: { ...state.core, count: { tail: cnt } } })
@@ -184,8 +188,11 @@ function Table(sources) {
             'margin-bottom': '0px',
             'margin-top': '0px',
             'background-color': bgcolor,
-            opacity: 0.3,
-            fontWeight: 'lighter'
+            'color': 'white',
+            opacity: 0.8,
+            fontWeight: 'lighter',
+            fontSize: '16px',
+            'vertical-align': 'middle'
         }
     })
 
@@ -205,23 +212,89 @@ function Table(sources) {
         ]),
     )
 
-    const loadedVdom$ = xs.combine(sampleTable.DOM, data$, filterText$, modifiedState$)
+
+    function convertToCSV(objArray) {
+        const header = keys(objArray[0])
+        const data = objArray.map(obj => values(obj))
+
+        const arrArray = [header].concat(data)
+
+        const csv = arrArray.map(arr => arr.map(el => el.toString()).join('\t')).join('\n')
+
+        return csv;
+    }
+
+    const csvData$ = data$.map(data => convertToCSV(data)).map(csv => "text/json;charset=utf-8," + encodeURIComponent(csv))
+
+    const loadedVdom$ = xs.combine(sampleTable.DOM, csvData$, filterText$, modifiedState$)
         .map(([
             dom,
-            data,
+            csvData,
             filterText,
             state
         ]) => div([
-            div('.row .valign-wrapper', { style: { 'margin-bottom': '0px', 'padding-top': '5px', 'background-color': state.settings.table.color } }, [
-                h5('.white-text .col .s5 .valign', state.settings.table.title),
-                div('.white-text .col .s7 .valign .right-align', filterText)
+            div('.row .valign-wrapper .switch', { style: { 'margin-bottom': '0px', 'padding-top': '5px', 'background-color': state.settings.table.color } }, [
+                h5('.white-text .col', [
+                    state.settings.table.title,
+                    span([' ']),
+                    i('.material-icons .grey-text', {
+                        style: {
+                            fontSize: '16px',
+                            'background-color': state.settings.table.color,
+                            opacity: 0.5,
+                        }
+                    }, 'add'),
+                    div('.white-text .col .s7 .valign .right-align', filterText)
+                ]),
+            ]),
+            div('.row .valign-wrapper', { style: { 'margin-bottom': '0px', 'padding-top': '0px', 'background-color': state.settings.table.color, opacity: 0.8 } }, [
+                (state.settings.table.expandOptions)
+                    ? div([
+                        button('.btn-flat .waves-effect .waves-light', smallBtnStyle(state.settings.table.color), [
+                            a('', { style: {'color': 'white'}, props: { href: 'data:' + csvData, download: 'compass-state.csv' } }, [
+                                span({ style: { 'vertical-align': 'top', fontSize: '8px' } }, 'csv'),
+                                i('.material-icons', 'file_download'),
+                            ])
+                        ]),
+                        button('.btn-flat .waves-effect .waves-light', smallBtnStyle(state.settings.table.color), [
+                            span({ style: { 'vertical-align': 'top', fontSize: '8px' } }, 'json'),
+                            i('.material-icons', 'file_download'),
+                        ]),
+                        button('.min10 .btn-flat .waves-effect .waves-light', smallBtnStyle(state.settings.table.color), [
+                            span({ style: { 'vertical-align': 'top', fontSize: '10px' } }, '-10'),
+                            i('.material-icons', 'fast_rewind'),
+                        ]),
+                        button('.min5 .btn-flat .waves-effect .waves-light', smallBtnStyle(state.settings.table.color), [
+                            span({ style: { 'vertical-align': 'top', fontSize: '10px' } }, '-5'),
+                            i('.material-icons', 'fast_rewind'),
+                        ]),
+                         button('.plus5 .btn-flat .waves-effect .waves-light', smallBtnStyle(state.settings.table.color), [
+                            span({ style: { 'vertical-align': 'top', fontSize: '10px' } }, '+5'),
+                            i('.material-icons', 'fast_forward')
+                        ]),
+                         button('.plus10 .btn-flat .waves-effect .waves-light', smallBtnStyle(state.settings.table.color), [
+                            span({ style: { 'vertical-align': 'top', fontSize: '10px' } }, '+10'),
+                            i('.material-icons', 'fast_forward')
+                        ])
+                     ])
+                    : div()
             ]),
             div('.row', { style: { 'margin-bottom': '0px', 'margin-top': '0px' } }, [
                 dom,
-                div('.col .s12 .right-align', [
-                    button('.min5 .btn-floating waves-effect waves-light', smallBtnStyle(state.settings.table.color), [i('.material-icons', 'fast_rewind')]),
-                    button('.plus5 .btn-floating waves-effect waves-light', smallBtnStyle(state.settings.table.color), [i('.material-icons', 'fast_forward')])
-                ])
+                // div('.col .s6', [
+                //     i('.tiny .material-icons', { style: { fontSize: '10px', fontColor: 'grey' } }, 'file_download'),
+                // ]),
+                // div('.col .s6 .right-align', [
+                //     i('.small .material-icons .orange-text', { style: { fontSize: '20px', fontColor: state.settings.table.color } }, 'file_download'),
+                //     button('.min5 .btn-floating waves-effect waves-light', smallBtnStyle(state.settings.table.color), [
+                //         i('.material-icons', 'fast_rewind')
+                //     ]),
+                //     // button('.plus5 .btn-floating waves-effect waves-light .tiny', smallBtnStyle(state.settings.table.color), [
+                //     i('.plus5 .material-icons', { style: { fontSize: '16px' } }, 'fast_forward')
+                //     // ])
+                // ]),
+                // // test !!!
+                // a('.col .s6 .offset-s3 .btn .center .grey', { props: { href: 'data:' + data, download: 'compass-state.csv' } }, 'download')
             ]),
         ])
         )
@@ -249,12 +322,16 @@ function Table(sources) {
 
     const dataReducer$ = data$.map(newData => prevState => ({ ...prevState, core: { ...prevState.core, data: newData } }))
 
+    const switchReducer$ = sources.DOM.select('.switch').events('click').fold((x, y) => !x, false)
+        .map(bool => prevState => ({ ...prevState, settings: { ...prevState.settings, table: { ...prevState.settings.table, expandOptions: bool } } }))
+
     return {
         log: xs.merge(
             logger(state$, 'state$'),
             logger(request$, 'request$'),
             logger(validResponse$, 'validResponse$'),
-            logger(invalidResponse$, 'invalidResponse$')
+            logger(invalidResponse$, 'invalidResponse$'),
+            logger(csvData$, 'stringData$'),
         ),
         DOM: vdom$,
         HTTP: request$,
@@ -263,6 +340,7 @@ function Table(sources) {
             inputReducer$,
             requestReducer$,
             dataReducer$,
+            switchReducer$
         )
     };
 

@@ -6,7 +6,7 @@ import { clone } from 'ramda';
 import sampleCombine from 'xstream/extra/sampleCombine'
 
 export const initSettings = {
-    version: 1.10,
+    version: 1.2,
 	debug : true,
     filter: {
         debug: true
@@ -16,6 +16,7 @@ export const initSettings = {
 		blur: 0
 	},
 	headTable: {
+        expandOptions: true,
         debug: true,
 		count: 5,
 		color: 'rgb(44,123,182)',
@@ -23,6 +24,8 @@ export const initSettings = {
 		version: 'v2'
 	},
 	tailTable: {
+        expandOptions: false,
+        debug: false,
 		count: 5,
 		color: 'rgb(215,25,28)',
 		title: 'Bottom Table',

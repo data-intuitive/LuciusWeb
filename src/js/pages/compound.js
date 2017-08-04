@@ -115,9 +115,11 @@ export default function CompoundWorkflow(sources) {
         log: xs.merge(
             logger(state$, 'state$'),
             CompoundFormSink.log,
+            filterForm.log,
             similarityPlot.log,
             histogram.log,
-            headTable.log
+            headTable.log,
+            tailTable.log
         ),
         DOM: vdom$,
         onion: xs.merge(

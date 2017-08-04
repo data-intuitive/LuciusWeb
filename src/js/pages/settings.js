@@ -6,19 +6,19 @@ import { clone } from 'ramda';
 import sampleCombine from 'xstream/extra/sampleCombine'
 
 export const initSettings = {
+    version: 1.0,
+	debug : true,
 	common: {
 		version: "v2",
 		blur: 0
 	},
 	headTable: {
-		title: 'Top Table 123',
 		count: 5,
 		color: 'rgb(44,123,182)',
 		title: 'Top Table',
 		version: 'v2'
 	},
 	tailTable: {
-		title: 'Bottom Table 123',
 		count: 5,
 		color: 'rgb(215,25,28)',
 		title: 'Bottom Table',

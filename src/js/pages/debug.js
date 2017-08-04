@@ -27,8 +27,6 @@ function Debug(sources) {
         return "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state))
     })
 
-    const stringDataLogger$ = stringData$.map(str => [str])
-
     const vdom$ = xs.combine(sources.onion.state$, stringData$) 
         .map(([state, mime]) => div('.row', [
                             div('.col .s10 .offset-s1',[
@@ -48,7 +46,7 @@ function Debug(sources) {
         log: xs.merge(
             logger(stringData$, 'stringData$')
         )
-    };
+    }
 }
 
 export default Debug

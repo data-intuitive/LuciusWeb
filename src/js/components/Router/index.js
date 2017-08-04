@@ -39,7 +39,7 @@ export default function Router(sources) {
         // '/hello': Hello,
         // '/http': HttpRequest,
     })
-        .remember();
+    .remember();
 
     const page$ = match$.map(({ path, value }) => {
         return value(Object.assign({}, sources, {
@@ -92,34 +92,31 @@ export default function Router(sources) {
         .remember()
 
     // Initialize state
-    // Since we use storageify, we only keep the settings
+    // Storageify ensures the state of the application is constantly cached.
+    // We only use the settings part of the stored state.
     const defaultReducer$ = xs.of(prevState => {
         // index -- defaultReducer$
         if (typeof prevState === 'undefined') {
+            // No pre-existing state information, use default settings
             return ({
                 settings: initSettings,
             })
         } else {
-            // return prevState
-            return ({
-                settings: prevState.settings
-            })
+            // Pre-existing state information.
+            // If default settings are newer, use those.
+            return (prevState.settings.version == initSettings.version)
+                    ? ({ settings: prevState.settings })
+                    : ({ settings: initSettings })
         }
     })
 
     // Capture link targets and send to router driver
     const router$ = sources.DOM.select('a').events('click')
         .map(ev => ev.target.pathname)
+        .remember()
 
     // All clicks on links should be sent to the preventDefault driver
     const prevent$ = sources.DOM.select('a').events('click').filter(ev => ev.target.pathname == '/debug');
-
-    const preventLogger$ = prevent$.map(c => (['prevent$ triggered', c]))
-
-    const logger$ = xs.merge(
-        // stateLogger$,
-        preventLogger$
-    )
 
     const history$ = sources.onion.state$.fold((acc, x) => acc.concat([x]), [{}])
 
@@ -127,9 +124,9 @@ export default function Router(sources) {
         log: xs.merge(
             logger(page$, 'page$', '>> ', ' > ', ''),
             logger(state$, 'state$'),
+            logger(history$, 'history$'),
             logger(defaultReducer$, '', '-- ', ' -- '),
             logger(prevent$, 'prevent$'),
-            logger(history$, 'history$'),
             page$.map(prop('log')).filter(Boolean).flatten()
         ),
         DOM: vdom$,
@@ -140,7 +137,10 @@ export default function Router(sources) {
             page$.map(prop('onion')).filter(Boolean).flatten()
         ),
         vega: page$.map(prop('vega')).filter(Boolean).flatten(),
-        preventDefault: prevent$,
+        preventDefault: xs.merge(
+            prevent$,
+            page$.map(prop('preventDefault')).filter(Boolean).flatten()
+        )
     }
 
 }

@@ -17,7 +17,7 @@ const loggerFactory = (elementID, thisState$, location = 'settings.debug') => (s
                         prefix + elementID + infix + streamID + suffix, 
                         ev
                         ])
-                    : xs.of(['no firing'])
+                    : xs.never()
             )
     return debug$$.flatten()
 }

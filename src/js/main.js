@@ -17,8 +17,8 @@ import SignatureWorkflow from './pages/signature';
 import switchPath from 'switch-path'
 
 const drivers = {
-  log: logDriver,
   DOM: makeDOMDriver('#root'),
+  log: logDriver,
   vega: makeVegaDriver(),
   HTTP: makeHTTPDriver(),
   router: makeRouterDriver(captureClicks(makeServerHistoryDriver()), switchPath),

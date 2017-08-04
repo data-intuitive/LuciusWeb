@@ -17,13 +17,13 @@ import SignatureWorkflow from './pages/signature';
 import switchPath from 'switch-path'
 
 const drivers = {
+  log: logDriver,
   DOM: makeDOMDriver('#root'),
   vega: makeVegaDriver(),
   HTTP: makeHTTPDriver(),
   router: makeRouterDriver(captureClicks(makeServerHistoryDriver()), switchPath),
   preventDefault: event$ => event$.subscribe({ next: e => e.preventDefault() }),
   storage: storageDriver,
-  log: logDriver
 };
 
 // let StatifiedMain = onionify(SignatureWorkflow);

@@ -12,7 +12,10 @@ import onionify from 'cycle-onionify';
 import storageify from "cycle-storageify";
 
 import Router from './components/Router/index';
-import {makeVegaDriver} from './makeVegaDriver';
+import { makeVegaDriver } from './drivers/makeVegaDriver';
+import { logDriver } from './drivers/logDriver';
+import { alertDriver } from './drivers/alertDriver';
+import { preventDefaultDriver } from './drivers/preventDefaultDriver';
 import SignatureWorkflow from './pages/signature';
 import switchPath from 'switch-path'
 
@@ -22,7 +25,8 @@ const drivers = {
   vega: makeVegaDriver(),
   HTTP: makeHTTPDriver(),
   router: makeRouterDriver(captureClicks(makeServerHistoryDriver()), switchPath),
-  preventDefault: event$ => event$.subscribe({ next: e => e.preventDefault() }),
+  preventDefault: preventDefaultDriver,
+  alert: alertDriver,
   storage: storageDriver,
 };
 
@@ -32,16 +36,6 @@ const drivers = {
 let StatifiedMain = onionify(storageify(Router, {key: 'ComPass'}));
 // let StatifiedMain = onionify(Router);
 run(StatifiedMain, drivers);
-
-
-function logDriver(stream$) {
-  stream$.addListener({
-    next: message => message.map(m => console.log(m)),
-    error: e => console.error(e),
-    complete: () => {}
-  })
-}
-
 
 // if (module.hot) {
 // 		module.hot.accept(() => {

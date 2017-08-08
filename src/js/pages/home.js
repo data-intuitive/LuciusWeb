@@ -59,7 +59,8 @@ function Home(sources) {
     return {
         DOM: vdom$,
         HTTP: CheckSink.HTTP,
-        onion: CheckSink.onion
+        onion: CheckSink.onion,
+        alert: CheckSink.alert
     };
 }
 

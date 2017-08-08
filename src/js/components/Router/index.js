@@ -137,6 +137,7 @@ export default function Router(sources) {
         router: router$,
         HTTP: page$.map(prop('HTTP')).filter(Boolean).flatten(),
         vega: page$.map(prop('vega')).filter(Boolean).flatten(),
+        alert: page$.map(prop('alert')).filter(Boolean).flatten(),
         preventDefault: xs.merge(
             prevent$,
             page$.map(prop('preventDefault')).filter(Boolean).flatten()

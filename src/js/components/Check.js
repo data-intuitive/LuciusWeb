@@ -15,7 +15,7 @@ function Check(sources) {
    const modifiedState$ = state$
         .compose(dropRepeats((x, y) => equals(omit(['result'], x), omit(['result'], y))))
         .compose(debounce(2000))
-        .debug()
+        // .debug()
 
     const request$ = xs.combine(modifiedState$, props$)
         .map(([state, props]) => {
@@ -26,7 +26,7 @@ function Check(sources) {
                 'category': 'test'
             }
         })
-        .debug();
+        .remember()
 
     const response$$ = sources.HTTP
         .select('test')
@@ -39,7 +39,7 @@ function Check(sources) {
         )
         .flatten()
         // .compose(debounce(2000))
-        .debug()
+        .remember()
 
     const validResponse$ = response$$
         .map(response$ =>
@@ -48,11 +48,10 @@ function Check(sources) {
         )
         .flatten()
         // .compose(debounce(2000))
-        .debug()
+        .remember()
 
     const data$ = validResponse$
         .map(result => result.body.result.data)
-    .debug()
 
     const initVdom$ = xs.of('...')
 
@@ -71,6 +70,9 @@ function Check(sources) {
         errorVdom$,
     ).remember()
 
+    const alert$ = invalidResponse$
+        .remember()
+
     // This is needed in order to get the onion stream active!
     const defaultReducer$ = xs.of(prevState => {
         if (typeof prevState === 'undefined') {
@@ -81,12 +83,12 @@ function Check(sources) {
     });
 
     return {
-        DOM: vdom$.debug(),
+        DOM: vdom$,
         HTTP: request$,
         onion: xs.merge(
             defaultReducer$,
-        )
-
+        ),
+        alert: alert$
     }
 }
 

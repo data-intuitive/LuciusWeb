@@ -224,12 +224,14 @@ function Table(sources) {
         return csv;
     }
 
-    const csvData$ = data$.map(data => convertToCSV(data)).map(csv => "text/json;charset=utf-8," + encodeURIComponent(csv))
+    const csvData$ = data$.map(data => convertToCSV(data)).map(csv => "text/csv;charset=utf-8," + encodeURIComponent(csv))
+    const jsonData$ = data$.map(json => "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(json)))
 
-    const loadedVdom$ = xs.combine(sampleTable.DOM, csvData$, filterText$, modifiedState$)
+    const loadedVdom$ = xs.combine(sampleTable.DOM, csvData$, jsonData$, filterText$, modifiedState$)
         .map(([
             dom,
             csvData,
+            jsonData,
             filterText,
             state
         ]) => div('.page', [
@@ -246,19 +248,21 @@ function Table(sources) {
                     }, 'add')
                 ]),
                 div('.white-text .col .s7 .valign .right-align', filterText)
-                ]),
+            ]),
             div('.row .valign-wrapper', { style: { 'margin-bottom': '0px', 'padding-top': '0px', 'background-color': state.settings.table.color, opacity: 0.8 } }, [
                 (state.settings.table.expandOptions)
                     ? div([
                         button('.btn-flat .waves-effect .waves-light', smallBtnStyle(state.settings.table.color), [
-                            a('', { style: {'color': 'white'}, props: { href: 'data:' + csvData, download: 'compass-state.csv' } }, [
+                            a('', { style: { 'color': 'white' }, props: { href: 'data:' + csvData, download: 'table.csv' } }, [
                                 span({ style: { 'vertical-align': 'top', fontSize: '8px' } }, 'csv'),
                                 i('.material-icons', 'file_download'),
                             ])
                         ]),
                         button('.btn-flat .waves-effect .waves-light', smallBtnStyle(state.settings.table.color), [
-                            span({ style: { 'vertical-align': 'top', fontSize: '8px' } }, 'json'),
-                            i('.material-icons', 'file_download'),
+                            a('', { style: { 'color': 'white' }, props: { href: 'data:' + jsonData, download: 'table.json' } }, [
+                                span({ style: { 'vertical-align': 'top', fontSize: '8px' } }, 'json'),
+                                i('.material-icons', 'file_download'),
+                            ])
                         ]),
                         button('.min10 .btn-flat .waves-effect .waves-light', smallBtnStyle(state.settings.table.color), [
                             span({ style: { 'vertical-align': 'top', fontSize: '10px' } }, '-10'),
@@ -268,15 +272,15 @@ function Table(sources) {
                             span({ style: { 'vertical-align': 'top', fontSize: '10px' } }, '-5'),
                             i('.material-icons', 'fast_rewind'),
                         ]),
-                         button('.plus5 .btn-flat .waves-effect .waves-light', smallBtnStyle(state.settings.table.color), [
+                        button('.plus5 .btn-flat .waves-effect .waves-light', smallBtnStyle(state.settings.table.color), [
                             span({ style: { 'vertical-align': 'top', fontSize: '10px' } }, '+5'),
                             i('.material-icons', 'fast_forward')
                         ]),
-                         button('.plus10 .btn-flat .waves-effect .waves-light', smallBtnStyle(state.settings.table.color), [
+                        button('.plus10 .btn-flat .waves-effect .waves-light', smallBtnStyle(state.settings.table.color), [
                             span({ style: { 'vertical-align': 'top', fontSize: '10px' } }, '+10'),
                             i('.material-icons', 'fast_forward')
                         ])
-                     ])
+                    ])
                     : div()
             ]),
             div('.row', { style: { 'margin-bottom': '0px', 'margin-top': '0px' } }, [

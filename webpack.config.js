@@ -44,10 +44,16 @@ module.exports = {
         exclude: /node_modules/,
         loaders: ['babel-loader']
       },
-      // {
-      //   test: /\.css$/,
-      //   loader: ExtractTextPlugin.extract({ fallback: 'style-loader', loader: ['css-loader']})
-      // },
+      {
+        test: /\.scss$/,
+            use: [{
+                loader: "style-loader" // creates style nodes from JS strings
+            }, {
+                loader: "css-loader" // translates CSS into CommonJS
+            }, {
+                loader: "sass-loader" // compiles Sass to CSS
+            }]
+     },
       { test: /\.css$/, loader: "style-loader!css-loader" },
       { 
         test: /\.(jpe?g|woff2?|ttf|eot|svg|png|gif)(\?v=\d+\.\d+\.\d+)?$/,

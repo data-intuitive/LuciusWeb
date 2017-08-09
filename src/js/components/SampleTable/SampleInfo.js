@@ -34,8 +34,8 @@ export function SampleInfo(sources) {
         let pStylewBlur = { style: merge(blur, { margin: '0px' } ) }
         let urlSourire = props.sourire.url
         let url = urlSourire + encodeURIComponent(sample.smiles).replace(/%20/g, '+')
-        return div('', [
-            div('.col .s12 .l4', { style: { margin: '15px 0px 0px 0px' } }, [
+        return div('.col .s12', [
+            div('.col .s6 .l4', { style: { margin: '15px 0px 0px 0px' } }, [
                 p('.col .s12 .grey-text', hStyle, 'Sample Info:'),
                 p(pStyle, entry('Sample ID: ', sample.id)),
                 p(pStyle, entry('protocolname: ', sample.protocolname)),
@@ -43,7 +43,7 @@ export function SampleInfo(sources) {
                 p(pStyle, entry('Year: ', sample.year)),
                 p(pStyle, entry('Plate ID: ', sample.plateid)),
             ]),
-            div('.col .s12 .l4', { style: { margin: '15px 0px 0px 0px' } }, [
+            div('.col .s6 .l4', { style: { margin: '15px 0px 0px 0px' } }, [
                 p('.col .s12 .grey-text', hStyle, 'Compound Info:'),
                 p(pStylewBlur, entry('Name: ', sample.compoundname)),
                 p(pStylewBlur, entry('JNJS: ', sample.jnjs)),
@@ -51,7 +51,7 @@ export function SampleInfo(sources) {
                 p(pStyle, entry('Type: ', sample.Type)),
                 p('.s12', pStyle, entry('Targets: ', sample.targets.join(', '))),
             ]),
-            div('.col .s6 .l4', { style: merge(blur, { margin: '20px 0px 0px 0px' } ) }, [
+            div('.col .s4 .offset-s8 .l4', { style: merge(blur, { margin: '20px 0px 0px 0px' } ) }, [
                 (sample.smiles != null && sample.smiles != 'NA' && sample.smiles != 'No Smiles')
                     ? img('.col .s12 .valign', { props: { src: url } })
                     : ''

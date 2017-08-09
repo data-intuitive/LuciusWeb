@@ -142,7 +142,7 @@ function SampleSelection(sources) {
         return (
             div([
                 div('.row', [
-                    div('.col .s6 .offset-s3', [table('.striped', tableContent)]),
+                    div('.col .s8 .offset-s2 .l6 .offset-l3', [table('.striped', tableContent)]),
                     div('.row .s6 .offset-s3', [
                         button('.doSelect .btn .col .offset-s4 .s4 .orange .darken-2', 'Select'),
                     ]),

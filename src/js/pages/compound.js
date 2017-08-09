@@ -96,7 +96,7 @@ export default function CompoundWorkflow(sources) {
             hist,
            headTable,
             tailTable
-        ]) => div('.row .orange .lighten-5 ', [
+        ]) => div('.row .compound', [
             formDOM,
             div('.col .s10 .offset-s1', pageStyle, [
                 div('.row', [filter]),

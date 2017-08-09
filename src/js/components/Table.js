@@ -232,7 +232,7 @@ function Table(sources) {
             csvData,
             filterText,
             state
-        ]) => div([
+        ]) => div('.page', [
             div('.row .valign-wrapper .switch', { style: { 'margin-bottom': '0px', 'padding-top': '5px', 'background-color': state.settings.table.color } }, [
                 h5('.white-text .col', [
                     state.settings.table.title,
@@ -243,10 +243,10 @@ function Table(sources) {
                             'background-color': state.settings.table.color,
                             opacity: 0.5,
                         }
-                    }, 'add'),
-                    div('.white-text .col .s7 .valign .right-align', filterText)
+                    }, 'add')
                 ]),
-            ]),
+                div('.white-text .col .s7 .valign .right-align', filterText)
+                ]),
             div('.row .valign-wrapper', { style: { 'margin-bottom': '0px', 'padding-top': '0px', 'background-color': state.settings.table.color, opacity: 0.8 } }, [
                 (state.settings.table.expandOptions)
                     ? div([

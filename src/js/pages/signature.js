@@ -96,7 +96,7 @@ function SignatureWorkflow(sources) {
             tailTable,
             // feedback
         ]) =>
-            div('.row .pink .lighten-5  ', [
+            div('.row .disease', [
                 form,
                 div('.col .s10 .offset-s1', pageStyle,
                     [

@@ -14,7 +14,7 @@ import { Check } from '../Check'
 import { IsolatedSettings } from '../../pages/settings'
 import flattenSequentially from 'xstream/extra/flattenSequentially'
 import { pick, mix } from 'cycle-onionify';
-import { initSettings } from '../../pages/settings'
+import { initSettings } from '../../configuration.js'
 import debounce from 'xstream/extra/debounce'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import { loggerFactory } from '../../utils/logger'

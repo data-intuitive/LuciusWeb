@@ -24,14 +24,14 @@ export function CompoundInfo(sources) {
 
     const blur$ = props$
         .filter(props => props.common.blur != undefined)
-        .map(props => ({ filter : 'blur(' + props.common.blur + 'px)'}) )
-        .startWith({ filter : 'blur(0px)'})
+        .map(props => ({ filter: 'blur(' + props.common.blur + 'px)' }))
+        .startWith({ filter: 'blur(0px)' })
 
     const detail = (sample, props, blur) => {
         let hStyle = { style: { margin: '0px', fontWeight: 'bold' } }
         let pStyle = { style: { margin: '0px' } }
-        let hStylewBlur = { style: merge(blur, { margin: '0px', fontWeight: 'bold' } ) }
-        let pStylewBlur = { style: merge(blur, { margin: '0px' } ) }
+        let hStylewBlur = { style: merge(blur, { margin: '0px', fontWeight: 'bold' }) }
+        let pStylewBlur = { style: merge(blur, { margin: '0px' }) }
         let urlSourire = props.sourire.url
         let url = urlSourire + encodeURIComponent(sample.smiles).replace(/%20/g, '+')
         return div('.col .s12', [
@@ -44,8 +44,8 @@ export function CompoundInfo(sources) {
             div('.col .s6 .l4', { style: { margin: '15px 0px 0px 0px' } }, [
                 p('.s12', pStyle, entry('InchiKey: ', sample.inchikey)),
                 p('.s12', pStyle, entry('Targets: ', sample.targets.join(', ')))
-             ]),
-             div('.col .s4 .offset-s8 .l4', { style: merge(blur, { margin: '20px 0px 0px 0px' } ) }, [
+            ]),
+            div('.col .s4 .offset-s8 .l4', { style: merge(blur, { margin: '20px 0px 0px 0px' }) }, [
                 (sample.smiles != null && sample.smiles != 'NA' && sample.smiles != 'No Smiles')
                     ? img('.col .s12 .valign', { props: { src: url } })
                     : ''
@@ -64,11 +64,10 @@ export function CompoundInfo(sources) {
                 [
                     div('.row', { style: { fontWeight: 'small' } }, [
                         div('.col .s1 .left-align', { style: { fontWeight: 'bold' } }, [sample.targets.length]),
-                        // div('.col .s2', [sample.id]),
-                        // div('.col .s1', [sample.protocolname]),
-                        div('.col .s2', {style : blur}, [(sample.jnjs != "NA") ? sample.jnjs : '']),
-                        div('.col .s3', {style : blur}, [sample.compoundname]),
-                        div('.col .s3 .center-align', {style : blur}, [
+                        div('.col .s2', { style: blur }, [(sample.jnjs != "NA") ? sample.jnjs : '']),
+                        div('.col .s3', { style: blur }, [sample.compoundname]),
+                        div('.col .s3 .truncate', { style: blur }, [sample.targets.join(", ")]),
+                        div('.col .s3 .center-align', { style: blur }, [
                             ((sample.smiles != null && sample.smiles != 'NA' && sample.smiles != 'No Smiles') && zoom == false)
                                 ? img({ props: { src: url, height: 50, 'object-fit': 'contain' } })
                                 : ''

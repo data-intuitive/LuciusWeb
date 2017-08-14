@@ -1,6 +1,6 @@
 export const initSettings = 
 {
-    version: 2.93,
+    version: 2.995,
 	debug : true,
     filter: {
         debug: false
@@ -9,19 +9,36 @@ export const initSettings =
 		version: "v2",
 		blur: 0
 	},
+	compoundTable: {
+        type: 'compoundTable',
+        apiClass: 'targetToCompounds',
+        expandOptions: false,
+        debug: true,
+		count: 50,
+		color: 'rgb(50,50,50)',
+        bgcolor: 'rgba(50,50,50,0.08)',
+		title: 'Compound Table',
+		version: 'v2'
+	},
 	headTable: {
+        type: 'topTable',
+        apiClass: 'topTable',
         expandOptions: false,
         debug: false,
 		count: 5,
 		color: 'rgb(44,123,182)',
+        bgcolor: 'rgba(44,123,182, 0.08)',
 		title: 'Top Table',
 		version: 'v2'
 	},
 	tailTable: {
+        type: 'bottomTable',
+        apiClass: 'topTable',
         expandOptions: false,
         debug: false,
 		count: 5,
 		color: 'rgb(215,25,28)',
+        bgcolor: 'rgba(215,25,28, 0.08)',
 		title: 'Bottom Table',
 		version: 'v2'
 	},

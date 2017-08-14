@@ -9,10 +9,12 @@ import dropRepeats from 'xstream/extra/dropRepeats'
 import { SignatureForm, formLens } from '../components/SignatureForm'
 import { Histogram, histLens } from '../components/Histogram/Histogram'
 import { SimilarityPlot, simLens } from '../components/SimilarityPlot/SimilarityPlot'
-import { Table, headTableLens, tailTableLens } from '../components/Table'
+import { makeTable, headTableLens, tailTableLens } from '../components/Table'
 import { initSettings } from './settings'
 import { Filter } from '../components/Filter'
 import { loggerFactory } from '~/../../src/js/utils/logger'
+import { SampleTable, sampleTableLens } from '../components/SampleTable/SampleTable'
+
 
 function SignatureWorkflow(sources) {
 
@@ -59,14 +61,20 @@ function SignatureWorkflow(sources) {
     const histogram = isolate(Histogram, { onion: histLens })
         ({ ...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ signature: s, filter: f })).remember() });
 
-    // tables: Join settings from api and sourire into props
-    const headTable = isolate(Table, { onion: headTableLens })
-        ({ ...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ signature: s, filter: f })).remember() });
+
+    const headTableContainer = makeTable(SampleTable, sampleTableLens)
 
     // tables: Join settings from api and sourire into props
-    const tailTable = isolate(Table, { onion: tailTableLens })
-        ({ ...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ signature: s, filter: f })).remember() });
+    const headTable = isolate(headTableContainer, { onion: headTableLens })
+        ({ ...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ query: s, filter: f })).remember() });
 
+
+    const tailTableContainer = makeTable(SampleTable, sampleTableLens)
+
+    // tables: Join settings from api and sourire into props
+    const tailTable = isolate(tailTableContainer, { onion: tailTableLens })
+        ({ ...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ query: s, filter: f })).remember() });
+        
     const pageStyle = {
         style:
         {

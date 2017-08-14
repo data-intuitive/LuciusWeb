@@ -38,6 +38,19 @@ export function Settings(sources) {
             ]
         },
         {
+            group: 'form',
+            title: 'Form Settings',
+            settings: [
+                {
+                    field: 'debug',
+                    type: 'checkbox',
+                    class: '.switch',
+                    title: 'Debug component?',
+                    props: { type: 'checkbox' }
+                }
+            ]
+        },
+         {
             group: 'headTable',
             title: 'Top Table Settings',
             settings: [

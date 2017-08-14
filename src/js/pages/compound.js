@@ -6,26 +6,27 @@ import { clone, equal, equals, mergeAll } from 'ramda'
 import { CompoundForm } from '../components/CompoundForm'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import { initSettings } from './settings'
-import { Table, headTableLens, tailTableLens } from '../components/Table'
+import { makeTable, headTableLens, tailTableLens } from '../components/Table'
 import { Histogram, histLens } from '../components/Histogram/Histogram'
 import { SimilarityPlot, simLens } from '../components/SimilarityPlot/SimilarityPlot'
 import { Filter } from '../components/Filter'
 import concat from 'xstream/extra/dropRepeats'
 import { loggerFactory } from '~/../../src/js/utils/logger'
+import { SampleTable, sampleTableLens } from '../components/SampleTable/SampleTable'
 
 export default function CompoundWorkflow(sources) {
 
     const logger = loggerFactory('compound', sources.onion.state$, 'settings.form.debug')
 
     const state$ = sources.onion.state$
-    
-    const formLens = { 
-        get: state => ({form: state.form, settings: {form: state.settings.form, api: state.settings.api}}),
-        set: (state, childState) => ({...state, form: childState.form})
+
+    const formLens = {
+        get: state => ({ form: state.form, settings: { form: state.settings.form, api: state.settings.api } }),
+        set: (state, childState) => ({ ...state, form: childState.form })
     };
 
-    const CompoundFormSink = isolate(CompoundForm, {onion: formLens})(sources)
-    const signature$ = CompoundFormSink.output
+    const CompoundFormSink = isolate(CompoundForm, { onion: formLens })(sources)
+    const signature$ = CompoundFormSink.output//.startWith('BRCA1')
 
     // Initialize if not yet done in parent (i.e. router) component (useful for testing)
     const defaultReducer$ = xs.of(prevState => {
@@ -39,35 +40,41 @@ export default function CompoundWorkflow(sources) {
                     hist: {},
                 })
         } else {
-             return ({...prevState,
-                settings: prevState.settings, 
+            return ({
+                ...prevState,
+                settings: prevState.settings,
                 form: {},
                 sim: {},
                 hist: {},
-             })
+            })
         }
     })
 
     // Filter Form
-    const filterForm = isolate(Filter, 'compoundfilter')({...sources, input: signature$})
+    const filterForm = isolate(Filter, 'compoundfilter')({ ...sources, input: signature$ })
     const filter$ = filterForm.output
 
-	// Similarity plot component
-	const similarityPlot = isolate(SimilarityPlot, {onion: simLens})
-                                  ({...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({signature: s, filter: f})).remember()});
+    // Similarity plot component
+    const similarityPlot = isolate(SimilarityPlot, { onion: simLens })
+        ({ ...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ signature: s, filter: f })).remember() });
 
-	// Histogram plot component
-	const histogram = isolate(Histogram, {onion: histLens})
-                            ({...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({signature: s, filter: f})).remember()});
+    // Histogram plot component
+    const histogram = isolate(Histogram, { onion: histLens })
+        ({ ...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ signature: s, filter: f })).remember() });
+
+
+    const headTableContainer = makeTable(SampleTable, sampleTableLens)
 
     // tables: Join settings from api and sourire into props
-    const headTable = isolate(Table, {onion: headTableLens})
-                             ({...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({signature: s, filter: f})).remember()});
+    const headTable = isolate(headTableContainer, { onion: headTableLens })
+        ({ ...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ query: s, filter: f })).remember() });
+
+
+    const tailTableContainer = makeTable(SampleTable, sampleTableLens)
 
     // tables: Join settings from api and sourire into props
-    const tailTable = isolate(Table, {onion: tailTableLens})
-                             ({...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({signature: s, filter: f})).remember()});
-
+    const tailTable = isolate(tailTableContainer, { onion: tailTableLens })
+        ({ ...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ query: s, filter: f })).remember() });
 
     const pageStyle = {
         style:
@@ -83,8 +90,8 @@ export default function CompoundWorkflow(sources) {
     const vdom$ = xs.combine(
         CompoundFormSink.DOM,
         filterForm.DOM,
-        similarityPlot.DOM, 
-        histogram.DOM, 
+        similarityPlot.DOM,
+        histogram.DOM,
         headTable.DOM,
         tailTable.DOM,
         // state$
@@ -94,17 +101,17 @@ export default function CompoundWorkflow(sources) {
             filter,
             simplot,
             hist,
-           headTable,
+            headTable,
             tailTable
         ]) => div('.row .compound', [
             formDOM,
             div('.col .s10 .offset-s1', pageStyle, [
                 div('.row', [filter]),
-                 div('.row ', [
+                div('.row ', [
                     div('.col .s12 .l7', [simplot]),
                     div('.col .s12 .l5', [hist]),
                 ]),
-              div('.row', []),
+                div('.row', []),
                 div('.col .s12', [headTable]),
                 div('.row', []),
                 div('.col .s12', [tailTable])

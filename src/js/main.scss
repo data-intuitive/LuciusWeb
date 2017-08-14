@@ -1,8 +1,8 @@
-body {
-    display: flex;
-    min-height: 100vh;
-    flex-direction: column;
-}
+// body {
+//     display: flex;
+//     min-height: 100vh;
+//     flex-direction: column;
+// }
 
 /* Colors for workflows, to be overriden when printed */
 @import '../../node_modules/materialize-css/sass/components/color';
@@ -19,7 +19,8 @@ body {
 }
 
 .target {
-
+    @extend .red;
+    @extend .lighten-5;
 }
 
 @media print { 

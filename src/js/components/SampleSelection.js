@@ -79,7 +79,7 @@ function SampleSelection(sources) {
     const request$ = newInput$
         .map(state => {
             return {
-                url: state.settings.api.url + '&classPath=com.dataintuitive.luciusapi.samples',
+                url: state.settings.api.url + '&classPath=com.dataintuitive.luciusapi.compoundToSamples',
                 method: 'POST',
                 send: {
                     version: 'v2',

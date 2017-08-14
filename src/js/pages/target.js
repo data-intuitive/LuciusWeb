@@ -61,12 +61,12 @@ function TargetWorkflow(sources) {
     })
 
     const TargetFormSink = isolate(TargetForm, { onion: formLens })(sources)
-    const targets$ = TargetFormSink.output//.startWith('MELK')
+    const target$ = TargetFormSink.output.startWith('ABL1')
 
     const TableContainer = makeTable(CompoundTable, compoundTableLens)
 
     const Table = isolate(TableContainer, { onion: compoundContainerTableLens })
-        ({ ...sources, input: targets$.map((t) => ({ query: t })).remember() });
+        ({ ...sources, input: target$.map((t) => ({ query: t })).remember() });
 
     // Granular access to global state and parts of settings
     const thisFormLens = {
@@ -76,8 +76,8 @@ function TargetWorkflow(sources) {
 
     const signatureForm = isolate(SignatureForm, { onion: thisFormLens })(sources)
     // only show signature form when a target has been selected !!!
-    const signatureFormVdom$ = xs.combine(signatureForm.DOM, targets$).map(([s, t]) => s).startWith(div())
-    const signature$ = signatureForm.output
+    const signatureFormVdom$ = xs.combine(signatureForm.DOM, target$).map(([s, t]) => s).startWith(div())
+    const signature$ = signatureForm.output.startWith('BRCA1 HSPA1A DNAJB1 DDIT4 -TSEN2')
 
     // Filter Form
     const filterForm = isolate(Filter, 'filter')({ ...sources, input: signature$ })
@@ -85,7 +85,7 @@ function TargetWorkflow(sources) {
 
     // Histogram plot component
     const histogram = isolate(Histogram, { onion: histLens })
-        ({ ...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ signature: s, filter: f })).remember() });
+        ({ ...sources, input: xs.combine(signature$, filter$, target$).map(([s, f, t]) => ({ signature: s, filter: f, target: t })).remember() });
 
     const pageStyle = {
         style:
@@ -128,7 +128,7 @@ function TargetWorkflow(sources) {
     return {
         log: xs.merge(
             logger(defaultReducer$, 'defaultReducer$'),
-            logger(targets$, 'targets$'),
+            logger(target$, 'target$'),
             TargetFormSink.log,
             Table.log
         ),
@@ -149,9 +149,7 @@ function TargetWorkflow(sources) {
         ),
        vega: xs.merge(
             histogram.vega,
-            // similarityPlot.vega
         ),
-        // router: router$
     };
 
 }

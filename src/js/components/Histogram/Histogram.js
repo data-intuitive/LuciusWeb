@@ -94,7 +94,8 @@ function Histogram(sources) {
 				send: {
 					query: state.core.input.signature,
 					bins: state.settings.hist.bins,
-					filter: (typeof state.core.input.filter !== 'undefined') ? state.core.input.filter : ''
+					filter: (typeof state.core.input.filter !== 'undefined') ? state.core.input.filter : '',
+                    features: state.core.input.target
 				},
 				'category': 'histogram'
 			}
@@ -125,9 +126,9 @@ function Histogram(sources) {
 		.map(result => result.body.result.data)
 
 	// Ingest the data in the spec and return to the driver
-	const vegaSpec$ = xs.combine(data$, width$, visible$)
-		.map(([data, newwidth, visible]) => {
-			return { spec: vegaHistogramSpec(data), el: elementID, width: newwidth }
+	const vegaSpec$ = xs.combine(data$, width$, visible$, input$)
+		.map(([data, newwidth, visible, input]) => {
+			return { spec: vegaHistogramSpec(data, input.target), el: elementID, width: newwidth }
 		})
 		.remember()
 
@@ -182,6 +183,8 @@ function Histogram(sources) {
     // Add data from API to state, update output key when relevant
     const dataReducer$ = data$.map(newData => prevState => ({...prevState, core: {...prevState.core, data: newData}})) 
 
+    const specReducer$ = vegaSpec$.map(specInfo => prevState => ({...prevState, core: {...prevState.core, vegaSpec: specInfo.spec}}))
+
 	return {
         log: xs.merge(
             logger(state$, 'state$'),
@@ -196,7 +199,8 @@ function Histogram(sources) {
 			defaultReducer$,
 			inputReducer$,
 			requestReducer$,
-			dataReducer$
+			dataReducer$,
+            specReducer$
 		)
 	};
 

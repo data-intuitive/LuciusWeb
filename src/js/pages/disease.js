@@ -16,7 +16,7 @@ import { loggerFactory } from '~/../../src/js/utils/logger'
 import { SampleTable, sampleTableLens } from '../components/SampleTable/SampleTable'
 
 
-function SignatureWorkflow(sources) {
+function DiseaseWorkflow(sources) {
 
     const logger = loggerFactory('signature', sources.onion.state$, 'settings.debug')
 
@@ -151,4 +151,4 @@ function SignatureWorkflow(sources) {
     };
 }
 
-export default SignatureWorkflow;
+export default DiseaseWorkflow;

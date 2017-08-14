@@ -4,7 +4,7 @@ import { merge, prop, equals } from 'ramda';
 import BMI from '../../examples/bmi';
 import Hello from '../../examples/hello-world';
 import { HttpRequest } from "../../examples/http-request"
-import SignatureWorkflow from '../../pages/signature'
+import DiseaseWorkflow from '../../pages/disease'
 import CompoundWorkflow from '../../pages/compound'
 import StatisticsWorkflow from '../../pages/statistics'
 import TargetWorkflow from '../../pages/target'
@@ -28,7 +28,7 @@ export default function Router(sources) {
 
     const match$ = router.define({
         '/': Home,
-        '/disease': SignatureWorkflow,
+        '/disease': DiseaseWorkflow,
         '/compound': CompoundWorkflow,
         '/target': TargetWorkflow,
         '/statistics': StatisticsWorkflow,

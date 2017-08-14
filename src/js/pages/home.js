@@ -5,15 +5,12 @@ import BMI from '../examples/bmi';
 import Hello from '../examples/hello-world';
 import { HttpRequest } from "../examples/http-request"
 
-import SignatureWorkflow from './signature'
-import CompoundWorkflow from './compound'
-import StatisticsWorkflow from './statistics'
 import { Check } from '../components/Check'
 import { IsolatedSettings } from './settings'
 
 import flattenSequentially from 'xstream/extra/flattenSequentially'
 import { pick, mix } from 'cycle-onionify';
-import { initSettings } from './settings'
+import { initSettings } from '../configuration'
 import debounce from 'xstream/extra/debounce'
 import dropRepeats from 'xstream/extra/dropRepeats'
 

@@ -15,7 +15,6 @@ import { makeVegaDriver } from './drivers/makeVegaDriver';
 import { logDriver } from './drivers/logDriver';
 import { alertDriver } from './drivers/alertDriver';
 import { preventDefaultDriver } from './drivers/preventDefaultDriver';
-import SignatureWorkflow from './pages/signature';
 import switchPath from 'switch-path'
 
 import './main.scss'

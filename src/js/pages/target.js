@@ -12,6 +12,7 @@ import { makeTable, compoundContainerTableLens } from '../components/Table'
 
 import { SampleTable, sampleTableLens } from '../components/SampleTable/SampleTable'
 import { CompoundTable, compoundTableLens } from '../components/CompoundTable/CompoundTable'
+import { Histogram, histLens } from '../components/Histogram/Histogram'
 
 import flattenSequentially from 'xstream/extra/flattenSequentially'
 import { pick, mix } from 'cycle-onionify';
@@ -20,6 +21,9 @@ import debounce from 'xstream/extra/debounce'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import { loggerFactory } from '~/../../src/js/utils/logger'
 import isolate from '@cycle/isolate'
+import { SignatureForm, formLens } from '../components/SignatureForm'
+import { Filter } from '../components/Filter'
+
 
 function TargetWorkflow(sources) {
 
@@ -30,7 +34,6 @@ function TargetWorkflow(sources) {
         set: (state, childState) => ({ ...state, form: childState.form })
     };
 
-
     // Initialize if not yet done in parent (i.e. router) component (useful for testing)
     const defaultReducer$ = xs.of(prevState => {
         // compound -- defaultReducer
@@ -39,14 +42,20 @@ function TargetWorkflow(sources) {
                 {
                     settings: initSettings,
                     form: {},
-                    compoundTable: {}
+                    compoundTable: {},
+                    sform: {},
+                    filter: {},
+                    hist: {}
                 })
         } else {
             return ({
                 ...prevState,
                 settings: prevState.settings,
                 form: {},
-                compoundTable: {}
+                compoundTable: {},
+                sform: {},
+                filter: {},
+                hist: {}
             })
         }
     })
@@ -58,6 +67,25 @@ function TargetWorkflow(sources) {
 
     const Table = isolate(TableContainer, { onion: compoundContainerTableLens })
         ({ ...sources, input: targets$.map((t) => ({ query: t })).remember() });
+
+    // Granular access to global state and parts of settings
+    const thisFormLens = {
+        get: state => ({ form: state.sform, settings: { form: state.settings.form, api: state.settings.api } }),
+        set: (state, childState) => ({ ...state, sform: childState.form })
+    };
+
+    const signatureForm = isolate(SignatureForm, { onion: thisFormLens })(sources)
+    // only show signature form when a target has been selected !!!
+    const signatureFormVdom$ = xs.combine(signatureForm.DOM, targets$).map(([s, t]) => s).startWith(div())
+    const signature$ = signatureForm.output
+
+    // Filter Form
+    const filterForm = isolate(Filter, 'filter')({ ...sources, input: signature$ })
+    const filter$ = filterForm.output
+
+    // Histogram plot component
+    const histogram = isolate(Histogram, { onion: histLens })
+        ({ ...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ signature: s, filter: f })).remember() });
 
     const pageStyle = {
         style:
@@ -72,19 +100,29 @@ function TargetWorkflow(sources) {
 
     const vdom$ = xs.combine(
         TargetFormSink.DOM,
-        Table.DOM
+        Table.DOM,
+        signatureFormVdom$,
+        filterForm.DOM,
+        histogram.DOM
     )
         .map(([
             formDOM,
             table,
-            //     tailTable
+            signatureForm,
+            filter,
+            hist
         ]) => div('.row .target', [
             formDOM,
+            signatureForm,
             div('.col .s10 .offset-s1', pageStyle, [
                 div('.row', []),
                 div('.col .s12', [table]),
                 div('.row', []),
-             ])
+                div('.row', [filter]),
+                div('.row ', [div('.col .s12 .l8 .offset-l2', [
+                    hist
+                ])]),
+            ]),
         ]))
 
     return {
@@ -98,12 +136,21 @@ function TargetWorkflow(sources) {
         onion: xs.merge(
             defaultReducer$,
             TargetFormSink.onion,
-            Table.onion
+            Table.onion,
+            signatureForm.onion,
+            filterForm.onion,
+            histogram.onion
         ),
         HTTP: xs.merge(
             TargetFormSink.HTTP,
-            Table.HTTP
-        )
+            Table.HTTP,
+            signatureForm.HTTP,
+            histogram.HTTP
+        ),
+       vega: xs.merge(
+            histogram.vega,
+            // similarityPlot.vega
+        ),
         // router: router$
     };
 

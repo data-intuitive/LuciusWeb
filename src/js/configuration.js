@@ -1,6 +1,6 @@
 export const initSettings = 
 {
-    version: 2.995,
+    version: 2.996,
 	debug : true,
     filter: {
         debug: false
@@ -47,7 +47,7 @@ export const initSettings =
 		dummy: 1
 	},
 	hist: {
-        debug: false,
+        debug: true,
 		bins: 20
 	},
 	sim: {

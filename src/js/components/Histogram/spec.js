@@ -33,7 +33,7 @@ export const vegaHistogramSpecV3 = (data, target = 'xyz') => ({
             "type": "band",
             "domain": { "data": "table", "field": "bin" },
             "range": "width",
-            "padding": 0.05,
+            "padding": 0.1,
             "round": true
         },
         {

@@ -1,5 +1,5 @@
 import xs from 'xstream';
-import { div, nav, a, h3, p, ul, li, h1, h2, i, footer, header, main, svg, g, path, input } from '@cycle/dom';
+import { div, nav, a, h3, p, ul, li, h1, h2, i, footer, header, main, svg, g, path, input, span } from '@cycle/dom';
 import { merge, prop, equals } from 'ramda';
 import BMI from '../examples/bmi';
 import Hello from '../examples/hello-world';
@@ -61,7 +61,7 @@ function TargetWorkflow(sources) {
     })
 
     const TargetFormSink = isolate(TargetForm, { onion: formLens })(sources)
-    const target$ = TargetFormSink.output.startWith('ABL1')
+    const target$ = TargetFormSink.output//.startWith('ABL1')
 
     const TableContainer = makeTable(CompoundTable, compoundTableLens)
 
@@ -76,8 +76,14 @@ function TargetWorkflow(sources) {
 
     const signatureForm = isolate(SignatureForm, { onion: thisFormLens })(sources)
     // only show signature form when a target has been selected !!!
-    const signatureFormVdom$ = xs.combine(signatureForm.DOM, target$).map(([s, t]) => s).startWith(div())
-    const signature$ = signatureForm.output.startWith('BRCA1 HSPA1A DNAJB1 DDIT4 -TSEN2')
+    const signatureMessage$ = xs.of('Optional Signature:')
+    const signatureFormVdom$ = xs.combine(signatureForm.DOM, signatureMessage$, target$).map(([s, m, t]) => 
+        div( [
+                p('.col .s12', {style: {opacity: 0.5, margin: "0px 0px 0px 0px", padding: 0}}, [m]),
+                div('.col .s12', {style: {opacity: 0.5, margin: "0px 0px 0px 0px", padding: 0}}, [s])
+                ]),
+    ).startWith(div())
+    const signature$ = signatureForm.output//.startWith('BRCA1 HSPA1A DNAJB1 DDIT4 -TSEN2')
 
     // Filter Form
     const filterForm = isolate(Filter, 'filter')({ ...sources, input: signature$ })
@@ -113,13 +119,16 @@ function TargetWorkflow(sources) {
             hist
         ]) => div('.row .target', [
             formDOM,
-            signatureForm,
             div('.col .s10 .offset-s1', pageStyle, [
-                div('.row', []),
+                // div('.row', []),
                 div('.col .s12', [table]),
                 div('.row', []),
+            ]),
+            div('.row', ''),
+            signatureForm,
+            div('.col .s10 .offset-s1', pageStyle, [
                 div('.row', [filter]),
-                div('.row ', [div('.col .s12 .l8 .offset-l2', [
+                div('.row ', [div('.col .s12 .l6 .offset-l3', [
                     hist
                 ])]),
             ]),
@@ -130,7 +139,8 @@ function TargetWorkflow(sources) {
             logger(defaultReducer$, 'defaultReducer$'),
             logger(target$, 'target$'),
             TargetFormSink.log,
-            Table.log
+            Table.log,
+            histogram.log
         ),
         DOM: vdom$.remember(),
         onion: xs.merge(

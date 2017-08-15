@@ -4,10 +4,11 @@ import dropRepeats from 'xstream/extra/dropRepeats';
 import debounce from 'xstream/extra/debounce'
 import { h, p, div, br, label, input, code, table, tr, td, b, h2, button, svg, h1 } from '@cycle/dom';
 import { clone, equals, omit } from 'ramda';
-import { similarityPlotSpec, exampleData, emptyData } from './spec.js'
+import { similarityPlotSpecV3, exampleData, emptyData } from './spec.js'
 import { widthStream } from '../../utils/utils'
 import { stateDebug } from '../../utils/utils'
 import { loggerFactory } from '~/../../src/js/utils/logger'
+import { parse } from 'vega-parser'
 
 const elementID = '#vega'
 
@@ -123,8 +124,10 @@ function SimilarityPlot(sources) {
 	// Ingest the data in the spec and return to the driver
 	const vegaSpec$ = xs.combine(data$, width$, visible$)
 		.map(([data, newwidth, visible]) => {
-			return { spec: similarityPlotSpec(data), el: elementID, width: newwidth }
+			return { spec: similarityPlotSpecV3(data), el: elementID, width: newwidth }
 		})
+
+    const vegaRuntime$ = vegaSpec$.map(spec => ({runtime: parse(spec.spec), width: spec.width, el: elementID})).remember()
 
 	const makeChart = () => {
 		return (
@@ -186,7 +189,7 @@ function SimilarityPlot(sources) {
         ),
 		DOM: vdom$,
 		HTTP: request$,
-		vega: vegaSpec$,
+		vega: vegaRuntime$,
 		onion: xs.merge(
 			defaultReducer$,
 			inputReducer$,

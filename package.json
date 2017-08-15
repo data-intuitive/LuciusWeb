@@ -55,7 +55,7 @@
     "ramda": "^0.21.0",
     "scss-loader": "0.0.1",
     "switch-path": "^1.2.0",
-    "vega": "^2.6.5",
+    "vega": "^3.0.1",
     "xstream": "^10.9.0"
   }
 }

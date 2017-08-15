@@ -1,3 +1,197 @@
+export const vegaHistogramSpecV3 = (data, target = 'xyz') => ({
+    "$schema": "https://vega.github.io/schema/vega/v3.0.json",
+    width: 500,
+    height: 300,
+      "autosize": {"type": "fit", "resize": true},
+    //   "padding": "strict",
+  
+    "data": [
+        {
+            "name": "table",
+            "values": data,
+            "format": {
+                "type": "json",
+                "parse": { "count": "number", "zhangAvg": "number" }
+            }
+        }
+    ],
+
+    "signals": [
+        {
+            "name": "tooltip",
+            "value": {},
+            "on": [
+                { "events": "rect:mouseover", "update": "datum" },
+                { "events": "rect:mouseout", "update": "{}" }
+            ]
+        }
+    ],
+
+    "scales": [
+        {
+            "name": "xscale",
+            "type": "band",
+            "domain": { "data": "table", "field": "bin" },
+            "range": "width",
+            "padding": 0.05,
+            "round": true
+        },
+        {
+            "name": "xscale2",
+            "type": "band",
+            "range": "width",
+            "domain": [1.0, 0.75, 0.5, 0.25, 0, -0.25, -0.5, -0.75, -1.0]
+        },
+        {
+            "name": "yscale",
+            "domain": { "data": "table", "field": "count" },
+            "nice": true,
+            "range": "height"
+        },
+        {
+            "name": "yscale2",
+            "domain": { "data": "table", "field": target },
+            "range": "height"
+        },
+        {
+            "name": "color",
+            "type": "sequential",
+            "nice": true,
+            "domain": { "data": "table", "field": "zhangAvg" },
+            "range": { "scheme": "redblue" }
+        }
+    ],
+
+    "axes": [
+        {
+            "orient": "bottom",
+            "scale": "xscale2",
+            "ticks": false,
+            "labels": true,
+            "encode": {
+                "labels": {
+                    "update": {
+                        "fill": { "value": "grey" }
+                    }
+                }
+            }
+        },
+        {
+            "orient": "left", "scale": "yscale",
+            "tickCount": 5,
+            "domain": false,
+            "encode": {
+                "ticks": {
+                    "update": {
+                        "stroke": { "value": "steelblue" }
+                    }
+                },
+                "labels": {
+                    "interactive": true,
+                    "update": {
+                        "fill": { "value": "grey" },
+                        "align": { "value": "right" },
+                        "baseline": { "value": "middle" }
+                    }
+                }
+            }
+        },
+        {
+            "orient": "right", "scale": "yscale2",
+            "tickCount": 2,
+            "domain": false,
+            "encode": {
+                "ticks": {
+                    "update": {
+                        "stroke": { "value": "orange" }
+                    }
+                },
+                "domain": {
+                    "update": {
+                        "stroke": { "value": "orange" }
+                    }
+                },
+                "labels": {
+                    "interactive": true,
+                    "update": {
+                        "fill": { "value": "orange" }
+                    }
+                }
+            }
+        }
+    ],
+
+    "marks": [
+        {
+            "type": "rect",
+            "from": { "data": "table" },
+            "encode": {
+                "enter": {
+                    "x": { "scale": "xscale", "field": "bin" },
+                    "width": { "scale": "xscale", "band": 1 },
+                    "y": { "scale": "yscale", "value": 0 },
+                    "y2": { "scale": "yscale", "field": "count" },
+                    "fillOpacity": { "value": 0.9 }
+                },
+                "update": {
+                    "fill": { "scale": "color", "field": "zhangAvg" },
+                    "fillOpacity": { "value": 0.7 },
+                    "stroke": {"scale" : "color", "field" : "zhangAvg"}
+                },
+                "hover": {
+                    "fill": { "value": "white" },
+                    "fillOpacity": { "value": 0.5 },
+                    "stroke" : {"value" : "grey"},
+                }
+            }
+        },
+        {
+            "type": "rect",
+            "from": { "data": "table" },
+            "encode": {
+                "enter": {
+                    "x": { "scale": "xscale", "field": "bin", "offset": 3.95 },
+                    "width": { "scale": "xscale", "band": 1, "offset": -8.05 },
+                    "y": { "scale": "yscale2", "value": 0 },
+                    "y2": { "scale": "yscale2", "field": target },
+                    "strokeWidth": { "value": 2 },
+                    "strokeOpacity": { "value": 0.3 },
+                    "cornerRadius": { "value": 2 }
+
+                },
+                "update": {
+                    "fill": { "value": "orange" },
+                    "fillOpacity": { "value": 0.3 },
+                    "stroke": { "value": "orange" }
+                },
+                "hover": {
+                    "fill": { "value": "red" }
+                }
+            }
+        },
+        {
+            "type": "text",
+            "encode": {
+                "enter": {
+                    "align": { "value": "center" },
+                    "baseline": { "value": "bottom" },
+                    "fill": { "value": "#333" }
+                },
+                "update": {
+                    "x": { "scale": "xscale", "signal": "tooltip.category", "band": 0.5 },
+                    "y": { "scale": "yscale", "signal": "tooltip.amount", "offset": -2 },
+                    "text": { "signal": "tooltip.amount" },
+                    "fillOpacity": [
+                        { "test": "datum === tooltip", "value": 0 },
+                        { "value": 1 }
+                    ]
+                }
+            }
+        }
+    ]
+})
+
+
 
 export const vegaHistogramSpec = (data, target = 'xyz') => {
     const obj = {

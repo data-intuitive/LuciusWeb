@@ -24,7 +24,6 @@ import isolate from '@cycle/isolate'
 import { SignatureForm, formLens } from '../components/SignatureForm'
 import { Filter } from '../components/Filter'
 
-
 function TargetWorkflow(sources) {
 
     const logger = loggerFactory('target', sources.onion.state$, 'settings.debug')
@@ -120,7 +119,6 @@ function TargetWorkflow(sources) {
         ]) => div('.row .target', [
             formDOM,
             div('.col .s10 .offset-s1', pageStyle, [
-                // div('.row', []),
                 div('.col .s12', [table]),
                 div('.row', []),
             ]),

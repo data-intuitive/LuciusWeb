@@ -82,7 +82,7 @@ function Histogram(sources) {
     // state$ handling
     const modifiedState$ = state$
         .filter(state => !isEmptyState(state))
-        .compose(dropRepeats(equals))
+        .compose(dropRepeats((x,y) => equals(x.core.data, y.core.data)))
 
     const initState$ = state$
         .filter(state => isEmptyState(state))
@@ -194,12 +194,12 @@ function Histogram(sources) {
             logger(state$, 'state$'),
             logger(request$, 'request$'),
             logger(validResponse$, 'validResponse$'),
-            logger(invalidResponse$, 'invalidResponse$'),
-            logger(vegaSpec$, 'vegaSpec$'),
+            // logger(invalidResponse$, 'invalidResponse$'),
+            // logger(vegaSpec$, 'vegaSpec$'),
             logger(vegaRuntime$, 'vegaRuntime$')
         ),
         DOM: vdom$,
-        HTTP: request$,
+        HTTP: request$, //.compose(debounce(4000)),
         vega: vegaRuntime$,
         onion: xs.merge(
             defaultReducer$,

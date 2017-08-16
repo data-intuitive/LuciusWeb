@@ -1,7 +1,6 @@
 export const vegaHistogramSpecV3 = (data, target = 'xyz') => ({
     "$schema": "https://vega.github.io/schema/vega/v3.0.json",
-    width: 500,
-    height: 300,
+
       "autosize": {"type": "fit", "resize": true},
     //   "padding": "strict",
   

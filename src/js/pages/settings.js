@@ -38,8 +38,8 @@ export function Settings(sources) {
             ]
         },
         {
-            group: 'form',
-            title: 'Form Settings',
+            group: 'compoundTable',
+            title: 'Compound Table Settings',
             settings: [
                 {
                     field: 'debug',
@@ -47,10 +47,17 @@ export function Settings(sources) {
                     class: '.switch',
                     title: 'Debug component?',
                     props: { type: 'checkbox' }
-                }
+                },
+                {
+                    field: 'count',
+                    class: '.range-field',
+                    type: 'range',
+                    title: '# of entries in table',
+                    props: { type: 'range', min: 0, max: 100 }
+                },
             ]
         },
-         {
+        {
             group: 'headTable',
             title: 'Top Table Settings',
             settings: [
@@ -66,7 +73,7 @@ export function Settings(sources) {
                     class: '.range-field',
                     type: 'range',
                     title: '# of entries in table',
-                    props: { type: 'range', min: 0, max: 50 }
+                    props: { type: 'range', min: 0, max: 20 }
                 },
             ]
         },
@@ -86,7 +93,7 @@ export function Settings(sources) {
                     class: '.range-field',
                     type: 'range',
                     title: '# of entries in table',
-                    props: { type: 'range', min: 0, max: 50 }
+                    props: { type: 'range', min: 0, max: 20 }
                 },
             ]
         },
@@ -163,6 +170,20 @@ export function Settings(sources) {
                 }
             ]
         },
+        {
+            group: 'form',
+            title: 'Form Settings',
+            settings: [
+                {
+                    field: 'debug',
+                    type: 'checkbox',
+                    class: '.switch',
+                    title: 'Debug component?',
+                    props: { type: 'checkbox' }
+                }
+            ]
+        },
+
     ]
 
     const makeSetting = (config) => (sources) => {
@@ -180,7 +201,7 @@ export function Settings(sources) {
                         span('.col .l6 .s12 .truncate', [
                             span('.flow-text', [config.title]),
                             span(['  ']),
-                            span('.grey-text .text-lighten-1 .right-align', [ '(', state.toString(), ')'])
+                            span('.grey-text .text-lighten-1 .right-align', ['(', state.toString(), ')'])
                         ]),
 
                         div('.col .s6 ' + config.class,

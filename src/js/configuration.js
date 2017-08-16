@@ -1,6 +1,6 @@
 export const initSettings = 
 {
-    version: 2.996,
+    version: 2.997,
 	debug : true,
     filter: {
         debug: false
@@ -13,7 +13,7 @@ export const initSettings =
         type: 'compoundTable',
         apiClass: 'targetToCompounds',
         expandOptions: false,
-        debug: true,
+        debug: false,
 		count: 50,
 		color: 'rgb(50,50,50)',
         bgcolor: 'rgba(50,50,50,0.08)',

@@ -14,6 +14,7 @@ import Router from './components/Router/index';
 import { makeVegaDriver } from './drivers/makeVegaDriver';
 import { logDriver } from './drivers/logDriver';
 import { alertDriver } from './drivers/alertDriver';
+import { popupDriver } from './drivers/popupDriver'
 import { preventDefaultDriver } from './drivers/preventDefaultDriver';
 import switchPath from 'switch-path'
 
@@ -28,6 +29,7 @@ const drivers = {
   preventDefault: preventDefaultDriver,
   alert: alertDriver,
   storage: storageDriver,
+  popup: popupDriver
 };
 
 // let StatifiedMain = onionify(SignatureWorkflow);
@@ -43,3 +45,4 @@ run(StatifiedMain, drivers);
 // 			rerun(StateifiedMain, drivers);
 // 		});
 // 	}
+

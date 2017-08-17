@@ -70,8 +70,9 @@ function SignatureForm(sources) {
 
     // Update in query, or simply ENTER
     const newQuery$ = xs.merge(
-        // state$.map(state => state.query),
-        domSource$.select('.Query').events('input').map(ev => ev.target.value)
+        domSource$.select('.Query').events('input').map(ev => ev.target.value),
+        // Ghost 
+        state$.map(state => state.form.query).compose(dropRepeats())
     )
 
     // Updated state is propagated and picked up by the necessary components

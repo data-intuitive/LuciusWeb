@@ -79,7 +79,11 @@ function makeTable(tableComponent, tableLens) {
         const httpSource$ = sources.HTTP;
 
         // Input handling
-        const input$ = sources.input
+        const input$ = xs.merge(
+            sources.input,
+            // Ghost mode
+            state$.map(state => state.core.input).compose(dropRepeats(equals))
+        )
 
         const newInput$ = xs.combine(
             input$,

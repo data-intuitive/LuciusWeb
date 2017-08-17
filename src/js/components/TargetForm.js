@@ -18,7 +18,7 @@ function TargetForm(sources) {
 
     const state$ = sources.onion.state$
 
-    const TargetCheckSink = isolate(TargetCheck, {onion: checkLens} )(sources)
+    const TargetCheckSink = isolate(TargetCheck, {onion: checkLens, DOM: 'check'} )(sources)
     const targetQuery$ = TargetCheckSink.output.remember()
 
     // const SampleSelectionSink = isolate(SampleSelection, {onion: sampleSelectionLens})({...sources, input: TargetQuery$})

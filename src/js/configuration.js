@@ -1,13 +1,14 @@
 export const initSettings = 
 {
-    version: 2.997,
+    version: 2.998,
 	debug : true,
     filter: {
         debug: false
     },
 	common: {
 		version: "v2",
-		blur: 0
+		blur: 0,
+        ghostMode: true
 	},
 	compoundTable: {
         type: 'compoundTable',

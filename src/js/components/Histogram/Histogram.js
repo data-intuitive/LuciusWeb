@@ -48,7 +48,10 @@ function Histogram(sources) {
     // Size stream
     const width$ = widthStream(domSource$, elementID)
 
-    const input$ = sources.input
+    const input$ = xs.merge(
+        sources.input,
+        state$.map(state => state.core.input).compose(dropRepeats(equals()))
+    )
 
     const newInput$ = xs.combine(
         input$,

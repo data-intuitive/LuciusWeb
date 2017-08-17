@@ -141,7 +141,8 @@ export default function Router(sources) {
         preventDefault: xs.merge(
             prevent$,
             page$.map(prop('preventDefault')).filter(Boolean).flatten()
-        )
+        ),
+        popup: page$.map(prop('popup')).filter(Boolean).flatten()
     }
 
 }

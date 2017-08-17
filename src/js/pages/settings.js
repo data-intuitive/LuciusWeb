@@ -29,6 +29,13 @@ export function Settings(sources) {
                     props: { type: 'text' }
                 },
                 {
+                    field: 'ghostMode',
+                    type: 'checkbox',
+                    class: '.switch',
+                    title: 'Ghost Mode',
+                    props: { type: 'checkbox' }
+                },
+                {
                     field: 'blur',
                     class: '.range-field',
                     type: 'range',

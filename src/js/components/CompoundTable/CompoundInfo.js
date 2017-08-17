@@ -37,12 +37,12 @@ export function CompoundInfo(sources) {
         return div('.col .s12', [
             div('.col .s6 .l4', { style: { margin: '15px 0px 0px 0px' } }, [
                 p(pStylewBlur, entry('Name: ', sample.compoundname)),
-                p(pStylewBlur, entry('JNJS: ', sample.jnjs)),
-                p(pStylewBlur, entry('JNJB: ', sample.jnjb)),
+                p(pStyle, entry('JNJS: ', sample.jnjs)),
+                p(pStyle, entry('JNJB: ', sample.jnjb)),
                 p(pStyle, entry('Type: ', sample.Type)),
             ]),
             div('.col .s6 .l4', { style: { margin: '15px 0px 0px 0px' } }, [
-                p('.s12', pStyle, entry('InchiKey: ', sample.inchikey)),
+                p('.s12', pStylewBlur, entry('InchiKey: ', sample.inchikey)),
                 p('.s12', pStyle, entry('Targets: ', sample.targets.join(', ')))
             ]),
             div('.col .s4 .offset-s8 .l4', { style: merge(blur, { margin: '20px 0px 0px 0px' }) }, [
@@ -66,7 +66,7 @@ export function CompoundInfo(sources) {
                         div('.col .s1 .left-align', { style: { fontWeight: 'bold' } }, [sample.targets.length]),
                         div('.col .s2', { style: blur }, [(sample.jnjs != "NA") ? sample.jnjs : '']),
                         div('.col .s3', { style: blur }, [sample.compoundname]),
-                        div('.col .s3 .truncate', { style: blur }, [sample.targets.join(", ")]),
+                        div('.col .s3 .truncate', [sample.targets.join(", ")]),
                         div('.col .s3 .center-align', { style: blur }, [
                             ((sample.smiles != null && sample.smiles != 'NA' && sample.smiles != 'No Smiles') && zoom == false)
                                 ? img({ props: { src: url, height: 50, 'object-fit': 'contain' } })

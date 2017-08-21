@@ -77,7 +77,7 @@ function SimilarityPlot(sources) {
 	// state$ handling
 	const modifiedState$ = state$
 		.filter(state => ! isEmptyState(state))
-		.compose(dropRepeats(equals))	
+		.compose(dropRepeats((x,y) => equals(x.core.data, y.core.data)))	
 	
 	const initState$ = state$
 		.filter(state => isEmptyState(state))
@@ -122,12 +122,12 @@ function SimilarityPlot(sources) {
 		.map(result => result.body.result.data)
 
 	// Ingest the data in the spec and return to the driver
-	const vegaSpec$ = xs.combine(data$, width$, visible$)
-		.map(([data, newwidth, visible]) => {
+	const vegaSpec$ = xs.combine(data$, width$, visible$, input$)
+		.map(([data, newwidth, visible, input]) => {
 			return { spec: similarityPlotSpecV3(data), el: elementID, width: newwidth }
 		})
 
-    const vegaRuntime$ = vegaSpec$.map(spec => ({runtime: parse(spec.spec), width: spec.width, el: elementID})).remember()
+    const vegaRuntime$ = vegaSpec$.map(spec => ({runtime: parse(spec.spec), width: spec.width, el: spec.el})).remember()
 
 	const makeChart = () => {
 		return (
@@ -135,7 +135,7 @@ function SimilarityPlot(sources) {
 		)
 	}
 
-	const initVdom$ = initState$.mapTo(div())//.debug()
+	const initVdom$ = initState$.mapTo(div(elementID))
 
 	const loadingVdom$ = request$
 	.mapTo(

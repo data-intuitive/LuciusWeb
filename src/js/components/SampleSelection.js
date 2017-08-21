@@ -17,10 +17,10 @@ const emptyData = {
     }
 }
 
-const sampleSelectionLens = { 
-    get: state => ({core: (typeof state.form !== 'undefined') ? state.form.sampleSelection : {}, settings: state.settings}),
+const sampleSelectionLens = {
+    get: state => ({ core: (typeof state.form !== 'undefined') ? state.form.sampleSelection : {}, settings: state.settings }),
     // get: state => ({core: state.form.sampleSelection, settings: state.settings}),
-    set: (state, childState) => ({...state, form: {...state.form, sampleSelection: childState.core}})
+    set: (state, childState) => ({ ...state, form: { ...state.form, sampleSelection: childState.core } })
 };
 
 /**
@@ -37,44 +37,44 @@ function SampleSelection(sources) {
 
     const input$ = sources.input
 
-	// When the component should not be shown, including empty signature
-	const isEmptyState = (state) => {
-		if (typeof state.core === 'undefined') {
-			return true 
-		} else {
-			if (typeof state.core.input === 'undefined') {
-				return true 
-			} else {
+    // When the component should not be shown, including empty signature
+    const isEmptyState = (state) => {
+        if (typeof state.core === 'undefined') {
+            return true
+        } else {
+            if (typeof state.core.input === 'undefined') {
+                return true
+            } else {
                 if (state.core.input == '') {
                     return true
                 } else {
                     return false
                 }
-			}
-		}
-	}
+            }
+        }
+    }
 
     const emptyState$ = state$
         // .filter(state => state.core.input == null || state.core.input == '')
-          .filter(state => isEmptyState(state))
-         .compose(dropRepeats((x, y) => equals(x, y)))
+        .filter(state => isEmptyState(state))
+        .compose(dropRepeats((x, y) => equals(x, y)))
 
     // When the state is cycled because of an internal update
-    const modifiedState$ = 	state$
+    const modifiedState$ = state$
         // .filter(state => state.core.input != '')
-         .filter(state => ! isEmptyState(state))
-        .compose(dropRepeats((x,y) => equals(x,y)))
+        .filter(state => !isEmptyState(state))
+        .compose(dropRepeats((x, y) => equals(x, y)))
 
     const newInput$ = xs.combine(
-            input$, 
-            state$
-        )
-        .map(([newinput, state]) => ({...state, core: {...state.core, input: newinput}}))
-        .compose(dropRepeats((x,y) => equals(x.core.input, y.core.input)))
+        input$,
+        state$
+    )
+        .map(([newinput, state]) => ({ ...state, core: { ...state.core, input: newinput } }))
+        .compose(dropRepeats((x, y) => equals(x.core.input, y.core.input)))
 
     // When a new query is required
     const updatedState$ = state$
-		.compose(dropRepeats((x, y) => equals(x.core, y.core)))
+        .compose(dropRepeats((x, y) => equals(x.core, y.core)))
 
     const request$ = newInput$
         .map(state => {
@@ -162,33 +162,45 @@ function SampleSelection(sources) {
 
     const dataReducer$ = data$.map(data => prevState => {
         const newData = data.map(el => merge(el, { use: true }))
-        return {...prevState, core: {...prevState.core, 
-            data: newData,
-            output: newData.filter(x => x.use).map(x => x.id) }}
+        return {
+            ...prevState, core: {
+                ...prevState.core,
+                data: newData,
+                output: newData.filter(x => x.use).map(x => x.id)
+            }
+        }
     })
 
     const selectReducer$ = useClick$.map(id => prevState => {
         const newData = prevState.core.data.map(el => {
-                    // One sample object
-                    var newEl = clone(el)
-                    const switchUse = (id === el.id)
-                    newEl.use = (switchUse) ? !el.use : el.use
-                    return newEl
-                })
-        return ({...prevState, 
-            core: {...prevState.core,
+            // One sample object
+            var newEl = clone(el)
+            const switchUse = (id === el.id)
+            newEl.use = (switchUse) ? !el.use : el.use
+            return newEl
+        })
+        return ({
+            ...prevState,
+            core: {
+                ...prevState.core,
                 data: newData,
-                output: newData.filter(x => x.use).map(x => x.id) 
-        }})
+                output: newData.filter(x => x.use).map(x => x.id)
+            }
+        })
     })
 
-   const defaultReducer$ = xs.of(prevState => ({...prevState, core: {input: '', data: []}}))
-   const inputReducer$ = input$.map(i => prevState => ({...prevState, core: {...prevState.core, input: i}}))
-   const requestReducer$ = request$.map(req => prevState => ({...prevState, core: {...prevState.core, request: req}}))
+    const defaultReducer$ = xs.of(prevState => ({ ...prevState, core: { input: '', data: [] } }))
+    const inputReducer$ = input$.map(i => prevState => ({ ...prevState, core: { ...prevState.core, input: i } }))
+    const requestReducer$ = request$.map(req => prevState => ({ ...prevState, core: { ...prevState.core, request: req } }))
 
-   const sampleSelection$ = sources.DOM.select('.doSelect').events('click')
-        .compose(sampleCombine(state$))
-        .map(([ev, state]) => state.core.output)
+    const sampleSelection$ =
+        xs.merge(
+            sources.DOM.select('.doSelect').events('click'),
+            // Ghost mode
+            sources.onion.state$.map(state => state.core.ghost).filter(ghost => ghost).compose(dropRepeats())
+        )
+            .compose(sampleCombine(state$))
+            .map(([ev, state]) => state.core.output)
 
     return {
         log: xs.merge(

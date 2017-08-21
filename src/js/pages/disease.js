@@ -15,12 +15,30 @@ import { Filter } from '../components/Filter'
 import { loggerFactory } from '~/../../src/js/utils/logger'
 import { SampleTable, sampleTableLens } from '../components/SampleTable/SampleTable'
 
+// Support for ghost mode
+import { scenario } from './diseaseScenario'
+import { runScenario } from '../utils/scenario'
 
 function DiseaseWorkflow(sources) {
 
     const logger = loggerFactory('signature', sources.onion.state$, 'settings.debug')
 
     const state$ = sources.onion.state$
+
+    // Scenario for ghost mode
+    const scenarioReducer$ =
+        sources.onion.state$.take(1)
+            .filter(state => state.settings.common.ghostMode)
+            .mapTo(runScenario(scenario).scenarioReducer$)
+            .flatten()
+            .startWith(prevState => prevState)
+    const scenarioPopup$ =
+        sources.onion.state$.take(1)
+            .filter(state => state.settings.common.ghostMode)
+            .mapTo(runScenario(scenario).scenarioPopup$)
+            .flatten()
+            .startWith({text: 'Welcome to Disease Workflow', duration: 4000})
+
 
 	/** 
 	 * Parse feedback from vega components. Not used yet...
@@ -135,7 +153,8 @@ function DiseaseWorkflow(sources) {
             histogram.onion,
             similarityPlot.onion,
             headTable.onion,
-            tailTable.onion
+            tailTable.onion,
+            scenarioReducer$
         ),
         vega: xs.merge(
             histogram.vega,
@@ -148,6 +167,7 @@ function DiseaseWorkflow(sources) {
             headTable.HTTP,
             tailTable.HTTP
         ),
+        popup: scenarioPopup$
     };
 }
 

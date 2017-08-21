@@ -142,11 +142,14 @@ function SignatureForm(sources) {
 
     // When GO clicked or enter -> send updated 'value' to sink
     // Maybe catch when no valid query?
-    const query$ = update$
+    const query$ = xs.merge(
+        update$,
+        // Ghost mode
+        sources.onion.state$.map(state => state.form.ghost).filter(ghost => ghost).compose(dropRepeats())
+    )
         .compose(sampleCombine(state$))
         .map(([update, state]) => state.form.query)
         .remember()
-    // .startWith(null).debug(log)
 
     return {
         log: xs.merge(

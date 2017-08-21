@@ -14,11 +14,29 @@ import concat from 'xstream/extra/dropRepeats'
 import { loggerFactory } from '~/../../src/js/utils/logger'
 import { SampleTable, sampleTableLens } from '../components/SampleTable/SampleTable'
 
+// Support for ghost mode
+import { scenario } from './compoundScenario'
+import { runScenario } from '../utils/scenario'
+
 export default function CompoundWorkflow(sources) {
 
     const logger = loggerFactory('compound', sources.onion.state$, 'settings.form.debug')
 
     const state$ = sources.onion.state$
+
+    // Scenario for ghost mode
+    const scenarioReducer$ =
+        sources.onion.state$.take(1)
+            .filter(state => state.settings.common.ghostMode)
+            .mapTo(runScenario(scenario).scenarioReducer$)
+            .flatten()
+            .startWith(prevState => prevState)
+    const scenarioPopup$ =
+        sources.onion.state$.take(1)
+            .filter(state => state.settings.common.ghostMode)
+            .mapTo(runScenario(scenario).scenarioPopup$)
+            .flatten()
+            .startWith({text: 'Welcome to Compound Workflow', duration: 4000})
 
     const formLens = {
         get: state => ({ form: state.form, settings: { form: state.settings.form, api: state.settings.api } }),
@@ -94,7 +112,6 @@ export default function CompoundWorkflow(sources) {
         histogram.DOM,
         headTable.DOM,
         tailTable.DOM,
-        // state$
     )
         .map(([
             formDOM,
@@ -136,7 +153,8 @@ export default function CompoundWorkflow(sources) {
             histogram.onion,
             filterForm.onion,
             headTable.onion,
-            tailTable.onion
+            tailTable.onion,
+            scenarioReducer$
         ),
         HTTP: xs.merge(
             CompoundFormSink.HTTP,
@@ -149,5 +167,6 @@ export default function CompoundWorkflow(sources) {
             histogram.vega,
             similarityPlot.vega
         ),
+        popup: scenarioPopup$
     };
 }

@@ -48,10 +48,7 @@ function Histogram(sources) {
     // Size stream
     const width$ = widthStream(domSource$, elementID)
 
-    const input$ = xs.merge(
-        sources.input,
-        state$.map(state => state.core.input).compose(dropRepeats(equals()))
-    )
+    const input$ = sources.input
 
     const newInput$ = xs.combine(
         input$,
@@ -175,8 +172,7 @@ function Histogram(sources) {
         errorVdom$,
         loadingVdom$,
         loadedVdom$,
-        // vegadom$
-    )//.startWith(div(elementID))
+    )
 
     const defaultReducer$ = xs.of(prevState => ({ ...prevState, core: { ...prevState.core, input: { signature: '' } } }))
 

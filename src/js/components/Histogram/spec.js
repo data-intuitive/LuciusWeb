@@ -1,4 +1,4 @@
-export const vegaHistogramSpecV3 = (data, target = 'xyz') => ({
+export const vegaSpec = (data, target = 'xyz') => ({
     "$schema": "https://vega.github.io/schema/vega/v3.0.json",
 
       "autosize": {"type": "fit", "resize": true},

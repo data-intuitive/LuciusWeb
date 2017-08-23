@@ -99,7 +99,7 @@ function TargetWorkflow(sources) {
             .filter(state => state.settings.common.ghostMode)
             .mapTo(runScenario(scenario).scenarioPopup$)
             .flatten()
-            .startWith({text: 'Welcome to Target Workflow', duration: 4000})
+            .startWith({ text: 'Welcome to Target Workflow', duration: 4000 })
 
     const TargetFormSink = isolate(TargetForm, { onion: formLens, DOM: 'form' })(sources)
     const target$ = TargetFormSink.output
@@ -120,8 +120,8 @@ function TargetWorkflow(sources) {
     const signatureMessage$ = xs.of('Optional Signature:')
     const signatureFormVdom$ = xs.combine(signatureForm.DOM, signatureMessage$, target$).map(([s, m, t]) =>
         div([
-            p('.col .s12', { style: { opacity: 0.5, margin: "0px 0px 0px 0px", padding: 0 } }, [m]),
-            div('.col .s12', { style: { opacity: 0.5, margin: "0px 0px 0px 0px", padding: 0 } }, [s])
+            p('.col .s12', { style: { margin: "0px 0px 0px 0px", padding: 0 } }, [m]),
+            div('.col .s12', { style: { margin: "0px 0px 0px 0px", padding: 0 } }, [s])
         ]),
     ).startWith(div())
     const signature$ = signatureForm.output
@@ -160,21 +160,20 @@ function TargetWorkflow(sources) {
             hist
         ]) => div('.row .target', [
             formDOM,
-            div('.col .s10 .offset-s1', pageStyle, [
-                div('.col .s12', [table]),
-                div('.row', []),
-            ]),
+            div('.col .s8 .offset-s2', [signatureForm]),
             div('.row', ''),
-            signatureForm,
             div('.col .s10 .offset-s1', pageStyle, [
                 div('.row', [filter]),
                 div('.row ', [div('.col .s12 .l6 .offset-l3', [
                     hist
                 ])]),
             ]),
-            div('.modal .bottom-sheet', [
-                div('.modal-content', [p('this is a test')])
-            ])
+            div('.row', ''),
+            div('.col .s10 .offset-s1', pageStyle, [
+                div('.col .s12', [table]),
+                div('.row', []),
+            ]),
+            div('.row', '')
         ]))
 
     return {

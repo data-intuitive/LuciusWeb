@@ -1,5 +1,5 @@
 
-export const similarityPlotSpecV3 = (data) => ({
+export const vegaSpec = (data) => ({
     "$schema": "https://vega.github.io/schema/vega/v3.0.json",
       "autosize": {"type": "fit", "resize": true},
  

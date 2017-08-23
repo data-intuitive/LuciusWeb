@@ -1,6 +1,6 @@
 export const initSettings = 
 {
-    version: 2.999,
+    version: 3.0,
     filter: {
         debug: false
     },
@@ -8,14 +8,14 @@ export const initSettings =
 		version: "v2",
         debug: false,
 		blur: 0,
-        ghostMode: true
+        ghostMode: false
 	},
 	compoundTable: {
         type: 'compoundTable',
         apiClass: 'targetToCompounds',
         expandOptions: false,
         debug: false,
-		count: 50,
+		count: 10,
 		color: 'rgb(50,50,50)',
         bgcolor: 'rgba(50,50,50,0.08)',
 		title: 'Compound Table',
@@ -48,7 +48,7 @@ export const initSettings =
 		dummy: 1
 	},
 	hist: {
-        debug: true,
+        debug: false,
 		bins: 20
 	},
 	sim: {
@@ -64,7 +64,7 @@ export const initSettings =
 		port: 8080,
 		context: 'luciusapi',
 		appName: 'luciusapi',
-		url: 'http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&appName=luciusapi&sync=true',
+		url: 'http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&sync=true&timeout=30',
 	},
 	sourire: {
 		hostname: 'localhost',

@@ -1,6 +1,11 @@
+import dropRepeats from 'xstream/extra/dropRepeats'
+import { clone, equals } from 'ramda';
+
 function logDriver(stream$) {
-  stream$.addListener({
-    next: message => message.map(m => console.log(m)),
+  stream$.compose(dropRepeats(equals)).addListener({
+    next: message => {
+        message.map(m => console.log(m))
+    },
     error: e => console.error(e),
     complete: () => {}
   })

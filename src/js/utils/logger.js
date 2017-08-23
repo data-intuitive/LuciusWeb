@@ -1,5 +1,6 @@
 import { merge, prop, equals, path } from 'ramda'
 import xs from 'xstream'
+import dropRepeats from 'xstream/extra/dropRepeats'
 
 /**
  * 
@@ -7,19 +8,25 @@ import xs from 'xstream'
  * @param {*} thisState$: Pass sources.onion.state$ in order to pick up the debug settings
  * @param {*} location: Path to the debug key in settings, using dots as delimiter
  */
-const loggerFactory = (elementID, thisState$, location = 'settings.debug') => (stream$, streamID, prefix='== ', infix=' > ', suffix=' ==') => {
-    const parseDebug = (debug) => (typeof debug === 'undefined') 
-                                    ? false
-                                    : debug
-    const debug$$ = thisState$.map(state => 
-                (parseDebug(path(location.split('.'), state)))
-                    ? stream$.map(ev => [
-                        prefix + elementID + infix + streamID + suffix, 
-                        ev
-                        ])
-                    : xs.never()
-            )
-    return debug$$.flatten().remember()
+const loggerFactory = (elementID, thisState$, location = 'settings.debug') => (stream$, streamID, prefix = '== ', infix = ' > ', suffix = ' ==') => {
+    const parseDebug = (debug) => (typeof debug === 'undefined')
+        ? false
+        : debug
+
+    const logStream$ =
+        xs.merge( // mimic thisState.first() because of lack of alternative...
+            thisState$.endWhen(thisState$.drop(1)),
+            xs.never()
+        )
+            .filter(state => parseDebug(path(location.split('.'), state)))
+            .compose(dropRepeats(equals))
+            .mapTo(stream$.map(ev => [
+                prefix + elementID + infix + streamID + suffix,
+                ev
+            ]))
+            .flatten()
+
+    return logStream$
 }
 
 export { loggerFactory }

@@ -22,7 +22,7 @@ import { loggerFactory } from '../../utils/logger'
 export default function Router(sources) {
     const { router } = sources;
 
-    const logger = loggerFactory('index', sources.onion.state$, 'settings.debug')
+    const logger = loggerFactory('index', sources.onion.state$, 'settings.common.debug')
 
     const state$ = sources.onion.state$
 
@@ -122,11 +122,10 @@ export default function Router(sources) {
 
     return {
         log: xs.merge(
-            logger(page$, 'page$', '>> ', ' > ', ''),
+            // logger(page$, 'page$', '>> ', ' > ', ''),
             logger(state$, 'state$'),
             logger(history$, 'history$'),
-            logger(defaultReducer$, 'defaultReducer$', '-- ', ' -- ', ''),
-            logger(prevent$, 'prevent$'),
+            // logger(prevent$, 'prevent$'),
             page$.map(prop('log')).filter(Boolean).flatten()
         ),
         onion: xs.merge(

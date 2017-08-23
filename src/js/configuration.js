@@ -1,12 +1,12 @@
 export const initSettings = 
 {
-    version: 2.998,
-	debug : true,
+    version: 2.999,
     filter: {
         debug: false
     },
 	common: {
 		version: "v2",
+        debug: false,
 		blur: 0,
         ghostMode: true
 	},

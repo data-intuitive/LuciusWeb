@@ -36,6 +36,13 @@ export function Settings(sources) {
                     props: { type: 'checkbox' }
                 },
                 {
+                    field: 'debug',
+                    type: 'checkbox',
+                    class: '.switch',
+                    title: 'Debug App?',
+                    props: { type: 'checkbox' }
+                },
+                {
                     field: 'blur',
                     class: '.range-field',
                     type: 'range',
@@ -194,11 +201,11 @@ export function Settings(sources) {
     ]
 
     const makeSetting = (config) => (sources) => {
-        const state$ = sources.onion.state$.debug()
+        const state$ = sources.onion.state$
 
         const update$ = (config.type == 'checkbox')
-            ? sources.DOM.select('input').events('click').map(event => event).debug()
-            : sources.DOM.events('input').map(event => event.target.value).debug()
+            ? sources.DOM.select('input').events('click').map(event => event)
+            : sources.DOM.events('input').map(event => event.target.value)
 
         const vdom$ =
             state$.map(state =>

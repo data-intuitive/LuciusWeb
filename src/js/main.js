@@ -1,12 +1,12 @@
 import 'materialize-css/bin/materialize.css';
 import 'materialize-css/bin/materialize.js';
 
-import {run} from '@cycle/run';
-import {makeDOMDriver} from '@cycle/dom';
-import {makeHTTPDriver} from '@cycle/http';
-import {makeHistoryDriver, makeServerHistoryDriver, makeHashHistoryDriver, captureClicks} from '@cycle/history'
+import { run } from '@cycle/run';
+import { makeDOMDriver } from '@cycle/dom';
+import { makeHTTPDriver } from '@cycle/http';
+import { makeHistoryDriver, makeServerHistoryDriver, makeHashHistoryDriver, captureClicks } from '@cycle/history'
 import storageDriver from '@cycle/storage';
-import {makeRouterDriver} from 'cyclic-router';
+import { makeRouterDriver } from 'cyclic-router';
 import onionify from 'cycle-onionify';
 import storageify from "cycle-storageify";
 
@@ -21,21 +21,21 @@ import switchPath from 'switch-path'
 import './main.scss'
 
 const drivers = {
-  DOM: makeDOMDriver('#root'),
-  log: logDriver,
-  vega: makeVegaDriver(),
-  HTTP: makeHTTPDriver(),
-  router: makeRouterDriver(captureClicks(makeServerHistoryDriver()), switchPath),
-  preventDefault: preventDefaultDriver,
-  alert: alertDriver,
-  storage: storageDriver,
-  popup: popupDriver
+    DOM: makeDOMDriver('#root'),
+    vega: makeVegaDriver(),
+    HTTP: makeHTTPDriver(),
+    router: makeRouterDriver(captureClicks(makeServerHistoryDriver()), switchPath),
+    preventDefault: preventDefaultDriver,
+    alert: alertDriver,
+    storage: storageDriver,
+    popup: popupDriver,
+    log: logDriver
 };
 
 // let StatifiedMain = onionify(SignatureWorkflow);
 // run(StatifiedMain, drivers);
 
-let StatifiedMain = onionify(storageify(Router, {key: 'ComPass'}));
+let StatifiedMain = onionify(storageify(Router, { key: 'ComPass' }));
 // let StatifiedMain = onionify(Router);
 run(StatifiedMain, drivers);
 

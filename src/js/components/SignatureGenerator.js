@@ -121,8 +121,6 @@ function SignatureGenerator(sources) {
     return {
         log: xs.merge(
             logger(state$, 'state$'),
-            logger(request$, 'request$'),
-            logger(response$, 'response$')
         ),
         DOM: vdom$,
         output: signature$,

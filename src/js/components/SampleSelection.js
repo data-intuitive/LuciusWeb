@@ -88,7 +88,7 @@ function SampleSelection(sources) {
                 'category': 'samples'
             }
         })
-        .remember()
+        // .remember()
 
     const response$ = sources.HTTP
         .select('samples')
@@ -96,11 +96,12 @@ function SampleSelection(sources) {
             response$.replaceError(() => xs.of(emptyData))
         )
         .flatten()
-        .remember()
+        // .remember()
 
     const data$ = response$
         .map(res => res.body)
         .map(json => json.result.data)
+        .remember()
 
     const useClick$ = sources.DOM
         .select('.selection')
@@ -205,8 +206,6 @@ function SampleSelection(sources) {
     return {
         log: xs.merge(
             logger(state$, 'state$'),
-            logger(request$, 'request$'),
-            logger(response$, 'response$')
         ),
         DOM: vdom$,
         HTTP: request$,//.compose(debounce(2000)),

@@ -21,35 +21,16 @@ function TargetForm(sources) {
     const TargetCheckSink = isolate(TargetCheck, {onion: checkLens, DOM: 'check'} )(sources)
     const targetQuery$ = TargetCheckSink.output.remember()
 
-    // const SampleSelectionSink = isolate(SampleSelection, {onion: sampleSelectionLens})({...sources, input: TargetQuery$})
-    // const sampleSelection$ = SampleSelectionSink.output.remember()
-
-    // const SignatureGeneratorSink = isolate(SignatureGenerator, {onion: signatureLens})({...sources, input: sampleSelection$ })
-    // const signature$ = SignatureGeneratorSink.output.remember()
-
     const vdom$ = xs.combine(
-        TargetCheckSink.DOM, //.startWith(p('test')),
+        TargetCheckSink.DOM, 
         targetQuery$.startWith('')
-        // SampleSelectionSink.DOM,
-        // SignatureGeneratorSink.DOM,
         )
         .map(([
             formDom, 
             targetQuery
-            // selectionDOM, 
-            // signatureDOM,
         ]) =>
             div([
                 formDom,
-                // selectionDOM,
-                div('.col .s10 .offset-s1', [
-                    div('.row', [
-                        div('.col .s12', [
-                            // targetQuery
-                            // signatureDOM
-                        ])
-                    ])
-                ])
             ]))
 
     const defaultReducer$ = xs.of(prevState => {
@@ -59,23 +40,15 @@ function TargetForm(sources) {
 
     return {
         log: xs.merge(
-            // logger(state$, 'state$'),
-            // logger(targetQuery$, 'targetQuery$'),
-            TargetCheckSink.log,
-            // SampleSelectionSink.log,
-            // SignatureGeneratorSink.log
+           TargetCheckSink.log,
         ),
         DOM: vdom$,
         onion: xs.merge(
             defaultReducer$,
             TargetCheckSink.onion,
-            // SampleSelectionSink.onion,
-            // SignatureGeneratorSink.onion
         ),
         HTTP: xs.merge(
             TargetCheckSink.HTTP,
-            // SampleSelectionSink.HTTP,
-            // SignatureGeneratorSink.HTTP
         ),
         output: targetQuery$
     }

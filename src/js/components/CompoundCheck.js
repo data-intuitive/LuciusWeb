@@ -92,7 +92,7 @@ function CompoundCheck(sources) {
                 'category': 'compounds'
             }
         })
-        .remember()
+        // .remember()
 
     const response$ = sources.HTTP
         .select('compounds')
@@ -100,10 +100,11 @@ function CompoundCheck(sources) {
             response$.replaceError(() => xs.of([]))
         )
         .flatten()
-        .remember()
+        // .remember()
 
     const data$ = response$
         .map(res => res.body.result.data)
+        .remember()
 
     const suggestionStyle = {
         style: {
@@ -222,8 +223,6 @@ function CompoundCheck(sources) {
     return {
         log: xs.merge(
             logger(state$, 'state$'),
-            logger(request$, 'request$'),
-            logger(response$, 'response$')
         ),
         DOM: vdom$,
         onion: xs.merge(

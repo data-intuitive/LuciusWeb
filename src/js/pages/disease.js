@@ -135,7 +135,8 @@ function DiseaseWorkflow(sources) {
                         div('.row', []),
                         div('.col .s12', [headTable]),
                         div('.row', []),
-                        div('.col .s12', [tailTable])
+                        div('.col .s12', [tailTable]),
+                        div('.row', [])
                     ])
             ])
         );

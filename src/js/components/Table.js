@@ -367,7 +367,7 @@ function makeTable(tableComponent, tableLens, scope = 'scope1') {
 
         return {
             DOM: vdom$,
-            HTTP: request$.compose(delay(4000)),
+            HTTP: request$,
             onion: xs.merge(
                 defaultReducer$,
                 inputReducer$,
@@ -389,4 +389,5 @@ function makeTable(tableComponent, tableLens, scope = 'scope1') {
     }
 
 }
+
 export { makeTable, headTableLens, tailTableLens, compoundContainerTableLens }

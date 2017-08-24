@@ -11,6 +11,8 @@ import dropRepeats from 'xstream/extra/dropRepeats'
 import dropUntil from 'xstream/extra/dropUntil'
 import { stateDebug } from '../utils/utils'
 import { loggerFactory } from '~/../../src/js/utils/logger'
+import { convertToCSV } from '../utils/export'
+
 
 // Granular access to the settings
 // We _copy_ the results array to the root of this element's scope.
@@ -118,7 +120,6 @@ function makeTable(tableComponent, tableLens) {
 
         const modifiedState$ = state$
             .filter(state => !isEmptyState(state))
-        // .compose(dropRepeats(equals))
 
         const emptyState$ = state$
             .filter(state => isEmptyState(state))
@@ -246,19 +247,12 @@ function makeTable(tableComponent, tableLens) {
             ]),
         )
 
-        function convertToCSV(objArray) {
-            const header = keys(objArray[0])
-            const data = objArray.map(obj => values(obj))
-
-            const arrArray = [header].concat(data)
-
-            const csv = arrArray.map(arr => arr.map(el => el.toString()).join('\t')).join('\n')
-
-            return csv;
-        }
-
-        const csvData$ = data$.map(data => convertToCSV(data)).map(csv => "text/csv;charset=utf-8," + encodeURIComponent(csv))
-        const jsonData$ = data$.map(json => "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(json)))
+        // Convert to TSV and JSON
+        const csvData$ = data$
+            .map(data => convertToCSV(data))
+            .map(csv => "text/tsv;charset=utf-8," + encodeURIComponent(csv))
+        const jsonData$ = data$
+            .map(json => "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(json)))
 
         const loadedVdom$ = xs.combine(sampleTable.DOM, csvData$, jsonData$, filterText$, modifiedState$)
             .map(([
@@ -286,8 +280,8 @@ function makeTable(tableComponent, tableLens) {
                     (state.settings.table.expandOptions)
                         ? div([
                             button('.btn-flat .waves-effect .waves-light', smallBtnStyle(state.settings.table.color), [
-                                a('', { style: { 'color': 'white' }, props: { href: 'data:' + csvData, download: 'table.csv' } }, [
-                                    span({ style: { 'vertical-align': 'top', fontSize: '8px' } }, 'csv'),
+                                a('', { style: { 'color': 'white' }, props: { href: 'data:' + csvData, download: 'table.tsv' } }, [
+                                    span({ style: { 'vertical-align': 'top', fontSize: '8px' } }, 'tsv'),
                                     i('.material-icons', 'file_download'),
                                 ])
                             ]),

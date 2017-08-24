@@ -1,22 +1,24 @@
 import xs from 'xstream';
+import dropRepeats from 'xstream/extra/dropRepeats'
+
 import { div, nav, a, h3, p, ul, li, h1, h2, i, footer, header, main, svg, g, path } from '@cycle/dom';
 import { merge, prop, equals } from 'ramda';
-import BMI from '../../examples/bmi';
-import Hello from '../../examples/hello-world';
-import { HttpRequest } from "../../examples/http-request"
+
+// Workflows
 import DiseaseWorkflow from '../../pages/disease'
 import CompoundWorkflow from '../../pages/compound'
-import StatisticsWorkflow from '../../pages/statistics'
 import TargetWorkflow from '../../pages/target'
+
+// Pages
+import StatisticsWorkflow from '../../pages/statistics'
 import Debug from '../../pages/debug'
 import Home from '../../pages/home'
-import { Check } from '../Check'
 import { IsolatedSettings } from '../../pages/settings'
-import flattenSequentially from 'xstream/extra/flattenSequentially'
+
+// Utilities
+import { Check } from '../Check'
 import { pick, mix } from 'cycle-onionify';
 import { initSettings } from '../../configuration.js'
-import debounce from 'xstream/extra/debounce'
-import dropRepeats from 'xstream/extra/dropRepeats'
 import { loggerFactory } from '../../utils/logger'
 
 export default function Router(sources) {
@@ -35,9 +37,6 @@ export default function Router(sources) {
         '/settings': IsolatedSettings,
         '/debug': Debug,
         '*': Home
-        // '/bmi': BMI,
-        // '/hello': Hello,
-        // '/http': HttpRequest,
     })
         .remember();
 
@@ -61,9 +60,6 @@ export default function Router(sources) {
         div('.nav-wrapper', [
             a('.brand-logo .right .grey-text', { props: { href: "/" } }, "ComPass"),
             ul('.left .hide-on-med-and-down', [
-                // makeLink('/bmi', 'BMI'),
-                // makeLink('/hello', 'Hello'),
-                // makeLink('/http', 'Http'),
                 makeLink('/compound', 'Compound', '.orange-text'),
                 makeLink('/target', 'Target', '.red-text'),
                 makeLink('/disease', 'Disease', '.pink-text'),

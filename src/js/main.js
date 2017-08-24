@@ -24,7 +24,7 @@ const drivers = {
     DOM: makeDOMDriver('#root'),
     vega: makeVegaDriver(),
     HTTP: makeHTTPDriver(),
-    router: makeRouterDriver(captureClicks(makeServerHistoryDriver()), switchPath),
+    router: makeRouterDriver(captureClicks(makeHistoryDriver()), switchPath),
     preventDefault: preventDefaultDriver,
     alert: alertDriver,
     storage: storageDriver,

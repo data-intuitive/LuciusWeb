@@ -39,16 +39,23 @@ export default function Router(sources) {
         // '/hello': Hello,
         // '/http': HttpRequest,
     })
-    .remember();
+        .remember();
 
     const page$ = match$.map(({ path, value }) => {
         return value(Object.assign({}, sources, {
             router: sources.router.path(path)
         }))
     })
-    .remember()
+        .remember()
 
     const makeLink = (path, label, options) => li([a(options, { props: { href: path } }, label)]);
+
+    // TODO: Add a visual reference for ghost mode
+    // const ghost$ = state$
+    //     .filter(state => state.common.ghost)
+    //     .compose(dropRepeats(equals))
+    //     .mapTo(i('.small .material-icons', 'flight_takeoff'))
+    //     .startWith(span())
 
     const nav$ = xs.of(header([nav('#navigation .grey .darken-4', [
         div('.nav-wrapper', [
@@ -77,7 +84,7 @@ export default function Router(sources) {
             div('.footer-copyright .row', { style: { margin: '0px' } }, [
                 div('.col .s12 .right-align', ['© 2017 By Data intuitive']),
             ])
-       ])
+        ])
     )
 
     const view$ = page$.map(prop('DOM')).flatten().remember()
@@ -105,8 +112,8 @@ export default function Router(sources) {
             // Pre-existing state information.
             // If default settings are newer, use those.
             return (prevState.settings.version == initSettings.version)
-                    ? ({ settings: prevState.settings })
-                    : ({ settings: initSettings })
+                ? ({ settings: prevState.settings })
+                : ({ settings: initSettings })
         }
     })
 

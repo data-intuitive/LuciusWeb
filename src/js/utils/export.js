@@ -1,10 +1,10 @@
-import { keys, values, filter, head, equals, map, prop, clone, omit, merge } from 'ramda'
+import { keys, values } from 'ramda'
 
 const convertToSafeString = (s) => {
     const quotesRequired = (s.indexOf(';') > -1) || (s.indexOf(',') > -1)
-    return (!quotesRequired) 
-    ? s 
-    : '"' + s + '"'
+    return (!quotesRequired)
+        ? s
+        : '"' + s + '"'
 }
 
 function convertToCSV(objArray) {
@@ -13,7 +13,13 @@ function convertToCSV(objArray) {
 
     const arrArray = [header].concat(data)
 
-    const csv = arrArray.map(arr => arr.map(el => convertToSafeString(el.toString())).join('\t')).join('\n')
+    const csv = arrArray
+        .map(arr =>
+            arr
+                .map(el => convertToSafeString(el.toString()))
+                .join('\t')
+        )
+        .join('\n')
 
     return csv;
 }

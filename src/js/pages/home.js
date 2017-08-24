@@ -1,9 +1,6 @@
 import xs from 'xstream';
 import { div, nav, a, h3, p, ul, li, h1, h2, i, footer, header, main, svg, g, path } from '@cycle/dom';
 import { merge, prop, equals } from 'ramda';
-import BMI from '../examples/bmi';
-import Hello from '../examples/hello-world';
-import { HttpRequest } from "../examples/http-request"
 
 import { Check } from '../components/Check'
 import { IsolatedSettings } from './settings'

@@ -5,23 +5,23 @@ import { div, nav, a, h3, p, ul, li, h1, h2, i, footer, header, main, svg, g, pa
 import { merge, prop, equals } from 'ramda';
 
 // Workflows
-import DiseaseWorkflow from '../../pages/disease'
-import CompoundWorkflow from '../../pages/compound'
-import TargetWorkflow from '../../pages/target'
+import DiseaseWorkflow from './pages/disease'
+import CompoundWorkflow from './pages/compound'
+import TargetWorkflow from './pages/target'
 
 // Pages
-import StatisticsWorkflow from '../../pages/statistics'
-import Debug from '../../pages/debug'
-import Home from '../../pages/home'
-import { IsolatedSettings } from '../../pages/settings'
+import StatisticsWorkflow from './pages/statistics'
+import Debug from './pages/debug'
+import Home from './pages/home'
+import { IsolatedSettings } from './pages/settings'
 
 // Utilities
-import { Check } from '../Check'
+import { Check } from './components/Check'
 import { pick, mix } from 'cycle-onionify';
-import { initSettings } from '../../configuration.js'
-import { loggerFactory } from '../../utils/logger'
+import { initSettings } from './configuration.js'
+import { loggerFactory } from './utils/logger'
 
-export default function Router(sources) {
+export default function Index(sources) {
     const { router } = sources;
 
     const logger = loggerFactory('index', sources.onion.state$, 'settings.common.debug')

@@ -10,7 +10,7 @@ import { makeRouterDriver } from 'cyclic-router';
 import onionify from 'cycle-onionify';
 import storageify from "cycle-storageify";
 
-import Router from './components/Router/index';
+import Index from './index';
 import { makeVegaDriver } from './drivers/makeVegaDriver';
 import { logDriver } from './drivers/logDriver';
 import { alertDriver } from './drivers/alertDriver';
@@ -32,17 +32,5 @@ const drivers = {
     log: logDriver
 };
 
-// let StatifiedMain = onionify(SignatureWorkflow);
-// run(StatifiedMain, drivers);
-
-let StatifiedMain = onionify(storageify(Router, { key: 'ComPass' }));
-// let StatifiedMain = onionify(Router);
+let StatifiedMain = onionify(storageify(Index, { key: 'ComPass' }));
 run(StatifiedMain, drivers);
-
-// if (module.hot) {
-// 		module.hot.accept(() => {
-// 			main = require('./main').default;
-// 			rerun(StateifiedMain, drivers);
-// 		});
-// 	}
-

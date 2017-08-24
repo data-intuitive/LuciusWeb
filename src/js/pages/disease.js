@@ -16,7 +16,7 @@ import { loggerFactory } from '~/../../src/js/utils/logger'
 import { SampleTable, sampleTableLens } from '../components/SampleTable/SampleTable'
 
 // Support for ghost mode
-import { scenario } from './diseaseScenario'
+import { scenario } from '../scenarios/diseaseScenario'
 import { runScenario } from '../utils/scenario'
 
 function DiseaseWorkflow(sources) {

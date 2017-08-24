@@ -23,7 +23,7 @@ import { SignatureForm, formLens } from '../components/SignatureForm'
 import { Filter } from '../components/Filter'
 
 // Support for ghost mode
-import { scenario } from './targetScenario'
+import { scenario } from '../scenarios/targetScenario'
 import { runScenario } from '../utils/scenario'
 
 

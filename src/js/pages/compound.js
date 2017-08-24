@@ -15,7 +15,7 @@ import { loggerFactory } from '~/../../src/js/utils/logger'
 import { SampleTable, sampleTableLens } from '../components/SampleTable/SampleTable'
 
 // Support for ghost mode
-import { scenario } from './compoundScenario'
+import { scenario } from '../scenarios/compoundScenario'
 import { runScenario } from '../utils/scenario'
 
 export default function CompoundWorkflow(sources) {

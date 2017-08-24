@@ -92,12 +92,19 @@ export const vegaSpec = (data) => ({
                     "size": { "scale": "sizeScale", "field": "count" },
                     "x": { "scale": "xscale", "field": "x" },
                     "y": { "scale": "yscale2", "field": "avg" },
+                },
+                "update": {
                     "fill": { "scale": "color", "field": "avg" },
                     "fillOpacity": { "value": 0.7 },
                     "strokeWidth": { "value": 2 },
                     "stroke": { "scale": "color", "field": "avg" }
+                },                
+                "hover": {
+                    "fill": { "value": "white" },
+                    "fillOpacity": { "value": 0.5 },
+                    "stroke" : {"value" : "grey"},
                 }
-            }
+             }
         }
     ]
 })

@@ -120,7 +120,7 @@ function SampleSelection(sources) {
             td(entry.year),
             td(entry.significantGenes),
             td('.selection', { props: { id: entry.id } }, [
-                input('.switch', { props: { type: 'checkbox', checked: entry.use, id: entry.id } }),
+                input('.switch .filled-in .grey', { props: { type: 'checkbox', checked: entry.use, id: entry.id } }),
                 label('', { props: { id: entry.id } })
             ])
         ]);

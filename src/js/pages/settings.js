@@ -321,7 +321,7 @@ export function Settings(sources) {
 
     const vdom$ = xs.combine(settings$, Settings.DOM)
         .map(([state, topTableEntries]) =>
-            div('.row .grey .lighten-3', [
+            div('.row .grey .lighten-3', {style : {margin: '0px 0px 0px 0px'}}, [
                 div('.row .s12', ['']),
                 topTableEntries,
                 div('.row .s12', ['']),

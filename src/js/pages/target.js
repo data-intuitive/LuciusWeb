@@ -158,7 +158,7 @@ function TargetWorkflow(sources) {
             signatureForm,
             filter,
             hist
-        ]) => div('.row .target', [
+        ]) => div('.row .target', {style : {margin: '0px 0px 0px 0px'}}, [
             formDOM,
             div('.col .s10 .offset-s1', [signatureForm]),
             div('.row', ''),

@@ -120,7 +120,7 @@ export default function CompoundWorkflow(sources) {
             hist,
             headTable,
             tailTable
-        ]) => div('.row .compound', [
+        ]) => div('.row .compound',{style : {margin: '0px 0px 0px 0px'}},  [
             formDOM,
             div('.col .s10 .offset-s1', pageStyle, [
                 div('.row', [filter]),
@@ -131,7 +131,8 @@ export default function CompoundWorkflow(sources) {
                 div('.row', []),
                 div('.col .s12', [headTable]),
                 div('.row', []),
-                div('.col .s12', [tailTable])
+                div('.col .s12', [tailTable]),
+                div('.row', [])
             ])
         ]))
 

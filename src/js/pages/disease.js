@@ -100,7 +100,7 @@ function DiseaseWorkflow(sources) {
             opacity: '0',
             transition: 'opacity 1s',
             delayed: { opacity: '1' },
-            destroy: { opacity: '0' }
+            destroy: { opacity: '0' },
         }
     }
 
@@ -122,7 +122,7 @@ function DiseaseWorkflow(sources) {
             tailTable,
             // feedback
         ]) =>
-            div('.row .disease', [
+            div('.row .disease', {style : {margin: '0px 0px 0px 0px'}}, [
                 form,
                 div('.col .s10 .offset-s1', pageStyle,
                     [

@@ -160,7 +160,7 @@ function TargetWorkflow(sources) {
             hist
         ]) => div('.row .target', [
             formDOM,
-            div('.col .s8 .offset-s2', [signatureForm]),
+            div('.col .s10 .offset-s1', [signatureForm]),
             div('.row', ''),
             div('.col .s10 .offset-s1', pageStyle, [
                 div('.row', [filter]),

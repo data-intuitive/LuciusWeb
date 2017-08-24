@@ -198,7 +198,7 @@ function SampleSelection(sources) {
         xs.merge(
             sources.DOM.select('.doSelect').events('click'),
             // Ghost mode
-            sources.onion.state$.map(state => state.core.ghost).filter(ghost => ghost).compose(dropRepeats())
+            sources.onion.state$.map(state => state.core.ghostoutput).filter(ghost => ghost).compose(dropRepeats())
         )
             .compose(sampleCombine(state$))
             .map(([ev, state]) => state.core.output)

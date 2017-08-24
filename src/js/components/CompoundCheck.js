@@ -41,8 +41,9 @@ function CompoundCheck(sources) {
             .map(ev => ev.target.value)
             .startWith(''),
         // This for ghost mode, inject changes via external state updates...
-        state$.map(state => state.core.input).compose(dropRepeats())
+        state$.filter(state => typeof state.core.ghostinput !== 'undefined').map(state => state.core.input).compose(dropRepeats())
     )
+    // .remember()
 
     // When the component should not be shown, including empty signature
     const isEmptyState = (state) => {
@@ -60,12 +61,10 @@ function CompoundCheck(sources) {
     const emptyState$ = state$
         .filter(state => isEmptyState(state))
         .compose(dropRepeats(equals))
-    // .filter(state => typeof state.core === 'undefined')
 
     // When the state is cycled because of an internal update
     const modifiedState$ = state$
         .filter(state => !isEmptyState(state))
-        // .filter(state => typeof state.core !== 'undefined')
         .compose(dropRepeats((x, y) => equals(x, y)))
 
     // An update to the input$, join it with state$
@@ -78,6 +77,7 @@ function CompoundCheck(sources) {
 
     const triggerRequest$ = newInput$
         .filter(state => state.core.input.length >= 2)
+        .filter(state => state.core.showSuggestions)
         .compose(debounce(500))
 
     const request$ = triggerRequest$
@@ -92,7 +92,6 @@ function CompoundCheck(sources) {
                 'category': 'compounds'
             }
         })
-        // .remember()
 
     const response$ = sources.HTTP
         .select('compounds')
@@ -100,11 +99,9 @@ function CompoundCheck(sources) {
             response$.replaceError(() => xs.of([]))
         )
         .flatten()
-        // .remember()
 
     const data$ = response$
         .map(res => res.body.result.data)
-        .remember()
 
     const suggestionStyle = {
         style: {
@@ -147,7 +144,7 @@ function CompoundCheck(sources) {
                 ])
         })
 
-    const vdom$ = xs.merge(initVdom$, loadedVdom$).startWith(div()).remember()
+    const vdom$ = xs.merge(initVdom$, loadedVdom$).startWith(div())//.remember()
 
     // Set a initial reducer, showing suggestions
     const defaultReducer$ = xs.of(prevState => {
@@ -159,33 +156,35 @@ function CompoundCheck(sources) {
                 showSuggestions: true,
                 validated: false,
                 input: '',
-                data: []
+                data: [],
             }
         }
         return newState
     })
 
     // Reducer for showing suggestions again after an input event
-    const inputReducer$ = input$.map(value => prevState => ({
-        ...prevState, core: {
-            ...prevState.core,
-            showSuggestions: true,
-            validated: false,
-            input: value,
-        }
-    }))
-
+    const inputReducer$ = input$.map(value => prevState =>
+        ({
+            ...prevState, core: {
+                ...prevState.core,
+                showSuggestions: true,
+                validated: false,
+                input: value,
+            }
+        })
+    )
     // Set a default signature for demo purposes
     const setDefault$ = sources.DOM.select('.Default').events('click')
-    const setDefaultReducer$ = setDefault$.map(events => prevState => ({
-        ...prevState, core: {
-            ...prevState.core,
-            showSuggestions: false,
-            validated: true,
-            input: '7108491',
-        }
-    }))
-
+    const setDefaultReducer$ = setDefault$.map(events => prevState =>
+        ({
+            ...prevState, core: {
+                ...prevState.core,
+                showSuggestions: false,
+                validated: true,
+                input: '7108491',
+            }
+        })
+    )
     // When a suggestion is clicked, update the state so the query becomes this
     const autocomplete$ = sources.DOM.select('.compoundComplete').events('click')
     const autocompleteReducer$ = autocomplete$.map(event => prevState => {
@@ -196,15 +195,19 @@ function CompoundCheck(sources) {
                 input: newInput,
                 showSuggestions: false,
                 validated: true,
-                output: newInput
+                output: newInput,
+
             }
         })
     })
-
     // Add request body to state
-    const requestReducer$ = request$.map(req => prevState => ({ ...prevState, core: { ...prevState.core, request: req } }))
+    const requestReducer$ = request$.map(req => prevState =>
+        ({ ...prevState, core: { ...prevState.core, request: req } })
+    )
     // Add data from API to state, update output key when relevant
-    const dataReducer$ = data$.map(newData => prevState => ({ ...prevState, core: { ...prevState.core, data: newData } }))
+    const dataReducer$ = data$.map(newData => prevState =>
+        ({ ...prevState, core: { ...prevState.core, data: newData } })
+    )
 
     // GO!!!
     const run$ = sources.DOM
@@ -214,16 +217,20 @@ function CompoundCheck(sources) {
     const query$ = xs.merge(
         run$,
         // Ghost mode
-        sources.onion.state$.map(state => state.core.ghost).filter(ghost => ghost).compose(dropRepeats())
+        sources.onion.state$.map(state => state.core.ghostoutput).filter(ghost => ghost).compose(dropRepeats())
     )
         .compose(sampleCombine(state$))
         .map(([ev, state]) => state.core.input)
         .remember()
 
+    // const history$ = sources.onion.state$.fold((acc, x) => acc.concat([x]), [{}])
+
     return {
         log: xs.merge(
-            logger(state$, 'state$'),
+            logger(state$, 'state$')
+            // logger(history$, 'history$'),
         ),
+        HTTP: request$,
         DOM: vdom$,
         onion: xs.merge(
             defaultReducer$,
@@ -233,7 +240,6 @@ function CompoundCheck(sources) {
             setDefaultReducer$,
             autocompleteReducer$
         ),
-        HTTP: request$,
         output: query$
     };
 }

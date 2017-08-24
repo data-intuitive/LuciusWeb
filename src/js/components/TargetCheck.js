@@ -42,9 +42,8 @@ function TargetCheck(sources) {
             .events('input')
             .map(ev => ev.target.value),
         // This for ghost mode, inject changes via external state updates...
-        state$.map(state => state.core.input).compose(dropRepeats())
+        state$.filter(state => typeof state.core.ghostinput !== 'undefined').map(state => state.core.input).compose(dropRepeats())
     )
-    // .startWith('')
 
     // When the component should not be shown, including empty signature
     const isEmptyState = (state) => {
@@ -62,7 +61,6 @@ function TargetCheck(sources) {
     const emptyState$ = state$
         .filter(state => isEmptyState(state))
         .compose(dropRepeats(equals))
-    // .filter(state => typeof state.core === 'undefined')
 
     // When the state is cycled because of an internal update
     const modifiedState$ = state$
@@ -148,7 +146,7 @@ function TargetCheck(sources) {
                 ])
         })
 
-    const vdom$ = xs.merge(initVdom$, loadedVdom$)//.startWith(div()).remember()
+    const vdom$ = xs.merge(initVdom$, loadedVdom$)
 
     // Set a initial reducer, showing suggestions
     const defaultReducer$ = xs.of(prevState => {
@@ -204,9 +202,13 @@ function TargetCheck(sources) {
     })
 
     // Add request body to state
-    const requestReducer$ = request$.map(req => prevState => ({ ...prevState, core: { ...prevState.core, request: req } }))
+    const requestReducer$ = request$.map(req => prevState =>
+        ({ ...prevState, core: { ...prevState.core, request: req } })
+    )
     // Add data from API to state, update output key when relevant
-    const dataReducer$ = data$.map(newData => prevState => ({ ...prevState, core: { ...prevState.core, data: newData } }))
+    const dataReducer$ = data$.map(newData => prevState =>
+        ({ ...prevState, core: { ...prevState.core, data: newData } })
+    )
 
     // GO!!!
     const run$ = sources.DOM
@@ -216,7 +218,7 @@ function TargetCheck(sources) {
     const query$ = xs.merge(
         run$,
         // Ghost mode
-        sources.onion.state$.map(state => state.core.ghost).filter(ghost => ghost).compose(dropRepeats())
+        sources.onion.state$.map(state => state.core.ghostoutput).filter(ghost => ghost).compose(dropRepeats())
     )
         .compose(sampleCombine(state$))
         .map(([ev, state]) => state.core.input)
@@ -225,9 +227,9 @@ function TargetCheck(sources) {
     return {
         log: xs.merge(
             logger(state$, 'state$'),
-            logger(request$, 'request$'),
-            logger(response$, 'response$'),
-            logger(inputReducer$, 'inputReducer$')
+            // logger(request$, 'request$'),
+            // logger(response$, 'response$'),
+            // logger(inputReducer$, 'inputReducer$')
         ),
         DOM: vdom$,
         onion: xs.merge(

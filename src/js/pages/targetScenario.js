@@ -1,4 +1,8 @@
 export const scenario = [
+    { // Initiate ghost input mode
+        delay: 10,
+        state: { form: { check: { ghostinput: true } } },
+    },
     { //Form
         delay: 500,
         state: { form: { check: { input: "A", showSuggestions: true, validated: false } } },
@@ -35,10 +39,10 @@ export const scenario = [
             duration: 4000
         }
     },
-    // Initiate Ghost
+    // Ghost output
     {
         delay: 2000,
-        state: { form: { check: { ghost: true } }, compoundTable: { input: { query: "ABL2" } } }
+        state: { form: { check: { ghostoutput: true } }, compoundTable: { input: { query: "ABL2" } } }
     },
     // Table
     {

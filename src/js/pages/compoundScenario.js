@@ -1,4 +1,8 @@
 export const scenario = [
+    { // Initiate ghost mode
+        delay: 10,
+        state: { form: { check: { ghostinput: true } } },
+    },
     { //Form
         delay: 500,
         state: { form: { check: { input: "1", showSuggestions: true, validated: false } } },
@@ -24,12 +28,12 @@ export const scenario = [
         state: { form: { check: { input: "123175", showSuggestions: false, validated: true } } },
     },
     {
-        delay: 500,
+        delay: 10,
         state: { form: { check: { showSuggestions: false, validated: true } } },
     },
     {
         delay: 1000,
-        state: { form: { check: { ghost : true } } },
+        state: { form: { check: { ghostoutput : true } } },
         message: {
             text: 'Press GO...',
             duration: 4000
@@ -50,7 +54,7 @@ export const scenario = [
     },
     {
         delay: 1000,
-        state: { form: { sampleSelection: { ghost : true, output: ['GJA130_B14'] } } },
+        state: { form: { sampleSelection: { ghostoutput : true, output: ['GJA130_B14'] } } },
         message: {
             text: 'Press Select',
             duration: 4000

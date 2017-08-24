@@ -5,13 +5,14 @@ import { a, h, p, div, br, label, input, code, table, tr, td, b, h2, button, svg
 import { log } from '../utils/logger'
 import { ENTER_KEYCODE } from '../utils/keycodes.js'
 import { keys, values, filter, head, equals, map, prop, clone, omit, merge } from 'ramda'
-// import { SampleTable, sampleTableLens } from './SampleTable/SampleTable'
+// import { tableContent, tableContentLens } from './tableContent/tableContent'
 import isolate from '@cycle/isolate'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import dropUntil from 'xstream/extra/dropUntil'
 import { stateDebug } from '../utils/utils'
 import { loggerFactory } from '~/../../src/js/utils/logger'
 import { convertToCSV } from '../utils/export'
+import delay from 'xstream/extra/delay'
 
 
 // Granular access to the settings
@@ -62,7 +63,7 @@ const compoundContainerTableLens = {
     set: (state, childState) => ({ ...state, compoundTable: childState.core, settings: { ...state.settings, compoundTable: childState.settings.table } })
 };
 
-function makeTable(tableComponent, tableLens) {
+function makeTable(tableComponent, tableLens, scope = 'scope1') {
 
     /**
      * This is a general table container: a post query is sent to the endpoint (configured via settings). 
@@ -93,7 +94,6 @@ function makeTable(tableComponent, tableLens) {
         )
             .map(([newInput, state]) => ({ ...state, core: { ...state.core, input: newInput } }))
             .compose(dropRepeats((x, y) => equals(x.core.input, y.core.input)))
-            .remember()
 
         // When the component should not be shown, including empty query
         const isEmptyState = (state) => {
@@ -112,22 +112,35 @@ function makeTable(tableComponent, tableLens) {
             }
         }
 
-        // Split off properties in separate stream to make life easier in subcomponents
+        const modifiedState$ = state$
+            .filter(state => !isEmptyState(state))
+            .compose(dropRepeats((x, y) => equals(x.core, y.core)))
+
+         // Split off properties in separate stream to make life easier in simple subcomponents
+         // Be aware: this is required to be a memory stream!!!
         const props$ = state$
             .filter(state => !isEmptyState(state))
             .map(state => state.settings)
+            .compose(dropRepeats(equals))
             .remember()
 
-        const modifiedState$ = state$
-            .filter(state => !isEmptyState(state))
+       const settings$ = state$
+            .map(state => state.settings)
+            .compose(dropRepeats(equals)) // Avoid updates to vdom$ when no real change
+
+        const expandOptions$ = state$
+            .map(state => state.core.expandOptions)
+            .compose(dropRepeats(equals)) // Avoid updates to vdom$ when no real change
 
         const emptyState$ = state$
             .filter(state => isEmptyState(state))
 
-        const plus5$ = sources.DOM.select('.plus5').events('click').mapTo(5).startWith(0).fold((x, y) => x + y, 0).remember()
-        const min5$ = sources.DOM.select('.min5').events('click').mapTo(5).startWith(0).fold((x, y) => x + y, 0).remember()
-        const plus10$ = sources.DOM.select('.plus10').events('click').mapTo(10).startWith(0).fold((x, y) => x + y, 0).remember()
-        const min10$ = sources.DOM.select('.min10').events('click').mapTo(10).startWith(0).fold((x, y) => x + y, 0).remember()
+        const plus5$ = sources.DOM.select('.plus5').events('click').mapTo(5).startWith(0).fold((x, y) => x + y, 0)
+        const min5$ = sources.DOM.select('.min5').events('click').mapTo(5).startWith(0).fold((x, y) => x + y, 0)
+        const plus10$ = sources.DOM.select('.plus10').events('click').mapTo(10).startWith(0).fold((x, y) => x + y, 0)
+        const min10$ = sources.DOM.select('.min10').events('click').mapTo(10).startWith(0).fold((x, y) => x + y, 0)
+
+        // ======================================================================== 
 
         const triggerRequest$ = xs.combine(
             newInput$,
@@ -162,7 +175,6 @@ function makeTable(tableComponent, tableLens) {
                 url: state.settings.api.url + '&classPath=com.dataintuitive.luciusapi.' + state.settings.table.apiClass,
                 category: 'table'
             }))
-            .remember()
 
         const response$$ = sources.HTTP
             .select('table')
@@ -174,7 +186,6 @@ function makeTable(tableComponent, tableLens) {
                     .replaceError(error => xs.of(error)) // emit error
             )
             .flatten()
-            .remember()
 
         const validResponse$ = response$$
             .map(response$ =>
@@ -182,21 +193,25 @@ function makeTable(tableComponent, tableLens) {
                     .replaceError(error => xs.empty())
             )
             .flatten()
-            .remember()
+
+        // ======================================================================== 
 
         const data$ = validResponse$
             .map(result => result.body.result.data)
 
-        // const sampleTable = isolate(SampleTable, 'core.data')({...sources, props: props$});
-        const sampleTable = isolate(tableComponent, { onion: tableLens })({ ...sources, props: props$ });
+        // Convert to TSV and JSON
+        const csvData$ = data$
+            .map(data => convertToCSV(data))
+            .map(csv => "text/tsv;charset=utf-8," + encodeURIComponent(csv))
+        const jsonData$ = data$
+            .map(json => "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(json)))
 
-        function isDefined(obj) {
-            if (typeof obj !== 'undefined') {
-                return true
-            } else {
-                return false
-            }
-        }
+        const datas$ = xs.combine(data$, csvData$, jsonData$)
+
+        // ======================================================================== 
+
+        // Table with samples/compounds -- depending on the tableComponent
+        const tableContent = isolate(tableComponent, { onion: tableLens, '*': scope })({ ...sources, props: props$ });
 
         const chipStyle = {
             style: {
@@ -207,8 +222,9 @@ function makeTable(tableComponent, tableLens) {
         }
 
         const filterText$ = modifiedState$
+            .compose(dropRepeats((x, y) => equals(x.core.input.filter, y.core.input.filter)))
             .map(state => {
-                if (isDefined(state.core.input.filter)) {
+                if (typeof state.core.input.filter !== 'undefined') {
                     let filters = keys(state.core.input.filter)
                     let nonEmptyFilters = filter(key => prop(key, state.core.input.filter).length > 0, filters)
                     let divs = map(key => div('.chip', chipStyle, [key, ': ', prop(key, state.core.input.filter)]), nonEmptyFilters)
@@ -231,6 +247,8 @@ function makeTable(tableComponent, tableLens) {
             }
         })
 
+        // ========================================================================
+
         const initVdom$ = emptyState$.mapTo(div())
 
         const loadingVdom$ = request$.compose(sampleCombine(filterText$, modifiedState$))
@@ -245,90 +263,71 @@ function makeTable(tableComponent, tableLens) {
                 ]),
                 div('.progress ', [div('.indeterminate')])
             ]),
-        )
+        ).remember()
 
-        // Convert to TSV and JSON
-        const csvData$ = data$
-            .map(data => convertToCSV(data))
-            .map(csv => "text/tsv;charset=utf-8," + encodeURIComponent(csv))
-        const jsonData$ = data$
-            .map(json => "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(json)))
-
-        const loadedVdom$ = xs.combine(sampleTable.DOM, csvData$, jsonData$, filterText$, modifiedState$)
-            .map(([
-                dom,
-                csvData,
-                jsonData,
-                filterText,
-                state
-            ]) => div('.page', [
-                div('.row .valign-wrapper .switch', { style: { 'margin-bottom': '0px', 'padding-top': '5px', 'background-color': state.settings.table.color } }, [
-                    h5('.white-text .col', [
-                        state.settings.table.title,
-                        span([' ']),
-                        i('.material-icons .grey-text', {
-                            style: {
-                                fontSize: '16px',
-                                'background-color': state.settings.table.color,
-                                opacity: 0.5,
-                            }
-                        }, 'add')
-                    ]),
-                    div('.white-text .col .s7 .valign .right-align', filterText)
-                ]),
-                div('.row .valign-wrapper', { style: { 'margin-bottom': '0px', 'padding-top': '0px', 'background-color': state.settings.table.color, opacity: 0.8 } }, [
-                    (state.settings.table.expandOptions)
-                        ? div([
-                            button('.btn-flat .waves-effect .waves-light', smallBtnStyle(state.settings.table.color), [
-                                a('', { style: { 'color': 'white' }, props: { href: 'data:' + csvData, download: 'table.tsv' } }, [
-                                    span({ style: { 'vertical-align': 'top', fontSize: '8px' } }, 'tsv'),
-                                    i('.material-icons', 'file_download'),
-                                ])
-                            ]),
-                            button('.btn-flat .waves-effect .waves-light', smallBtnStyle(state.settings.table.color), [
-                                a('', { style: { 'color': 'white' }, props: { href: 'data:' + jsonData, download: 'table.json' } }, [
-                                    span({ style: { 'vertical-align': 'top', fontSize: '8px' } }, 'json'),
-                                    i('.material-icons', 'file_download'),
-                                ])
-                            ]),
-                            button('.min10 .btn-flat .waves-effect .waves-light', smallBtnStyle(state.settings.table.color), [
-                                span({ style: { 'vertical-align': 'top', fontSize: '10px' } }, '-10'),
-                                i('.material-icons', 'fast_rewind'),
-                            ]),
-                            button('.min5 .btn-flat .waves-effect .waves-light', smallBtnStyle(state.settings.table.color), [
-                                span({ style: { 'vertical-align': 'top', fontSize: '10px' } }, '-5'),
-                                i('.material-icons', 'fast_rewind'),
-                            ]),
-                            button('.plus5 .btn-flat .waves-effect .waves-light', smallBtnStyle(state.settings.table.color), [
-                                span({ style: { 'vertical-align': 'top', fontSize: '10px' } }, '+5'),
-                                i('.material-icons', 'fast_forward')
-                            ]),
-                            button('.plus10 .btn-flat .waves-effect .waves-light', smallBtnStyle(state.settings.table.color), [
-                                span({ style: { 'vertical-align': 'top', fontSize: '10px' } }, '+10'),
-                                i('.material-icons', 'fast_forward')
-                            ])
-                        ])
-                        : div()
-                ]),
-                div('.row', { style: { 'margin-bottom': '0px', 'margin-top': '0px' } }, [
+        const loadedVdom$ =
+            xs.combine(tableContent.DOM, expandOptions$, settings$, csvData$, jsonData$, filterText$)
+                .map(([
                     dom,
-                    // div('.col .s6', [
-                    //     i('.tiny .material-icons', { style: { fontSize: '10px', fontColor: 'grey' } }, 'file_download'),
-                    // ]),
-                    // div('.col .s6 .right-align', [
-                    //     i('.small .material-icons .orange-text', { style: { fontSize: '20px', fontColor: state.settings.table.color } }, 'file_download'),
-                    //     button('.min5 .btn-floating waves-effect waves-light', smallBtnStyle(state.settings.table.color), [
-                    //         i('.material-icons', 'fast_rewind')
-                    //     ]),
-                    //     // button('.plus5 .btn-floating waves-effect waves-light .tiny', smallBtnStyle(state.settings.table.color), [
-                    //     i('.plus5 .material-icons', { style: { fontSize: '16px' } }, 'fast_forward')
-                    //     // ])
-                    // ]),
-                    // // test !!!
-                    // a('.col .s6 .offset-s3 .btn .center .grey', { props: { href: 'data:' + data, download: 'compass-state.csv' } }, 'download')
-                ]),
-            ])
-            )
+                    expandOptions,
+                    settings,
+                    csvData,
+                    jsonData,
+                    filterText,
+                ]) => div('.page', [
+                    div('.row .valign-wrapper .switch', { style: { 'margin-bottom': '0px', 'padding-top': '5px', 'background-color': settings.table.color } }, [
+                        h5('.white-text .col', [
+                            settings.table.title,
+                            span([' ']),
+                            i('.material-icons .grey-text', {
+                                style: {
+                                    fontSize: '16px',
+                                    'background-color': settings.table.color,
+                                    opacity: 0.5,
+                                }
+                            }, 'add')
+                        ]),
+                        div('.white-text .col .s7 .valign .right-align', filterText)
+                    ]),
+                    div('.row .valign-wrapper', { style: { 'margin-bottom': '0px', 'padding-top': '0px', 'background-color': settings.table.color, opacity: 0.8 } }, [
+                        (expandOptions)
+                            ? div([
+                                button('.btn-flat .waves-effect .waves-light', smallBtnStyle(settings.table.color), [
+                                    a('', { style: { 'color': 'white' }, props: { href: 'data:' + csvData, download: 'table.tsv' } }, [
+                                        span({ style: { 'vertical-align': 'top', fontSize: '8px' } }, 'tsv'),
+                                        i('.material-icons', 'file_download'),
+                                    ])
+                                ]),
+                                button('.btn-flat .waves-effect .waves-light', smallBtnStyle(settings.table.color), [
+                                    a('', { style: { 'color': 'white' }, props: { href: 'data:' + jsonData, download: 'table.json' } }, [
+                                        span({ style: { 'vertical-align': 'top', fontSize: '8px' } }, 'json'),
+                                        i('.material-icons', 'file_download'),
+                                    ])
+                                ]),
+                                button('.min10 .btn-flat .waves-effect .waves-light', smallBtnStyle(settings.table.color), [
+                                    span({ style: { 'vertical-align': 'top', fontSize: '10px' } }, '-10'),
+                                    i('.material-icons', 'fast_rewind'),
+                                ]),
+                                button('.min5 .btn-flat .waves-effect .waves-light', smallBtnStyle(settings.table.color), [
+                                    span({ style: { 'vertical-align': 'top', fontSize: '10px' } }, '-5'),
+                                    i('.material-icons', 'fast_rewind'),
+                                ]),
+                                button('.plus5 .btn-flat .waves-effect .waves-light', smallBtnStyle(settings.table.color), [
+                                    span({ style: { 'vertical-align': 'top', fontSize: '10px' } }, '+5'),
+                                    i('.material-icons', 'fast_forward')
+                                ]),
+                                button('.plus10 .btn-flat .waves-effect .waves-light', smallBtnStyle(settings.table.color), [
+                                    span({ style: { 'vertical-align': 'top', fontSize: '10px' } }, '+10'),
+                                    i('.material-icons', 'fast_forward')
+                                ])
+                            ])
+                            : div()
+                    ]),
+                    div('.row', { style: { 'margin-bottom': '0px', 'margin-top': '0px' } }, [
+                        dom
+                    ]),
+                ])
+                )
 
         const errorVdom$ = invalidResponse$.mapTo(div('.red .white-text', [p('An error occured !!!')]))
 
@@ -338,41 +337,53 @@ function makeTable(tableComponent, tableLens) {
             loadingVdom$,
             loadedVdom$
         )
-        // .startWith(div())
 
-        // Default Re
-        const defaultReducer$ = xs.of(prevState => ({ ...prevState, core: { ...prevState.core, input: { query: '', targets: '' } } }))
+        // ========================================================================
 
+        // Default Reducer
+        const defaultReducer$ = xs.of(prevState =>
+            ({ ...prevState, core: { ...prevState.core, input: { query: '', targets: '' } } })
+        )
         // Add input to state
         const inputReducer$ = input$.map(i => prevState =>
             // inputReducer
             ({ ...prevState, core: { ...prevState.core, input: i } })
         )
         // Add request body to state
-        const requestReducer$ = request$.map(req => prevState => ({ ...prevState, core: { ...prevState.core, request: req } }))
-
-        const dataReducer$ = data$.map(newData => prevState => ({ ...prevState, core: { ...prevState.core, data: newData } }))
-
-        const switchReducer$ = sources.DOM.select('.switch').events('click').fold((x, y) => !x, false)
-            .map(bool => prevState => ({ ...prevState, settings: { ...prevState.settings, table: { ...prevState.settings.table, expandOptions: bool } } }))
+        const requestReducer$ = request$.map(req => prevState =>
+            ({ ...prevState, core: { ...prevState.core, request: req } })
+        )
+        // Data reducer
+        const dataReducer$ = data$.map(newData => prevState =>
+            ({ ...prevState, core: { ...prevState.core, data: newData } })
+        )
+        // Reducer for opening and closing option drawer
+        const switchReducer$ = sources.DOM.select('.switch')
+            .events('click')
+            .fold((x, y) => !x, false)
+            .map(yesorno => prevState =>
+                ({ ...prevState, core: { ...prevState.core, expandOptions: yesorno } })
+            )
 
         return {
-            log: xs.merge(
-                logger(state$, 'state$'),
-                logger(newInput$, 'newInput$'),
-                logger(request$, 'request$'),
-                logger(validResponse$, 'validResponse$'),
-                logger(invalidResponse$, 'invalidResponse$'),
-            ),
             DOM: vdom$,
-            HTTP: request$,
+            HTTP: request$.compose(delay(4000)),
             onion: xs.merge(
                 defaultReducer$,
                 inputReducer$,
                 requestReducer$,
                 dataReducer$,
                 switchReducer$
-            )
+            ),
+            log: xs.merge(
+                logger(modifiedState$, 'state$'),
+                // logger(loadingVdom$, 'loading...'),
+                // logger(loadedVdom$, 'loaded...')
+                // logger(newInput$, 'newInput$'),
+                // logger(request$, 'request$'),
+                // logger(validResponse$, 'validResponse$'),
+                // logger(invalidResponse$, 'invalidResponse$'),
+            ),
         };
 
     }

@@ -261,7 +261,7 @@ function makeTable(tableComponent, tableLens, scope = 'scope1') {
                     h5('.white-text .col .s5 .valign', state.settings.table.title),
                     div('.white-text .col .s7 .valign .right-align', filterText)
                 ]),
-                div('.progress ', [div('.indeterminate')])
+                div('.progress ', { style: { margin: '2px 0px 2px 0px' } }, [div('.indeterminate')])
             ]),
         ).remember()
 

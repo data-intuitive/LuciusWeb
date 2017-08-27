@@ -25,26 +25,30 @@
 
 @media print { 
 
- @page { margin: 20pt 0pt 20pt 0pt }
+    @page { margin: 40pt 0pt 40pt 0pt }
 
- /* no background color for printing */
- .compound, .disease, .target {
-     background-color: white !important
- }
+    /* no background color for printing */
+    .compound, .disease, .target {
+        background-color: white !important
+    }
 
- /* Don't print header and footer */
- header, footer { display: none !important; }
+    /* Don't print header and footer */
+    header, footer { display: none !important; }
 
- /* li and page class to avoid splitting up blocks that belong together */
- li, div.page
-      {
-        page-break-after: always;
+    /* ul and page class to avoid splitting up blocks that belong together */
+    li {
         page-break-inside: avoid;
-      }
-
- /* Recuce font size for printing */
- div, p, a, span {
-     font-size: 9pt
- }
+    }
+    ul
+    {
+        page-break-before: avoid;
+    }
+    .pagebreak {
+        page-break-after: always
+    }
+    /* Recuce font size for printing */
+    div, p, a, span {
+        font-size: 9pt
+    }
 
 }

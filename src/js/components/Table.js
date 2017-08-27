@@ -116,15 +116,15 @@ function makeTable(tableComponent, tableLens, scope = 'scope1') {
             .filter(state => !isEmptyState(state))
             .compose(dropRepeats((x, y) => equals(x.core, y.core)))
 
-         // Split off properties in separate stream to make life easier in simple subcomponents
-         // Be aware: this is required to be a memory stream!!!
+        // Split off properties in separate stream to make life easier in simple subcomponents
+        // Be aware: this is required to be a memory stream!!!
         const props$ = state$
             .filter(state => !isEmptyState(state))
             .map(state => state.settings)
             .compose(dropRepeats(equals))
             .remember()
 
-       const settings$ = state$
+        const settings$ = state$
             .map(state => state.settings)
             .compose(dropRepeats(equals)) // Avoid updates to vdom$ when no real change
 
@@ -274,59 +274,61 @@ function makeTable(tableComponent, tableLens, scope = 'scope1') {
                     csvData,
                     jsonData,
                     filterText,
-                ]) => div('.page', [
-                    div('.row .valign-wrapper .switch', { style: { 'margin-bottom': '0px', 'padding-top': '5px', 'background-color': settings.table.color } }, [
-                        h5('.white-text .col', [
-                            settings.table.title,
-                            span([' ']),
-                            i('.material-icons .grey-text', {
-                                style: {
-                                    fontSize: '16px',
-                                    'background-color': settings.table.color,
-                                    opacity: 0.5,
-                                }
-                            }, 'add')
+                ]) => 
+                    div([
+                        div('.pagebreak',  []),
+                        div('.row .valign-wrapper .switch', { style: { 'margin-bottom': '0px', 'padding-top': '5px', 'background-color': settings.table.color } }, [
+                            h5('.white-text .col', [
+                                settings.table.title,
+                                span([' ']),
+                                i('.material-icons .grey-text', {
+                                    style: {
+                                        fontSize: '16px',
+                                        'background-color': settings.table.color,
+                                        opacity: 0.5,
+                                    }
+                                }, 'add')
+                            ]),
+                            div('.white-text .col .s7 .valign .right-align', filterText)
                         ]),
-                        div('.white-text .col .s7 .valign .right-align', filterText)
-                    ]),
-                    div('.row .valign-wrapper', { style: { 'margin-bottom': '0px', 'padding-top': '0px', 'background-color': settings.table.color, opacity: 0.8 } }, [
-                        (expandOptions)
-                            ? div([
-                                button('.btn-flat .waves-effect .waves-light', smallBtnStyle(settings.table.color), [
-                                    a('', { style: { 'color': 'white' }, props: { href: 'data:' + csvData, download: 'table.tsv' } }, [
-                                        span({ style: { 'vertical-align': 'top', fontSize: '8px' } }, 'tsv'),
-                                        i('.material-icons', 'file_download'),
+                        div('.row .valign-wrapper', { style: { 'margin-bottom': '0px', 'padding-top': '0px', 'background-color': settings.table.color, opacity: 0.8 } }, [
+                            (expandOptions)
+                                ? div([
+                                    button('.btn-flat .waves-effect .waves-light', smallBtnStyle(settings.table.color), [
+                                        a('', { style: { 'color': 'white' }, props: { href: 'data:' + csvData, download: 'table.tsv' } }, [
+                                            span({ style: { 'vertical-align': 'top', fontSize: '8px' } }, 'tsv'),
+                                            i('.material-icons', 'file_download'),
+                                        ])
+                                    ]),
+                                    button('.btn-flat .waves-effect .waves-light', smallBtnStyle(settings.table.color), [
+                                        a('', { style: { 'color': 'white' }, props: { href: 'data:' + jsonData, download: 'table.json' } }, [
+                                            span({ style: { 'vertical-align': 'top', fontSize: '8px' } }, 'json'),
+                                            i('.material-icons', 'file_download'),
+                                        ])
+                                    ]),
+                                    button('.min10 .btn-flat .waves-effect .waves-light', smallBtnStyle(settings.table.color), [
+                                        span({ style: { 'vertical-align': 'top', fontSize: '10px' } }, '-10'),
+                                        i('.material-icons', 'fast_rewind'),
+                                    ]),
+                                    button('.min5 .btn-flat .waves-effect .waves-light', smallBtnStyle(settings.table.color), [
+                                        span({ style: { 'vertical-align': 'top', fontSize: '10px' } }, '-5'),
+                                        i('.material-icons', 'fast_rewind'),
+                                    ]),
+                                    button('.plus5 .btn-flat .waves-effect .waves-light', smallBtnStyle(settings.table.color), [
+                                        span({ style: { 'vertical-align': 'top', fontSize: '10px' } }, '+5'),
+                                        i('.material-icons', 'fast_forward')
+                                    ]),
+                                    button('.plus10 .btn-flat .waves-effect .waves-light', smallBtnStyle(settings.table.color), [
+                                        span({ style: { 'vertical-align': 'top', fontSize: '10px' } }, '+10'),
+                                        i('.material-icons', 'fast_forward')
                                     ])
-                                ]),
-                                button('.btn-flat .waves-effect .waves-light', smallBtnStyle(settings.table.color), [
-                                    a('', { style: { 'color': 'white' }, props: { href: 'data:' + jsonData, download: 'table.json' } }, [
-                                        span({ style: { 'vertical-align': 'top', fontSize: '8px' } }, 'json'),
-                                        i('.material-icons', 'file_download'),
-                                    ])
-                                ]),
-                                button('.min10 .btn-flat .waves-effect .waves-light', smallBtnStyle(settings.table.color), [
-                                    span({ style: { 'vertical-align': 'top', fontSize: '10px' } }, '-10'),
-                                    i('.material-icons', 'fast_rewind'),
-                                ]),
-                                button('.min5 .btn-flat .waves-effect .waves-light', smallBtnStyle(settings.table.color), [
-                                    span({ style: { 'vertical-align': 'top', fontSize: '10px' } }, '-5'),
-                                    i('.material-icons', 'fast_rewind'),
-                                ]),
-                                button('.plus5 .btn-flat .waves-effect .waves-light', smallBtnStyle(settings.table.color), [
-                                    span({ style: { 'vertical-align': 'top', fontSize: '10px' } }, '+5'),
-                                    i('.material-icons', 'fast_forward')
-                                ]),
-                                button('.plus10 .btn-flat .waves-effect .waves-light', smallBtnStyle(settings.table.color), [
-                                    span({ style: { 'vertical-align': 'top', fontSize: '10px' } }, '+10'),
-                                    i('.material-icons', 'fast_forward')
                                 ])
-                            ])
-                            : div()
-                    ]),
-                    div('.row', { style: { 'margin-bottom': '0px', 'margin-top': '0px' } }, [
-                        dom
-                    ]),
-                ])
+                                : div()
+                        ]),
+                        div('.row', { style: { 'margin-bottom': '0px', 'margin-top': '0px' } }, [
+                            dom
+                        ]),
+                    ])
                 )
 
         const errorVdom$ = invalidResponse$.mapTo(div('.red .white-text', [p('An error occured !!!')]))

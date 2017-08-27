@@ -269,8 +269,8 @@ export function Settings(sources) {
             .map(vdoms =>
                 ul('.collection .with-header',
                     [
-                        li('.collection-header', [
-                            h3(title)
+                        li('.collection-header .grey .lighten-2', [
+                            h4(title)
                         ])
                     ].concat(vdoms)
                 )

@@ -64,6 +64,7 @@ function SimilarityPlot(sources) {
 
     // Size stream
     const width$ = widthStream(sources.DOM, elementID)
+    const resize$ = sources.resize.startWith('go!')
 
     // ========================================================================
 
@@ -130,7 +131,7 @@ function SimilarityPlot(sources) {
         .filter(data => !isEmptyData(data))
 
     // Ingest the data in the spec and return to the driver
-    const vegaSpec$ = xs.combine(nonEmptyData$, width$, visible$, input$)
+    const vegaSpec$ = xs.combine(nonEmptyData$, width$, visible$, input$, resize$)
         .map(([data, newwidth, visible]) => ({ spec: vegaSpec(data), el: elementID, width: newwidth }))
 
     const vegaRuntime$ = vegaSpec$

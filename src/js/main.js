@@ -20,6 +20,9 @@ import switchPath from 'switch-path'
 
 import './main.scss'
 
+import fromEvent from 'xstream/extra/fromEvent'
+import xs from 'xstream'
+
 const drivers = {
     DOM: makeDOMDriver('#root'),
     vega: makeVegaDriver(),
@@ -29,6 +32,7 @@ const drivers = {
     alert: alertDriver,
     storage: storageDriver,
     popup: popupDriver,
+    resize: () => fromEvent(window, 'resize'),
     log: logDriver
 };
 

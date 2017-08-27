@@ -55,7 +55,7 @@ export const scenario = [
     },
     {
         delay: 2000,
-        state: { settings: { compoundTable: { expandOptions: true } } },
+        state: { compoundTable: { expandOptions: true } },
         message: {
             text: 'By clicking the table header, additional options are available',
             duration: 4000
@@ -63,7 +63,7 @@ export const scenario = [
     },
     {
         delay: 5000,
-        state: { settings: { compoundTable: { expandOptions: false } } },
+        state: {  compoundTable: { expandOptions: false } },
         message: {
             text: 'Clicking the header again closes the option drawer',
             duration: 4000

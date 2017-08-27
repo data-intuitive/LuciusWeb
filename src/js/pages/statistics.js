@@ -12,14 +12,10 @@ import { Statistics } from '../components/Statistics'
 
 function StatisticsWorkflow(sources) {
 
-	const state$ = sources.onion.state$.debug(state => {
-		console.log('== State in Statistics')
-		console.log(state)
-	});
+    const state$ = sources.onion.state$
 
 	// Initialize if not yet done in parent (i.e. router) component (useful for testing)
 	const defaultReducer$ = xs.of(prevState => {
-		console.log('statistics -- defaultReducer')
 		if (typeof prevState === 'undefined') {
 			return { settings: initSettings }
 		} else {
@@ -59,7 +55,7 @@ function StatisticsWorkflow(sources) {
 			stats
 		]) =>
 			div('.row .grey .lighten-5  ', [
-				div('.col .s10 .offset-s1', //pageStyle,
+				div('.col .s10 .offset-s1', pageStyle,
 					[
 						div('.col .s12', [stats]),
 					])

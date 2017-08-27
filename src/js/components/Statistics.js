@@ -8,17 +8,14 @@ import debounce from 'xstream/extra/debounce'
 
 function Statistics(sources) {
 
-    const state$ = sources.onion.state$.debug()
-
-    // const feedback$ = sources.DOM.select('div').events('click').map(ev => ev.target.text).debug()
+    const state$ = sources.onion.state$
 
     // Check when the state has changed, omit the result key
     const modifiedState$ = state$
         .compose(dropRepeats((x, y) => equals(omit(['result'], x), omit(['result'], y))))
-        .compose(debounce(2000))
-        .debug()
+        .compose(debounce(100))
 
-    const props$ = sources.props.debug()
+    const props$ = sources.props
 
     const request$ = xs.combine(modifiedState$, props$)
         .map(([state, props]) => {
@@ -29,7 +26,6 @@ function Statistics(sources) {
                 'category': 'statistics'
             }
         })
-        .debug();
 
     const response$$ = sources.HTTP
         .select('statistics')

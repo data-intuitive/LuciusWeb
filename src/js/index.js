@@ -1,7 +1,7 @@
 import xs from 'xstream';
 import dropRepeats from 'xstream/extra/dropRepeats'
 
-import { div, nav, a, h3, p, ul, li, h1, h2, i, footer, header, main, svg, g, path } from '@cycle/dom';
+import { div, nav, a, h3, p, ul, li, h1, h2, i, footer, header, main, svg, g, path, span } from '@cycle/dom';
 import { merge, prop, equals } from 'ramda';
 
 // Workflows
@@ -29,22 +29,22 @@ export default function Index(sources) {
     const state$ = sources.onion.state$
 
     const match$ = router.define({
-        '/': Home,
-        '/disease': DiseaseWorkflow,
-        '/compound': CompoundWorkflow,
-        '/target': TargetWorkflow,
-        '/statistics': StatisticsWorkflow,
-        '/settings': IsolatedSettings,
-        '/debug': Debug,
-        '*': Home
-    })
+            '/': Home,
+            '/disease': DiseaseWorkflow,
+            '/compound': CompoundWorkflow,
+            '/target': TargetWorkflow,
+            '/statistics': StatisticsWorkflow,
+            '/settings': IsolatedSettings,
+            '/debug': Debug,
+            '*': Home
+        })
         .remember();
 
     const page$ = match$.map(({ path, value }) => {
-        return value(Object.assign({}, sources, {
-            router: sources.router.path(path)
-        }))
-    })
+            return value(Object.assign({}, sources, {
+                router: sources.router.path(path)
+            }))
+        })
         .remember()
 
     const makeLink = (path, label, options) => li([a(options, { props: { href: path } }, label)]);
@@ -56,25 +56,48 @@ export default function Index(sources) {
     //     .mapTo(i('.small .material-icons', 'flight_takeoff'))
     //     .startWith(span())
 
+
+    const compoundSVG = svg({ attrs: { height: '16pt', viewBox: '0 0 20 30' } }, [
+        svg.g([
+            svg.path({ attrs: { d: 'M17,2L17,2c-2.1,0-3,0.5-3,3v7h-4V5c0-2.5-0.9-3-3-3l0,0L6,2v2h1c0.7,0,1,0.4,1,1v12c0,5.2,4,5,4,5s4,0.2,4-5V5c0-0.6,0.3-1,1-1h1V2L17,2z', stroke: '#ff9800' } })
+        ])
+    ])
+
+    const targetSVG = svg({ attrs: { height: '18pt', viewBox: '0 0 20 30' } }, [
+        svg.g([
+            svg.path({ attrs: { stroke: '#f44335', d: 'M22.7,9.7l-1.4-1.4c-0.4,0.4-0.8,0.8-1.2,1.1l-5.4-5.4c0.3-0.4,0.7-0.8,1.1-1.2l-1.4-1.4c-3.4,3.4-3.6,6.7-3.4,9.6c-3-0.2-6.3,0-9.6,3.4l1.4,1.4c0.4-0.4,0.8-0.8,1.2-1.1l5.4,5.4c-0.3,0.4-0.7,0.8-1.1,1.2l1.4,1.4c3.4-3.4,3.5-6.6,3.4-9.6C16,13.3,19.3,13.1,22.7,9.7z M19.2,9.9c-0.9,0.5-1.7,0.8-2.6,1l-3.6-3.6c0.2-0.9,0.5-1.7,1-2.6L19.2,9.9z M11.1,12.9c0.1,0.8,0.1,1.6,0,2.4l-2.5-2.5C9.4,12.9,10.2,12.9,11.1,12.9z M4.8,14.1c0.9-0.5,1.7-0.8,2.6-1l3.6,3.6c-0.2,0.9-0.5,1.7-1,2.6L4.8,14.1z M12.9,11.1c-0.1-0.8-0.1-1.7,0-2.5l2.5,2.5C14.6,11.2,13.8,11.1,12.9,11.1z' } })
+        ])
+    ])
+
+    const diseaseSVG = svg({ attrs: { height: '16pt', viewBox: "0 0 13.421 13.421" } }, [
+        svg.g([
+            svg.path({ attrs: { stroke: '#e91e63', d: 'M12.843,8.669c-0.907-0.542-2.619-0.031-4.944,1.476c-1.507,0.977-2.618,1.269-3.215,0.846c-0.871-0.616-0.709-2.674-0.498-3.862h0.179c0.122,0,0.222-0.099,0.222-0.223V6.467C5.192,6,7.47,4.183,7.786,3.013c0.361-1.327-1.672-2.181-2.264-2.399c0.01-0.127-0.061-0.249-0.188-0.29l-0.22-0.072C4.967,0.204,4.809,0.285,4.76,0.433L4.63,0.831C4.582,0.978,4.663,1.138,4.811,1.185l0.222,0.072c0.08,0.026,0.161,0.011,0.228-0.028c0.742,0.266,2.06,0.957,1.884,1.609C6.907,3.713,4.932,5.367,4.121,5.984H3.71C2.9,5.366,0.924,3.713,0.687,2.838c-0.175-0.645,1.116-1.329,1.86-1.602c0.069,0.056,0.159,0.084,0.25,0.058l0.225-0.061c0.149-0.041,0.237-0.195,0.195-0.345l-0.11-0.404c-0.042-0.15-0.196-0.238-0.346-0.196l-0.225,0.06C2.416,0.381,2.34,0.487,2.333,0.604c-0.553,0.2-2.657,1.06-2.291,2.409C0.348,4.14,2.475,5.869,3.17,6.411v0.495c0,0.124,0.099,0.223,0.222,0.223h0.116c-0.205,1.189-0.429,3.543,0.79,4.406c0.296,0.212,0.646,0.316,1.051,0.316c0.767,0,1.731-0.381,2.913-1.146c2.975-1.928,3.998-1.606,4.241-1.462c0.187,0.11,0.27,0.305,0.249,0.576c-0.03,0.38-0.284,0.863-0.708,1.177c-0.249-0.324-0.641-0.535-1.08-0.535c-0.751,0-1.36,0.611-1.36,1.361s0.609,1.361,1.36,1.361s1.361-0.611,1.361-1.361c0-0.067-0.007-0.133-0.016-0.198c0.608-0.394,1.053-1.076,1.106-1.753C13.456,9.348,13.247,8.909,12.843,8.669z M10.963,12.517c-0.383,0-0.694-0.313-0.694-0.695s0.312-0.694,0.694-0.694c0.216,0,0.405,0.101,0.533,0.255c0.14,0.115,0.106,0.252,0.159,0.431c0,0.003,0.003,0.005,0.003,0.009C11.659,12.204,11.347,12.517,10.963,12.517z' } })
+        ])
+    ])
+
+    span('.material-icons', { attrs: { height: '20pt' } }, 'airline_seat_individual_suite')
+
+
+
     const nav$ = xs.of(header([nav('#navigation .grey .darken-4', [
         div('.nav-wrapper', [
             a('.brand-logo .right .grey-text', { props: { href: "/" } }, "ComPass"),
             ul('.left .hide-on-med-and-down', [
-                makeLink('/compound', 'Compound', '.orange-text'),
-                makeLink('/target', 'Target', '.red-text'),
-                makeLink('/disease', 'Disease', '.pink-text'),
+                makeLink('/compound', ['Compound', ' ', compoundSVG], '.orange-text'),
+                makeLink('/target', span(['Target', ' ', targetSVG]), '.red-text'),
+                makeLink('/disease', span(['Disease', ' ', diseaseSVG]), '.pink-text'),
                 makeLink('/settings', 'Settings', ''),
             ])
         ])
-    ])
-    ]));
+    ])]));
 
     const footer$ = xs.of(
         footer('.page-footer .grey .darken-4 .grey-text', [
             div('.row', { style: { margin: '0px' } }, [
                 div('.col .s12', { style: { margin: '0px' } }, [
                     p({ style: { margin: '0px' } }, ['Please use ', a({ props: { href: '/statistics' } }, 'the information'), ' provided in ComPass with care. ComPass does not make any claims.']),
-                    p({ style: { margin: '0px' } }, ['In case of issues, please include the contents of ', a({ props: { href: '/debug' } }, 'this page'), ' in your bug report'])
+                    p({ style: { margin: '0px' } }, ['In case of issues, please include the contents of ', a({ props: { href: '/debug' } }, 'this page'), ' in your bug report']),
+                    // div('.col .s1', homeSvg)
                 ])
             ]),
             div('.footer-copyright .row', { style: { margin: '0px' } }, [
@@ -107,9 +130,9 @@ export default function Index(sources) {
         } else {
             // Pre-existing state information.
             // If default settings are newer, use those.
-            return (prevState.settings.version == initSettings.version)
-                ? ({ settings: prevState.settings })
-                : ({ settings: initSettings })
+            return (prevState.settings.version == initSettings.version) ?
+                ({ settings: prevState.settings }) :
+                ({ settings: initSettings })
         }
     })
 
@@ -148,3 +171,108 @@ export default function Index(sources) {
     }
 
 }
+
+const homeSvg = svg({ attrs: { viewBox: '1020 -226 972 972' } }, [
+    svg.a({ attrs: { 'xlink:href': "/target" } }, [
+        // TARGET
+        svg.path({
+            attrs: {
+                id: "target",
+                d: "M 1506.0454 -136.98166 L 1506.0454 -225 C 1420.9163 -225 1337.2871 -202.5916 1263.5632 -160.02709 C 1031.6083 -26.107868 952.1347 270.4917 1086.0539 502.4466 L 1162.28 458.43743 C 1052.6664 268.58106 1117.716 25.81266 1307.5724 -83.80097 C 1367.9158 -118.64026 1436.3668 -136.98165 1506.0454 -136.98166 Z",
+                fill: "#f44335"
+            }
+        }),
+        svg.text([
+            svg.textPath({ attrs: { 'xlink:href': "#target", startOffset: "80%" } }, [
+                svg.tspan({ attrs: { 'font-family': "Roboto", 'font-size': "60", 'text-anchor': "middle", 'letter-spacing': 15, 'font-weight': "bold", fill: "#ebebeb", dy: "-20" } }, "TARGET")
+            ])
+        ]),
+        svg.path({
+            attrs: {
+                d: "M 1506.0454 -136.98166 L 1506.0454 -225 C 1420.9163 -225 1337.2871 -202.5916 1263.5632 -160.02709 C 1031.6083 -26.107868 952.1347 270.4917 1086.0539 502.4466 L 1162.28 458.43743 C 1052.6664 268.58106 1117.716 25.81266 1307.5724 -83.80097 C 1367.9158 -118.64026 1436.3668 -136.98165 1506.0454 -136.98166 Z",
+                stroke: "white",
+                'fill-opacity': '0',
+                'stroke-linecap': "round",
+                'stroke-linejoin': "round",
+                'stroke-width': "6"
+            }
+        })
+    ]),
+    // DISEASE
+    svg.a({ attrs: { 'xlink:href': "/disease" } }, [
+        svg.path({
+            attrs: {
+                id: "disease",
+                d: "M 1849.8108 458.43743 L 1926.0369 502.4466 C 1968.6014 428.7227 1991.0098 345.09344 1991.0098 259.9644 C 1991.0098 -7.8740405 1773.8838 -225 1506.0454 -225 L 1506.0454 -136.98166 C 1725.2726 -136.98166 1902.9914 40.73715 1902.9914 259.9644 C 1902.9914 329.643 1884.65 398.094 1849.8108 458.4374 Z",
+                fill: "#e91e63"
+            }
+        }),
+        svg.text([
+            svg.textPath({ attrs: { 'xlink:href': "#disease", startOffset: "80%" } }, [
+                svg.tspan({ attrs: { 'font-family': "Roboto", 'font-size': "60", 'text-anchor': "middle", 'letter-spacing': 15, 'font-weight': "bold", fill: "#ebebeb", dy: "-20" } }, "DISEASE")
+            ])
+        ]),
+        svg.path({
+            attrs: {
+                d: "M 1849.8108 458.43743 L 1926.0369 502.4466 C 1968.6014 428.7227 1991.0098 345.09344 1991.0098 259.9644 C 1991.0098 -7.8740405 1773.8838 -225 1506.0454 -225 L 1506.0454 -136.98166 C 1725.2726 -136.98166 1902.9914 40.73715 1902.9914 259.9644 C 1902.9914 329.643 1884.65 398.094 1849.8108 458.4374 Z",
+                stroke: "white",
+                'fill-opacity': '0',
+                'stroke-linecap': "round",
+                'stroke-linejoin': "round",
+                'stroke-width': "6"
+            }
+        })
+    ]),
+    // COMPOUND
+    svg.a({ attrs: { 'xlink:href': "/compound" } }, [
+        svg.path({
+            attrs: {
+                id: "compound",
+                d: "M 1162.28 458.43743 L 1086.0539 502.4466 C 1128.6184 576.1705 1189.8393 637.3914 1263.5632 679.9559 C 1495.518 813.8751 1792.1177 734.4015 1926.0369 502.4466 L 1849.8108 458.43743 C 1740.1971 648.2938 1497.4287 713.3434 1307.5724 603.7298 C 1247.229 568.8905 1197.1193 518.7809 1162.28 458.43745 Z",
+                fill: "#ff9800"
+            }
+        }),
+        svg.text([
+            svg.textPath({ attrs: { 'xlink:href': "#compound", startOffset: "29%" } }, [
+                svg.tspan({ attrs: { 'font-family': "Roboto", 'font-size': "60", 'text-anchor': "middle", 'letter-spacing': 15, 'font-weight': "bold", fill: "#ebebeb", dy: "-20" } }, "COMPOUND")
+            ])
+        ]),
+        svg.path({
+            attrs: {
+                d: "M 1162.28 458.43743 L 1086.0539 502.4466 C 1128.6184 576.1705 1189.8393 637.3914 1263.5632 679.9559 C 1495.518 813.8751 1792.1177 734.4015 1926.0369 502.4466 L 1849.8108 458.43743 C 1740.1971 648.2938 1497.4287 713.3434 1307.5724 603.7298 C 1247.229 568.8905 1197.1193 518.7809 1162.28 458.43745 Z",
+                stroke: "white",
+                'fill-opacity': '0',
+                'stroke-linecap': "round",
+                'stroke-linejoin': "round",
+                'stroke-width': "6"
+            }
+        })
+    ]),
+    svg.g([
+        // DISEASE - PHENO
+        svg.path({ attrs: { d: "M 1506.0454 251.9644 L 1506.0454 -.035595944 C 1645.2211 -.035595944 1758.0454 112.78865 1758.0454 251.9644 C 1758.0454 296.19964 1746.4014 339.65556 1724.2838 377.9644 Z", fill: "#e92363", 'fill-opacity': ".5" } }),
+        svg.path({ attrs: { d: "M 1506.0454 251.9644 L 1506.0454 -.035595944 C 1645.2211 -.035595944 1758.0454 112.78865 1758.0454 251.9644 C 1758.0454 296.19964 1746.4014 339.65556 1724.2838 377.9644 Z", stroke: "white", 'stroke-linecap': "round", 'stroke-linejoin': "round", 'stroke-width': "6", 'fill-opacity': '0' } }),
+        svg.text({ attrs: { transform: "translate(1529.807 150.726)", fill: "white" } }, [
+            svg.tspan({ attrs: { 'font-family': "Roboto", 'font-size': "60", 'font-weight': "bold", fill: "white", x: ".18359375", y: "56", textLength: "198.63281" } }, 'PHENO')
+        ]),
+
+        svg.path({ attrs: { d: "M 1506.1296 251.9644 L 1724.368 377.9644 C 1654.78 498.49415 1500.6593 539.7907 1380.1296 470.2028 C 1341.8207 448.0852 1310.0088 416.27324 1287.8912 377.9644 Z", fill: "#fe9801", 'fill-opacity': ".5" } }),
+        svg.path({ attrs: { d: "M 1506.1296 251.9644 L 1724.368 377.9644 C 1654.78 498.49415 1500.6593 539.7907 1380.1296 470.2028 C 1341.8207 448.0852 1310.0088 416.27324 1287.8912 377.9644 Z", stroke: "white", 'stroke-linecap': "round", 'stroke-linejoin': "round", 'stroke-width': "6", 'fill-opacity': '0' } }),
+        // svg.path({ attrs: { d: "M 1506.1296 251.9644 L 1724.368 377.9644 C 1654.78 498.49415 1500.6593 539.7907 1380.1296 470.2028 C 1341.8207 448.0852 1310.0088 416.27324 1287.8912 377.9644 Z", stroke: "white", 'stroke-linecap': "round", 'stroke-linejoin': "round", 'stroke-width': "6" } }),
+
+
+        svg.path({ attrs: { d: "M 1506.0454 251.9644 L 1287.807 377.9644 C 1218.2191 257.43466 1259.5156 103.31388 1380.0454 33.726002 C 1418.3542 11.608383 1461.8101 -.035595944 1506.0454 -.035595944 Z", fill: "#f44335", 'fill-opacity': ".5" } }),
+        svg.path({ attrs: { d: "M 1506.0454 251.9644 L 1287.807 377.9644 C 1218.2191 257.43466 1259.5156 103.31388 1380.0454 33.726002 C 1418.3542 11.608383 1461.8101 -.035595944 1506.0454 -.035595944 Z", stroke: "white", 'stroke-linecap': "round", 'stroke-linejoin': "round", 'stroke-width': "6", 'fill-opacity': '0' } }),
+
+        svg.text({ attrs: { transform: "translate(1309.807 150.726)", fill: "white" } }, [
+            svg.tspan({ attrs: { 'font-family': "Roboto", 'font-size': "60", 'font-weight': "bold", fill: "white", x: ".29589844", y: "56", textLength: "158.4082" } }, 'GENO')
+        ]),
+
+
+        svg.text({ attrs: { transform: "translate(1406.807 358.726)", fill: "white" } }, [
+            svg.tspan({ attrs: { 'font-family': "Roboto", 'font-size': "60", 'font-weight': "bold", fill: "white", x: ".3076172", y: "56", textLength: "209.38477" } }, 'CHEMO')
+        ]),
+
+
+    ])
+])

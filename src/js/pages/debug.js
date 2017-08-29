@@ -15,7 +15,7 @@ import { loggerFactory } from '../utils/logger'
 
 function Debug(sources) {
 
-    const logger = loggerFactory('debug', sources.onion.state$, 'settings.debug')
+    const logger = loggerFactory('debug', sources.onion.state$, 'settings.common.debug')
 
     const stringData$ = sources.onion.state$.map(state => {
         return "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state))

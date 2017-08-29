@@ -20,7 +20,7 @@ import { runScenario } from '../utils/scenario'
 
 export default function CompoundWorkflow(sources) {
 
-    const logger = loggerFactory('compound', sources.onion.state$, 'settings.form.debug')
+    const logger = loggerFactory('compound', sources.onion.state$, 'settings.common.debug')
 
     const state$ = sources.onion.state$
 

@@ -21,7 +21,7 @@ import { runScenario } from '../utils/scenario'
 
 function DiseaseWorkflow(sources) {
 
-    const logger = loggerFactory('signature', sources.onion.state$, 'settings.debug')
+    const logger = loggerFactory('signature', sources.onion.state$, 'settings.common.debug')
 
     const state$ = sources.onion.state$
 

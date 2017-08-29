@@ -54,26 +54,25 @@ function TargetWorkflow(sources) {
 
     // sources = { ...sources, DOM: mergeDeepRight(sources.DOM, domSource) }
 
-    const logger = loggerFactory('target', sources.onion.state$, 'settings.debug')
+    const logger = loggerFactory('target', sources.onion.state$, 'settings.common.debug')
 
     const formLens = {
         get: state => ({ form: state.form, settings: { form: state.settings.form, api: state.settings.api } }),
-        set: (state, childState) => ({ ...state, form: childState.form })
+        set: (state, childState) => ({...state, form: childState.form })
     };
 
     // Initialize if not yet done in parent (i.e. router) component (useful for testing)
     const defaultReducer$ = xs.of(prevState => {
         // compound -- defaultReducer
         if (typeof prevState === 'undefined') {
-            return (
-                {
-                    settings: initSettings,
-                    form: {},
-                    compoundTable: {},
-                    sform: {},
-                    filter: {},
-                    hist: {}
-                })
+            return ({
+                settings: initSettings,
+                form: {},
+                compoundTable: {},
+                sform: {},
+                filter: {},
+                hist: {}
+            })
         } else {
             return ({
                 ...prevState,
@@ -90,16 +89,16 @@ function TargetWorkflow(sources) {
     // Scenario for ghost mode
     const scenarioReducer$ =
         sources.onion.state$.take(1)
-            .filter(state => state.settings.common.ghostMode)
-            .mapTo(runScenario(scenario).scenarioReducer$)
-            .flatten()
-            .startWith(prevState => prevState)
+        .filter(state => state.settings.common.ghostMode)
+        .mapTo(runScenario(scenario).scenarioReducer$)
+        .flatten()
+        .startWith(prevState => prevState)
     const scenarioPopup$ =
         sources.onion.state$.take(1)
-            .filter(state => state.settings.common.ghostMode)
-            .mapTo(runScenario(scenario).scenarioPopup$)
-            .flatten()
-            .startWith({ text: 'Welcome to Target Workflow', duration: 4000 })
+        .filter(state => state.settings.common.ghostMode)
+        .mapTo(runScenario(scenario).scenarioPopup$)
+        .flatten()
+        .startWith({ text: 'Welcome to Target Workflow', duration: 4000 })
 
     const TargetFormSink = isolate(TargetForm, { onion: formLens, DOM: 'form' })(sources)
     const target$ = TargetFormSink.output
@@ -107,16 +106,16 @@ function TargetWorkflow(sources) {
     const TableContainer = makeTable(CompoundTable, compoundTableLens)
 
     const Table = isolate(TableContainer, { onion: compoundContainerTableLens })
-        ({ ...sources, input: target$.map((t) => ({ query: t })).remember() });
+        ({...sources, input: target$.map((t) => ({ query: t })).remember() });
 
     // Granular access to global state and parts of settings
     const thisFormLens = {
         get: state => ({ form: state.sform, settings: { form: state.settings.form, api: state.settings.api } }),
-        set: (state, childState) => ({ ...state, sform: childState.form })
+        set: (state, childState) => ({...state, sform: childState.form })
     };
 
     const signatureForm = isolate(SignatureForm, { onion: thisFormLens })(sources)
-    // only show signature form when a target has been selected !!!
+        // only show signature form when a target has been selected !!!
     const signatureMessage$ = xs.of('Optional Signature:')
     const signatureFormVdom$ = xs.combine(signatureForm.DOM, signatureMessage$, target$).map(([s, m, t]) =>
         div([
@@ -127,16 +126,15 @@ function TargetWorkflow(sources) {
     const signature$ = signatureForm.output
 
     // Filter Form
-    const filterForm = isolate(Filter, 'filter')({ ...sources, input: signature$ })
+    const filterForm = isolate(Filter, 'filter')({...sources, input: signature$ })
     const filter$ = filterForm.output
 
     // Histogram plot component
     const histogram = isolate(Histogram, { onion: histLens })
-        ({ ...sources, input: xs.combine(signature$, filter$, target$).map(([s, f, t]) => ({ signature: s, filter: f, target: t })).remember() });
+        ({...sources, input: xs.combine(signature$, filter$, target$).map(([s, f, t]) => ({ signature: s, filter: f, target: t })).remember() });
 
     const pageStyle = {
-        style:
-        {
+        style: {
             fontSize: '14px',
             opacity: '0',
             transition: 'opacity 1s',
@@ -146,19 +144,19 @@ function TargetWorkflow(sources) {
     }
 
     const vdom$ = xs.combine(
-        TargetFormSink.DOM,
-        Table.DOM,
-        signatureFormVdom$,
-        filterForm.DOM,
-        histogram.DOM
-    )
+            TargetFormSink.DOM,
+            Table.DOM,
+            signatureFormVdom$,
+            filterForm.DOM,
+            histogram.DOM
+        )
         .map(([
             formDOM,
             table,
             signatureForm,
             filter,
             hist
-        ]) => div('.row .target', {style : {margin: '0px 0px 0px 0px'}}, [
+        ]) => div('.row .target', { style: { margin: '0px 0px 0px 0px' } }, [
             formDOM,
             div('.col .s10 .offset-s1', [signatureForm]),
             div('.row', ''),
@@ -178,7 +176,7 @@ function TargetWorkflow(sources) {
 
     return {
         log: xs.merge(
-            logger(defaultReducer$, 'defaultReducer$'),
+            // logger(defaultReducer$, 'defaultReducer$'),
             logger(target$, 'target$'),
             TargetFormSink.log,
             Table.log,

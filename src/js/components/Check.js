@@ -10,12 +10,11 @@ function Check(sources) {
 
     const state$ = sources.onion.state$
 
-    const props$ = sources.props.debug()
+    const props$ = sources.props
 
    const modifiedState$ = state$
         .compose(dropRepeats((x, y) => equals(omit(['result'], x), omit(['result'], y))))
         .compose(debounce(2000))
-        // .debug()
 
     const request$ = xs.combine(modifiedState$, props$)
         .map(([state, props]) => {

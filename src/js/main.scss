@@ -5,12 +5,11 @@
 // }
 
 /* Colors for workflows, to be overriden when printed */
-@import '../../node_modules/materialize-css/sass/components/color';
 
+@import '../../node_modules/materialize-css/sass/components/color';
 .compound {
     @extend .orange;
     @extend .lighten-5;
-
 }
 
 .disease {
@@ -23,32 +22,41 @@
     @extend .lighten-5;
 }
 
-@media print { 
+a:hover #border {
+    stroke: #4E4C4C;
+    stroke-width: 2pt;
+}
 
-    @page { margin: 40pt 0pt 40pt 0pt }
-
+@media print {
+    @page {
+        margin: 40pt 0pt 40pt 0pt
+    }
     /* no background color for printing */
-    .compound, .disease, .target {
+    .compound,
+    .disease,
+    .target {
         background-color: white !important
     }
-
     /* Don't print header and footer */
-    header, footer { display: none !important; }
-
+    header,
+    footer {
+        display: none !important;
+    }
     /* ul and page class to avoid splitting up blocks that belong together */
     li {
         page-break-inside: avoid;
     }
-    ul
-    {
+    ul {
         page-break-before: avoid;
     }
     .pagebreak {
         page-break-after: always
     }
     /* Recuce font size for printing */
-    div, p, a, span {
+    div,
+    p,
+    a,
+    span {
         font-size: 9pt
     }
-
 }

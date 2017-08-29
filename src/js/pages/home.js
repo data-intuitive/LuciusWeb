@@ -11,6 +11,16 @@ import { initSettings } from '../configuration'
 import debounce from 'xstream/extra/debounce'
 import dropRepeats from 'xstream/extra/dropRepeats'
 
+const appear = {
+    style: {
+        // fontSize: '14px',
+        opacity: '0',
+        transition: 'opacity 4s',
+        delayed: { opacity: '1' },
+        destroy: { opacity: '0' }
+    }
+}
+
 function Home(sources) {
 
     const checkProps$ = sources.onion.state$
@@ -26,8 +36,8 @@ function Home(sources) {
                 'This application is the interface with L1000 data. Currently, ',
                 'there is support for working with disease profiles expressed using gene lists or signatures and compound similarity.'
             ]),
-            div('.col .s6 offset-s3 .center-align', [
-                svg({ attrs: { viewBox: '1020 -226 972 972' } }, [
+            div('.col .s6 offset-s3 .center-align', appear, [
+                svg({ attrs: { viewBox: '1018 -228 972 974' } }, [
                     svg.a({ attrs: { 'xlink:href': "/target" } }, [
                         // TARGET
                         svg.path({
@@ -44,6 +54,7 @@ function Home(sources) {
                         ]),
                         svg.path({
                             attrs: {
+                                id: 'border',
                                 d: "M 1506.0454 -136.98166 L 1506.0454 -225 C 1420.9163 -225 1337.2871 -202.5916 1263.5632 -160.02709 C 1031.6083 -26.107868 952.1347 270.4917 1086.0539 502.4466 L 1162.28 458.43743 C 1052.6664 268.58106 1117.716 25.81266 1307.5724 -83.80097 C 1367.9158 -118.64026 1436.3668 -136.98165 1506.0454 -136.98166 Z",
                                 stroke: "white",
                                 'fill-opacity': '0',
@@ -69,6 +80,7 @@ function Home(sources) {
                         ]),
                         svg.path({
                             attrs: {
+                                id: 'border',
                                 d: "M 1849.8108 458.43743 L 1926.0369 502.4466 C 1968.6014 428.7227 1991.0098 345.09344 1991.0098 259.9644 C 1991.0098 -7.8740405 1773.8838 -225 1506.0454 -225 L 1506.0454 -136.98166 C 1725.2726 -136.98166 1902.9914 40.73715 1902.9914 259.9644 C 1902.9914 329.643 1884.65 398.094 1849.8108 458.4374 Z",
                                 stroke: "white",
                                 'fill-opacity': '0',
@@ -94,6 +106,7 @@ function Home(sources) {
                         ]),
                         svg.path({
                             attrs: {
+                                id: 'border',
                                 d: "M 1162.28 458.43743 L 1086.0539 502.4466 C 1128.6184 576.1705 1189.8393 637.3914 1263.5632 679.9559 C 1495.518 813.8751 1792.1177 734.4015 1926.0369 502.4466 L 1849.8108 458.43743 C 1740.1971 648.2938 1497.4287 713.3434 1307.5724 603.7298 C 1247.229 568.8905 1197.1193 518.7809 1162.28 458.43745 Z",
                                 stroke: "white",
                                 'fill-opacity': '0',

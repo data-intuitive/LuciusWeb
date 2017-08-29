@@ -22,9 +22,12 @@
     @extend .lighten-5;
 }
 
+
+/* home svg styling and hover */
+
 a:hover #border {
-    stroke: #4E4C4C;
-    stroke-width: 2pt;
+    fill: white;
+    fill-opacity: 0.5;
 }
 
 @media print {

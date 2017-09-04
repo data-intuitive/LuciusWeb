@@ -1,33 +1,28 @@
 export const vegaSpec = (data, target = 'xyz') => ({
     "$schema": "https://vega.github.io/schema/vega/v3.0.json",
 
-      "autosize": {"type": "fit", "resize": true},
+    "autosize": { "type": "fit", "resize": true },
     //   "padding": "strict",
-  
-    "data": [
-        {
-            "name": "table",
-            "values": data,
-            "format": {
-                "type": "json",
-                "parse": { "count": "number", "zhangAvg": "number" }
-            }
-        }
-    ],
 
-    "signals": [
-        {
-            "name": "tooltip",
-            "value": {},
-            "on": [
-                { "events": "rect:mouseover", "update": "datum" },
-                { "events": "rect:mouseout", "update": "{}" }
-            ]
+    "data": [{
+        "name": "table",
+        "values": data,
+        "format": {
+            "type": "json",
+            "parse": { "count": "number", "zhangAvg": "number", target: "number" }
         }
-    ],
+    }],
 
-    "scales": [
-        {
+    "signals": [{
+        "name": "tooltip",
+        "value": {},
+        "on": [
+            { "events": "rect:mouseover", "update": "datum" },
+            { "events": "rect:mouseout", "update": "{}" }
+        ]
+    }],
+
+    "scales": [{
             "name": "xscale",
             "type": "band",
             "domain": { "data": "table", "field": "bin" },
@@ -61,8 +56,7 @@ export const vegaSpec = (data, target = 'xyz') => ({
         }
     ],
 
-    "axes": [
-        {
+    "axes": [{
             "orient": "bottom",
             "scale": "xscale2",
             "ticks": false,
@@ -76,7 +70,8 @@ export const vegaSpec = (data, target = 'xyz') => ({
             }
         },
         {
-            "orient": "left", "scale": "yscale",
+            "orient": "left",
+            "scale": "yscale",
             "tickCount": 5,
             "domain": false,
             "encode": {
@@ -96,7 +91,8 @@ export const vegaSpec = (data, target = 'xyz') => ({
             }
         },
         {
-            "orient": "right", "scale": "yscale2",
+            "orient": "right",
+            "scale": "yscale2",
             "tickCount": 2,
             "domain": false,
             "encode": {
@@ -120,8 +116,7 @@ export const vegaSpec = (data, target = 'xyz') => ({
         }
     ],
 
-    "marks": [
-        {
+    "marks": [{
             "type": "rect",
             "from": { "data": "table" },
             "encode": {
@@ -135,12 +130,12 @@ export const vegaSpec = (data, target = 'xyz') => ({
                 "update": {
                     "fill": { "scale": "color", "field": "zhangAvg" },
                     "fillOpacity": { "value": 0.7 },
-                    "stroke": {"scale" : "color", "field" : "zhangAvg"}
+                    "stroke": { "scale": "color", "field": "zhangAvg" }
                 },
                 "hover": {
                     "fill": { "value": "white" },
                     "fillOpacity": { "value": 0.5 },
-                    "stroke" : {"value" : "grey"},
+                    "stroke": { "value": "grey" },
                 }
             }
         },
@@ -199,33 +194,28 @@ export const vegaHistogramSpec = (data, target = 'xyz') => {
         // "width": width,
         // "height": height,
         // "padding": {"top": 10, "left": 30, "bottom": 30, "right": 10},
-        "signals": [
-            {
-                "name": "tooltip",
-                "init": {},
-                "streams": [
-                    { "type": "rect:mouseover", "expr": "datum" },
-                    { "type": "rect:mouseout", "expr": "{}" }
-                ]
-            }
-        ],
+        "signals": [{
+            "name": "tooltip",
+            "init": {},
+            "streams": [
+                { "type": "rect:mouseover", "expr": "datum" },
+                { "type": "rect:mouseout", "expr": "{}" }
+            ]
+        }],
 
-        "data": [
-            {
-                "name": "table",
-                "values": data,
-                "format": {
-                    type: "json",
-                    parse: {
-                        count: "number",
-                        zhangAvg: "number"
-                    }
+        "data": [{
+            "name": "table",
+            "values": data,
+            "format": {
+                type: "json",
+                parse: {
+                    count: "number",
+                    zhangAvg: "number"
                 }
             }
-        ],
+        }],
 
-        "scales": [
-            {
+        "scales": [{
                 "name": "x",
                 "type": "ordinal",
                 "range": "width",
@@ -252,40 +242,37 @@ export const vegaHistogramSpec = (data, target = 'xyz') => {
                 nice: true
             }
         ],
-        "axes": [
-            {
-                "type": "x",
-                "scale": "xscale",
-                "properties": {
-                    "ticks": {
-                        "stroke": { "value": "steelblue" },
-                    },
-                    "majorTicks": {
-                        "strokeWidth": { "value": 2 },
-                        "stroke": { value: "lightgray" }
-                    },
-                    "labels": {
-                        "text": { "template": "{{datum.data|number:','}}" },
-                        "fill": { "value": "lightgray" },
-                        "angle": { "value": 50 },
-                        "fontSize": { "value": 8 },
-                        "align": { "value": "left" },
-                        "baseline": { "value": "middle" },
-                        "dx": { "value": 3 }
-                    },
-                    "title": {
-                        "fontSize": { "value": 16 }
-                    },
-                    "axis": {
-                        "stroke": { "value": "#333" },
-                        "strokeWidth": { "value": 0 }
-                    }
+        "axes": [{
+            "type": "x",
+            "scale": "xscale",
+            "properties": {
+                "ticks": {
+                    "stroke": { "value": "steelblue" },
+                },
+                "majorTicks": {
+                    "strokeWidth": { "value": 2 },
+                    "stroke": { value: "lightgray" }
+                },
+                "labels": {
+                    "text": { "template": "{{datum.data|number:','}}" },
+                    "fill": { "value": "lightgray" },
+                    "angle": { "value": 50 },
+                    "fontSize": { "value": 8 },
+                    "align": { "value": "left" },
+                    "baseline": { "value": "middle" },
+                    "dx": { "value": 3 }
+                },
+                "title": {
+                    "fontSize": { "value": 16 }
+                },
+                "axis": {
+                    "stroke": { "value": "#333" },
+                    "strokeWidth": { "value": 0 }
                 }
-            },
-        ],
+            }
+        }, ],
 
-        "marks": [
-            {
+        "marks": [{
                 "type": "rect",
                 "from": { "data": "table" },
                 "properties": {
@@ -302,8 +289,7 @@ export const vegaHistogramSpec = (data, target = 'xyz') => {
                         "strokeOpacity": { "value": 50 }
                     },
                     "update": {
-                        "stroke": [
-                            {
+                        "stroke": [{
                                 "test": "datum._id == tooltip._id",
                                 "value": "gray"
                             },
@@ -324,8 +310,7 @@ export const vegaHistogramSpec = (data, target = 'xyz') => {
                         "dx": { "scale": "x", "band": true, "mult": 0.5 },
                         "y": { "scale": "y", "signal": "tooltip.count", "offset": -5 },
                         "text": { "signal": "tooltip.count" },
-                        "fillOpacity": [
-                            {
+                        "fillOpacity": [{
                                 "test": "!tooltip._id",
                                 "value": 0
                             },
@@ -350,8 +335,7 @@ export const vegaHistogramSpec = (data, target = 'xyz') => {
                         "strokeOpacity": { "value": 50 }
                     },
                     "update": {
-                        "stroke": [
-                            {
+                        "stroke": [{
                                 "test": "datum._id == tooltip._id",
                                 "value": "gray"
                             },
@@ -368,8 +352,7 @@ export const vegaHistogramSpec = (data, target = 'xyz') => {
 
 export const emptyData = [{}];
 
-export const exampleData = [
-    {
+export const exampleData = [{
         "indexLow": "0",
         "count": "105",
         "lowerBound": "0.9000",

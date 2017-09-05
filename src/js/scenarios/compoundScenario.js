@@ -84,7 +84,7 @@ export const scenario = [{ // Initiate ghost mode
     },
 
     { // Signature creation
-        delay: 1000,
+        delay: 100,
         state: { form: { sampleSelection: { ghostoutput: true, output: ['GJA129_P03'] } } },
         message: {
             text: 'Press Select',
@@ -92,24 +92,24 @@ export const scenario = [{ // Initiate ghost mode
         }
     },
     {
-        delay: 3000,
+        delay: 5000,
         state: {},
         message: {
             text: 'A signed ranked gene signature is generated across the samples',
-            duration: 4000
+            duration: 5000
         }
     },
     {
-        delay: 1000,
+        delay: 5000,
         state: {},
         message: {
             text: 'This gene signature can be copied and used in the target workflow',
-            duration: 4000
+            duration: 5000
         }
     },
 
     { // Filter
-        delay: 3000,
+        delay: 5000,
         state: {
             filter: { ghostinput: { protocol: "MCF7" } },
             headTable: { input: { filter: { protocol: "MCF7" }, query: '-GOLT1B DDIT4 GPER -TNIP1 INSIG1 CLIC4 HMGCS1 HMOX1 AARS ELOVL6 -EGR1 -MAT2A FDFT1 -DDX42 PCK2 -MYCBP -RRP1B TSC22D3 CDK7 TIPARP -POLR1C -NFKBIA RGS2' } },
@@ -117,7 +117,7 @@ export const scenario = [{ // Initiate ghost mode
         },
         message: {
             text: 'Set filter to MCF7',
-            duration: 4000
+            duration: 5000
         }
     },
 

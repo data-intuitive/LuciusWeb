@@ -11,7 +11,7 @@ import { Histogram, histLens } from '../components/Histogram/Histogram'
 import { SimilarityPlot, simLens } from '../components/SimilarityPlot/SimilarityPlot'
 import { makeTable, headTableLens, tailTableLens } from '../components/Table'
 import { initSettings } from './settings'
-import { Filter } from '../components/Filter'
+import { Filter, compoundFilterLens } from '../components/Filter'
 import { loggerFactory } from '~/../../src/js/utils/logger'
 import { SampleTable, sampleTableLens } from '../components/SampleTable/SampleTable'
 
@@ -28,21 +28,21 @@ function DiseaseWorkflow(sources) {
     // Scenario for ghost mode
     const scenarioReducer$ =
         sources.onion.state$.take(1)
-            .filter(state => state.settings.common.ghostMode)
-            .mapTo(runScenario(scenario).scenarioReducer$)
-            .flatten()
-            .startWith(prevState => prevState)
+        .filter(state => state.settings.common.ghostMode)
+        .mapTo(runScenario(scenario).scenarioReducer$)
+        .flatten()
+        .startWith(prevState => prevState)
     const scenarioPopup$ =
         sources.onion.state$.take(1)
-            .filter(state => state.settings.common.ghostMode)
-            .mapTo(runScenario(scenario).scenarioPopup$)
-            .flatten()
-            .startWith({text: 'Welcome to Disease Workflow', duration: 4000})
+        .filter(state => state.settings.common.ghostMode)
+        .mapTo(runScenario(scenario).scenarioPopup$)
+        .flatten()
+        .startWith({ text: 'Welcome to Disease Workflow', duration: 4000 })
 
 
-	/** 
-	 * Parse feedback from vega components. Not used yet...
-	 */
+    /** 
+     * Parse feedback from vega components. Not used yet...
+     */
     // const feedback$ = sources.vega.map(item => item).startWith(null).debug();
     // const feedback$ = domSource$.select('.SignatureCheck').events('click').mapTo('click !').startWith(null);
 
@@ -50,18 +50,17 @@ function DiseaseWorkflow(sources) {
     const signature$ = signatureForm.output
 
     // Filter Form
-    const filterForm = isolate(Filter, 'filter')({ ...sources, input: signature$ })
-    const filter$ = filterForm.output
+    const filterForm = isolate(Filter, { onion: compoundFilterLens })({...sources, input: signature$ })
+    const filter$ = filterForm.output.remember()
 
     // default Reducer, initialization
     const defaultReducer$ = xs.of(prevState => {
         // disease -- defaultReducer
         if (typeof prevState === 'undefined') {
-            return (
-                {
-                    settings: initSettings,
-                    form: {},
-                })
+            return ({
+                settings: initSettings,
+                form: {},
+            })
         } else {
             return ({
                 ...prevState,
@@ -73,29 +72,28 @@ function DiseaseWorkflow(sources) {
 
     // Similarity plot component
     const similarityPlot = isolate(SimilarityPlot, { onion: simLens })
-        ({ ...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ signature: s, filter: f })).remember() });
+        ({...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ signature: s, filter: f })).remember() });
 
     // Histogram plot component
     const histogram = isolate(Histogram, { onion: histLens })
-        ({ ...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ signature: s, filter: f })).remember() });
+        ({...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ signature: s, filter: f })).remember() });
 
 
     const headTableContainer = makeTable(SampleTable, sampleTableLens)
 
     // tables: Join settings from api and sourire into props
     const headTable = isolate(headTableContainer, { onion: headTableLens })
-        ({ ...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ query: s, filter: f })).remember() });
+        ({...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ query: s, filter: f })).remember() });
 
 
     const tailTableContainer = makeTable(SampleTable, sampleTableLens)
 
     // tables: Join settings from api and sourire into props
     const tailTable = isolate(tailTableContainer, { onion: tailTableLens })
-        ({ ...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ query: s, filter: f })).remember() });
-        
+        ({...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ query: s, filter: f })).remember() });
+
     const pageStyle = {
-        style:
-        {
+        style: {
             fontSize: '14px',
             opacity: '0',
             transition: 'opacity 1s',
@@ -105,39 +103,38 @@ function DiseaseWorkflow(sources) {
     }
 
     const vdom$ = xs.combine(
-        signatureForm.DOM,
-        filterForm.DOM,
-        histogram.DOM,
-        similarityPlot.DOM,
-        headTable.DOM,
-        tailTable.DOM,
-        // feedback$
-    )
+            signatureForm.DOM,
+            filterForm.DOM,
+            histogram.DOM,
+            similarityPlot.DOM,
+            headTable.DOM,
+            tailTable.DOM,
+            // feedback$
+        )
         .map(([
-            form,
-            filter,
-            hist,
-            simplot,
-            headTable,
-            tailTable,
-            // feedback
-        ]) =>
-            div('.row .disease', {style : {margin: '0px 0px 0px 0px'}}, [
                 form,
-                div('.col .s10 .offset-s1', pageStyle,
-                    [
-                        div('.row', [filter]),
-                        div('.row ', [div('.col .s12 .l7', [
-                            simplot,
-                        ]), div('.col .s12 .l5', [
-                            hist,
-                        ])]),
-                        div('.row', []),
-                        div('.col .s12', [headTable]),
-                        div('.row', []),
-                        div('.col .s12', [tailTable]),
-                        div('.row', [])
-                    ])
+                filter,
+                hist,
+                simplot,
+                headTable,
+                tailTable,
+                // feedback
+            ]) =>
+            div('.row .disease', { style: { margin: '0px 0px 0px 0px' } }, [
+                form,
+                div('.col .s10 .offset-s1', pageStyle, [
+                    div('.row', [filter]),
+                    div('.row ', [div('.col .s12 .l7', [
+                        simplot,
+                    ]), div('.col .s12 .l5', [
+                        hist,
+                    ])]),
+                    div('.row', []),
+                    div('.col .s12', [headTable]),
+                    div('.row', []),
+                    div('.col .s12', [tailTable]),
+                    div('.row', [])
+                ])
             ])
         );
 

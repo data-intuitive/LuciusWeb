@@ -7,6 +7,17 @@ import { ENTER_KEYCODE } from '../utils/keycodes.js'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import { loggerFactory } from '~/../../src/js/utils/logger'
 
+
+export const compoundFilterLens = {
+    get: state => ({ core: state.filter, settings: state.settings }),
+    set: (state, childState) => ({...state, filter: childState.core })
+}
+
+const concentrations = ['', '0.1', '1', '10', '30']
+const protocols = ['', 'MCF7', 'PBMC']
+const types = ['', 'test', 'poscon']
+
+
 /**
  * Provide a filter form. We inject (via input) a signature in order to hide the form when an empty signature is present.
  * 
@@ -42,49 +53,39 @@ function Filter(sources) {
 
     const modifiedState$ = xs.combine(input$, state$)
         .filter(([input, state]) => !isEmptyState(state))
-        .map(([input, state]) => state.core.input)
-        // .compose(dropRepeats(equals))
-
-    // Make sure the input is generated only when some state is active.
-    const filterInput$ = xs.of(x => ({
-        concentration: '',
-        protocol: '',
-        type: ''
-    }))
+        .map(([i, state]) => ({...state, core: {...state.core, input: i } }))
 
     const emptyVdom$ = emptyState$.mapTo(div())
 
-    const loadedVdom$ = xs.combine(filterInput$, modifiedState$)
-        .map(([filter, state]) =>
-            div([
+    const isSelected = (x, y) => (x === y) ? { props: { value: y, selected: true } } : { props: { value: y } }
+
+    const loadedVdom$ = xs.combine(modifiedState$)
+        .map(([state]) => {
+            const concentration = state.core.output.concentration
+            const protocol = state.core.output.protocol
+            const type = state.core.output.type
+
+            return div([
                 div('.input-field .concentration .col .s12 .l4', [
                     span('.blue-grey-text', ['Concentration']),
-                    select('.browser-default', [
-                        option('.selected', { props: { value: '' } }, ''),
-                        option({ props: { value: '0.1' } }, 0.1),
-                        option({ props: { value: '1' } }, 1),
-                        option({ props: { value: '10' } }, 10),
-                        option({ props: { value: '30' } }, 30)
-                    ]),
+                    select('.browser-default',
+                        concentrations.map(conc => option(isSelected(concentration, conc), conc))
+                    ),
                 ]),
                 div('.input-field .protocol .col .s12 .l4', [
                     span('.blue-grey-text', ['Protocol']),
-                    select('.browser-default', [
-                        option('.selected', { props: { value: '' } }, ''),
-                        option({ props: { value: 'MCF7' } }, 'MCF7'),
-                        option({ props: { value: 'PBMC' } }, 'PBMC')
-                    ]),
+                    select('.browser-default',
+                        protocols.map(prot => option(isSelected(protocol, prot), prot))
+                    ),
                 ]),
                 div('.input-field .type .col .s12 .l4', [
                     span('.blue-grey-text', ['Type']),
-                    select('.browser-default', [
-                        option('.selected', { props: { value: '' } }, ''),
-                        option({ props: { value: 'test' } }, 'test'),
-                        option({ props: { value: 'poscon' } }, 'poscon')
-                    ]),
+                    select('.browser-default',
+                        types.map(t => option(isSelected(type, t), t))
+                    ),
                 ]),
             ])
-        )
+        })
 
     const vdom$ = xs.merge(
         emptyVdom$,
@@ -104,7 +105,6 @@ function Filter(sources) {
         .map(ev => ev.target.value)
         .map(value => ({ type: value }))
         .startWith('')
-
     const protocolChanged$ = sources.DOM
         .select('.protocol')
         .events('input')
@@ -112,18 +112,26 @@ function Filter(sources) {
         .map(value => ({ protocol: value }))
         .startWith('')
 
-    const changes$ = xs.combine(
+    const domChanges$ = xs.combine(
         concentrationChanged$,
         typeChanged$,
         protocolChanged$
     ).map((filters) => mergeAll(filters))
 
+    // This for ghost mode, inject changes via external state updates...
+    const ghostChanges$ = state$
+        .filter(state => typeof state.core.ghostinput !== 'undefined')
+        .map(state => state.core.ghostinput)
+        .compose(dropRepeats())
+        .debug()
+
+    const changes$ = xs.merge(domChanges$, ghostChanges$)
+
     // To be sent to sink as output
     const filter$ = changes$.remember()
 
-    const defaultReducer$ = xs.of(prevState => ({ ...prevState, core: { input: '' } }))
-    const inputReducer$ = input$.map(i => prevState => ({ ...prevState, core: { ...prevState.core, input: i } }))
-    const outputReducer$ = filter$.map(i => prevState => ({ ...prevState, core: { ...prevState.core, output: i } }))
+    const inputReducer$ = input$.map(i => prevState => ({...prevState, core: {...prevState.core, input: i } }))
+    const outputReducer$ = filter$.map(i => prevState => ({...prevState, core: {...prevState.core, output: i } }))
 
     return {
         log: xs.merge(
@@ -132,7 +140,6 @@ function Filter(sources) {
         DOM: vdom$,
         output: filter$,
         onion: xs.merge(
-            defaultReducer$,
             inputReducer$,
             outputReducer$
         )

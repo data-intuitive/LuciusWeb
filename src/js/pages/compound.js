@@ -9,7 +9,7 @@ import { initSettings } from './settings'
 import { makeTable, headTableLens, tailTableLens } from '../components/Table'
 import { Histogram, histLens } from '../components/Histogram/Histogram'
 import { SimilarityPlot, simLens } from '../components/SimilarityPlot/SimilarityPlot'
-import { Filter } from '../components/Filter'
+import { Filter, compoundFilterLens } from '../components/Filter'
 import concat from 'xstream/extra/dropRepeats'
 import { loggerFactory } from '~/../../src/js/utils/logger'
 import { SampleTable, sampleTableLens } from '../components/SampleTable/SampleTable'
@@ -27,36 +27,38 @@ export default function CompoundWorkflow(sources) {
     // Scenario for ghost mode
     const scenarioReducer$ =
         sources.onion.state$.take(1)
-            .filter(state => state.settings.common.ghostMode)
-            .mapTo(runScenario(scenario).scenarioReducer$)
-            .flatten()
-            .startWith(prevState => prevState)
+        .filter(state => state.settings.common.ghostMode)
+        .mapTo(runScenario(scenario).scenarioReducer$)
+        .flatten()
+        .startWith(prevState => prevState)
     const scenarioPopup$ =
         sources.onion.state$.take(1)
-            .filter(state => state.settings.common.ghostMode)
-            .mapTo(runScenario(scenario).scenarioPopup$)
-            .flatten()
-            .startWith({text: 'Welcome to Compound Workflow', duration: 4000})
+        .filter(state => state.settings.common.ghostMode)
+        .mapTo(runScenario(scenario).scenarioPopup$)
+        .flatten()
+        .startWith({ text: 'Welcome to Compound Workflow', duration: 4000 })
 
     const formLens = {
         get: state => ({ form: state.form, settings: { form: state.settings.form, api: state.settings.api } }),
-        set: (state, childState) => ({ ...state, form: childState.form })
+        set: (state, childState) => ({...state, form: childState.form })
     };
 
     const CompoundFormSink = isolate(CompoundForm, { onion: formLens })(sources)
-    const signature$ = CompoundFormSink.output//.startWith('BRCA1')
+    const signature$ = CompoundFormSink.output //.startWith('BRCA1')
 
     // Initialize if not yet done in parent (i.e. router) component (useful for testing)
     const defaultReducer$ = xs.of(prevState => {
         // compound -- defaultReducer
         if (typeof prevState === 'undefined') {
-            return (
-                {
-                    settings: initSettings,
-                    form: {},
-                    sim: {},
-                    hist: {},
-                })
+            return ({
+                settings: initSettings,
+                form: {},
+                sim: {},
+                hist: {},
+                filter: {},
+                headTable: {},
+                tailTable: {}
+            })
         } else {
             return ({
                 ...prevState,
@@ -64,39 +66,41 @@ export default function CompoundWorkflow(sources) {
                 form: {},
                 sim: {},
                 hist: {},
+                filter: {},
+                headTable: {},
+                tailTable: {}
             })
         }
     })
 
     // Filter Form
-    const filterForm = isolate(Filter, 'compoundfilter')({ ...sources, input: signature$ })
-    const filter$ = filterForm.output
+    const filterForm = isolate(Filter, { onion: compoundFilterLens })({...sources, input: signature$ })
+    const filter$ = filterForm.output.remember()
 
     // Similarity plot component
     const similarityPlot = isolate(SimilarityPlot, { onion: simLens })
-        ({ ...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ signature: s, filter: f })).remember() });
+        ({...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ signature: s, filter: f })).remember() });
 
     // Histogram plot component
     const histogram = isolate(Histogram, { onion: histLens })
-        ({ ...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ signature: s, filter: f })).remember() });
+        ({...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ signature: s, filter: f })).remember() });
 
 
     const headTableContainer = makeTable(SampleTable, sampleTableLens)
 
     // tables: Join settings from api and sourire into props
     const headTable = isolate(headTableContainer, { onion: headTableLens })
-        ({ ...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ query: s, filter: f })).remember() });
+        ({...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ query: s, filter: f })).remember() });
 
 
     const tailTableContainer = makeTable(SampleTable, sampleTableLens)
 
     // tables: Join settings from api and sourire into props
     const tailTable = isolate(tailTableContainer, { onion: tailTableLens })
-        ({ ...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ query: s, filter: f })).remember() });
+        ({...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ query: s, filter: f })).remember() });
 
     const pageStyle = {
-        style:
-        {
+        style: {
             fontSize: '14px',
             opacity: '0',
             transition: 'opacity 1s',
@@ -106,13 +110,13 @@ export default function CompoundWorkflow(sources) {
     }
 
     const vdom$ = xs.combine(
-        CompoundFormSink.DOM,
-        filterForm.DOM,
-        similarityPlot.DOM,
-        histogram.DOM,
-        headTable.DOM,
-        tailTable.DOM,
-    )
+            CompoundFormSink.DOM,
+            filterForm.DOM,
+            similarityPlot.DOM,
+            histogram.DOM,
+            headTable.DOM,
+            tailTable.DOM,
+        )
         .map(([
             formDOM,
             filter,
@@ -120,7 +124,7 @@ export default function CompoundWorkflow(sources) {
             hist,
             headTable,
             tailTable
-        ]) => div('.row .compound',{style : {margin: '0px 0px 0px 0px'}},  [
+        ]) => div('.row .compound', { style: { margin: '0px 0px 0px 0px' } }, [
             formDOM,
             div('.col .s10 .offset-s1', pageStyle, [
                 div('.row', [filter]),

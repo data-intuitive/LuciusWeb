@@ -92,24 +92,24 @@ export const scenario = [{ // Initiate ghost mode
         }
     },
     {
-        delay: 5000,
+        delay: 6000,
         state: {},
         message: {
             text: 'A signed ranked gene signature is generated across the samples',
-            duration: 5000
+            duration: 6000
         }
     },
     {
-        delay: 5000,
+        delay: 6000,
         state: {},
         message: {
             text: 'This gene signature can be copied and used in the target workflow',
-            duration: 5000
+            duration: 6000
         }
     },
 
     { // Filter
-        delay: 5000,
+        delay: 7000,
         state: {
             filter: { ghostinput: { protocol: "MCF7" } },
             headTable: { input: { filter: { protocol: "MCF7" }, query: '-GOLT1B DDIT4 GPER -TNIP1 INSIG1 CLIC4 HMGCS1 HMOX1 AARS ELOVL6 -EGR1 -MAT2A FDFT1 -DDX42 PCK2 -MYCBP -RRP1B TSC22D3 CDK7 TIPARP -POLR1C -NFKBIA RGS2' } },
@@ -117,7 +117,7 @@ export const scenario = [{ // Initiate ghost mode
         },
         message: {
             text: 'Set filter to MCF7',
-            duration: 5000
+            duration: 7000
         }
     },
 

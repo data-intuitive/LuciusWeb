@@ -33,9 +33,9 @@ function Home(sources) {
         .map(([check, svgPath]) => div('.row', [
             h2('.col .l6 .m8 .s10 offset-l3 .offset-m2 .offset-s1 ', ['Welcome to ComPass', check]),
             p('.col .l6 .m8 .s10 offset-l3 .offset-m2 .offset-s1  .flow-text', [
-                'This application is the interface with L1000 data. Currently, ',
-                'there is support for working with disease profiles expressed using gene lists or signatures and compound similarity.'
+                'This application is the interface with L1000 data.'
             ]),
+            div('.row', []),
             div('.col .l6 .m8 .s10 offset-l3 .offset-m2 .offset-s1 .center-align', appear, [
                 svg({ attrs: { viewBox: '1018 -228 972 974' }, style: { 'max-width': '400px' } }, [
                     svg.a({ attrs: { 'xlink:href': "/target" } }, [
@@ -167,6 +167,7 @@ function Home(sources) {
             //             a('.pink-text .text-lighten-3', { props: { href: '/disease' }, style: { fontWeight: 'bolder', 'font-size': '32px' } }, ' Disease Workflow')
             //         ]),
             // ]),
+            div('.row', []),
             p('.col .l6 .m8 .s10 offset-l3 .offset-m2 .offset-s1  .flow-text', [
                 'You can click on one of the workflows above to start it.',
                 ' Alternatively, you can initiate ghost mode in the settings.'

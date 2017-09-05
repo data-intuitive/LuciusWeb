@@ -39,7 +39,7 @@ export default function CompoundWorkflow(sources) {
         .startWith({ text: 'Welcome to Compound Workflow', duration: 4000 })
 
     const formLens = {
-        get: state => ({ form: state.form, settings: { form: state.settings.form, api: state.settings.api } }),
+        get: state => ({ form: state.form, settings: { form: state.settings.form, api: state.settings.api, common: state.settings.common } }),
         set: (state, childState) => ({...state, form: childState.form })
     };
 

@@ -24,14 +24,14 @@ export function SampleInfo(sources) {
 
     const blur$ = props$
         .filter(props => props.common.blur != undefined)
-        .map(props => ({ filter : 'blur(' + props.common.blur + 'px)'}) )
-        .startWith({ filter : 'blur(0px)'})
+        .map(props => ({ filter: 'blur(' + props.common.blur + 'px)' }))
+        .startWith({ filter: 'blur(0px)' })
 
     const detail = (sample, props, blur) => {
         let hStyle = { style: { margin: '0px', fontWeight: 'bold' } }
         let pStyle = { style: { margin: '0px' } }
-        let hStylewBlur = { style: merge(blur, { margin: '0px', fontWeight: 'bold' } ) }
-        let pStylewBlur = { style: merge(blur, { margin: '0px' } ) }
+        let hStylewBlur = { style: merge(blur, { margin: '0px', fontWeight: 'bold' }) }
+        let pStylewBlur = { style: merge(blur, { margin: '0px' }) }
         let urlSourire = props.sourire.url
         let url = urlSourire + encodeURIComponent(sample.smiles).replace(/%20/g, '+')
         return div('.col .s12', [
@@ -49,12 +49,12 @@ export function SampleInfo(sources) {
                 p(pStylewBlur, entry('JNJS: ', sample.jnjs)),
                 p(pStylewBlur, entry('JNJB: ', sample.jnjb)),
                 p(pStyle, entry('Type: ', sample.Type)),
-                p('.s12', pStyle, entry('Targets: ', sample.targets.join(', '))),
+                p('.s12', pStylewBlur, entry('Targets: ', sample.targets.join(', '))),
             ]),
-            div('.col .s4 .offset-s8 .l4', { style: merge(blur, { margin: '20px 0px 0px 0px' } ) }, [
-                (sample.smiles != null && sample.smiles != 'NA' && sample.smiles != 'No Smiles')
-                    ? img('.col .s12 .valign', { props: { src: url } })
-                    : ''
+            div('.col .s4 .offset-s8 .l4', { style: merge(blur, { margin: '20px 0px 0px 0px' }) }, [
+                (sample.smiles != null && sample.smiles != 'NA' && sample.smiles != 'No Smiles') ?
+                img('.col .s12 .valign', { props: { src: url } }) :
+                ''
             ]),
         ])
     }
@@ -66,22 +66,21 @@ export function SampleInfo(sources) {
             let url = urlSourire + encodeURIComponent(sample.smiles).replace(/%20/g, '+')
             let zhangRounded = (sample.zhang != null) ? sample.zhang.toFixed(3) : 'NA'
 
-            return li('.collection-item  .zoom', { style: { 'background-color': bgcolor } },
-                [
-                    div('.row', { style: { fontWeight: 'small' } }, [
-                        div('.col .s1 .left-align', { style: { fontWeight: 'bold' } }, [zhangRounded]),
-                        div('.col .s2', [sample.id]),
-                        div('.col .s1', [sample.protocolname]),
-                        div('.col .s2', {style : blur}, [(sample.jnjs != "NA") ? sample.jnjs : '']),
-                        div('.col .s3', {style : blur}, [sample.compoundname]),
-                        div('.col .s3 .center-align', {style : blur}, [
-                            ((sample.smiles != null && sample.smiles != 'NA' && sample.smiles != 'No Smiles') && zoom == false)
-                                ? img({ props: { src: url, height: 50, 'object-fit': 'contain' } })
-                                : ''
-                        ]),
+            return li('.collection-item  .zoom', { style: { 'background-color': bgcolor } }, [
+                div('.row', { style: { fontWeight: 'small' } }, [
+                    div('.col .s1 .left-align', { style: { fontWeight: 'bold' } }, [zhangRounded]),
+                    div('.col .s2', [sample.id]),
+                    div('.col .s1', [sample.protocolname]),
+                    div('.col .s2', { style: blur }, [(sample.jnjs != "NA") ? sample.jnjs : '']),
+                    div('.col .s3', { style: blur }, [sample.compoundname]),
+                    div('.col .s3 .center-align', { style: blur }, [
+                        ((sample.smiles != null && sample.smiles != 'NA' && sample.smiles != 'No Smiles') && zoom == false) ?
+                        img({ props: { src: url, height: 50, 'object-fit': 'contain' } }) :
+                        ''
                     ]),
-                    (zoom) ? div('.row', [detail(sample, props, blur)]) : div()
-                ])
+                ]),
+                (zoom) ? div('.row', [detail(sample, props, blur)]) : div()
+            ])
         })
         .startWith(li('.collection-itm .zoom', [p('Just one item!!!')]))
 

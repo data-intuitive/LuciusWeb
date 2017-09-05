@@ -20,7 +20,7 @@ const emptyData = {
 const sampleSelectionLens = {
     get: state => ({ core: (typeof state.form !== 'undefined') ? state.form.sampleSelection : {}, settings: state.settings }),
     // get: state => ({core: state.form.sampleSelection, settings: state.settings}),
-    set: (state, childState) => ({ ...state, form: { ...state.form, sampleSelection: childState.core } })
+    set: (state, childState) => ({...state, form: {...state.form, sampleSelection: childState.core } })
 };
 
 /**
@@ -66,10 +66,10 @@ function SampleSelection(sources) {
         .compose(dropRepeats((x, y) => equals(x, y)))
 
     const newInput$ = xs.combine(
-        input$,
-        state$
-    )
-        .map(([newinput, state]) => ({ ...state, core: { ...state.core, input: newinput } }))
+            input$,
+            state$
+        )
+        .map(([newinput, state]) => ({...state, core: {...state.core, input: newinput } }))
         .compose(dropRepeats((x, y) => equals(x.core.input, y.core.input)))
 
     // When a new query is required
@@ -109,10 +109,12 @@ function SampleSelection(sources) {
         .map(ev => ev.ownerTarget.id)
 
     // Helper function for rendering the table, based on the state
-    const makeTable = (data) => {
+    const makeTable = (state) => {
+        const data = state.core.data
+        const blurStyle = { style: { filter: 'blur(' + state.settings.common.blur + 'px)' } }
         let rows = data.map(entry => [
-            td(entry.jnjs),
-            td((entry.compoundname.length > 10) ? entry.compoundname.substring(0, 10) : entry.compoundname),
+            td(blurStyle, entry.jnjs),
+            td(blurStyle, (entry.compoundname.length > 10) ? entry.compoundname.substring(0, 10) + '...' : entry.compoundname),
             td(entry.id),
             td(entry.protocolname),
             td(entry.concentration),
@@ -157,14 +159,15 @@ function SampleSelection(sources) {
     const loadingVdom$ = xs.combine(request$, modifiedState$).mapTo(div())
 
     const loadedVdom$ = modifiedState$
-        .map(state => makeTable(state.core.data))
+        .map(state => makeTable(state))
 
     const vdom$ = xs.merge(initVdom$, loadingVdom$, loadedVdom$)
 
     const dataReducer$ = data$.map(data => prevState => {
         const newData = data.map(el => merge(el, { use: true }))
         return {
-            ...prevState, core: {
+            ...prevState,
+            core: {
                 ...prevState.core,
                 data: newData,
                 output: newData.filter(x => x.use).map(x => x.id)
@@ -190,9 +193,9 @@ function SampleSelection(sources) {
         })
     })
 
-    const defaultReducer$ = xs.of(prevState => ({ ...prevState, core: { input: '', data: [] } }))
-    const inputReducer$ = input$.map(i => prevState => ({ ...prevState, core: { ...prevState.core, input: i } }))
-    const requestReducer$ = request$.map(req => prevState => ({ ...prevState, core: { ...prevState.core, request: req } }))
+    const defaultReducer$ = xs.of(prevState => ({...prevState, core: { input: '', data: [] } }))
+    const inputReducer$ = input$.map(i => prevState => ({...prevState, core: {...prevState.core, input: i } }))
+    const requestReducer$ = request$.map(req => prevState => ({...prevState, core: {...prevState.core, request: req } }))
 
     const sampleSelection$ =
         xs.merge(
@@ -200,15 +203,15 @@ function SampleSelection(sources) {
             // Ghost mode
             sources.onion.state$.map(state => state.core.ghostoutput).filter(ghost => ghost).compose(dropRepeats())
         )
-            .compose(sampleCombine(state$))
-            .map(([ev, state]) => state.core.output)
+        .compose(sampleCombine(state$))
+        .map(([ev, state]) => state.core.output)
 
     return {
         log: xs.merge(
             logger(state$, 'state$'),
         ),
         DOM: vdom$,
-        HTTP: request$,//.compose(debounce(2000)),
+        HTTP: request$, //.compose(debounce(2000)),
         onion: xs.merge(
             defaultReducer$,
             inputReducer$,

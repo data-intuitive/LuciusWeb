@@ -9,7 +9,7 @@ export const vegaSpec = (data, target = 'xyz') => ({
         "values": data,
         "format": {
             "type": "json",
-            "parse": { "count": "number", "zhangAvg": "number", target: "number" }
+            "parse": { "count": "number", "zhangAvg": "number", [target]: "number" }
         }
     }],
 

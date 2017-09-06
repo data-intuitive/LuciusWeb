@@ -1,5 +1,5 @@
 import xs from 'xstream';
-import { div, nav, a, h3, p, ul, li, h1, h2, i, footer, header, main, svg, g, path, img, map, area, use } from '@cycle/dom'
+import { div, nav, a, h3, p, ul, li, h1, h2, i, footer, header, main, svg, g, path, img, map, area, use, span } from '@cycle/dom'
 import { merge, prop, equals } from 'ramda';
 
 import { Check } from '../components/Check'
@@ -10,6 +10,8 @@ import { pick, mix } from 'cycle-onionify';
 import { initSettings } from '../configuration'
 import debounce from 'xstream/extra/debounce'
 import dropRepeats from 'xstream/extra/dropRepeats'
+
+import { logoSVG } from '../index'
 
 const appear = {
     style: {
@@ -31,7 +33,12 @@ function Home(sources) {
 
     const vdom$ = xs.combine(CheckSink.DOM, xs.of('src/js/pages/home.svg#home'))
         .map(([check, svgPath]) => div('.row', [
-            h2('.col .l6 .m8 .s10 offset-l3 .offset-m2 .offset-s1 ', ['Welcome to ComPass', check]),
+            h2('.col .l6 .m8 .s10 offset-l3 .offset-m2 .offset-s1', { style: { 'vertical-align': 'top' } }, [
+                'Welcome to ',
+                div({ style: { display: 'inline-block', width: '200px', 'vertical-align': '-40%' } }, [logoSVG]),
+                ' ',
+                check
+            ]),
             p('.col .l6 .m8 .s10 offset-l3 .offset-m2 .offset-s1  .flow-text', [
                 'This application is the interface with L1000 data.'
             ]),

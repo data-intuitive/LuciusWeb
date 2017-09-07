@@ -24,7 +24,8 @@ export function CompoundInfo(sources) {
 
     const blur$ = props$
         .filter(props => props.common.blur != undefined)
-        .map(props => ({ filter: 'blur(' + props.common.blur + 'px)' }))
+        .filter(props => props.common.blur)
+        .map(props => ({ filter: 'blur(' + props.common.amountBlur + 'px)' }))
         .startWith({ filter: 'blur(0px)' })
 
     const detail = (sample, props, blur) => {

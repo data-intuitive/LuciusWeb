@@ -16,12 +16,10 @@ export function Settings(sources) {
 
     const settings$ = sources.onion.state$
 
-    const settingsConfig = [
-        {
+    const settingsConfig = [{
             group: 'common',
             title: 'Common Settings',
-            settings: [
-                {
+            settings: [{
                     field: 'version',
                     type: 'text',
                     class: '.input-field',
@@ -44,9 +42,16 @@ export function Settings(sources) {
                 },
                 {
                     field: 'blur',
+                    class: '.switch',
+                    type: 'checkbox',
+                    title: 'Blur?',
+                    props: { type: 'checkbox' }
+                },
+                {
+                    field: 'amountBlur',
                     class: '.range-field',
                     type: 'range',
-                    title: 'Amount of blur',
+                    title: 'Amount blur?',
                     props: { type: 'range', min: 0, max: 10 }
                 }
             ]
@@ -54,8 +59,7 @@ export function Settings(sources) {
         {
             group: 'compoundTable',
             title: 'Compound Table Settings',
-            settings: [
-                {
+            settings: [{
                     field: 'debug',
                     type: 'checkbox',
                     class: '.switch',
@@ -74,8 +78,7 @@ export function Settings(sources) {
         {
             group: 'headTable',
             title: 'Top Table Settings',
-            settings: [
-                {
+            settings: [{
                     field: 'debug',
                     type: 'checkbox',
                     class: '.switch',
@@ -94,8 +97,7 @@ export function Settings(sources) {
         {
             group: 'tailTable',
             title: 'Bottom Table Settings',
-            settings: [
-                {
+            settings: [{
                     field: 'debug',
                     type: 'checkbox',
                     class: '.switch',
@@ -114,8 +116,7 @@ export function Settings(sources) {
         {
             group: 'hist',
             title: 'Histogram Settings',
-            settings: [
-                {
+            settings: [{
                     field: 'debug',
                     type: 'checkbox',
                     class: '.switch',
@@ -134,8 +135,7 @@ export function Settings(sources) {
         {
             group: 'sim',
             title: 'Similarity Plot Settings',
-            settings: [
-                {
+            settings: [{
                     field: 'debug',
                     type: 'checkbox',
                     class: '.switch',
@@ -161,41 +161,35 @@ export function Settings(sources) {
         {
             group: 'api',
             title: 'API Settings',
-            settings: [
-                {
-                    field: 'url',
-                    class: '.input-field',
-                    type: 'text',
-                    title: 'LuciusAPI URL',
-                    props: {}
-                }
-            ]
+            settings: [{
+                field: 'url',
+                class: '.input-field',
+                type: 'text',
+                title: 'LuciusAPI URL',
+                props: {}
+            }]
         },
         {
             group: 'sourire',
             title: 'Sourire Settings',
-            settings: [
-                {
-                    field: 'url',
-                    class: '.input-field',
-                    type: 'text',
-                    title: 'Sourire URL',
-                    props: {}
-                }
-            ]
+            settings: [{
+                field: 'url',
+                class: '.input-field',
+                type: 'text',
+                title: 'Sourire URL',
+                props: {}
+            }]
         },
         {
             group: 'form',
             title: 'Form Settings',
-            settings: [
-                {
-                    field: 'debug',
-                    type: 'checkbox',
-                    class: '.switch',
-                    title: 'Debug component?',
-                    props: { type: 'checkbox' }
-                }
-            ]
+            settings: [{
+                field: 'debug',
+                type: 'checkbox',
+                class: '.switch',
+                title: 'Debug component?',
+                props: { type: 'checkbox' }
+            }]
         },
 
     ]
@@ -203,9 +197,9 @@ export function Settings(sources) {
     const makeSetting = (config) => (sources) => {
         const state$ = sources.onion.state$
 
-        const update$ = (config.type == 'checkbox')
-            ? sources.DOM.select('input').events('click').map(event => event)
-            : sources.DOM.events('input').map(event => event.target.value)
+        const update$ = (config.type == 'checkbox') ?
+            sources.DOM.select('input').events('click').map(event => event) :
+            sources.DOM.events('input').map(event => event.target.value)
 
         const vdom$ =
             state$.map(state =>
@@ -221,27 +215,29 @@ export function Settings(sources) {
                         div('.col .s6 ' + config.class,
 
                             (config.type == 'checkbox')
-                                // Checkbox form
-                                ? [
-                                    label('.active', [
-                                        // config.title,
-                                        input({ props: merge(config.props, { checked: state }) }),
-                                        span('.lever'),
-                                    ])
-                                ]
-                                // Range or input
-                                : [
-                                    input({ props: merge(config.props, { value: state }) }),
-                                    // label(config.field),
-                                ]
+                            // Checkbox form
+                            ?
+                            [
+                                label('.active', [
+                                    // config.title,
+                                    input({ props: merge(config.props, { checked: state }) }),
+                                    span('.lever'),
+                                ])
+                            ]
+                            // Range or input
+                            :
+                            [
+                                input({ props: merge(config.props, { value: state }) }),
+                                // label(config.field),
+                            ]
                         )
 
                     ])
                 ))
 
-        const updateReducer$ = (config.type == 'checkbox')
-            ? update$.map(update => prevState => !prevState)
-            : update$.map(update => prevState => update)
+        const updateReducer$ = (config.type == 'checkbox') ?
+            update$.map(update => prevState => !prevState) :
+            update$.map(update => prevState => update)
 
         return {
             DOM: vdom$,
@@ -267,13 +263,11 @@ export function Settings(sources) {
             .compose(pick('DOM'))
             .compose(mix(xs.combine))
             .map(vdoms =>
-                ul('.collection .with-header',
-                    [
-                        li('.collection-header .grey .lighten-2', [
-                            h4(title)
-                        ])
-                    ].concat(vdoms)
-                )
+                ul('.collection .with-header', [
+                    li('.collection-header .grey .lighten-2', [
+                        h4(title)
+                    ])
+                ].concat(vdoms))
             )
             .remember()
 
@@ -321,7 +315,7 @@ export function Settings(sources) {
 
     const vdom$ = xs.combine(settings$, Settings.DOM)
         .map(([state, topTableEntries]) =>
-            div('.row .grey .lighten-3', {style : {margin: '0px 0px 0px 0px'}}, [
+            div('.row .grey .lighten-3', { style: { margin: '0px 0px 0px 0px' } }, [
                 div('.row .s12', ['']),
                 topTableEntries,
                 div('.row .s12', ['']),

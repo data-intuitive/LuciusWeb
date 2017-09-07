@@ -111,7 +111,7 @@ function SampleSelection(sources) {
     // Helper function for rendering the table, based on the state
     const makeTable = (state) => {
         const data = state.core.data
-        const blurStyle = { style: { filter: 'blur(' + state.settings.common.blur + 'px)' } }
+        const blurStyle = (state.settings.common.blur) ? { style: { filter: 'blur(' + state.settings.common.amountBlur + 'px)' } } : {}
         let rows = data.map(entry => [
             td(blurStyle, entry.jnjs),
             td(blurStyle, (entry.compoundname.length > 10) ? entry.compoundname.substring(0, 10) + '...' : entry.compoundname),

@@ -97,6 +97,7 @@ export default function Index(sources) {
 
     const footer$ = xs.of(
         footer('.page-footer .grey .darken-4 .grey-text', [
+            // div('.container', [
             div('.row', { style: { margin: '0px' } }, [
                 div('.col .s12', { style: { margin: '0px' } }, [
                     p({ style: { margin: '0px' } }, ['Please use ', a({ props: { href: '/statistics' } }, 'the information'), ' provided in ComPass with care. ComPass does not make any claims.']),
@@ -108,18 +109,24 @@ export default function Index(sources) {
                 div('.col .s12 .right-align', ['© 2017 By Data intuitive']),
             ])
         ])
+        // ])
     )
 
     const view$ = page$.map(prop('DOM')).flatten().remember()
 
     const vdom$ = xs.combine(nav$, view$, footer$)
-        .map(([navDom, viewDom, footerDom]) => div(
-            [
-                navDom,
-                // div('.row', div('.col.s12', [logoSVG])),
-                main([viewDom]),
-                footerDom
-            ]))
+        .map(([navDom, viewDom, footerDom]) => div({
+            style: {
+                display: 'flex',
+                'min-height': '100vh',
+                'flex-direction': 'column',
+                'height': '100%'
+            }
+        }, [
+            navDom,
+            main([viewDom]),
+            footerDom
+        ]))
         .remember()
 
     // Initialize state
@@ -177,7 +184,7 @@ export default function Index(sources) {
 
 }
 
-export const logoSVG = svg({ attrs: { viewBox: "159 26 1012.1082 460" } }, [
+export const logoSVG = svg({ id: 'logo', attrs: { viewBox: "159 26 1012.1082 460" } }, [
     svg.defs([
         svg.linearGradient({ attrs: { id: 'gradient', x1: '0%', y1: '0%', x2: '100%', y2: '100%', gradientUnits: "userSpaceOnUse" } }, [
             svg.stop({ attrs: { offset: "0%" }, style: { "stop-color": "#ff9800", "stop-opacity": "1" } }),

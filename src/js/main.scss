@@ -6,6 +6,17 @@
 
 /* Colors for workflows, to be overriden when printed */
 
+body {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+    height: 100%
+}
+
+main {
+    flex: 1 0 auto;
+}
+
 @import '../../node_modules/materialize-css/sass/components/color';
 .compound {
     @extend .orange;

@@ -335,7 +335,7 @@ export function Settings(sources) {
         DOM: vdom$,
         onion: xs.merge(
             resetReducer$,
-            Settings.onion.compose(debounce(1000))
+            Settings.onion.compose(debounce(200))
         ),
     };
 }

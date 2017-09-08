@@ -20,7 +20,7 @@ import dropRepeats from 'xstream/extra/dropRepeats'
 import { loggerFactory } from '~/../../src/js/utils/logger'
 import isolate from '@cycle/isolate'
 import { SignatureForm, formLens } from '../components/SignatureForm'
-import { Filter } from '../components/Filter'
+import { Filter, compoundFilterLens } from '../components/Filter'
 
 // Support for ghost mode
 import { scenario } from '../scenarios/targetScenario'
@@ -126,7 +126,7 @@ function TargetWorkflow(sources) {
     const signature$ = signatureForm.output
 
     // Filter Form
-    const filterForm = isolate(Filter, 'filter')({...sources, input: signature$ })
+    const filterForm = isolate(Filter, { onion: compoundFilterLens })({...sources, input: signature$ })
     const filter$ = filterForm.output
 
     // Histogram plot component

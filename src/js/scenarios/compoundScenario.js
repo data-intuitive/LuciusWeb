@@ -125,7 +125,7 @@ export const scenario = [{ // Initiate ghost mode
         delay: 3000,
         state: {},
         message: {
-            text: 'The corresponding similarity plots are vizualised for the entire compound data base',
+            text: 'The corresponding plots are generated for the entire compound database',
             duration: 4000
         }
     },
@@ -133,7 +133,7 @@ export const scenario = [{ // Initiate ghost mode
         delay: 3000,
         state: {},
         message: {
-            text: 'Scroll down to assess the top 10 correlated and anticorrelated compounds',
+            text: 'Scroll down to assess the top correlated and anti-correlated compounds',
             duration: 4000
         }
     },

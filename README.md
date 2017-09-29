@@ -1,3 +1,9 @@
+# Version 1
+
+This is the old version of the ComPass interface, developed by [Herkulano](https://herkulano.com/).
+
+![](figures/compassv1.png)
+
 # ComPass Frontend
 
 ### Instructions

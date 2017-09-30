@@ -13,7 +13,7 @@ RUN cd /root/LuciusWeb \
   && npm install
 
 # Port to expose
-EXPOSE 3000
+EXPOSE 8080
 
 # RUN
 CMD cd /root/LuciusWeb && npm run serve

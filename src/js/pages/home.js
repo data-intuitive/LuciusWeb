@@ -189,7 +189,8 @@ function Home(sources) {
         DOM: vdom$,
         HTTP: CheckSink.HTTP,
         onion: CheckSink.onion,
-        alert: CheckSink.alert
+        alert: CheckSink.alert,
+        popup: CheckSink.popup
     };
 }
 

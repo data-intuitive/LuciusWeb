@@ -5,17 +5,37 @@ import { prop } from 'ramda'
 // TODO: Make it update immediately, currently only updates on new query
 export function widthStream(domSource$, el) {
     return domSource$
-                .select(el)
-                .elements()
-                .map(elements => elements[0])
-                .map(container => {
-                    if (container != undefined ) {
-                        return container.offsetWidth
-                    } else {
-                        return 100
-                    }
-                    })
-                .compose(dropRepeats())
-                .remember()
-                // .debug(log)
+        .select(el)
+        .elements()
+        .map(elements => elements[0])
+        .map(container => {
+            if (container != undefined) {
+                return container.offsetWidth
+            } else {
+                return 100
+            }
+        })
+        .compose(dropRepeats())
+        .remember()
+        // .debug(log)
 }
+
+
+/** 
+ * For later use: Array extensions
+ */
+Array.prototype.sum = Array.prototype.sum || function() {
+    return this.reduce(function(sum, a) { return sum + Number(a) }, 0);
+}
+
+Array.prototype.average = Array.prototype.average || function() {
+    return this.sum() / (this.length || 1);
+}
+
+Array.prototype.max = function() {
+    return Math.max.apply(null, this);
+};
+
+Array.prototype.min = function() {
+    return Math.min.apply(null, this);
+};

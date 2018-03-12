@@ -5,6 +5,7 @@ import { mergeWith, merge } from 'ramda'
 import { clone, equal, equals, mergeAll, omit } from 'ramda';
 import dropRepeats from 'xstream/extra/dropRepeats'
 import debounce from 'xstream/extra/debounce'
+import sampleCombine from 'xstream/extra/sampleCombine'
 
 // Alert the user when last response time is 1.5 times higher than the minimum
 // over the history of the jobserver.
@@ -14,12 +15,12 @@ function Check(sources) {
 
     const state$ = sources.onion.state$
 
-    const props$ = sources.props //.remember()
+    const props$ = sources.props
+        .compose(dropRepeats((x, y) => equals(x, y)))
+        .remember()
 
     const modifiedState$ = state$
         .compose(dropRepeats((x, y) => equals(omit(['result'], x), omit(['result'], y))))
-        // .compose(debounce(2000))
-
 
     const request$ = xs.combine(modifiedState$, props$)
         .map(([state, props]) => {
@@ -31,7 +32,6 @@ function Check(sources) {
             }
         })
         .remember()
-
 
     const response$$ = sources.HTTP
         .select('statistics')
@@ -45,12 +45,20 @@ function Check(sources) {
         .flatten()
         .remember()
 
+    /**
+     * Parse the successful results only.
+     * 
+     * We add a little wait time (`debounce`) in order for the jobserver
+     * to be up-to-date with the actual jobs. Otherwize, we measure the
+     * wrong job times.
+     */
     const validResponse$ = response$$
         .map(response$ =>
             response$
             .replaceError(error => xs.empty())
         )
         .flatten()
+        .compose(debounce(500))
 
     // A valid response means we should see if the response times are reasonable.
     // Trigger a request for every validResponse from statistics.
@@ -79,12 +87,17 @@ function Check(sources) {
 
     const jobs$ = validResponseJobs$
         .map(result => result.body)
-        .debug()
 
-    const initVdom$ = xs.of('...')
+    /** 
+     * An indicator of the data loading...
+     */
+    const initVdom$ = xs.periodic(200)
+        .map(i => i % 4)
+        .map(i => span(".grey-text", ".".repeat(i)))
+        .endWhen(validResponseJobs$)
 
-    const loadingVdom$ = request$
-        .mapTo('...')
+    // const loadingVdom$ = request$
+    //     .mapTo('...')
 
     /**
      * Calculate a measure for the performance of the API.
@@ -122,7 +135,7 @@ function Check(sources) {
 
     const vdom$ = xs.merge(
         initVdom$,
-        loadingVdom$,
+        // loadingVdom$,
         loadedVdom$,
         errorVdom$,
     ).remember()

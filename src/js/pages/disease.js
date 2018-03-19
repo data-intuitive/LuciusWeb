@@ -7,7 +7,7 @@ import dropRepeats from 'xstream/extra/dropRepeats'
 
 // Components
 import { SignatureForm, formLens } from '../components/SignatureForm'
-import { Histogram, histLens } from '../components/Histogram/Histogram'
+import { Histogram, histLens } from '../components/HistogramBasedOnSimPlot/HistogramBasedOnSimPlot'
 import { SimilarityPlot, simLens } from '../components/SimilarityPlot/SimilarityPlot'
 import { makeTable, headTableLens, tailTableLens } from '../components/Table'
 import { initSettings } from './settings'

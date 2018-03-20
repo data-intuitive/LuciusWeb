@@ -7,8 +7,7 @@ import dropRepeats from 'xstream/extra/dropRepeats'
 
 // Components
 import { SignatureForm, formLens } from '../components/SignatureForm'
-import { Histogram, histLens } from '../components/HistogramBasedOnSimPlot/HistogramBasedOnSimPlot'
-import { SimilarityPlot, simLens } from '../components/SimilarityPlot/SimilarityPlot'
+import { BinnedPlots, plotsLens } from '../components/BinnedPlots/BinnedPlots'
 import { makeTable, headTableLens, tailTableLens } from '../components/Table'
 import { initSettings } from './settings'
 import { Filter, compoundFilterLens } from '../components/Filter'
@@ -70,13 +69,13 @@ function DiseaseWorkflow(sources) {
         }
     })
 
-    // Similarity plot component
-    const similarityPlot = isolate(SimilarityPlot, { onion: simLens })
+    // Binned Plots
+    const binnedPlots = isolate(BinnedPlots, { onion: plotsLens })
         ({...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ signature: s, filter: f })).remember() });
 
     // Histogram plot component
-    const histogram = isolate(Histogram, { onion: histLens })
-        ({...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ signature: s, filter: f })).remember() });
+    // const histogram = isolate(Histogram, { onion: histLens })
+    //     ({...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ signature: s, filter: f })).remember() });
 
 
     const headTableContainer = makeTable(SampleTable, sampleTableLens)
@@ -105,8 +104,7 @@ function DiseaseWorkflow(sources) {
     const vdom$ = xs.combine(
             signatureForm.DOM,
             filterForm.DOM,
-            histogram.DOM,
-            similarityPlot.DOM,
+            binnedPlots.DOM,
             headTable.DOM,
             tailTable.DOM,
             // feedback$
@@ -114,8 +112,7 @@ function DiseaseWorkflow(sources) {
         .map(([
                 form,
                 filter,
-                hist,
-                simplot,
+                plots,
                 headTable,
                 tailTable,
                 // feedback
@@ -124,11 +121,7 @@ function DiseaseWorkflow(sources) {
                 form,
                 div('.col .s10 .offset-s1', pageStyle, [
                     div('.row', [filter]),
-                    div('.row ', [div('.col .s12 .l7', [
-                        simplot,
-                    ]), div('.col .s12 .l5', [
-                        hist,
-                    ])]),
+                    div('.row', [plots]),
                     div('.row', []),
                     div('.col .s12', [headTable]),
                     div('.row', []),
@@ -141,6 +134,7 @@ function DiseaseWorkflow(sources) {
     return {
         log: xs.merge(
             logger(state$, 'state$'),
+            binnedPlots.log,
             signatureForm.log
         ),
         DOM: vdom$,
@@ -148,20 +142,17 @@ function DiseaseWorkflow(sources) {
             defaultReducer$,
             signatureForm.onion,
             filterForm.onion,
-            histogram.onion,
-            similarityPlot.onion,
+            binnedPlots.onion,
             headTable.onion,
             tailTable.onion,
             scenarioReducer$
         ),
         vega: xs.merge(
-            histogram.vega,
-            similarityPlot.vega
+            binnedPlots.vega
         ),
         HTTP: xs.merge(
             signatureForm.HTTP,
-            histogram.HTTP,
-            similarityPlot.HTTP,
+            binnedPlots.HTTP,
             headTable.HTTP,
             tailTable.HTTP
         ),

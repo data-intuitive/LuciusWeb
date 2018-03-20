@@ -1,5 +1,5 @@
 export const initSettings = {
-    version: 3.1,
+    version: 3.4,
     filter: {
         debug: false
     },
@@ -55,6 +55,11 @@ export const initSettings = {
         debug: false,
         binsX: 20,
         binsY: 20
+    },
+    plots: {
+        debug: false,
+        bins: 40,
+        binsX: 20
     },
     form: {
         debug: false

@@ -114,6 +114,32 @@ export function Settings(sources) {
             ]
         },
         {
+            group: 'plots',
+            title: 'Combined (binned) plots',
+            settings: [{
+                    field: 'debug',
+                    type: 'checkbox',
+                    class: '.switch',
+                    title: 'Debug component?',
+                    props: { type: 'checkbox' }
+                },
+                {
+                    field: 'bins',
+                    class: '.range-field',
+                    type: 'range',
+                    title: '# of bins in Histogram and Y-direction',
+                    props: { type: 'range', min: 5, max: 50 }
+                },
+                {
+                    field: 'binsX',
+                    class: '.range-field',
+                    type: 'range',
+                    title: '# of bins in X direction',
+                    props: { type: 'range', min: 5, max: 50 }
+                },
+            ]
+        },
+        {
             group: 'hist',
             title: 'Histogram Settings',
             settings: [{

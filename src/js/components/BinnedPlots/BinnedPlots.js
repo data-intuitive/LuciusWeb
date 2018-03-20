@@ -94,8 +94,8 @@ function BinnedPlots(sources) {
                 method: 'POST',
                 send: {
                     query: state.core.input.signature,
-                    binsY: state.settings.plots.bins,
-                    binsX: state.settings.plots.binsX,
+                    binsX: state.settings.plots.bins,
+                    binsY: state.settings.plots.binsX,
                     filter: (typeof state.core.input.filter !== 'undefined') ? state.core.input.filter : ''
                 },
                 'category': 'plot'
@@ -128,7 +128,7 @@ function BinnedPlots(sources) {
      * thus not correspond to the correct value. Here we pad the data with zero-values.
      */
     const baseGrid$ = triggerRequest$.map(state => {
-        console.log(state.settings.plots.bins)
+        // console.log(state.settings.plots.bins)
         const paddingArray = Array.from({ length: state.settings.plots.bins }).fill(null)
         console.log(paddingArray)
         return paddingArray.map((value, key) => ({

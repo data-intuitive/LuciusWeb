@@ -43,6 +43,19 @@ export const histogramVegaSpec = (data) => ({
             }
         ]
     }],
+    "signals": [{
+        "name": "tooltip",
+        "value": {},
+        "on": [{
+                "events": "rect:mouseover",
+                "update": "datum"
+            },
+            {
+                "events": "rect:mouseout",
+                "update": "{}"
+            }
+        ]
+    }],
     "scales": [{
             "name": "xscale",
             "domain": {
@@ -98,16 +111,7 @@ export const histogramVegaSpec = (data) => ({
             "scale": "xscale",
             "ticks": false,
             "labels": false,
-            "domain": false,
-            // "encode": {
-            //     "labels": {
-            //         "update": {
-            //             "fill": {
-            //                 "value": "grey"
-            //             }
-            //         }
-            //     }
-            // }
+            "domain": false
         },
         {
             "orient": "right",
@@ -126,63 +130,140 @@ export const histogramVegaSpec = (data) => ({
         }
     ],
     "marks": [{
-        "type": "rect",
-        "from": {
-            "data": "table"
+            "type": "rect",
+            "name": "bars",
+            "from": {
+                "data": "table"
+            },
+            "encode": {
+                "enter": {
+                    "x": {
+                        "scale": "xscale",
+                        "field": "total_count",
+                        "offset": 0
+                    },
+                    "x2": {
+                        "scale": "xscale",
+                        "value": 0
+                    },
+                    "y": {
+                        "scale": "yscale",
+                        "field": "y",
+                        "offset": 3
+                    },
+                    "height": {
+                        "scale": "yscale",
+                        "band": 1,
+                        "offset": -3
+                    },
+                    "fillOpacity": {
+                        "value": 0.9
+                    }
+                },
+                "update": {
+                    "fill": {
+                        "scale": "color",
+                        "field": "average_avg"
+                    },
+                    "fillOpacity": {
+                        "value": 0.7
+                    },
+                    "strokeWidth": {
+                        "scale": "nullScale",
+                        "field": "isNull"
+                    },
+                    "stroke": {
+                        "scale": "color",
+                        "field": "average_avg"
+                    }
+                },
+                "hover": {
+                    "fill": {
+                        "value": "white"
+                    },
+                    "fillOpacity": {
+                        "value": 0.5
+                    },
+                    "stroke": {
+                        "value": "grey"
+                    }
+                }
+            }
         },
-        "encode": {
-            "enter": {
-                "x": {
-                    "scale": "xscale",
-                    "field": "total_count",
-                    "offset": 0
+        {
+            "type": "text",
+            "encode": {
+                "enter": {
+                    "fill": {
+                        "value": "#333"
+                    }
                 },
-                "x2": {
-                    "scale": "xscale",
-                    "value": 0
-                },
-                "y": {
-                    "scale": "yscale",
-                    "field": "y",
-                    "offset": 3
-                },
-                "height": {
-                    "scale": "yscale",
-                    "band": 1,
-                    "offset": -3
-                },
-                "fillOpacity": {
-                    "value": 0.9
-                }
-            },
-            "update": {
-                "fill": {
-                    "scale": "color",
-                    "field": "average_avg"
-                },
-                "fillOpacity": {
-                    "value": 0.7
-                },
-                "strokeWidth": {
-                    "scale": "nullScale",
-                    "field": "isNull"
-                },
-                "stroke": {
-                    "scale": "color",
-                    "field": "average_avg"
-                }
-            },
-            "hover": {
-                "fill": {
-                    "value": "white"
-                },
-                "fillOpacity": {
-                    "value": 0.5
-                },
-                "stroke": {
-                    "value": "grey"
+                "update": {
+                    "x": {
+                        "scale": "xscale",
+                        "signal": "tooltip.total_count",
+                        "offset": 10
+                    },
+                    "y": {
+                        "scale": "yscale",
+                        "signal": "tooltip.y",
+                        "band": 0.5,
+                        "offset": 1.5
+                    },
+                    "text": {
+                        "signal": "tooltip.total_count"
+                    },
+                    "baseline": {
+                        "value": "middle"
+                    },
+                    "fillOpacity": [{
+                            "test": "datum === tooltip",
+                            "value": 0
+                        },
+                        {
+                            "value": 1
+                        }
+                    ]
                 }
             }
         }
-    }]
+        // {
+        //     "type": "text",
+        //     "from": {
+        //         "data": "bars"
+        //     },
+        //     "encode": {
+        //         "enter": {
+        //             "x": {
+        //                 "field": "x2",
+        //                 "offset": -5
+        //             },
+        //             "y": {
+        //                 "field": "y",
+        //                 "offset": {
+        //                     "field": "height",
+        //                     "mult": 0.5
+        //                 }
+        //             }
+        //         },
+        //         "update": {
+        //             "fontSize": {
+        //                 "value": 10
+        //             },
+        //             "fill": {
+        //                 "value": "white"
+        //             },
+        //             "align": {
+        //                 "value": "right"
+        //             },
+        //             "baseline": {
+        //                 "value": "middle"
+        //             },
+        //             "text": {
+        //                 "field": "datum.total_count"
+        //             }
+        //         }
+        //     }
+        // }
+    ]
 })

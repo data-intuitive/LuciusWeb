@@ -7,8 +7,7 @@ import { CompoundForm } from '../components/CompoundForm'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import { initSettings } from './settings'
 import { makeTable, headTableLens, tailTableLens } from '../components/Table'
-import { Histogram, histLens } from '../components/Histogram/Histogram'
-import { SimilarityPlot, simLens } from '../components/SimilarityPlot/SimilarityPlot'
+import { BinnedPlots, plotsLens } from '../components/BinnedPlots/BinnedPlots'
 import { Filter, compoundFilterLens } from '../components/Filter'
 import concat from 'xstream/extra/dropRepeats'
 import { loggerFactory } from '~/../../src/js/utils/logger'
@@ -77,25 +76,17 @@ export default function CompoundWorkflow(sources) {
     const filterForm = isolate(Filter, { onion: compoundFilterLens })({...sources, input: signature$ })
     const filter$ = filterForm.output.remember()
 
-    // Similarity plot component
-    const similarityPlot = isolate(SimilarityPlot, { onion: simLens })
+    // Binned Plots Component
+    const binnedPlots = isolate(BinnedPlots, { onion: plotsLens })
         ({...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ signature: s, filter: f })).remember() });
 
-    // Histogram plot component
-    const histogram = isolate(Histogram, { onion: histLens })
-        ({...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ signature: s, filter: f })).remember() });
-
-
+    // tables
     const headTableContainer = makeTable(SampleTable, sampleTableLens)
-
-    // tables: Join settings from api and sourire into props
-    const headTable = isolate(headTableContainer, { onion: headTableLens })
-        ({...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ query: s, filter: f })).remember() });
-
-
     const tailTableContainer = makeTable(SampleTable, sampleTableLens)
 
-    // tables: Join settings from api and sourire into props
+    // Join settings from api and sourire into props
+    const headTable = isolate(headTableContainer, { onion: headTableLens })
+        ({...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ query: s, filter: f })).remember() });
     const tailTable = isolate(tailTableContainer, { onion: tailTableLens })
         ({...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ query: s, filter: f })).remember() });
 
@@ -112,26 +103,21 @@ export default function CompoundWorkflow(sources) {
     const vdom$ = xs.combine(
             CompoundFormSink.DOM,
             filterForm.DOM,
-            similarityPlot.DOM,
-            histogram.DOM,
+            binnedPlots.DOM,
             headTable.DOM,
             tailTable.DOM,
         )
         .map(([
             formDOM,
             filter,
-            simplot,
-            hist,
+            plots,
             headTable,
             tailTable
         ]) => div('.row .compound', { style: { margin: '0px 0px 0px 0px' } }, [
             formDOM,
             div('.col .s10 .offset-s1', pageStyle, [
                 div('.row', [filter]),
-                div('.row ', [
-                    div('.col .s12 .l7', [simplot]),
-                    div('.col .s12 .l5', [hist]),
-                ]),
+                div('.row', [plots]),
                 div('.row', []),
                 div('.col .s12', [headTable]),
                 div('.row', []),
@@ -145,8 +131,7 @@ export default function CompoundWorkflow(sources) {
             logger(state$, 'state$'),
             CompoundFormSink.log,
             filterForm.log,
-            similarityPlot.log,
-            histogram.log,
+            binnedPlots.log,
             headTable.log,
             tailTable.log
         ),
@@ -154,8 +139,7 @@ export default function CompoundWorkflow(sources) {
         onion: xs.merge(
             defaultReducer$,
             CompoundFormSink.onion,
-            similarityPlot.onion,
-            histogram.onion,
+            binnedPlots.onion,
             filterForm.onion,
             headTable.onion,
             tailTable.onion,
@@ -163,15 +147,11 @@ export default function CompoundWorkflow(sources) {
         ),
         HTTP: xs.merge(
             CompoundFormSink.HTTP,
-            histogram.HTTP,
-            similarityPlot.HTTP,
+            binnedPlots.HTTP,
             headTable.HTTP,
             tailTable.HTTP
         ),
-        vega: xs.merge(
-            histogram.vega,
-            similarityPlot.vega
-        ),
+        vega: binnedPlots.vega,
         popup: scenarioPopup$
     };
 }

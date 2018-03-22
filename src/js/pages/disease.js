@@ -69,25 +69,17 @@ function DiseaseWorkflow(sources) {
         }
     })
 
-    // Binned Plots
+    // Binned Plots Component
     const binnedPlots = isolate(BinnedPlots, { onion: plotsLens })
         ({...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ signature: s, filter: f })).remember() });
 
-    // Histogram plot component
-    // const histogram = isolate(Histogram, { onion: histLens })
-    //     ({...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ signature: s, filter: f })).remember() });
-
-
+    // tables
     const headTableContainer = makeTable(SampleTable, sampleTableLens)
-
-    // tables: Join settings from api and sourire into props
-    const headTable = isolate(headTableContainer, { onion: headTableLens })
-        ({...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ query: s, filter: f })).remember() });
-
-
     const tailTableContainer = makeTable(SampleTable, sampleTableLens)
 
-    // tables: Join settings from api and sourire into props
+    // Join settings from api and sourire into props
+    const headTable = isolate(headTableContainer, { onion: headTableLens })
+        ({...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ query: s, filter: f })).remember() });
     const tailTable = isolate(tailTableContainer, { onion: tailTableLens })
         ({...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ query: s, filter: f })).remember() });
 

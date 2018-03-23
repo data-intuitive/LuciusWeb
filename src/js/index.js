@@ -100,13 +100,22 @@ export default function Index(sources) {
             // div('.container', [
             div('.row', { style: { margin: '0px' } }, [
                 div('.col .s12', { style: { margin: '0px' } }, [
-                    p({ style: { margin: '0px' } }, ['Please use ', a({ props: { href: '/statistics' } }, 'the information'), ' provided in ComPass with care. ComPass does not make any claims.']),
-                    p({ style: { margin: '0px' } }, ['In case of issues, please include the contents of ', a({ props: { href: '/debug' } }, 'this page'), ' in your bug report']),
-                    // div('.col .s1', homeSvg)
+                    p({ style: { margin: '0px' } }, [
+                        'Please use ',
+                        a({ props: { href: '/statistics' } },
+                            'the information'),
+                        ' provided in ComPass with care. ',
+                        'Work instructions can be found via this link: ',
+                        a({ props: { href: 'http://awsaivirl1009.jnj.com/assets/ComPass_WI.pdf' } }, 'Work Instructions.')
+                    ]),
+                    p({ style: { margin: '0px' } }, [
+                        'ComPass does not make any claims. ',
+                        'In case of issues, please include the contents of ', a({ props: { href: '/debug' } }, 'this page'), ' in your bug report'
+                    ]),
                 ])
             ]),
             div('.footer-copyright .row', { style: { margin: '0px' } }, [
-                div('.col .s12 .right-align', ['© 2017 By Data intuitive']),
+                div('.col .s12 .right-align', ['© 2018 By Data intuitive']),
             ])
         ])
         // ])

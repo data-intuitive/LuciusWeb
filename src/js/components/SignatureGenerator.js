@@ -29,6 +29,13 @@ const signatureLens = {
  * 
  * Input: List of samples (array)
  * Output: Signature (can be empty!)
+ * 
+ * Genes can be annotated (if Brutus is running). But the app is robust against Brutus not being online.
+ * 
+ * TODO: A lot of cleanup and rework is still required:
+ * 
+ * - Configure Brutus endpoint
+ * - Isolate gene as a component
  */
 function SignatureGenerator(sources) {
 

@@ -1,5 +1,5 @@
 export const initSettings = {
-    version: 3.4,
+    version: 3.6,
     filter: {
         debug: false
     },
@@ -75,5 +75,10 @@ export const initSettings = {
         hostname: 'localhost',
         port: 9000,
         url: 'http://localhost:9999/molecule/'
+    },
+    geneAnnotations: {
+        debug: true,
+        url: 'http://localhost:8082/gene/symbol/',
+
     }
 };

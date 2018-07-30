@@ -16,6 +16,7 @@ import { SampleTable, sampleTableLens } from '../components/SampleTable/SampleTa
 // Support for ghost mode
 import { scenario } from '../scenarios/compoundScenario'
 import { runScenario } from '../utils/scenario'
+import { SignatureGenerator } from '../components/SignatureGenerator';
 
 export default function CompoundWorkflow(sources) {
 
@@ -38,7 +39,15 @@ export default function CompoundWorkflow(sources) {
         .startWith({ text: 'Welcome to Compound Workflow', duration: 4000 })
 
     const formLens = {
-        get: state => ({ form: state.form, settings: { form: state.settings.form, api: state.settings.api, common: state.settings.common } }),
+        get: state => ({
+            form: state.form,
+            settings: {
+                form: state.settings.form,
+                api: state.settings.api,
+                common: state.settings.common,
+                geneAnnotations: state.settings.geneAnnotations
+            }
+        }),
         set: (state, childState) => ({...state, form: childState.form })
     };
 
@@ -56,7 +65,8 @@ export default function CompoundWorkflow(sources) {
                 hist: {},
                 filter: {},
                 headTable: {},
-                tailTable: {}
+                tailTable: {},
+                geneAnnotations: {}
             })
         } else {
             return ({
@@ -67,7 +77,8 @@ export default function CompoundWorkflow(sources) {
                 hist: {},
                 filter: {},
                 headTable: {},
-                tailTable: {}
+                tailTable: {},
+                geneAnnotations: {}
             })
         }
     })

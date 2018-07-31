@@ -95,8 +95,6 @@ function SignatureGenerator(sources) {
         }
     }
 
-    // const geneAnnotationQuery = GeneAnnotationQuery(sources)
-
     const geneAnnotationQuery = GeneAnnotationQuery(sources)
     const geneAnnotations$ = geneAnnotationQuery.output
     const hover$ = geneAnnotationQuery.hover
@@ -106,16 +104,18 @@ function SignatureGenerator(sources) {
         div('.col .orange .lighten-4 .genePopup .' + thisGene, geneStyle, [
             thisGene,
             ((selectedGene.trim() == thisGene.trim()) && !(isEmpty(annotation))) ?
-            div('.col .active .black .white-text', { style: { 'font-size': '12px', position: 'fixed', visibility: 'visible', opacity: 0.8, padding: '5px', width: '400px' } }, [
-                div('.tooltip-content', [
+            div('.col .active .black .white-text', { style: { 'font-size': '13px', position: 'fixed', top: 'calc(100% - 150px)', height: '150px', width: '100%', left: '0px', visibility: 'visible', opacity: 0.8, padding: '10px' } }, [
+                div('.col .s3', { style: { 'font-size': '14px', } }, [
                     p('Name: ' + annotation.name),
                     p(["Link: ", a({ props: { href: annotation.uniprot, target: "_blank" } }, annotation.uniprot)]),
                     p("EntrezID: " + annotation.entrezid),
-                    p("Ensembl: " + annotation.ensembl),
-                    p("Function: " + annotation.function),
+                    p("Ensembl: " + annotation.ensembl)
+                ]),
+                div('.col .s9', [
+                    p(annotation.function),
                 ])
             ]) :
-            div('.active .white', { style: { position: 'fixed', visibility: 'invisible', opacity: 0 } }, [])
+            div('.active .white', { syle: { position: 'fixed', visibility: 'invisible', opacity: 0 } }, [])
         ])
 
     const validVdom$ = xs.combine(validSignature$, hover$, geneAnnotations$)
@@ -146,7 +146,7 @@ function SignatureGenerator(sources) {
     // Initialization
     const defaultReducer$ = xs.of(prevState => ({...prevState, core: { input: '' } }))
         // Add input to state
-    const inputReducer$ = input$.map(i => prevState => ({...prevState, core: {...prevState.core, input: i } }))
+    const inputReducer$ = newInput$.map(i => prevState => ({...prevState, core: {...prevState.core, input: i } }))
         // Add request body to state
     const requestReducer$ = request$.map(req => prevState => ({...prevState, core: {...prevState.core, request: req } }))
         // Add data from API to state, update output key when relevant

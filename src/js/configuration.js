@@ -1,7 +1,12 @@
 export const initSettings = {
-    version: 3.6,
+    version: 3.81,
     filter: {
-        debug: false
+        debug: true,
+        values: {
+            concentration: ['0.1', '1', '10', '30'],
+            protocol: ['MCF7', 'PBMC'],
+            type: ['test', 'poscon']
+        }
     },
     common: {
         version: "v2",
@@ -77,7 +82,7 @@ export const initSettings = {
         url: 'http://localhost:9999/molecule/'
     },
     geneAnnotations: {
-        debug: true,
+        debug: false,
         url: 'http://localhost:8082/gene/symbol/',
 
     }

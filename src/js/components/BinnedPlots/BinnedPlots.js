@@ -7,7 +7,6 @@ import { clone, equals, omit } from 'ramda';
 import { histogramVegaSpec } from './HistogramSpec.js'
 import { similarityPlotVegaSpec } from './SimilarityPlotSpec.js'
 import { widthStream } from '../../utils/utils'
-import { stateDebug } from '../../utils/utils'
 import { loggerFactory } from '~/../../src/js/utils/logger'
 import { parse } from 'vega-parser'
 
@@ -128,15 +127,13 @@ function BinnedPlots(sources) {
      * thus not correspond to the correct value. Here we pad the data with zero-values.
      */
     const baseGrid$ = triggerRequest$.map(state => {
-        // console.log(state.settings.plots.bins)
         const paddingArray = Array.from({ length: state.settings.plots.bins }).fill(null)
-        console.log(paddingArray)
         return paddingArray.map((value, key) => ({
             "x": 0,
             "count": 0,
             "y": key
         }))
-    }).debug().remember()
+    }).remember()
 
     const data$ = validResponse$
         .map(result => result.body.result.data)
@@ -149,7 +146,6 @@ function BinnedPlots(sources) {
         .filter(data => !isEmptyData(data))
         .compose(sampleCombine(baseGrid$))
         .map(([data, baseGrid]) => (data.concat(baseGrid)))
-        .debug()
 
     // Ingest the data in the spec and return to the driver
     const similarityPlotVegaSpec$ = xs.combine(nonEmptyData$, width$('#simplot'), visibility$('#simplot'), input$, resize$)

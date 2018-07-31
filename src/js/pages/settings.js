@@ -139,51 +139,51 @@ export function Settings(sources) {
                 },
             ]
         },
-        {
-            group: 'hist',
-            title: 'Histogram Settings',
-            settings: [{
-                    field: 'debug',
-                    type: 'checkbox',
-                    class: '.switch',
-                    title: 'Debug component?',
-                    props: { type: 'checkbox' }
-                },
-                {
-                    field: 'bins',
-                    class: '.range-field',
-                    type: 'range',
-                    title: '# of bins',
-                    props: { type: 'range', min: 5, max: 50 }
-                }
-            ]
-        },
-        {
-            group: 'sim',
-            title: 'Similarity Plot Settings',
-            settings: [{
-                    field: 'debug',
-                    type: 'checkbox',
-                    class: '.switch',
-                    title: 'Debug component?',
-                    props: { type: 'checkbox' }
-                },
-                {
-                    field: 'binsX',
-                    class: '.range-field',
-                    type: 'range',
-                    title: '# of bins in X direction',
-                    props: { type: 'range', min: 5, max: 50 }
-                },
-                {
-                    field: 'binsY',
-                    class: '.range-field',
-                    type: 'range',
-                    title: '# of bins in Y direction',
-                    props: { type: 'range', min: 5, max: 50 }
-                }
-            ]
-        },
+        // {
+        //     group: 'hist',
+        //     title: 'Histogram Settings',
+        //     settings: [{
+        //             field: 'debug',
+        //             type: 'checkbox',
+        //             class: '.switch',
+        //             title: 'Debug component?',
+        //             props: { type: 'checkbox' }
+        //         },
+        //         {
+        //             field: 'bins',
+        //             class: '.range-field',
+        //             type: 'range',
+        //             title: '# of bins',
+        //             props: { type: 'range', min: 5, max: 50 }
+        //         }
+        //     ]
+        // },
+        // {
+        //     group: 'sim',
+        //     title: 'Similarity Plot Settings',
+        //     settings: [{
+        //             field: 'debug',
+        //             type: 'checkbox',
+        //             class: '.switch',
+        //             title: 'Debug component?',
+        //             props: { type: 'checkbox' }
+        //         },
+        //         {
+        //             field: 'binsX',
+        //             class: '.range-field',
+        //             type: 'range',
+        //             title: '# of bins in X direction',
+        //             props: { type: 'range', min: 5, max: 50 }
+        //         },
+        //         {
+        //             field: 'binsY',
+        //             class: '.range-field',
+        //             type: 'range',
+        //             title: '# of bins in Y direction',
+        //             props: { type: 'range', min: 5, max: 50 }
+        //         }
+        //     ]
+        // },
         {
             group: 'api',
             title: 'API Settings',
@@ -207,6 +207,23 @@ export function Settings(sources) {
             }]
         },
         {
+            group: 'geneAnnotations',
+            title: 'Gene Annotation Settings',
+            settings: [{
+                field: 'debug',
+                type: 'checkbox',
+                class: '.switch',
+                title: 'Debug component?',
+                props: { type: 'checkbox' }
+            }, {
+                field: 'url',
+                class: '.input-field',
+                type: 'text',
+                title: 'Brutus URL',
+                props: {}
+            }]
+        },
+        {
             group: 'form',
             title: 'Form Settings',
             settings: [{
@@ -217,7 +234,17 @@ export function Settings(sources) {
                 props: { type: 'checkbox' }
             }]
         },
-
+        {
+            group: 'filter',
+            title: 'Filter Settings',
+            settings: [{
+                field: 'debug',
+                type: 'checkbox',
+                class: '.switch',
+                title: 'Debug component?',
+                props: { type: 'checkbox' }
+            }]
+        }
     ]
 
     const makeSetting = (config) => (sources) => {

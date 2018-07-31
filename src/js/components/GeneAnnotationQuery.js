@@ -19,7 +19,7 @@ import dropRepeats from 'xstream/extra/dropRepeats'
 function GeneAnnotationQuery(sources, id = ".genePopup") {
 
     const logger = loggerFactory('geneAnnotationsQuery', sources.onion.state$, 'settings.debug')
-    const state$ = sources.onion.state$.debug()
+    const state$ = sources.onion.state$
 
     /**
      * check if the mouse is over a certain element
@@ -47,7 +47,6 @@ function GeneAnnotationQuery(sources, id = ".genePopup") {
             }
         })
         .remember()
-        .debug()
 
     const geneResponse$ = sources.HTTP
         .select('gene')
@@ -56,7 +55,6 @@ function GeneAnnotationQuery(sources, id = ".genePopup") {
         )
         .flatten()
         .map(r => r.body)
-        .debug()
 
     return {
         log: xs.merge(

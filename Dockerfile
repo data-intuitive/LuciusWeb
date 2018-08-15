@@ -2,6 +2,9 @@
 FROM node
 USER root
 
+RUN apt-get update
+RUN apt-get install gcc g++ build-essential
+
 WORKDIR /app
 
 # Get sources

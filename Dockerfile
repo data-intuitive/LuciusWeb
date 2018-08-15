@@ -2,9 +2,6 @@
 FROM node
 USER root
 
-RUN apt-get update
-RUN apt-get install gcc g++ build-essential
-
 WORKDIR /app
 
 # Get sources
@@ -12,6 +9,8 @@ WORKDIR /app
 RUN git clone https://github.com/data-intuitive/LuciusWeb
 
 WORKDIR /app/LuciusWeb
+
+RUN npm install -g node-canvas
 
 # LuciusWeb
 RUN npm update && \

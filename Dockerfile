@@ -2,18 +2,22 @@
 FROM node
 USER root
 
-WORKDIR /root
+WORKDIR /app
 
 # Get sources
 # Make sure the correct branch/release is used here!
 RUN git clone https://github.com/data-intuitive/LuciusWeb
 
+WORKDIR /app/LuciusWeb
+
 # LuciusWeb
-RUN cd /root/LuciusWeb \
-  && npm install
+RUN npm update && \
+    npm install && \
+    npm run build
 
 # Port to expose
-EXPOSE 8080
+EXPOSE 80
 
 # RUN
-CMD cd /root/LuciusWeb && npm run serve
+CMD /usr/local/bin/node server.js
+#cd /root/LuciusWeb && npm run serve

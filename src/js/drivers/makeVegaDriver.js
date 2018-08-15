@@ -1,19 +1,17 @@
 import xs from 'xstream'
 import { View } from 'vega-view'
 import { Warn } from 'vega'
-import { parse } from 'vega-parser'
+// import { parse } from 'vega-parser'
 
 function makeVegaDriver() {
 
     function vegaDriver(spec$) {
 
         const view$ = spec$
-            .map(specInfo => (
-                {
-                    view: new View(specInfo.runtime).width(specInfo.width).height(350).logLevel(Warn),
-                    el: specInfo.el
-                }
-            ))
+            .map(specInfo => ({
+                view: new View(specInfo.runtime).width(specInfo.width).height(350).logLevel(Warn),
+                el: specInfo.el
+            }))
 
         view$.addListener({
             next: (viewInfo) => {
@@ -26,7 +24,7 @@ function makeVegaDriver() {
         })
 
     }
-    
+
     return vegaDriver
 
 }

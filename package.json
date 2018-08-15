@@ -1,95 +1,94 @@
 {
-  "name": "LuciusWeb",
-  "version": "3.2.0",
-  "description": "Web interface for ComPass aka Lucius",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/data-intuitive/luciusweb"
-  },
-  "keywords": [
-    "L1000",
-    "ComPass"
-  ],
-  "main": "main.js",
-  "scripts": {
-    "serve": "webpack-dev-server -d --progress --colors --inline --host 0.0.0.0",
-    "prod": "NODE_ENV=production webpack-dev-server -d --progress --colors --inline --host 0.0.0.0",
-    "start": "npm install && node server.js",
-    "electron": "electron .",
-    "build": "NODE_ENV=production webpack",
-    "pack": "build --dir",
-    "dist": "build",
-    "startelectron": "npm install && electron ."
-  },
-  "build": {
-    "appId": "yourappid",
-    "category": "your.app.category.type",
-    "dmg": {
-      "contents": [
-        {
-          "x": 110,
-          "y": 150
+    "name": "LuciusWeb",
+    "version": "3.2.0",
+    "description": "Web interface for ComPass aka Lucius",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/data-intuitive/luciusweb"
+    },
+    "keywords": [
+        "L1000",
+        "ComPass"
+    ],
+    "main": "server.js",
+    "scripts": {
+        "serve": "webpack-dev-server -d --progress --colors --inline --host 0.0.0.0",
+        "prod": "NODE_ENV=production webpack-dev-server -d --progress --colors --inline --host 0.0.0.0",
+        "start": "npm install && node server.js",
+        "electron": "electron .",
+        "build": "NODE_ENV=production webpack",
+        "pack": "build --dir",
+        "dist": "build",
+        "startelectron": "npm install && electron ."
+    },
+    "build": {
+        "appId": "yourappid",
+        "category": "your.app.category.type",
+        "dmg": {
+            "contents": [{
+                    "x": 110,
+                    "y": 150
+                },
+                {
+                    "x": 240,
+                    "y": 150,
+                    "type": "link",
+                    "path": "/Applications"
+                }
+            ]
         },
-        {
-          "x": 240,
-          "y": 150,
-          "type": "link",
-          "path": "/Applications"
+        "linux": {
+            "target": [
+                "AppImage",
+                "deb"
+            ]
+        },
+        "win": {
+            "target": "squirrel",
+            "icon": "build/icon.ico"
         }
-      ]
     },
-    "linux": {
-      "target": [
-        "AppImage",
-        "deb"
-      ]
+    "author": "Toni Verbeiren",
+    "license": "Apache v2",
+    "devDependencies": {
+        "autoprefixer": "^6.7.2",
+        "babel-core": "^6.26.3",
+        "babel-loader": "^7.1.4",
+        "babel-preset-es2015": "^6.24.1",
+        "babel-preset-stage-0": "^6.24.1",
+        "bootstrap-sass": "^3.3.7",
+        "css-loader": "^0.26.4",
+        "electron-builder": "^20.15.1",
+        "extract-text-webpack-plugin": "^2.1.2",
+        "jquery": "^3.2.1",
+        "node-sass": "^4.5.3",
+        "resolve-url-loader": "^1.6.1",
+        "sass-loader": "^5.0.1",
+        "style-loader": "^0.13.2",
+        "url-loader": "^0.5.9",
+        "webpack": "^2.7.0",
+        "webpack-dev-server": "^2.7.1",
+        "webpack-material-design-icons": "^0.1.0"
     },
-    "win": {
-      "target": "squirrel",
-      "icon": "build/icon.ico"
+    "dependencies": {
+        "@cycle/dom": "^20.4.0",
+        "@cycle/history": "^6.10.0",
+        "@cycle/http": "^14.9.0",
+        "@cycle/isolate": "^3.3.0",
+        "@cycle/run": "^4.1.0",
+        "@cycle/storage": "^4.1.1",
+        "cycle-onionify": "^3.3.0",
+        "cycle-storageify": "^3.2.0",
+        "cyclic-router": "^4.0.7",
+        "datalib": "^1.8.0",
+        "electron": "^2.0.2",
+        "file-loader": "^0.10.1",
+        "materialize-css": "^0.100.2",
+        "postcss-loader": "^1.3.3",
+        "ramda": "^0.25.0",
+        "scss-loader": "0.0.1",
+        "switch-path": "^1.2.0",
+        "vega": "^3.3.1",
+        "xstream": "^11.3.0"
     }
-  },
-  "author": "Toni Verbeiren",
-  "license": "Apache v2",
-  "devDependencies": {
-    "autoprefixer": "^6.7.2",
-    "babel-core": "^6.26.3",
-    "babel-loader": "^7.1.4",
-    "babel-preset-es2015": "^6.24.1",
-    "babel-preset-stage-0": "^6.24.1",
-    "bootstrap-sass": "^3.3.7",
-    "css-loader": "^0.26.4",
-    "electron-builder": "^20.15.1",
-    "extract-text-webpack-plugin": "^2.1.2",
-    "jquery": "^3.2.1",
-    "node-sass": "^4.5.3",
-    "resolve-url-loader": "^1.6.1",
-    "sass-loader": "^5.0.1",
-    "style-loader": "^0.13.2",
-    "url-loader": "^0.5.9",
-    "webpack": "^2.7.0",
-    "webpack-dev-server": "^2.7.1",
-    "webpack-material-design-icons": "^0.1.0"
-  },
-  "dependencies": {
-    "@cycle/dom": "^20.4.0",
-    "@cycle/history": "^6.10.0",
-    "@cycle/http": "^14.9.0",
-    "@cycle/isolate": "^3.3.0",
-    "@cycle/run": "^4.1.0",
-    "@cycle/storage": "^4.1.1",
-    "cycle-onionify": "^3.3.0",
-    "cycle-storageify": "^3.2.0",
-    "cyclic-router": "^4.0.7",
-    "datalib": "^1.8.0",
-    "electron": "^2.0.2",
-    "file-loader": "^0.10.1",
-    "materialize-css": "^0.100.2",
-    "postcss-loader": "^1.3.3",
-    "ramda": "^0.25.0",
-    "scss-loader": "0.0.1",
-    "switch-path": "^1.2.0",
-    "vega": "^3.3.1",
-    "xstream": "^11.3.0"
-  }
 }

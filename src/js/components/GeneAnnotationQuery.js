@@ -41,7 +41,7 @@ function GeneAnnotationQuery(sources, id = ".genePopup") {
         .filter(([el, state]) => el != "")
         .map(([el, state]) => {
             return {
-                url: cleanURL(state.settings.geneAnnotations.url + el),
+                url: state.settings.geneAnnotations.url + cleanURL(el),
                 method: 'GET',
                 'category': 'gene'
             }

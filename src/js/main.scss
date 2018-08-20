@@ -17,7 +17,8 @@ main {
     flex: 1 0 auto;
 }
 
-@import '../../node_modules/materialize-css/sass/components/color';
+@import 'materialize-css/sass/components/color-variables';
+@import 'materialize-css/sass/components/color-classes';
 .compound {
     @extend .orange;
     @extend .lighten-5;

@@ -129,7 +129,7 @@ export default function CompoundWorkflow(sources) {
             div('.col .s10 .offset-s1', pageStyle, [
                 div('.row', [filter]),
                 div('.row', [plots]),
-                div('.row', []),
+                // div('.row', []),
                 div('.col .s12', [headTable]),
                 div('.row', []),
                 div('.col .s12', [tailTable]),
@@ -163,6 +163,8 @@ export default function CompoundWorkflow(sources) {
             tailTable.HTTP
         ),
         vega: binnedPlots.vega,
-        popup: scenarioPopup$
+        popup: scenarioPopup$,
+        modal: CompoundFormSink.modal,
+        ac: CompoundFormSink.ac
     };
 }

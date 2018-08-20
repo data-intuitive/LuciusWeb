@@ -52,7 +52,7 @@ function SignatureForm(sources) {
                             i('.large  .center-align .material-icons .pink-text', { style: { fontSize: '45px', fontColor: 'gray' } }, 'search'),
                         ]),
                         // textarea('.Query .col .s10 .materialize-textarea', {style: {fontSize: '20px'} , props: {type: 'text', value: query.trim()}, value: query.trim()}),
-                        input('.Query .col s10', { style: { fontSize: '20px' }, props: { type: 'text', value: query }, value: query }),
+                        input('.Query .col s10 .white-text', { style: { fontSize: '20px' }, props: { type: 'text', value: query }, value: query }),
                         // div('.row', [
                         // div('.col .s1'),
                         (validated)

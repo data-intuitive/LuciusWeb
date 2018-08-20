@@ -94,10 +94,15 @@ function Filter(sources) {
      * @param {*} selection Array with selection
      */
     const filterSwitch = (filter, option, selectedOptions) => div(
-        '.collection-item ' + '.' + filter + '-options', { props: { id: option } }, [
-            input('.switch .filled-in-box', isSelectedProps(option, selectedOptions)),
-            label('', { props: { id: option } }, option)
+        '.collection-item ' + '.' + filter + '-options', { props: { id: option } }, 
+        [
+        label([
+            input('.filled-in-box', isSelectedProps(option, selectedOptions), ''),
+            // label('', { props: { id: option } }, 
+            span([option])
+        // )
         ])
+    ])
 
     /**
      * A table of check boxes that is only shown if needed

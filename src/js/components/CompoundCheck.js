@@ -1,7 +1,7 @@
 import sampleCombine from 'xstream/extra/sampleCombine'
 import isolate from '@cycle/isolate'
 import { i, p, div, br, label, input, code, table, tr, td, b, h2, button, textarea, a, ul, li, span } from '@cycle/dom';
-import { clone, equals } from 'ramda';
+import { clone, equals, mergeAll } from 'ramda';
 import xs from 'xstream';
 import { logThis, log } from '../utils/logger'
 import { ENTER_KEYCODE } from '../utils/keycodes.js'
@@ -34,6 +34,8 @@ function CompoundCheck(sources) {
 
     const state$ = sources.onion.state$
 
+    const acInput$ = sources.ac
+
     const input$ = xs.merge(
         sources.DOM
             .select('.compoundQuery')
@@ -43,7 +45,6 @@ function CompoundCheck(sources) {
         // This for ghost mode, inject changes via external state updates...
         state$.filter(state => typeof state.core.ghostinput !== 'undefined').map(state => state.core.input).compose(dropRepeats())
     )
-    // .remember()
 
     // When the component should not be shown, including empty signature
     const isEmptyState = (state) => {
@@ -66,11 +67,12 @@ function CompoundCheck(sources) {
     const modifiedState$ = state$
         .filter(state => !isEmptyState(state))
         .compose(dropRepeats((x, y) => equals(x, y)))
+        .remember()
 
     // An update to the input$, join it with state$
     const newInput$ = xs.combine(
         input$,
-        state$
+        modifiedState$
     )
         .map(([newinput, state]) => ({ ...state, core: { ...state.core, input: newinput } }))
         .compose(dropRepeats((x, y) => equals(x.core.input, y.core.input)))
@@ -102,14 +104,15 @@ function CompoundCheck(sources) {
 
     const data$ = response$
         .map(res => res.body.result.data)
+        .remember()
 
-    const suggestionStyle = {
-        style: {
-            'margin-bottom': '0px',
-            'margin-top': '0px',
-            fontWeight: 'lighter',
-        }
-    }
+    // const suggestionStyle = {
+    //     style: {
+    //         'margin-bottom': '0px',
+    //         'margin-top': '0px',
+    //         fontWeight: 'lighter',
+    //     }
+    // }
 
     const initVdom$ = emptyState$
         .mapTo(div())
@@ -118,7 +121,6 @@ function CompoundCheck(sources) {
         .map(state => {
             const query = state.core.input
             const validated = state.core.validated
-            const showSuggestions = state.core.showSuggestions
             return div(
                 [
                     div('.row  .orange .darken-4 .white-text', { style: { padding: '20px 10px 10px 10px' } }, [
@@ -126,14 +128,7 @@ function CompoundCheck(sources) {
                             i('.large  .center-align .material-icons .orange-text', { style: { fontSize: '45px', fontColor: 'gray' } }, 'search'),
                         ]),
                         div('.col .s10 .input-field', { style: { margin: '0px 0px 0px 0px' } }, [
-                            input('.compoundQuery .col .s12 .autocomplete-input', { style: { fontSize: '20px' }, props: { type: 'text', value: query }, value: query }),
-                            (showSuggestions)
-                                ? ul('.autocomplete-content .dropdown-content .col .s12 .orange .lighten-4 .z-depth-5',
-                                    state.core.data.map(x => li({ attrs: { 'data-index': x.jnjs } }, [
-                                        div('.col .s3 .compoundComplete', suggestionStyle, [x.jnjs]),
-                                        div('.col .s9 .compoundComplete ', suggestionStyle, [x.name])
-                                    ])))
-                                : ul([])
+                            input('.compoundQuery.col .s12 .autocomplete-input .white-text', { style: { fontSize: '20px' }, props: { type: 'text', value: query }, value: query }),
                         ]),
                         (validated)
                             ? div('.CompoundCheck .waves-effect .col .s1 .center-align', [
@@ -175,7 +170,7 @@ function CompoundCheck(sources) {
     )
     // Set a default signature for demo purposes
     const setDefault$ = sources.DOM.select('.Default').events('click')
-    const setDefaultReducer$ = setDefault$.map(events => prevState =>
+    const setDefaultReducer$ = setDefault$.mapTo(prevState =>
         ({
             ...prevState, core: {
                 ...prevState.core,
@@ -186,9 +181,8 @@ function CompoundCheck(sources) {
         })
     )
     // When a suggestion is clicked, update the state so the query becomes this
-    const autocomplete$ = sources.DOM.select('.compoundComplete').events('click')
-    const autocompleteReducer$ = autocomplete$.map(event => prevState => {
-        const newInput = event.target.parentNode.dataset.index
+    const autocompleteReducer$ = acInput$.map(event => prevState => {
+        const newInput = event //event.target.parentNode.dataset.index
         return ({
             ...prevState, core: {
                 ...prevState.core,
@@ -208,6 +202,16 @@ function CompoundCheck(sources) {
     const dataReducer$ = data$.map(newData => prevState =>
         ({ ...prevState, core: { ...prevState.core, data: newData } })
     )
+
+    // Whenever more than 1 option is available per our compound query, we list the options.
+    const ac$ = data$.filter(data => data.length > 1).map(data => ({
+        el: '.compoundQuery', 
+        data: data,
+        render: function(data) { return mergeAll(data.map(d => ({ [d.jnjs + ' - ' + d.name]: null }))) },
+        strip: function (str) {
+            return str.split(" - ")[0];
+        }
+    }))
 
     // GO!!!
     const run$ = sources.DOM
@@ -240,7 +244,8 @@ function CompoundCheck(sources) {
             setDefaultReducer$,
             autocompleteReducer$
         ),
-        output: query$
+        output: query$,
+        ac: ac$
     };
 }
 

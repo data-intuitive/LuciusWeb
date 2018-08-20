@@ -128,7 +128,7 @@ function TargetCheck(sources) {
                             i('.large  .center-align .material-icons .red-text', { style: { fontSize: '45px', fontColor: 'gray' } }, 'search'),
                         ]),
                         div('.col .s10 .input-field', { style: { margin: '0px 0px 0px 0px' } }, [
-                            input('.TargetQuery .col .s12 .autocomplete-input', { style: { fontSize: '20px' }, props: { type: 'text', value: query }, value: query }),
+                            input('.TargetQuery .col .s12 .autocomplete-input .white-text', { style: { fontSize: '20px' }, props: { type: 'text', value: query }, value: query }),
                             (showSuggestions)
                                 ? ul('.autocomplete-content .dropdown-content .col .s12 .red .lighten-4 .z-depth-5',
                                     state.core.data.map(x => li({ attrs: { 'data-index': x.target } }, [

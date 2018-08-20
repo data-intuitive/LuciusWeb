@@ -112,21 +112,30 @@ function SampleSelection(sources) {
     const makeTable = (state) => {
         const data = state.core.data
         const blurStyle = (state.settings.common.blur) ? { style: { filter: 'blur(' + state.settings.common.amountBlur + 'px)' } } : {}
+        const selectedClass = (selected) => (selected) ? '.black-text' : '.grey-text .text-lighten-2'
         let rows = data.map(entry => [
-            td(blurStyle, entry.jnjs),
-            td(blurStyle, (entry.compoundname.length > 10) ? entry.compoundname.substring(0, 10) + '...' : entry.compoundname),
-            td(entry.id),
-            td(entry.protocolname),
-            td(entry.concentration),
-            td(entry.batch),
-            td(entry.year),
-            td(entry.significantGenes),
             td('.selection', { props: { id: entry.id } }, [
-                input('.switch .filled-in .grey', { props: { type: 'checkbox', checked: entry.use, id: entry.id } }),
-                label('', { props: { id: entry.id } })
-            ])
+                (entry.use) ? i('.small .material-icons .red-text','remove')
+                : i('.small .material-icons .green-text','add')
+            ]),
+            td(selectedClass(entry.use), blurStyle, entry.jnjs),
+            td(selectedClass(entry.use), blurStyle, (entry.compoundname.length > 10) ? entry.compoundname.substring(0, 10) + '...' : entry.compoundname),
+            td(selectedClass(entry.use), entry.id),
+            td(selectedClass(entry.use), entry.protocolname),
+            td(selectedClass(entry.use), entry.concentration),
+            td(selectedClass(entry.use), entry.batch),
+            td(selectedClass(entry.use), entry.year),
+            td(selectedClass(entry.use), entry.significantGenes)
+            // td('.selection', { props: { id: entry.id } }, [
+            //     label('', { props: { id: entry.id } }, [
+            //         input('.filled-in .grey', { props: { type: 'checkbox', checked: entry.use, id: entry.id } }, 'tt'),
+            //         span([''])
+            //     ])
+            // ])
+
         ]);
         const header = tr([
+            th('Use?'),
             th('JNJ'),
             th('Name'),
             th('Sample'),
@@ -134,8 +143,7 @@ function SampleSelection(sources) {
             th('Conc'),
             th('Batch'),
             th('Year'),
-            th('Sign. Genes'),
-            th('Use?')
+            th('Sign. Genes')
         ]);
 
         let body = [];
@@ -145,7 +153,7 @@ function SampleSelection(sources) {
         return (
             div([
                 div('.row', [
-                    div('.col .s8 .offset-s2 .l6 .offset-l3', [table('.striped', tableContent)]),
+                    div('.col .s10 .offset-s1 .l8 .offset-l2', [table('.striped .centered', tableContent)]),
                     div('.row .s6 .offset-s3', [
                         button('.doSelect .btn .col .offset-s4 .s4 .orange .darken-2', 'Select'),
                     ]),
@@ -219,7 +227,7 @@ function SampleSelection(sources) {
             dataReducer$,
             selectReducer$
         ),
-        output: sampleSelection$,
+        output: sampleSelection$
     }
 }
 

@@ -1,5 +1,5 @@
 import 'materialize-css/dist/css/materialize.css';
-import 'materialize-css/dist/js/materialize.js';
+// import 'materialize-css/dist/js/materialize.js';
 
 import { run } from '@cycle/run';
 import { makeDOMDriver } from '@cycle/dom';
@@ -11,17 +11,20 @@ import onionify from 'cycle-onionify';
 import storageify from "cycle-storageify";
 
 import Index from './index';
+
 import { makeVegaDriver } from './drivers/makeVegaDriver';
 import { logDriver } from './drivers/logDriver';
 import { alertDriver } from './drivers/alertDriver';
 import { popupDriver } from './drivers/popupDriver'
 import { preventDefaultDriver } from './drivers/preventDefaultDriver';
 import switchPath from 'switch-path'
+import { makeModalDriver } from './drivers/makeModalDriver'
+import { makeAutocompleteDriver } from './drivers/makeAutocompleteDriver';
 
 import './main.scss'
 
 import fromEvent from 'xstream/extra/fromEvent'
-import xs from 'xstream'
+// import xs from 'xstream'
 
 const drivers = {
     DOM: makeDOMDriver('#root'),
@@ -33,7 +36,9 @@ const drivers = {
     storage: storageDriver,
     popup: popupDriver,
     resize: () => fromEvent(window, 'resize'),
-    log: logDriver
+    log: logDriver,
+    modal: makeModalDriver(),
+    ac: makeAutocompleteDriver()
 };
 
 let StatifiedMain = onionify(storageify(Index, { key: 'ComPass' }));

@@ -188,7 +188,9 @@ export default function Index(sources) {
             prevent$,
             page$.map(prop('preventDefault')).filter(Boolean).flatten()
         ),
-        popup: page$.map(prop('popup')).filter(Boolean).flatten()
+        popup: page$.map(prop('popup')).filter(Boolean).flatten(),
+        modal: page$.map(prop('modal')).filter(Boolean).flatten(),
+        ac: page$.map(prop('ac')).filter(Boolean).flatten()
     }
 
 }

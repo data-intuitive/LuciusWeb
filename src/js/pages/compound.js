@@ -128,8 +128,7 @@ export default function CompoundWorkflow(sources) {
             formDOM,
             div('.col .s10 .offset-s1', pageStyle, [
                 div('.row', [filter]),
-                div('.row', [plots]),
-                // div('.row', []),
+                div('.row', [ plots ]),
                 div('.col .s12', [headTable]),
                 div('.row', []),
                 div('.col .s12', [tailTable]),

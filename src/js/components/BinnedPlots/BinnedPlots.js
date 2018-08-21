@@ -164,7 +164,7 @@ function BinnedPlots(sources) {
     // ========================================================================
 
     const plotsContainerDifferent = (left, right) => {
-        return div('.row ', [div('.col .s12 .l7', [
+        return div('.col .s12', [div('.col .s12 .l7', {style : { margin: '0 0 0 0', padding: 0}}, [
             left,
         ]), div('.col .s12 .l5', [
             right,

@@ -16,7 +16,6 @@ function CompoundForm(sources) {
 
     const logger = loggerFactory('compoundForm', sources.onion.state$, 'settings.debug')
 
-    console.log(sources)
     const state$ = sources.onion.state$
 
     const CompoundCheckSink = isolate(CompoundCheck, {onion: checkLens} )(sources)
@@ -75,7 +74,7 @@ function CompoundForm(sources) {
             SignatureGeneratorSink.HTTP
         ),
         output: signature$,
-        modal: CompoundCheckSink.modal,
+        modal: SignatureGeneratorSink.modal,
         ac: CompoundCheckSink.ac
     }
 }

@@ -1,5 +1,4 @@
 import 'materialize-css/dist/css/materialize.css';
-// import 'materialize-css/dist/js/materialize.js';
 
 import { run } from '@cycle/run';
 import { makeDOMDriver } from '@cycle/dom';

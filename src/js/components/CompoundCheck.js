@@ -10,6 +10,7 @@ import debounce from 'xstream/extra/debounce'
 import concat from 'xstream/extra/concat'
 import { prop } from 'ramda'
 import { loggerFactory } from '~/../../src/js/utils/logger'
+import { titleCase } from '../utils/utils'
 
 const checkLens = {
     get: state => ({ core: (typeof state.form !== 'undefined') ? state.form.check : {}, settings: state.settings }),
@@ -207,7 +208,7 @@ function CompoundCheck(sources) {
     const ac$ = data$.filter(data => data.length > 1).map(data => ({
         el: '.compoundQuery', 
         data: data,
-        render: function(data) { return mergeAll(data.map(d => ({ [d.jnjs + ' - ' + d.name]: null }))) },
+        render: function(data) { return mergeAll(data.map(d => ({ [d.jnjs + ' - ' + titleCase(d.name)]: null }))) },
         strip: function (str) {
             return str.split(" - ")[0];
         }

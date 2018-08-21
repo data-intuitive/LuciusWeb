@@ -2,51 +2,31 @@ import { loggerFactory } from '~/../../src/js/utils/logger'
 import xs from 'xstream'
 import { keys, values, filter, head, equals, map, prop, clone, omit, merge } from 'ramda'
 import dropRepeats from 'xstream/extra/dropRepeats'
-
-// const GeneAnnotationQueryLens = {
-//     get: state => ({ settings: state.settings.geneAnnotations }),
-//     set: (state, childState) => state
-// };
+import { i, em, p, div, br, label, input, code, table, tr, td, b, h2, button, textarea, a, ul, li, span, th, thead, tbody, h3, h4 } from '@cycle/dom';
+import { absGene, titleCase } from '../utils/utils'
+import sampleCombine from 'xstream/extra/sampleCombine'
 
 /**
- * This compontent checks if the mouse is over a DOM element with a gene identifier (tagged `.genePupop`).
- * It queries annotations for that gene and returns a json structure with the result to `output`.
+ * This components checks if an elements is clicked and shows a modal when so.
  * 
  * Please note:
- *  - This component that does NOT handle DOM rendering of the annotations!
  *  - No isolation is performed, but make sure the appropriate config key is pushed through!
  */
 function GeneAnnotationQuery(sources, id = ".genePopup") {
 
-    const logger = loggerFactory('geneAnnotationsQuery', sources.onion.state$, 'settings.debug')
+    const logger = loggerFactory('geneAnnotationQuery', sources.onion.state$, 'settings.geneAnnotations.debug')
     const state$ = sources.onion.state$
 
-    /**
-     * check if the mouse is over a certain element
-     */
-    const mouseIn$ = sources.DOM.select(id).events('mouseenter', {
-        preventDefault: true
-    }).map(x => x.target.textContent)
+    const trigger$ = sources.DOM.select(id).events('click').map(x => x.target.textContent)
 
-    const mouseOut$ = sources.DOM.select(id).events('mouseleave', {
-        preventDefault: true,
-        useCapture: true
-    }).mapTo("")
-
-    const hover$ = xs.merge(mouseIn$, mouseOut$).startWith("")
-
-    const cleanURL = (url) => url.replace('-', '').trim()
-
-    const triggerGeneAnnotation$ = xs.combine(hover$, state$.compose(dropRepeats(equals)))
-        .filter(([el, state]) => el != "")
+    const triggerGeneAnnotation$ = trigger$.compose(sampleCombine(state$))
         .map(([el, state]) => {
             return {
-                url: state.settings.geneAnnotations.url + cleanURL(el),
+                url: state.settings.geneAnnotations.url + absGene(el),
                 method: 'GET',
                 'category': 'gene'
             }
         })
-        .remember()
 
     const geneResponse$ = sources.HTTP
         .select('gene')
@@ -56,13 +36,33 @@ function GeneAnnotationQuery(sources, id = ".genePopup") {
         .flatten()
         .map(r => r.body)
 
+    const DOM$ = geneResponse$.map(annotation =>
+        div('#modal-' + absGene(annotation.symbol) + '.modal.bottom-sheet.grey.darken-4.grey-text', [
+            div('.col.s12.modal-content', [
+                h3('.text-darken-3.right-align', 'Target Information'),
+                div('.grey-text.text-lighten-2.col.s4', { style: { 'font-size': '14px', } }, [
+                    h4([titleCase(annotation.name)]),
+                    p([b("Link: "), a({ props: { href: annotation.uniprot, target: "_blank" } }, annotation.uniprot)]),
+                    p([b("EntrezID: "), annotation.entrezid]),
+                    p([b("Ensembl: "),annotation.ensembl])
+                ]),
+                div('.col .s8', [
+                    p(annotation.function),
+                ])
+            ])
+        ])
+    ).startWith(div())
+
+    const openModal$ = geneResponse$
+        .map(annotation => ({ el: '#modal-' + annotation.symbol, state: 'open' }))
+
     return {
         log: xs.merge(
-            logger(state$, 'state$'),
+            logger(state$, 'state$')
         ),
-        hover: hover$,
-        output: geneResponse$.startWith({}),
-        HTTP: triggerGeneAnnotation$
+        DOM: DOM$,
+        HTTP: triggerGeneAnnotation$,
+        modal: xs.merge(openModal$)
     }
 
 }

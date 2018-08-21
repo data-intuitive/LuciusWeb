@@ -11,7 +11,7 @@ import { loggerFactory } from '~/../../src/js/utils/logger'
 import { stringify } from 'querystring';
 import { isNullOrUndefined } from 'util';
 import { GeneAnnotationQuery } from './GeneAnnotationQuery'
-// import { GeneAnnotationQueryLens } from './GeneAnnotationQuery'
+import { absGene } from '../utils/utils'
 
 const emptyData = {
     body: {
@@ -23,7 +23,7 @@ const emptyData = {
 
 const signatureLens = {
     get: state => ({ core: state.form.signature, settings: state.settings }),
-    set: (state, childState) => ({...state, form: {...state.form, signature: childState.core } })
+    set: (state, childState) => ({ ...state, form: { ...state.form, signature: childState.core } })
 };
 
 /**
@@ -41,6 +41,9 @@ const signatureLens = {
  */
 function SignatureGenerator(sources) {
 
+    // Plug-in annotations for genes
+    const geneAnnotationQuery = GeneAnnotationQuery(sources)
+
     const logger = loggerFactory('signatureGenerator', sources.onion.state$, 'settings.form.debug')
 
     const state$ = sources.onion.state$
@@ -48,10 +51,10 @@ function SignatureGenerator(sources) {
     const input$ = sources.input
 
     const newInput$ = xs.combine(
-            input$,
-            state$
-        )
-        .map(([newinput, state]) => ({...state, core: {...state.core, input: newinput } }))
+        input$,
+        state$
+    )
+        .map(([newinput, state]) => ({ ...state, core: { ...state.core, input: newinput } }))
         .compose(dropRepeats((x, y) => equals(x.core.input, y.core.input)))
 
     const triggerRequest$ = newInput$
@@ -95,35 +98,18 @@ function SignatureGenerator(sources) {
         }
     }
 
-    const geneAnnotationQuery = GeneAnnotationQuery(sources)
-    const geneAnnotations$ = geneAnnotationQuery.output
-    const hover$ = geneAnnotationQuery.hover
-
-    // top: 'calc(100% - 30px)', height: '30px', 
-    const showGene = (thisGene, selectedGene, annotation) =>
-        div('.col .orange .lighten-4 .genePopup .' + thisGene, geneStyle, [
-            thisGene,
-            ((selectedGene.trim() == thisGene.trim()) && !(isEmpty(annotation))) ?
-            div('.col .active .black .white-text', { style: { 'font-size': '13px', position: 'fixed', top: 'calc(100% - 150px)', height: '150px', width: '100%', left: '0px', visibility: 'visible', opacity: 0.8, padding: '10px' } }, [
-                div('.col .s3', { style: { 'font-size': '14px', } }, [
-                    p('Name: ' + annotation.name),
-                    p(["Link: ", a({ props: { href: annotation.uniprot, target: "_blank" } }, annotation.uniprot)]),
-                    p("EntrezID: " + annotation.entrezid),
-                    p("Ensembl: " + annotation.ensembl)
-                ]),
-                div('.col .s9', [
-                    p(annotation.function),
-                ])
-            ]) :
-            div('.active .white', { syle: { position: 'fixed', visibility: 'invisible', opacity: 0 } }, [])
+    const showGene = (thisGene) =>
+        div('#' + absGene(thisGene) + '.col.orange.lighten-4.genePopup', geneStyle, [
+            thisGene
         ])
 
-    const validVdom$ = xs.combine(validSignature$, hover$, geneAnnotations$)
-        .map(([s, hover, annotation]) => div('.card .orange .lighten-3', [
+    const validVdom$ = xs.combine(validSignature$, geneAnnotationQuery.DOM)
+        .map(([s, annotation]) => div('.card .orange .lighten-3', [
             div('.card-content .orange-text .text-darken-4', [
                 span('.card-title', 'Signature:'),
                 div('.row', { style: { fontSize: "16px", fontStyle: 'bold' } },
-                    s.split(" ").map(gene => showGene(gene, hover, annotation)))
+                    s.split(" ").map(gene => showGene(gene))),
+                annotation
             ])
         ]))
         .startWith(div('.card .orange .lighten-3', []))
@@ -138,19 +124,18 @@ function SignatureGenerator(sources) {
         ]))
         .startWith(div('.card .orange .lighten-3', []))
 
-
     const vdom$ = xs.merge(invalidVdom$, validVdom$)
 
     const signature$ = xs.merge(validSignature$, invalidSignature$).remember()
 
     // Initialization
-    const defaultReducer$ = xs.of(prevState => ({...prevState, core: { input: '' } }))
-        // Add input to state
-    const inputReducer$ = newInput$.map(i => prevState => ({...prevState, core: {...prevState.core, input: i } }))
-        // Add request body to state
-    const requestReducer$ = request$.map(req => prevState => ({...prevState, core: {...prevState.core, request: req } }))
-        // Add data from API to state, update output key when relevant
-    const dataReducer$ = data$.map(newData => prevState => ({...prevState, core: {...prevState.core, data: newData, output: newData.join(" ") } }))
+    const defaultReducer$ = xs.of(prevState => ({ ...prevState, core: { input: '' } }))
+    // Add input to state
+    const inputReducer$ = newInput$.map(i => prevState => ({ ...prevState, core: { ...prevState.core, input: i } }))
+    // Add request body to state
+    const requestReducer$ = request$.map(req => prevState => ({ ...prevState, core: { ...prevState.core, request: req } }))
+    // Add data from API to state, update output key when relevant
+    const dataReducer$ = data$.map(newData => prevState => ({ ...prevState, core: { ...prevState.core, data: newData, output: newData.join(" ") } }))
 
     return {
         log: xs.merge(
@@ -159,13 +144,17 @@ function SignatureGenerator(sources) {
         ),
         DOM: vdom$,
         output: signature$,
-        HTTP: xs.merge(request$, geneAnnotationQuery.HTTP),
+        HTTP: xs.merge(
+            request$, 
+            geneAnnotationQuery.HTTP
+        ),
         onion: xs.merge(
             defaultReducer$,
             inputReducer$,
             dataReducer$,
             requestReducer$
-        )
+        ),
+        modal: geneAnnotationQuery.modal
     }
 
 }

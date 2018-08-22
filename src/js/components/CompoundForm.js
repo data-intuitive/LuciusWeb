@@ -74,7 +74,10 @@ function CompoundForm(sources) {
             SignatureGeneratorSink.HTTP
         ),
         output: signature$,
-        modal: SignatureGeneratorSink.modal,
+        modal: xs.merge(
+            SignatureGeneratorSink.modal,
+            SampleSelectionSink.modal
+        ),
         ac: CompoundCheckSink.ac
     }
 }

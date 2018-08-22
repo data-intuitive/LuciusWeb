@@ -3,11 +3,11 @@ import isolate from '@cycle/isolate'
 import { i, p, div, br, label, input, code, table, tr, td, b, h2, button, textarea, a, ul, li, span, th, thead, tbody } from '@cycle/dom';
 import { clone, equals, merge } from 'ramda';
 import xs from 'xstream';
-import { logThis, log } from '../utils/logger'
 import { ENTER_KEYCODE } from '../utils/keycodes.js'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import debounce from 'xstream/extra/debounce'
 import { loggerFactory } from '~/../../src/js/utils/logger'
+import { CompoundAnnotation } from '../components/CompoundAnnotation'
 
 const emptyData = {
     body: {
@@ -31,9 +31,11 @@ const sampleSelectionLens = {
  */
 function SampleSelection(sources) {
 
+    const compoundAnnotations = CompoundAnnotation(sources)
+
     const logger = loggerFactory('sampleSelection', sources.onion.state$, 'settings.form.debug')
 
-    const state$ = sources.onion.state$
+    const state$ = sources.onion.state$.debug()
 
     const input$ = sources.input
 
@@ -109,7 +111,7 @@ function SampleSelection(sources) {
         .map(ev => ev.ownerTarget.id)
 
     // Helper function for rendering the table, based on the state
-    const makeTable = (state) => {
+    const makeTable = (state, annotation) => {
         const data = state.core.data
         const blurStyle = (state.settings.common.blur) ? { style: { filter: 'blur(' + state.settings.common.amountBlur + 'px)' } } : {}
         const selectedClass = (selected) => (selected) ? '.black-text' : '.grey-text .text-lighten-2'
@@ -118,7 +120,7 @@ function SampleSelection(sources) {
                 (entry.use) ? i('.small .material-icons .red-text','remove')
                 : i('.small .material-icons .green-text','add')
             ]),
-            td(selectedClass(entry.use), blurStyle, entry.jnjs),
+            td('.compoundPopup' + selectedClass(entry.use), blurStyle, entry.jnjs),
             td(selectedClass(entry.use), blurStyle, (entry.compoundname.length > 10) ? entry.compoundname.substring(0, 10) + '...' : entry.compoundname),
             td(selectedClass(entry.use), entry.id),
             td(selectedClass(entry.use), entry.protocolname),
@@ -154,6 +156,7 @@ function SampleSelection(sources) {
             div([
                 div('.row', [
                     div('.col .s10 .offset-s1 .l8 .offset-l2', [table('.striped .centered', tableContent)]),
+                    annotation,
                     div('.row .s6 .offset-s3', [
                         button('.doSelect .btn .col .offset-s4 .s4 .orange .darken-2', 'Select'),
                     ]),
@@ -166,8 +169,8 @@ function SampleSelection(sources) {
 
     const loadingVdom$ = xs.combine(request$, modifiedState$).mapTo(div())
 
-    const loadedVdom$ = modifiedState$
-        .map(state => makeTable(state))
+    const loadedVdom$ = xs.combine(modifiedState$, compoundAnnotations.DOM)
+        .map(([state, annotation]) => makeTable(state, annotation))
 
     const vdom$ = xs.merge(initVdom$, loadingVdom$, loadedVdom$)
 
@@ -219,7 +222,10 @@ function SampleSelection(sources) {
             logger(state$, 'state$'),
         ),
         DOM: vdom$,
-        HTTP: request$, //.compose(debounce(2000)),
+        HTTP: xs.merge(
+            request$,
+            compoundAnnotations.HTTP
+        ),
         onion: xs.merge(
             defaultReducer$,
             inputReducer$,
@@ -227,7 +233,8 @@ function SampleSelection(sources) {
             dataReducer$,
             selectReducer$
         ),
-        output: sampleSelection$
+        output: sampleSelection$,
+        modal: compoundAnnotations.modal
     }
 }
 

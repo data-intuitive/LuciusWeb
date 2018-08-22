@@ -1,5 +1,5 @@
 export const initSettings = {
-    version: 3.81,
+    version: 3.91,
     filter: {
         debug: true,
         values: {
@@ -85,5 +85,9 @@ export const initSettings = {
         debug: false,
         url: 'http://localhost:8082/gene/symbol/',
 
+    },
+    compoundAnnotations: {
+        debug: false,
+        url: 'http://localhost:8082/drugbank/jnjs/',
     }
 };

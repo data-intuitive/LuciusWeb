@@ -45,8 +45,9 @@ export default function CompoundWorkflow(sources) {
                 form: state.settings.form,
                 api: state.settings.api,
                 common: state.settings.common,
-                geneAnnotations: state.settings.geneAnnotations
-            }
+                geneAnnotations: state.settings.geneAnnotations,
+                compoundAnnotations: state.settings.compoundAnnotations
+             }
         }),
         set: (state, childState) => ({...state, form: childState.form })
     };
@@ -163,7 +164,9 @@ export default function CompoundWorkflow(sources) {
         ),
         vega: binnedPlots.vega,
         popup: scenarioPopup$,
-        modal: CompoundFormSink.modal,
+        modal: xs.merge(
+            CompoundFormSink.modal
+        ),
         ac: CompoundFormSink.ac
     };
 }

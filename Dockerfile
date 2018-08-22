@@ -14,9 +14,9 @@ WORKDIR /app/LuciusWeb
 RUN npm install -g node-gyp
 
 # LuciusWeb
-RUN npm update && \
-    npm install && \
-    npm run build
+# RUN npm update
+RUN npm install
+RUN npm run build
 
 # Port to expose
 EXPOSE 80

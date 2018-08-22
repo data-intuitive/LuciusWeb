@@ -11,7 +11,7 @@ import { initSettings } from '../configuration'
 
 export const compoundFilterLens = {
     get: state => ({ core: state.filter, settings: state.settings }),
-    set: (state, childState) => ({...state, filter: childState.core })
+    set: (state, childState) => ({ ...state, filter: childState.core })
 }
 
 /**
@@ -49,14 +49,14 @@ function Filter(sources) {
 
     const modifiedState$ = xs.combine(input$, state$)
         .filter(([input, state]) => !isEmptyState(state))
-        .map(([i, state]) => ({...state, core: {...state.core, input: i } }))
+        .map(([i, state]) => ({ ...state, core: { ...state.core, input: i } }))
 
     const toggleConcentration$ = sources.DOM
         .select('.concentration')
         .events('click')
         .fold((x, y) => !x, false)
         .startWith(false)
-        // .remember()
+    // .remember()
 
     const toggleProtocol$ = sources.DOM
         .select('.protocol')
@@ -94,15 +94,14 @@ function Filter(sources) {
      * @param {*} selection Array with selection
      */
     const filterSwitch = (filter, option, selectedOptions) => div(
-        '.collection-item ' + '.' + filter + '-options', { props: { id: option } }, 
-        [
-        label([
-            input('.filled-in-box', isSelectedProps(option, selectedOptions), ''),
-            // label('', { props: { id: option } }, 
-            span([option])
-        // )
+        '.collection-item ' + '.' + filter + '-options', { props: { id: option } }, [
+            label({ props: { id: option } }, [
+                input(isSelectedProps(option, selectedOptions), ''),
+                // label('', { props: { id: option } }, 
+                span({ props: { id: option } }, [option])
+                // )
+            ])
         ])
-    ])
 
     /**
      * A table of check boxes that is only shown if needed
@@ -112,13 +111,13 @@ function Filter(sources) {
      */
     const togglableFilter = (filter, toggle, possibleOptions, selectedOptions) =>
         toggle ?
-        div('.col .s10 .offset-s1', [ //{ style: { position: 'absolute', left: '0px', top: '50%', width: '50%', 'z-index': '1' } }, [
-            div('.collection .selection ',
-                possibleOptions.map(option => filterSwitch(filter, option, selectedOptions))
-            )
+            div('.col .s10 .offset-s1', [ //{ style: { position: 'absolute', left: '0px', top: '50%', width: '50%', 'z-index': '1' } }, [
+                div('.collection .selection ',
+                    possibleOptions.map(option => filterSwitch(filter, option, selectedOptions))
+                )
 
-        ]) :
-        div('.protocol .col .s10 .offset-s1', [''])
+            ]) :
+            div('.protocol .col .s10 .offset-s1', [''])
 
     const emptyVdom$ = emptyState$.mapTo(div())
 
@@ -169,16 +168,19 @@ function Filter(sources) {
     // Toggles for filter options
     const concentrationToggled$ = sources.DOM.select('.concentration-options')
         .events('click')
+        .map(function (ev) { ev.preventDefault(); return ev; })
         .map(ev => ev.ownerTarget.id)
         .map(value => ({ concentration: value }))
 
     const protocolToggled$ = sources.DOM.select('.protocol-options')
         .events('click')
+        .map(function (ev) { ev.preventDefault(); return ev; })
         .map(ev => ev.ownerTarget.id)
         .map(value => ({ protocol: value }))
 
     const typeToggled$ = sources.DOM.select('.type-options')
         .events('click')
+        .map(function (ev) { ev.preventDefault(); return ev; })
         .map(ev => ev.ownerTarget.id)
         .map(value => ({ type: value }))
 
@@ -187,7 +189,6 @@ function Filter(sources) {
         .filter(state => typeof state.core.ghostinput !== 'undefined')
         .map(state => state.core.ghostinput)
         .compose(dropRepeats())
-
 
     // Trigger when all filter fields are collapsed
     const toggleAny$ = xs.combine(toggleConcentration$, toggleProtocol$, toggleType$)
@@ -202,34 +203,37 @@ function Filter(sources) {
      * Reducers
      */
 
-    const defaultReducer$ = xs.of(prevState => ({...prevState,
-        core: {...prevState.core,
+    const defaultReducer$ = xs.of(prevState => ({
+        ...prevState,
+        core: {
+            ...prevState.core,
             output: initSettings.filter.values
         }
     }))
 
-    const inputReducer$ = input$.map(i => prevState => ({...prevState, core: {...prevState.core, input: i } }))
+    const inputReducer$ = input$.map(i => prevState => ({ ...prevState, core: { ...prevState.core, input: i } }))
 
     const toggleReducer$ = xs.merge(
-            concentrationToggled$, protocolToggled$, typeToggled$)
+        concentrationToggled$, protocolToggled$, typeToggled$)
+        // .debug()
         .map(clickedConcentration => prevState => {
             // We want this function to work for 3 the different filters, so first get the appropriate one
             const filterKey = head(keys(clickedConcentration))
             const filterValue = prop(filterKey, clickedConcentration)
-                // if already included, remove it from the list
+            // if already included, remove it from the list
             const currentArrayForFilterKey = prop(filterKey, prevState.core.output)
             const alreadyIncluded = currentArrayForFilterKey.includes(filterValue)
             const newArrayForFilterKey = alreadyIncluded ?
                 currentArrayForFilterKey.filter(el => el != filterValue) : // the value has to be removed from the list
                 currentArrayForFilterKey.concat(filterValue) // the value has to be added to the list
-                // When all options are _excluded_, reset to all options _included_
-                // const cleanArrayForFilterKey = (newArrayForFilterKey.length == 4) ? [] : newArrayForFilterKey
+            // When all options are _excluded_, reset to all options _included_
+            // const cleanArrayForFilterKey = (newArrayForFilterKey.length == 4) ? [] : newArrayForFilterKey
             const updatedState = assocPath(['core', 'output', filterKey], newArrayForFilterKey, prevState)
             return updatedState
         })
 
 
-    const outputReducer$ = filter$.map(i => prevState => ({...prevState, core: {...prevState.core, output: i } }))
+    const outputReducer$ = filter$.map(i => prevState => ({ ...prevState, core: { ...prevState.core, output: i } }))
 
     return {
         log: xs.merge(

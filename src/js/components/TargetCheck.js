@@ -106,15 +106,6 @@ function TargetCheck(sources) {
 
     const data$ = response$
         .map(res => res.body.result.data)
-        .debug()
-
-    const suggestionStyle = {
-        style: {
-            'margin-bottom': '0px',
-            'margin-top': '0px',
-            fontWeight: 'lighter',
-        }
-    }
 
     const initVdom$ = emptyState$
         .mapTo(div())
@@ -123,7 +114,6 @@ function TargetCheck(sources) {
         .map(state => {
             const query = state.core.input
             const validated = state.core.validated
-            const showSuggestions = state.core.showSuggestions
             return div(
                 [
                     div('.row  .red .darken-4 .white-text', { style: { padding: '20px 10px 10px 10px' } }, [
@@ -132,13 +122,6 @@ function TargetCheck(sources) {
                         ]),
                         div('.col .s10 .input-field', { style: { margin: '0px 0px 0px 0px' } }, [
                             input('.TargetQuery .col .s12 .autocomplete-input .white-text', { style: { fontSize: '20px' }, props: { type: 'text', value: query }, value: query }),
-                            // (showSuggestions)
-                            //     ? ul('.autocomplete-content .dropdown-content .col .s12 .red .lighten-4 .z-depth-5',
-                            //         state.core.data.map(x => li({ attrs: { 'data-index': x.target } }, [
-                            //             div('.col .s3 .TargetComplete', suggestionStyle, [x.target]),
-                            //             div('.col .s9 .TargetComplete ', suggestionStyle, [x.count])
-                            //         ])))
-                            //     : ul([])
                         ]),
                         (validated)
                             ? div('.TargetCheck .waves-effect .col .s1 .center-align', [
@@ -205,27 +188,46 @@ function TargetCheck(sources) {
     // })
 
     // Whenever more than 1 option is available per our compound query, we list the options.
-    const ac$ = data$.filter(data => data.length > 1).map(data => ({
-        el: '.TargetQuery',
-        data: data,
-        render: function (data) { return mergeAll(data.map(d => ({ [d.target + ' (' + d.count + " occurrences)"]: null }))) },
-        strip: function (str) {
-            return str.split(" (")[0];
-        }
-    })).debug()
-
-    // When a suggestion is clicked, update the state so the query becomes this
-    const autocompleteReducer$ = acInput$.map(event => prevState => {
-        const newInput = event //event.target.parentNode.dataset.index
-        return ({
-            ...prevState, core: {
-                ...prevState.core,
-                input: newInput,
-                showSuggestions: false,
-                validated: true
+    const ac$ = data$
+        .filter(data => data.length > 1)
+        .map(data => ({
+            el: '.TargetQuery',
+            data: data,
+            render: function (data) { return mergeAll(data.map(d => ({ [d.target + ' (' + d.count + " occurrences)"]: null }))) },
+            strip: function (str) {
+                return str.split(" (")[0];
             }
+        }))
+    // Trigger an update when only one result is left so we can handle that in the AutoComplete driver
+    const acOneSolution$ = data$
+        .filter(data => data.length == 1)
+        .map(data => ({
+            el: '.TargetQuery',
+            data: data,
+            render: function (data) { return mergeAll(data.map(d => ({ [d.target + ' (' + d.count + " occurrences)"]: null }))) },
+            strip: function (str) {
+                return str.split(" (")[0];
+            }
+        })).remember()
+
+    // When a suggestion is clicked or autocomplete is 'finished', update the state so the query becomes this
+    const autocompleteReducer$ = xs.merge(
+        // input from autocomplete (clicking an option)
+        acInput$,
+        // input from having one solution left in the autocomplete, extract the remaning target
+        acOneSolution$.map(info => info.data[0].target)
+    )
+        .map(input => prevState => {
+            const newInput = input
+            return ({
+                ...prevState, core: {
+                    ...prevState.core,
+                    input: newInput,
+                    showSuggestions: false,
+                    validated: true
+                }
+            })
         })
-    }).debug()
 
     // Add request body to state
     const requestReducer$ = request$.map(req => prevState =>
@@ -268,7 +270,7 @@ function TargetCheck(sources) {
         ),
         HTTP: request$,
         output: query$,
-        ac: ac$.debug()
+        ac: xs.merge(ac$, acOneSolution$)
     };
 }
 

@@ -36,7 +36,7 @@ function makeAutocompleteDriver() {
                                     ac.close()
                                 }
                             })
-                            if (ac.isOpen) { ac.close() }
+                            if (ac.isOpen || acInfo.data.length == 1) { ac.close() }
                             else { ac.open() }
                         }
                     },

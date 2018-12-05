@@ -181,20 +181,6 @@ function CompoundCheck(sources) {
             }
         })
     )
-    // When a suggestion is clicked, update the state so the query becomes this
-    const autocompleteReducer$ = acInput$.map(event => prevState => {
-        const newInput = event //event.target.parentNode.dataset.index
-        return ({
-            ...prevState, core: {
-                ...prevState.core,
-                input: newInput,
-                showSuggestions: false,
-                validated: true,
-                output: newInput,
-
-            }
-        })
-    })
     // Add request body to state
     const requestReducer$ = request$.map(req => prevState =>
         ({ ...prevState, core: { ...prevState.core, request: req } })
@@ -205,14 +191,48 @@ function CompoundCheck(sources) {
     )
 
     // Whenever more than 1 option is available per our compound query, we list the options.
-    const ac$ = data$.filter(data => data.length > 1).map(data => ({
-        el: '.compoundQuery', 
-        data: data,
-        render: function(data) { return mergeAll(data.map(d => ({ [d.jnjs + ' - ' + titleCase(d.name)]: null }))) },
-        strip: function (str) {
-            return str.split(" - ")[0];
-        }
-    }))
+    const ac$ = data$
+        .filter(data => data.length > 1)
+        .map(data => ({
+            el: '.compoundQuery',
+            data: data,
+            render: function (data) { return mergeAll(data.map(d => ({ [d.jnjs + ' - ' + titleCase(d.name)]: null }))) },
+            strip: function (str) {
+                return str.split(" - ")[0];
+            }
+        }))
+    // Trigger an update when only one result is left so we can handle that in the AutoComplete driver
+    const acOneSolution$ = data$
+        .filter(data => data.length == 1)
+        .map(data => ({
+            el: '.compoundQuery',
+            data: data,
+            render: function (data) { return mergeAll(data.map(d => ({ [d.jnjs + ' - ' + titleCase(d.name)]: null }))) },
+            strip: function (str) {
+                return str.split(" - ")[0];
+            }
+        }))
+
+    // When a suggestion is clicked, update the state so the query becomes this
+    const autocompleteReducer$ = xs.merge(
+        // input from autocomplete (clicking an option)
+        acInput$,
+        // input from having one solution left in the autocomplete, extract the remaning target
+        acOneSolution$.map(info => info.data[0].jnjs)
+    )
+        .map(input => prevState => {
+            const newInput = input
+            return ({
+                ...prevState, core: {
+                    ...prevState.core,
+                    input: newInput,
+                    showSuggestions: false,
+                    validated: true,
+                    output: newInput,
+
+                }
+            })
+        })
 
     // GO!!!
     const run$ = sources.DOM
@@ -246,7 +266,7 @@ function CompoundCheck(sources) {
             autocompleteReducer$
         ),
         output: query$,
-        ac: ac$
+        ac: xs.merge(ac$, acOneSolution$).debug()
     };
 }
 

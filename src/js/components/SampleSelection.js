@@ -116,9 +116,15 @@ function SampleSelection(sources) {
         const blurStyle = (state.settings.common.blur) ? { style: { filter: 'blur(' + state.settings.common.amountBlur + 'px)' } } : {}
         const selectedClass = (selected) => (selected) ? '.black-text' : '.grey-text .text-lighten-2'
         let rows = data.map(entry => [
+            // td('.selection', { props: { id: entry.id } }, [
+            //     (entry.use) ? i('.small .material-icons .red-text','remove')
+            //     : i('.small .material-icons .green-text','add')
+            // ]),
             td('.selection', { props: { id: entry.id } }, [
-                (entry.use) ? i('.small .material-icons .red-text','remove')
-                : i('.small .material-icons .green-text','add')
+                label('', { props: { id: entry.id } }, [
+                    input('.grey', { props: { type: 'checkbox', checked: entry.use, id: entry.id } }, 'tt'),
+                    span([''])
+                ])
             ]),
             td('.compoundPopup' + selectedClass(entry.use), blurStyle, entry.jnjs),
             td(selectedClass(entry.use), blurStyle, (entry.compoundname.length > 10) ? entry.compoundname.substring(0, 10) + '...' : entry.compoundname),
@@ -128,12 +134,6 @@ function SampleSelection(sources) {
             td(selectedClass(entry.use), entry.batch),
             td(selectedClass(entry.use), entry.year),
             td(selectedClass(entry.use), entry.significantGenes)
-            // td('.selection', { props: { id: entry.id } }, [
-            //     label('', { props: { id: entry.id } }, [
-            //         input('.filled-in .grey', { props: { type: 'checkbox', checked: entry.use, id: entry.id } }, 'tt'),
-            //         span([''])
-            //     ])
-            // ])
 
         ]);
         const header = tr([

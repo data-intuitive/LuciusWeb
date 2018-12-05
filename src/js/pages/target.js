@@ -203,7 +203,8 @@ function TargetWorkflow(sources) {
         vega: xs.merge(
             histogram.vega,
         ),
-        popup: scenarioPopup$ // ghost mode
+        popup: scenarioPopup$, // ghost mode
+        ac: TargetFormSink.ac
     };
 
 }

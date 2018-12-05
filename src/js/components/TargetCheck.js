@@ -1,7 +1,7 @@
 import sampleCombine from 'xstream/extra/sampleCombine'
 import isolate from '@cycle/isolate'
 import { i, p, div, br, label, input, code, table, tr, td, b, h2, button, textarea, a, ul, li, span } from '@cycle/dom';
-import { clone, equals } from 'ramda';
+import { clone, equals, mergeAll } from 'ramda';
 import xs from 'xstream';
 import { logThis, log } from '../utils/logger'
 import { ENTER_KEYCODE } from '../utils/keycodes.js'
@@ -35,6 +35,8 @@ function TargetCheck(sources) {
     const logger = loggerFactory('TargetCheck', sources.onion.state$, 'settings.form.debug')
 
     const state$ = sources.onion.state$
+
+    const acInput$ = sources.ac
 
     const input$ = xs.merge(
         sources.DOM
@@ -104,6 +106,7 @@ function TargetCheck(sources) {
 
     const data$ = response$
         .map(res => res.body.result.data)
+        .debug()
 
     const suggestionStyle = {
         style: {
@@ -129,13 +132,13 @@ function TargetCheck(sources) {
                         ]),
                         div('.col .s10 .input-field', { style: { margin: '0px 0px 0px 0px' } }, [
                             input('.TargetQuery .col .s12 .autocomplete-input .white-text', { style: { fontSize: '20px' }, props: { type: 'text', value: query }, value: query }),
-                            (showSuggestions)
-                                ? ul('.autocomplete-content .dropdown-content .col .s12 .red .lighten-4 .z-depth-5',
-                                    state.core.data.map(x => li({ attrs: { 'data-index': x.target } }, [
-                                        div('.col .s3 .TargetComplete', suggestionStyle, [x.target]),
-                                        div('.col .s9 .TargetComplete ', suggestionStyle, [x.count])
-                                    ])))
-                                : ul([])
+                            // (showSuggestions)
+                            //     ? ul('.autocomplete-content .dropdown-content .col .s12 .red .lighten-4 .z-depth-5',
+                            //         state.core.data.map(x => li({ attrs: { 'data-index': x.target } }, [
+                            //             div('.col .s3 .TargetComplete', suggestionStyle, [x.target]),
+                            //             div('.col .s9 .TargetComplete ', suggestionStyle, [x.count])
+                            //         ])))
+                            //     : ul([])
                         ]),
                         (validated)
                             ? div('.TargetCheck .waves-effect .col .s1 .center-align', [
@@ -187,19 +190,42 @@ function TargetCheck(sources) {
     }))
 
     // When a suggestion is clicked, update the state so the query becomes this
-    const autocomplete$ = sources.DOM.select('.TargetComplete').events('click')
-    const autocompleteReducer$ = autocomplete$.map(event => prevState => {
-        const newInput = event.target.parentNode.dataset.index
+    // const autocomplete$ = sources.DOM.select('.TargetComplete').events('click')
+    // const autocompleteReducer$ = autocomplete$.map(event => prevState => {
+    //     const newInput = event.target.parentNode.dataset.index
+    //     return ({
+    //         ...prevState, core: {
+    //             ...prevState.core,
+    //             input: newInput,
+    //             showSuggestions: false,
+    //             validated: true,
+    //             output: newInput
+    //         }
+    //     })
+    // })
+
+    // Whenever more than 1 option is available per our compound query, we list the options.
+    const ac$ = data$.filter(data => data.length > 1).map(data => ({
+        el: '.TargetQuery',
+        data: data,
+        render: function (data) { return mergeAll(data.map(d => ({ [d.target + ' (' + d.count + " occurrences)"]: null }))) },
+        strip: function (str) {
+            return str.split(" (")[0];
+        }
+    })).debug()
+
+    // When a suggestion is clicked, update the state so the query becomes this
+    const autocompleteReducer$ = acInput$.map(event => prevState => {
+        const newInput = event //event.target.parentNode.dataset.index
         return ({
             ...prevState, core: {
                 ...prevState.core,
                 input: newInput,
                 showSuggestions: false,
-                validated: true,
-                output: newInput
+                validated: true
             }
         })
-    })
+    }).debug()
 
     // Add request body to state
     const requestReducer$ = request$.map(req => prevState =>
@@ -241,7 +267,8 @@ function TargetCheck(sources) {
             autocompleteReducer$
         ),
         HTTP: request$,
-        output: query$
+        output: query$,
+        ac: ac$.debug()
     };
 }
 

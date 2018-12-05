@@ -50,7 +50,8 @@ function TargetForm(sources) {
         HTTP: xs.merge(
             TargetCheckSink.HTTP,
         ),
-        output: targetQuery$
+        output: targetQuery$,
+        ac: TargetCheckSink.ac
     }
 }
 

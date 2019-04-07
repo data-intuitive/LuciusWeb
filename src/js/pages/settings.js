@@ -219,7 +219,24 @@ export function Settings(sources) {
                 field: 'url',
                 class: '.input-field',
                 type: 'text',
-                title: 'Brutus URL',
+                title: 'Brutus URL for Gene Annotations',
+                props: {}
+            }]
+        },
+        {
+            group: 'compoundAnnotations',
+            title: 'Compound Annotation Settings',
+            settings: [{
+                field: 'debug',
+                type: 'checkbox',
+                class: '.switch',
+                title: 'Debug component?',
+                props: { type: 'checkbox' }
+            }, {
+                field: 'url',
+                class: '.input-field',
+                type: 'text',
+                title: 'Brutus URL for Compound Annotations',
                 props: {}
             }]
         },

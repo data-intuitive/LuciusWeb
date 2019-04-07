@@ -1,7 +1,7 @@
 export const initSettings = {
-    version: 3.91,
+    version: 3.93,
     filter: {
-        debug: true,
+        debug: false,
         values: {
             concentration: ['0.1', '1', '10', '30'],
             protocol: ['MCF7', 'PBMC'],

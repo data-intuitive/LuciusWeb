@@ -50,7 +50,7 @@ export function SampleInfo(sources) {
                 p(pStylewBlur, entry('JNJS: ', sample.jnjs)),
                 p(pStylewBlur, entry('JNJB: ', sample.jnjb)),
                 p(pStyle, entry('Type: ', sample.Type)),
-                p('.s12', pStylewBlur, entry('Targets: ', sample.targets.join(', '))),
+                p('.s12', entry('Targets: ', sample.targets.join(', '))),
             ]),
             div('.col .s4 .offset-s8 .l4', { style: merge(blur, { margin: '20px 0px 0px 0px' }) }, [
                 (sample.smiles != null && sample.smiles != 'NA' && sample.smiles != 'No Smiles') ?

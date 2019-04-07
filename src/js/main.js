@@ -27,6 +27,8 @@ import './main.scss'
 import fromEvent from 'xstream/extra/fromEvent'
 // import xs from 'xstream'
 
+console.log(VERSION)
+
 const drivers = {
     DOM: makeDOMDriver('#root'),
     vega: makeVegaDriver(),

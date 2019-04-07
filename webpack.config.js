@@ -79,8 +79,10 @@ module.exports = {
       'window.jQuery': 'jquery',
     }),
     new webpack.HotModuleReplacementPlugin(),
-    new webpack.NamedModulesPlugin()
-  ],
+    new webpack.NamedModulesPlugin(),
+    new webpack.DefinePlugin({
+      VERSION: JSON.stringify(require("./package.json").version)
+    })  ],
   resolve: {
     extensions: ['.js', '.sass'],
     // root: [path.join(__dirname, './src')]

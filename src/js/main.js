@@ -1,5 +1,7 @@
 import 'materialize-css/dist/css/materialize.css';
 
+require('../../favicon.ico')
+
 import { run } from '@cycle/run';
 import { makeDOMDriver } from '@cycle/dom';
 import { makeHTTPDriver } from '@cycle/http';

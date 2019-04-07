@@ -57,16 +57,17 @@ module.exports = {
                     path.resolve('node_modules')
                 ]}
             }]
-     },
+      },
       { test: /\.css$/, loader: "style-loader!css-loader" },
-      { 
+      {
         test: /\.(jpe?g|woff2?|ttf|eot|svg|png|gif)(\?v=\d+\.\d+\.\d+)?$/,
         loader: "file-loader?name=fonts/[name].[ext]"
       },
-      // {
-      //     test: /\.(eot|svg|ttf|woff|woff2)$/,
-      //     loader: 'file-loader?name=material-design-icons/iconfont/[name].[ext]'
-      // }
+      {
+        test: /\.ico$/,
+        loader: "url-loader",
+        query: { mimetype: "image/x-icon" }
+      }
     ]
   },
   plugins: [

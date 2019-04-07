@@ -115,7 +115,7 @@ export default function Index(sources) {
                 ])
             ]),
             div('.footer-copyright .row', { style: { margin: '0px' } }, [
-                div('.col .s12 .right-align', ['© 2018 By Data intuitive']),
+                div('.col .s12 .right-align', ['© 2019 By Data intuitive']),
             ])
         ])
         // ])

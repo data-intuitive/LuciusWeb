@@ -21,8 +21,11 @@ function CompoundAnnotation(sources, id = ".compoundPopup") {
 
     const triggerAnnotation$ = trigger$.compose(sampleCombine(state$))
         .map(([el, state]) => {
+            const url = state.settings.compoundAnnotations.url
+            // v1 doesn't actually have a version identifier
+            const version = (state.settings.compoundAnnotations.version == "v1") ? "" : "v2/"
             return {
-                url: state.settings.compoundAnnotations.url + el,
+                url: url + version + 'jnjs' + '/' + el,
                 method: 'GET',
                 'category': 'compound'
             }
@@ -35,12 +38,10 @@ function CompoundAnnotation(sources, id = ".compoundPopup") {
         )
         .flatten()
         .map(r => r.body)
+        .debug()
 
-    const vdom$ = response$.map(annotation => {
-        const isAvailable = (annotation.jnjs != "NA")
-        if (isAvailable) {
-            return div('#modal-' + annotation.jnjs + '.modal.bottom-sheet.grey.darken-4.grey-text', [
-                div('.col.s12.modal-content', [
+    const displayAnnotationV1 = (annotation) => {
+      return [
                     div('.grey-text.col.l6.s12',  [
                         h4('.grey-text.text-lighten-2', [titleCase(annotation.name)]),
                         p([b('.grey-text.text-lighten-1', "JNJS: "), annotation.jnjs]), 
@@ -56,7 +57,23 @@ function CompoundAnnotation(sources, id = ".compoundPopup") {
                         p([b('.grey-text.text-lighten-1', 'Target Gene Name: '), (annotation.drugBankTargetGeneName != null) ? annotation.drugBankTargetGeneName : "N/A"]),
                         // p([b('.grey-text.text-lighten-1', 'Remarks: '), (annotation.remarks != null) ? annotation.remarks : "N/A"])
                     ])
-                ])
+                ]
+    }
+
+    const displayAnnotationV2 = (annotation) => {
+      return [
+                    div('.grey-text.col.l6.s12',  [
+                        h4('.grey-text.text-lighten-2', [titleCase("Nothing yet !!!")]),
+                    ])
+                ]
+    }
+
+    const vdom$ = response$.map(annotation => {
+        const isAvailable = (annotation.jnjs != "NA")
+        if (isAvailable) {
+            return div('#modal-' + annotation.jnjs + '.modal.bottom-sheet.grey.darken-4.grey-text', [
+                div('.col.s12.modal-content', 
+                  (annotation.version == "v1") ? displayAnnotationV1(annotation) : displayAnnotationV2(annotation))
             ])
         } else {
             return div('#modal-' + annotation.jnjs + '.modal.bottom-sheet.grey.darken-4.grey-text', [

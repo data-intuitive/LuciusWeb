@@ -1,5 +1,5 @@
 export const initSettings = {
-    version: 3.93,
+    version: 3.94,
     filter: {
         debug: false,
         values: {
@@ -88,6 +88,7 @@ export const initSettings = {
     },
     compoundAnnotations: {
         debug: false,
-        url: 'http://localhost:8082/drugbank/jnjs/',
+        version: 'v1',
+        url: 'http://localhost:8082/drugbank/',
     }
 };

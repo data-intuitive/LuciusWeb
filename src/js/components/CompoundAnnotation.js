@@ -38,7 +38,6 @@ function CompoundAnnotation(sources, id = ".compoundPopup") {
     )
     .flatten()
     .map(r => r.body)
-    .debug()
 
   const displayAnnotationV1 = (annotation) => {
     return [
@@ -65,16 +64,20 @@ function CompoundAnnotation(sources, id = ".compoundPopup") {
     const title = annotation.genericName
     const targets = annotation.targetGeneName
     // Translate agonist and antagonist in positive and negative effects
-    const targetActions = annotation.targetName.map(action => {
-      if (action.includes("agonist")) return "positive effect"
-      if (action.includes("antagonist")) return "negative effect"
-    })
+    // const targetActions = annotation.targetName.map(action => {
+    //   if (action.includes("agonist")) return "positive effect"
+    //   if (action.includes("antagonist")) return "negative effect"
+    // })
+    // const targetResults = (targets.join() != "") ? targets.map((target, i) => target + " " + targetActions[i])
+    //                                         : ["No information available"]
+    const targetActions = annotation.targetName
+    const targetResults = (targets.join() != "") ? targetActions.map((action, i) => action + " - " + targets[i])
+                                            : ["No information available"]
+
     const otherIDs = annotation.externalID
     // Extract chembl id and parse it
     const chemblID = otherIDs.find(x => x.includes("ChEMBL")).split(" (")[0]
     // Combine both lists:
-    const targetResults = (targets.join() != "") ? targets.map((target, i) => target + " " + targetActions[i])
-                                            : ["No information available"]
 
     return [
       div('.grey-text.col.l6.s12',  [

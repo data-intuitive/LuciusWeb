@@ -8,6 +8,7 @@ import { merge, prop, equals } from 'ramda';
 import DiseaseWorkflow from './pages/disease'
 import CompoundWorkflow from './pages/compound'
 import TargetWorkflow from './pages/target'
+import CorrelationWorkflow from './pages/correlation'
 
 // Pages
 import StatisticsWorkflow from './pages/statistics'
@@ -35,6 +36,7 @@ export default function Index(sources) {
             '/target': TargetWorkflow,
             '/statistics': StatisticsWorkflow,
             '/settings': IsolatedSettings,
+            '/correlation': CorrelationWorkflow,
             '/debug': Debug,
             '*': Home
         })
@@ -91,7 +93,7 @@ export default function Index(sources) {
                 makeLink('/target', span(['Target', ' ', targetSVG]), '.red-text'),
                 makeLink('/disease', span(['Disease', ' ', diseaseSVG]), '.pink-text'),
                 makeLink('/settings', span(['Settings', ' ', settingsSVG]), '.grey-text'),
-                span('.grey-text .text-darken-3','', ["v", VERSION])
+                makeLink('/correlation', span('.grey-text .text-darken-3','', ["v", VERSION]), ''),
             ])
         ])
     ])]));

@@ -11,120 +11,130 @@ import { loggerFactory } from '~/../../src/js/utils/logger'
 import { check, flash, play_arrow } from 'webpack-material-design-icons'
 
 const emptyData = {
-	body: {
-		result: {
-			data : []
-		}
-	}
+  body: {
+    result: {
+      data : []
+    }
+  }
 }
 
 const stateTemplate = {
-	query: 'The query to send to the checkSignature endpoint',
-	settings: 'settings passed from root state'
+  query: 'The query to send to the checkSignature endpoint',
+  settings: 'settings passed from root state'
 }
 
 const checkLens = { 
-	get: state => ({query: state.form.query, settings: state.settings}),
-	set: (state, childState) => ({...state, form : {...state.form, query: childState.query}})
+  get: state => ({query: state.form.query, settings: state.settings}),
+  set: (state, childState) => ({...state, form : {...state.form, query: childState.query}})
+};
+
+const checkLens1 = { 
+  get: state => ({query: state.form.query1, settings: state.settings}),
+  set: (state, childState) => ({...state, form : {...state.form, query1: childState.query}})
+};
+
+const checkLens2 = { 
+  get: state => ({query: state.form.query2, settings: state.settings}),
+  set: (state, childState) => ({...state, form : {...state.form, query2: childState.query}})
 };
 
 function SignatureCheck(sources) {
 
-   const logger = loggerFactory('signatureCheck', sources.onion.state$, 'settings.form.debug')
+  const logger = loggerFactory('signatureCheck', sources.onion.state$, 'settings.form.debug')
 
-	const domSource$ = sources.DOM;
-	const httpSource$ = sources.HTTP;
-	const state$ = sources.onion.state$
+  const domSource$ = sources.DOM;
+  const httpSource$ = sources.HTTP;
+  const state$ = sources.onion.state$
 
-	const request$ = state$
-		.filter((state) => state.query !== '')
-		.compose(debounce(200))
-		.map(state =>  {
-			return {
-				url : state.settings.api.url + '&classPath=com.dataintuitive.luciusapi.checkSignature',
-				method : 'POST',
-				send : {
-					version : 'v2',
-					query : state.query
-				},
-				'category' : 'checkSignature'
-		}})
-        .remember()
+  const request$ = state$
+    .filter((state) => state.query !== '')
+    .compose(debounce(200))
+    .map(state =>  {
+      return {
+        url : state.settings.api.url + '&classPath=com.dataintuitive.luciusapi.checkSignature',
+        method : 'POST',
+        send : {
+          version : 'v2',
+          query : state.query
+        },
+        'category' : 'checkSignature'
+      }})
+    .remember()
 
-	// Catch the response in a stream
-	// Handle errors by returning an empty object
-	const response$ = httpSource$
-		.select('checkSignature')
-		.map((response$) =>
-				response$.replaceError(() => xs.of(emptyData))
-			)		
-		.flatten()
-        .remember()
+  // Catch the response in a stream
+  // Handle errors by returning an empty object
+  const response$ = httpSource$
+    .select('checkSignature')
+    .map((response$) =>
+      response$.replaceError(() => xs.of(emptyData))
+    )
+    .flatten()
+    .remember()
 
-	const data$ = response$
-		.map(res => res.body)
-		.map(json => json.result.data)
+  const data$ = response$
+    .map(res => res.body)
+    .map(json => json.result.data)
 
-	// Helper function for rendering the table, based on the state
-	const makeTable = (data) => {
-			// let visible = visible1 //state.ux.checkSignatureVisible;
-			let rows = data.map(entry => [ 
-				(entry.inL1000) ? td([i('.small .material-icons', 'done')] ) : td('.red .lighten-4 .red-text .text-darken-4', [i('.small .material-icons', 'mode_edit')] ),
-				(entry.inL1000) ? td(entry.query) : td('.red .lighten-4 .red-text .text-darken-4', entry.query),
-				(entry.inL1000) ? td(entry.symbol) : td('.red .lighten-4 .red-text .text-darken-4', entry.symbol)
-			]);
-			const header = tr([
-								th('In L1000?'),
-								th('Input'),
-								th('Symbol')
-					]);
+  // Helper function for rendering the table, based on the state
+  const makeTable = (data) => {
+    // let visible = visible1 //state.ux.checkSignatureVisible;
+    let rows = data.map(entry => [ 
+      (entry.inL1000) ? td([i('.small .material-icons', 'done')] ) : td('.red .lighten-4 .red-text .text-darken-4', [i('.small .material-icons', 'mode_edit')] ),
+      (entry.inL1000) ? td(entry.query) : td('.red .lighten-4 .red-text .text-darken-4', entry.query),
+      (entry.inL1000) ? td(entry.symbol) : td('.red .lighten-4 .red-text .text-darken-4', entry.symbol)
+    ]);
+    const header = tr([
+      th('In L1000?'),
+      th('Input'),
+      th('Symbol')
+    ]);
 
-			let body = [];
-			rows.map(row => body.push(tr(row)));
-			const tableContent = [thead([header]), tbody(body)];
+    let body = [];
+    rows.map(row => body.push(tr(row)));
+    const tableContent = [thead([header]), tbody(body)];
 
-			return ( 
-					div([
-							div('.row', [
-								div('.col .s6 .offset-s3', [table('.striped', tableContent)]),
-								div('.row .s6 .offset-s3', [
-									button('.collapseUpdate .btn .col .offset-s4 .s4 .pink .darken-2', 'Update/Validate'),
-									]),
-							])
-						])
-			);
-	}
+    return ( 
+      div([
+        div('.row', [
+          div('.col .s6 .offset-s3', [table('.striped', tableContent)]),
+          div('.row .s6 .offset-s3', [
+            button('.collapseUpdate .btn .col .offset-s4 .s4 .pink .darken-2', 'Update/Validate'),
+          ]),
+        ])
+      ])
+    );
+  }
 
-	// vdom
-	const vdom$ = data$
-					.map((data) => makeTable(data))
-					.startWith(div())
+  // vdom
+  const vdom$ = data$
+    .map((data) => makeTable(data))
+    .startWith(div())
 
-	// Update and Collapse button updates the query and collapses the window
-	const collapseUpdate$ = domSource$.select('.collapseUpdate').events('click');
-	const collapseUpdateReducer$ = collapseUpdate$.compose(sampleCombine(data$))
-		.map(([collapse, data]) => prevState => {
-			return ({...prevState, query : data.map(x => (x.inL1000) ? x.symbol : '').join(" ").replace(/\s\s+/g, ' ').trim()});
-		});
+  // Update and Collapse button updates the query and collapses the window
+  const collapseUpdate$ = domSource$.select('.collapseUpdate').events('click');
+  const collapseUpdateReducer$ = collapseUpdate$.compose(sampleCombine(data$))
+    .map(([collapse, data]) => prevState => {
+      return ({...prevState, query : data.map(x => (x.inL1000) ? x.symbol : '').join(" ").replace(/\s\s+/g, ' ').trim()});
+    });
 
-	// The result of this component is an event when valid
-	// XXX: stays true the whole cycle, so maybe tackle this as well!!!!
-	const validated$ = collapseUpdate$.map(update => true)
+  // The result of this component is an event when valid
+  // XXX: stays true the whole cycle, so maybe tackle this as well!!!!
+  const validated$ = collapseUpdate$.map(update => true)
 
   return { 
     log: xs.merge(
-        logger(state$, 'state$'),
-        logger(request$, 'request$'),
-        logger(response$, 'response$')
+      logger(state$, 'state$'),
+      logger(request$, 'request$'),
+      logger(response$, 'response$')
     ),
     HTTP: request$,
     DOM: vdom$,
-	onion: xs.merge(
-		collapseUpdateReducer$, 
-		),
-	validated : validated$
+    onion: xs.merge(
+      collapseUpdateReducer$, 
+    ),
+    validated : validated$
   }
 
 };
 
-export { SignatureCheck, checkLens };
+export { SignatureCheck, checkLens, checkLens1, checkLens2 };

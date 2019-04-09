@@ -139,11 +139,11 @@ function Histogram(sources) {
 
     // Ingest the data in the spec and return to the driver
     const vegaSpec$ = xs.combine(nonEmptyData$, width$, visible$, input$, resize$)
-        .map(([data, newwidth, visible, input]) => ({ spec: vegaSpec(data, input.target), el: elementID, width: newwidth }))
+        .map(([data, newwidth, visible, input]) => ({ spec: vegaSpec(data, input.target), el: elementID, width: newwidth, height: 350 }))
 
     // Parse to vega runtime object
     const vegaRuntime$ = vegaSpec$
-        .map(spec => ({ runtime: parse(spec.spec), width: spec.width, el: spec.el }))
+        .map(spec => ({ runtime: parse(spec.spec), width: spec.width, el: spec.el, height: spec.height }))
 
     // ========================================================================
 

@@ -149,17 +149,17 @@ function BinnedPlots(sources) {
 
     // Ingest the data in the spec and return to the driver
     const similarityPlotVegaSpec$ = xs.combine(nonEmptyData$, width$('#simplot'), visibility$('#simplot'), input$, resize$)
-        .map(([data, newwidth, visible]) => ({ spec: similarityPlotVegaSpec(data), el: '#simplot', width: newwidth }))
+        .map(([data, newwidth, visible]) => ({ spec: similarityPlotVegaSpec(data), el: '#simplot', width: newwidth, height: 350 }))
         .compose(debounce(10))
 
     const histogramVegaSpec$ = xs.combine(nonEmptyData$, width$('#hist'), visibility$('#hist'), input$, resize$)
-        .map(([data, newwidth, visible]) => ({ spec: histogramVegaSpec(data), el: '#hist', width: newwidth }))
+        .map(([data, newwidth, visible]) => ({ spec: histogramVegaSpec(data), el: '#hist', width: newwidth, height: 350 }))
         .compose(debounce(20))
 
     const specs$ = xs.merge(similarityPlotVegaSpec$, histogramVegaSpec$)
 
     const runtimes$ = specs$
-        .map(spec => ({ runtime: parse(spec.spec), width: spec.width, el: spec.el }))
+        .map(spec => ({ runtime: parse(spec.spec), width: spec.width, el: spec.el, height: spec.height }))
 
     // ========================================================================
 

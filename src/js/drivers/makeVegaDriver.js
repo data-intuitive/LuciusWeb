@@ -9,7 +9,7 @@ function makeVegaDriver() {
 
         const view$ = spec$
             .map(specInfo => ({
-                view: new View(specInfo.runtime).width(specInfo.width).height(350).logLevel(Warn),
+                view: new View(specInfo.runtime).width(specInfo.width).height(specInfo.height).logLevel(Warn),
                 el: specInfo.el
             }))
 

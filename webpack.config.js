@@ -1,5 +1,5 @@
 const autoprefixer = require('autoprefixer')
-const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const ExtractTextPlugin = require('mini-css-extract-plugin')
 var path = require('path');
 var webpack = require('webpack');
 
@@ -25,6 +25,7 @@ var entry = PRODUCTION
              ];
 
 module.exports = {
+  watch: true,
   entry: ['./src/js/main'], //entry,
   output: {
     path: path.join(__dirname, 'dist'),
@@ -46,24 +47,28 @@ module.exports = {
       },
       {
         test: /\.scss$/,
-            use: [{
-                loader: "style-loader" // creates style nodes from JS strings
-            }, {
-                loader: "css-loader" // translates CSS into CommonJS
-            }, {
-                loader: "sass-loader", // compiles Sass to CSS
-                options : {
-                includePaths: [
-                    path.resolve('node_modules')
-                ]}
-            }]
+        use: ["style-loader", "css-loader", 
+          { loader: "sass-loader",
+            options: {
+              sassOptions: {includePaths: ["node_modules"]}
+            }
+          }
+        ]
       },
       { test: /\.css$/, loader: "style-loader!css-loader" },
       {
         test: /\.(jpe?g|woff2?|ttf|eot|svg|png|gif)(\?v=\d+\.\d+\.\d+)?$/,
-        loader: "file-loader?name=fonts/[name].[ext]"
+        use: [
+        {
+          loader: 'file-loader',
+          options: {
+            name: '[name].[ext]',
+            outputPath: 'fonts/'
+          }
+        }
+      ]
       },
-      {
+    {
         test: /\.ico$/,
         loader: "url-loader",
         query: { mimetype: "image/x-icon" }

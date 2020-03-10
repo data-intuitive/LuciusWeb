@@ -14,6 +14,7 @@ import CorrelationWorkflow from './pages/correlation'
 import StatisticsWorkflow from './pages/statistics'
 import Debug from './pages/debug'
 import Home from './pages/home'
+import Admin from './pages/admin'
 import { IsolatedSettings } from './pages/settings'
 
 // Utilities
@@ -38,6 +39,7 @@ export default function Index(sources) {
             '/settings': IsolatedSettings,
             '/correlation': CorrelationWorkflow,
             '/debug': Debug,
+            '/admin': Admin,
             '*': Home
         })
         .remember();
@@ -211,9 +213,9 @@ export const logoSVG = svg({ id: 'logo', attrs: { viewBox: "159 26 1012.1082 460
         svg.path({ attrs: { d: 'M 389 256 L 159 256 L 334 303 Z' } }),
         svg.path({ attrs: { d: 'M 389 256 L 389 486 L 436 311 Z' } }),
         svg.path({ attrs: { d: 'M 389 256 L 619 256 L 444 209 Z' } }),
-        svg.text({ attrs: { 'font-family': "Calibri", 'font-size': "160", 'font-weight': "bold", x: "450", y: "398" } }, 'COMPASS'),
+        svg.text({ attrs: { 'font-family': "Open+Sans+Condensed", 'font-size': "130", 'font-weight': "bold", x: "450", y: "398" } }, 'COMPASS'),
         svg.rect({ attrs: { x: "466", y: "240.5", width: "690", height: "15.5" } }),
-        svg.text({ attrs: { 'font-family': "Calibri", 'font-size': "40", 'font-weight': "bold", x: "497", y: "450" } }, 'COMPUTATIONAL SCIENCES'),
+        svg.text({ attrs: { 'font-family': "Open+Sans+Condensed", 'font-size': "40", 'font-weight': "bold", x: "497", y: "450" } }, 'COMPUTATIONAL SCIENCES'),
         svg.path({ attrs: { d: "M 1111.1316 329.63885 C 1111.7629 340.6366 1119.8291 350.53146 1131.0461 350.7098 C 1142.2632 350.8882 1154.6805 342.4446 1153.2188 331.05904 C 1151.7572 319.67348 1142.7102 319.24054 1132.1177 316.17612 C 1121.5253 313.11165 1130.3999 308.0055 1130.3999 308.0055 C 1130.3999 308.0055 1134.739 305.7016 1139.3956 304.96687 C 1144.0522 304.23215 1147.434 306.17886 1149.1073 306.1567 C 1150.7806 306.13453 1150.2077 300.1209 1149.0792 298.99964 C 1147.9508 297.87838 1138.8401 295.20424 1130.1026 299.3452 C 1121.365 303.48615 1118.0291 308.5461 1118.0291 308.5461 C 1118.0291 308.5461 1110.5002 318.6411 1111.1316 329.63885 Z" } }),
         svg.path({ attrs: { d: "M 1123.1925 334.362 C 1124.9592 338.72802 1129.5795 341.5972 1134.138 340.08526 C 1138.6965 338.57332 1142.5552 333.3991 1140.3996 328.99328 C 1138.244 324.58742 1134.0469 325.6506 1129.3442 325.9052 C 1124.6415 326.1598 1122.6041 322.6 1122.6041 322.6 L 1122.3587 325.91298 C 1122.3587 325.91298 1121.4258 329.996 1123.1925 334.362 Z", fill: "white" } }),
         svg.ellipse({ attrs: { cx: "1130.6581", cy: "328.0728", rx: "5.658064", ry: "6.727217" } }),

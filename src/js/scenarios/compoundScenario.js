@@ -1,3 +1,9 @@
+const filterValues = {
+            concentration: ['0.1', '1', '10', '30'],
+            protocol: ['MCF7', 'PBMC'],
+            type: ['test', 'poscon']
+        }
+
 export const scenario = [{ // Initiate ghost mode
         delay: 100,
         state: { form: { check: { ghostinput: true } } },
@@ -68,7 +74,7 @@ export const scenario = [{ // Initiate ghost mode
     },
     {
         delay: 3000,
-        state: { form: { sampleSelection: { data: { index: 0, value: { use: false } } } } },
+        state: { form: { sampleSelection: { data: { index: 0, value: { use: true } } } } },
         message: {
             text: 'select or deselect the desired sample(s)',
             duration: 4000
@@ -111,9 +117,13 @@ export const scenario = [{ // Initiate ghost mode
     { // Filter
         delay: 7000,
         state: {
-            filter: { ghostinput: { protocol: "MCF7" } },
-            headTable: { input: { filter: { protocol: "MCF7" }, query: '-GOLT1B DDIT4 GPER -TNIP1 INSIG1 CLIC4 HMGCS1 HMOX1 AARS ELOVL6 -EGR1 -MAT2A FDFT1 -DDX42 PCK2 -MYCBP -RRP1B TSC22D3 CDK7 TIPARP -POLR1C -NFKBIA RGS2' } },
-            tailTable: { input: { filter: { protocol: "MCF7" }, query: '-GOLT1B DDIT4 GPER -TNIP1 INSIG1 CLIC4 HMGCS1 HMOX1 AARS ELOVL6 -EGR1 -MAT2A FDFT1 -DDX42 PCK2 -MYCBP -RRP1B TSC22D3 CDK7 TIPARP -POLR1C -NFKBIA RGS2' } },
+            filter: {
+              input: '-GOLT1B DDIT4 GPER -TNIP1 INSIG1 CLIC4 HMGCS1 HMOX1 AARS ELOVL6 -EGR1 -MAT2A FDFT1 -DDX42 PCK2 -MYCBP -RRP1B TSC22D3 CDK7 TIPARP -POLR1C -NFKBIA RGS2',
+              output: filterValues,
+              ghost: { expand: false }
+            },
+            headTable: { input: { query: '-GOLT1B DDIT4 GPER -TNIP1 INSIG1 CLIC4 HMGCS1 HMOX1 AARS ELOVL6 -EGR1 -MAT2A FDFT1 -DDX42 PCK2 -MYCBP -RRP1B TSC22D3 CDK7 TIPARP -POLR1C -NFKBIA RGS2' } },
+            tailTable: { input: { query: '-GOLT1B DDIT4 GPER -TNIP1 INSIG1 CLIC4 HMGCS1 HMOX1 AARS ELOVL6 -EGR1 -MAT2A FDFT1 -DDX42 PCK2 -MYCBP -RRP1B TSC22D3 CDK7 TIPARP -POLR1C -NFKBIA RGS2' } },
         },
         message: {
             text: 'Set filter to MCF7',

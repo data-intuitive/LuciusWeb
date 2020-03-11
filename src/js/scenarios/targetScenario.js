@@ -1,4 +1,5 @@
-export const scenario = [{ // Initiate ghost input mode
+export const scenario = [
+    { // Initiate ghost input mode
         delay: 10,
         state: { form: { check: { ghostinput: true } } },
     },
@@ -122,13 +123,16 @@ export const scenario = [{ // Initiate ghost input mode
     { // Filter
         delay: 8000,
         state: {
-            filter: { ghostinput: { protocol: "MCF7" } },
-            headTable: { input: { filter: { protocol: "MCF7" }, query: '-ZW10 -CDC20 -KIF20A EML3 -FAIM -PSMG1' } },
-            tailTable: { input: { filter: { protocol: "MCF7" }, query: '-ZW10 -CDC20 -KIF20A EML3 -FAIM -PSMG1' } },
+            filter: {
+              input: '-ZW10 -CDC20 -KIF20A EML3 -FAIM -PSMG1',
+              ghost: { expand: false }
+            },
+            headTable: { input: { query: '-ZW10 -CDC20 -KIF20A EML3 -FAIM -PSMG1' } },
+            tailTable: { input: { query: '-ZW10 -CDC20 -KIF20A EML3 -FAIM -PSMG1' } },
         },
         message: {
-            text: 'Set filter to MCF7',
-            duration: 7000
+            text: 'The table of compounds is generated with the specific know target',
+            duration: 4000
         }
     },
     {
@@ -136,54 +140,6 @@ export const scenario = [{ // Initiate ghost input mode
         state: {},
         message: {
             text: 'The CDK7 L1000 profiled compounds are now superimposed on the gene signature cpd based distribution',
-            duration: 4000
-        }
-    },
-]
-
-export const oldScenario = [ // Ghost output
-    {
-        delay: 2000,
-        state: { form: { check: { ghostoutput: true } }, compoundTable: { input: { query: "ABL2" } } }
-    },
-    // Table
-    {
-        delay: 1000,
-        state: {},
-        message: {
-            text: 'The table lists compounds with the given known target',
-            duration: 4000
-        }
-    },
-    {
-        delay: 2000,
-        state: { compoundTable: { expandOptions: true } },
-        message: {
-            text: 'By clicking the table header, additional options are available',
-            duration: 4000
-        }
-    },
-    {
-        delay: 5000,
-        state: { compoundTable: { expandOptions: false } },
-        message: {
-            text: 'Clicking the header again closes the option drawer',
-            duration: 4000
-        }
-    },
-    {
-        delay: 3000,
-        state: { sform: { query: "BRCA1 MELK", validated: false } },
-        message: {
-            text: 'The table shows targets that do not appear in L1000',
-            duration: 4000
-        }
-    },
-    {
-        delay: 2000,
-        state: { sform: { validated: true } },
-        message: {
-            text: 'An additional signature can be specified',
             duration: 4000
         }
     },

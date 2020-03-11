@@ -11,12 +11,13 @@ const filterMCF7 = {
         }
 
 const filterMCF7Conc = {
-            concentration: ['0.1', '10', '30'],
+            concentration: [ '1' ],
             protocol: ['MCF7'],
             type: ['test', 'poscon']
         }
 
-export const scenario = [{ //Form
+export const scenario = [
+    { //Form
         delay: 500,
         state: { form: { query: "-E", validated: false } },
         message: {
@@ -122,7 +123,7 @@ export const scenario = [{ //Form
             filter: {
               input: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS',
               output: filterValues,
-              ghost: { expand: true }
+              ghost: { expand: false }
             },
             headTable: { input: { query: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS' } },
             tailTable: { input: { query: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS' } },
@@ -141,13 +142,13 @@ export const scenario = [{ //Form
             filter: {
               input: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS',
               output: filterMCF7,
-              ghost: { expand: true, deselect: {protocol: 'PBMC'} }
+              ghost: { expand: true, deselect: {protocol: 'MCF'} }
             },
             headTable: { input: { filter: filterMCF7, query: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS' } },
             tailTable: { input: { filter: filterMCF7, query: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS' } },
         },
         message: {
-            text: 'Set filter to PBMC',
+            text: 'Set filter to MCF7',
             duration: 7000
         }
     },
@@ -157,7 +158,7 @@ export const scenario = [{ //Form
             filter: {
               input: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS',
               output: filterMCF7Conc,
-              ghost: { expand: true, deselect: {concentration: '1'} }
+              ghost: { expand: true, deselect: {concentration: '0.1'} }
             },
             headTable: { input: { filter: filterMCF7Conc, query: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS' } },
             tailTable: { input: { filter: filterMCF7Conc, query: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS' } },
@@ -165,6 +166,30 @@ export const scenario = [{ //Form
         message: {
             text: 'Set filter to 1mM',
             duration: 7000
+        }
+    },
+    {
+        delay: 500,
+        state: {
+            filter: {
+              input: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS',
+              output: filterMCF7Conc,
+              ghost: { expand: true, deselect: {concentration: '10'} }
+            },
+            headTable: { input: { filter: filterMCF7Conc, query: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS' } },
+            tailTable: { input: { filter: filterMCF7Conc, query: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS' } },
+        }
+    },
+    {
+        delay: 500,
+        state: {
+            filter: {
+              input: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS',
+              output: filterMCF7Conc,
+              ghost: { expand: true, deselect: {concentration: '30'} }
+            },
+            headTable: { input: { filter: filterMCF7Conc, query: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS' } },
+            tailTable: { input: { filter: filterMCF7Conc, query: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS' } },
         }
     },
     {

@@ -1,12 +1,12 @@
 import sampleCombine from 'xstream/extra/sampleCombine'
 import isolate from '@cycle/isolate'
 import { ul, li, form, i, p, div, br, label, input, code, table, tr, td, b, h2, h5, button, textarea, a, select, option, span } from '@cycle/dom';
-import { clone, equals, merge, mergeAll } from 'ramda';
+import { clone, merge, mergeAll } from 'ramda';
 import xs from 'xstream';
 import { ENTER_KEYCODE } from '../utils/keycodes.js'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import { loggerFactory } from '~/../../src/js/utils/logger'
-import { difference, keys, head, prop, assocPath } from 'ramda'
+import { difference, keys, head, prop, assocPath, equals } from 'ramda'
 import { initSettings } from '../configuration'
 
 export const compoundFilterLens = {
@@ -16,13 +16,16 @@ export const compoundFilterLens = {
 
 /**
  * Provide a filter form. We inject (via input) a signature in order to hide the form when an empty signature is present.
- * 
+ *
+ * Please note that the filter state object contains the values for the filter that should be _included_.
+ *
+ * - input$: stream of signature updates
+ * - output$: to be consumed by components that require filter functionality, object with filter values.
  */
 function Filter(sources) {
 
     const logger = loggerFactory('filter', sources.onion.state$, 'settings.filter.debug')
 
-    const domSource$ = sources.DOM;
     const state$ = sources.onion.state$
 
     const input$ = sources.input
@@ -50,25 +53,38 @@ function Filter(sources) {
     const modifiedState$ = xs.combine(input$, state$)
         .filter(([input, state]) => !isEmptyState(state))
         .map(([i, state]) => ({ ...state, core: { ...state.core, input: i } }))
+        .compose(dropRepeats(equals))
 
-    const toggleConcentration$ = sources.DOM
+    // This for ghost mode, inject changes via external state updates...
+    const ghostChanges$ = modifiedState$
+        .filter(state => typeof state.core.ghost !== 'undefined')
+        .compose(dropRepeats())
+
+    const expandAnyGhost$ = ghostChanges$.map(state => state.core.ghost.expand).startWith(false)
+
+    const expandConcentrationUI$ = sources.DOM
         .select('.concentration')
         .events('click')
         .fold((x, y) => !x, false)
         .startWith(false)
-    // .remember()
 
-    const toggleProtocol$ = sources.DOM
+    const expandConcentration$ = xs.merge(expandConcentrationUI$, expandAnyGhost$)
+
+    const expandProtocolUI$ = sources.DOM
         .select('.protocol')
         .events('click')
         .fold((x, y) => !x, false)
         .startWith(false)
 
-    const toggleType$ = sources.DOM
+    const expandProtocol$ = xs.merge(expandProtocolUI$, expandAnyGhost$)
+
+    const expandTypeUI$ = sources.DOM
         .select('.type')
         .events('click')
         .fold((x, y) => !x, false)
         .startWith(false)
+
+    const expandType$ = xs.merge(expandTypeUI$, expandAnyGhost$)
 
     // Helper functions for options: all unset or all set
     const noFilter = (selectedOptions, possibleOptions) => (selectedOptions.length == possibleOptions.length)
@@ -121,7 +137,7 @@ function Filter(sources) {
 
     const emptyVdom$ = emptyState$.mapTo(div())
 
-    const loadedVdom$ = xs.combine(modifiedState$, toggleConcentration$, toggleProtocol$, toggleType$)
+    const loadedVdom$ = xs.combine(modifiedState$, expandConcentration$, expandProtocol$, expandType$)
         .map(([state, toggleConcentration, toggleProtocol, toggleType]) => {
             const selectedConcentrations = state.core.output.concentration
             const selectedProtocols = state.core.output.protocol
@@ -165,12 +181,29 @@ function Filter(sources) {
         loadedVdom$.startWith(div())
     )
 
+    // Trigger when all filter fields are collapsed
+    const expandAny$ = xs.combine(expandConcentration$, expandProtocol$, expandType$)
+        .filter(([concentrationExpanded, protocolExpanded, typeExpanded]) => !concentrationExpanded && !protocolExpanded && !typeExpanded)
+
+    // Push filter through as output field ONLY when filter fields are collapsed
+    // This is to avoid too frequent updates
+    const filter$ = expandAny$.compose(sampleCombine(modifiedState$))
+        .map(([t, state]) => state.core.output)
+        .startWith(initSettings.filter.values)
+
     // Toggles for filter options
-    const concentrationToggled$ = sources.DOM.select('.concentration-options')
-        .events('click')
-        .map(function (ev) { ev.preventDefault(); return ev; })
-        .map(ev => ev.ownerTarget.id)
-        .map(value => ({ concentration: value }))
+    const toggledGhost$ = 
+              ghostChanges$
+                .filter(state => typeof state.core.ghost.deselect !== 'undefined')
+                .map(state => state.core.ghost.deselect)
+                .compose(dropRepeats(equals))
+
+    const concentrationToggled$ =
+              sources.DOM.select('.concentration-options')
+                  .events('click')
+                  .map(function (ev) { ev.preventDefault(); return ev; })
+                  .map(ev => ev.ownerTarget.id)
+                  .map(value => ({ concentration: value }))
 
     const protocolToggled$ = sources.DOM.select('.protocol-options')
         .events('click')
@@ -184,25 +217,10 @@ function Filter(sources) {
         .map(ev => ev.ownerTarget.id)
         .map(value => ({ type: value }))
 
-    // This for ghost mode, inject changes via external state updates...
-    const ghostChanges$ = state$
-        .filter(state => typeof state.core.ghostinput !== 'undefined')
-        .map(state => state.core.ghostinput)
-        .compose(dropRepeats())
-
-    // Trigger when all filter fields are collapsed
-    const toggleAny$ = xs.combine(toggleConcentration$, toggleProtocol$, toggleType$)
-        .filter(([concentrationToggled, protocolToggled, typeToggled]) => !concentrationToggled && !protocolToggled && !typeToggled)
-
-    // Push filter through as output field ONLY when filter fields are collapsed
-    const filter$ = toggleAny$.compose(sampleCombine(modifiedState$))
-        .map(([t, state]) => state.core.output)
-        .startWith(initSettings.filter.values)
-
     /**
      * Reducers
      */
-
+    // default Reducer
     const defaultReducer$ = xs.of(prevState => ({
         ...prevState,
         core: {
@@ -214,8 +232,7 @@ function Filter(sources) {
     const inputReducer$ = input$.map(i => prevState => ({ ...prevState, core: { ...prevState.core, input: i } }))
 
     const toggleReducer$ = xs.merge(
-        concentrationToggled$, protocolToggled$, typeToggled$)
-        // .debug()
+        concentrationToggled$, protocolToggled$, typeToggled$, toggledGhost$)
         .map(clickedConcentration => prevState => {
             // We want this function to work for 3 the different filters, so first get the appropriate one
             const filterKey = head(keys(clickedConcentration))
@@ -238,7 +255,6 @@ function Filter(sources) {
     return {
         log: xs.merge(
             logger(state$, 'state$'),
-            // logger(filter$, 'filter$')
         ),
         DOM: vdom$,
         output: filter$,

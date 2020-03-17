@@ -68,7 +68,7 @@ function Filter(sources) {
         .fold((x, y) => !x, false)
         .startWith(false)
 
-    const expandConcentration$ = xs.merge(expandConcentrationUI$, expandAnyGhost$)
+    const expandConcentration$ = xs.merge(expandConcentrationUI$, expandAnyGhost$).remember()
 
     const expandProtocolUI$ = sources.DOM
         .select('.protocol')
@@ -76,7 +76,7 @@ function Filter(sources) {
         .fold((x, y) => !x, false)
         .startWith(false)
 
-    const expandProtocol$ = xs.merge(expandProtocolUI$, expandAnyGhost$)
+    const expandProtocol$ = xs.merge(expandProtocolUI$, expandAnyGhost$).remember()
 
     const expandTypeUI$ = sources.DOM
         .select('.type')
@@ -84,7 +84,7 @@ function Filter(sources) {
         .fold((x, y) => !x, false)
         .startWith(false)
 
-    const expandType$ = xs.merge(expandTypeUI$, expandAnyGhost$)
+    const expandType$ = xs.merge(expandTypeUI$, expandAnyGhost$).remember()
 
     // Helper functions for options: all unset or all set
     const noFilter = (selectedOptions, possibleOptions) => (selectedOptions.length == possibleOptions.length)
@@ -178,7 +178,7 @@ function Filter(sources) {
 
     const vdom$ = xs.merge(
         emptyVdom$,
-        loadedVdom$.startWith(div())
+        loadedVdom$//.startWith(div())
     )
 
     // Trigger when all filter fields are collapsed

@@ -8,6 +8,7 @@ import dropRepeats from 'xstream/extra/dropRepeats'
 import debounce from 'xstream/extra/debounce'
 import { loggerFactory } from '~/../../src/js/utils/logger'
 import { CompoundAnnotation } from '../components/CompoundAnnotation'
+import { safeModelToUi } from '../modelTranslations'
 
 const emptyData = {
     body: {
@@ -25,7 +26,7 @@ const sampleSelectionLens = {
 
 /**
  * Based on a (list of) compound(s), get the samples that correspond to it and allow users to select them.
- * 
+ *
  * input: compound(s) (string)
  * output: list of samples (array)
  */
@@ -138,7 +139,7 @@ function SampleSelection(sources) {
         ]);
         const header = tr([
             th('Use?'),
-            th('JNJ'),
+            th(safeModelToUi('jnjs')),
             th('Name'),
             th('Sample'),
             th('Protocol'),

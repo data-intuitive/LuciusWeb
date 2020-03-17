@@ -4,6 +4,7 @@ import { log } from '../../utils/logger'
 import { merge } from 'ramda'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import { stateDebug } from '../../utils/utils'
+import { safeModelToUi } from '../../modelTranslations'
 
 export function SampleInfo(sources) {
 
@@ -47,8 +48,8 @@ export function SampleInfo(sources) {
             div('.col .s6 .l4', { style: { margin: '15px 0px 0px 0px' } }, [
                 p('.col .s12 .grey-text', hStyle, 'Compound Info:'),
                 p(pStylewBlur, entry('Name: ', sample.compoundname)),
-                p(pStylewBlur, entry('JNJS: ', sample.jnjs)),
-                p(pStylewBlur, entry('JNJB: ', sample.jnjb)),
+                p(pStylewBlur, entry(safeModelToUi('jnjs') + ": ", sample.jnjs)),
+                p(pStylewBlur, entry(safeModelToUi('jnjb') + ": ", sample.jnjb)),
                 p(pStyle, entry('Type: ', sample.Type)),
                 p('.s12', entry('Targets: ', sample.targets.join(', '))),
             ]),

@@ -1,5 +1,5 @@
 export const initSettings = {
-    version: 3.94,
+    version: 3.96,
     filter: {
         debug: false,
         values: {
@@ -13,7 +13,19 @@ export const initSettings = {
         debug: false,
         blur: false,
         amountBlur: 5,
-        ghostMode: false
+        ghostMode: false,
+        modelTranslations: [
+          {
+            ui: 'JNJS',
+            model: 'jnjs',
+            comment: ''
+          },
+          {
+            ui: 'JNJB',
+            model: 'jnjb',
+            comment: ''
+          }
+        ]
     },
     compoundTable: {
         type: 'compoundTable',

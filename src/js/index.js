@@ -115,7 +115,7 @@ export default function Index(sources) {
                                   'the information'),
                               ' provided in ComPass with care. ',
                               'Work instructions can be found via this link: ',
-                              a({ props: { href: state.settings.deployment.customizations.wip } }, 'Work Instructions.')
+                              a({ props: { href: state.settings.deployment.customizations.wi } }, 'Work Instructions.')
                           ]),
                           p({ style: { margin: '0px' } }, [
                               'ComPass does not make any claims. ',
@@ -152,21 +152,24 @@ export default function Index(sources) {
     // Please note: with the addition of 'deployments', the requested deployment is added to the settings
     // Overwrite recursively with the values from `deployments.json` using Ramda's `mergeDeepRight`
     // The wanted deployment is contained in initSettings.deployment already without further details
+    // When it comes to component isolation, having the admin and user configuration together under the
+    // related key in settings makes sense. So we add the respective entries from deployment to where they should appear
     const defaultReducer$ = xs.of(prevState => {
         const desiredDeployment = initSettings.deployment.name
         const updatedDeployment = mergeDeepRight(initSettings.deployment, deployments[desiredDeployment])
         const updatedSettings = merge(initSettings, { deployment : updatedDeployment})
+        const distributedAdminSettings = mergeDeepRight(updatedSettings, updatedSettings.deployment.services)
         if (typeof prevState === 'undefined') {
             // No pre-existing state information, use default settings
             return ({
-                settings: updatedSettings,
+                settings: distributedAdminSettings,
             })
         } else {
             // Pre-existing state information.
             // If default settings are newer, use those.
             return (prevState.settings.version == initSettings.version) ?
                 ({ settings: prevState.settings }) :
-                ({ settings: updatedSettings })
+                ({ settings: distributedAdminSettings })
         }
     })
 

@@ -78,10 +78,6 @@ export const initSettings = {
         title: 'Bottom Table',
         version: 'v2'
     },
-    stats: {
-        endpoint: 'classPath=com.dataintuitive.luciusapi.statistics',
-        dummy: 1
-    },
     hist: {
         debug: false,
         bins: 20
@@ -99,26 +95,11 @@ export const initSettings = {
     form: {
         debug: false
     },
-    api: {
-        hostname: 'localhost',
-        port: 8080,
-        context: 'luciusapi',
-        appName: 'luciusapi',
-        url: 'http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&sync=true&timeout=30',
-    },
-    sourire: {
-        hostname: 'localhost',
-        port: 9000,
-        url: 'http://localhost:9999/molecule/'
-    },
     geneAnnotations: {
-        debug: false,
-        url: 'http://localhost:8082/gene/symbol/',
-
+        debug: false
     },
     compoundAnnotations: {
         debug: false,
         version: 'v1',
-        url: 'http://localhost:8082/drugbank/',
     }
 };

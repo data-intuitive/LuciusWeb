@@ -15,6 +15,7 @@ import StatisticsWorkflow from './pages/statistics'
 import Debug from './pages/debug'
 import Home from './pages/home'
 import { IsolatedSettings } from './pages/settings'
+import { IsolatedAdminSettings } from './pages/adminSettings'
 
 // Utilities
 import { Check } from './components/Check'
@@ -39,6 +40,7 @@ export default function Index(sources) {
             '/settings': IsolatedSettings,
             '/correlation': CorrelationWorkflow,
             '/debug': Debug,
+            '/admin': IsolatedAdminSettings,
             '*': Home
         })
         .remember();
@@ -94,6 +96,7 @@ export default function Index(sources) {
                 makeLink('/target', span(['Target', ' ', targetSVG]), '.red-text'),
                 makeLink('/disease', span(['Disease', ' ', diseaseSVG]), '.pink-text'),
                 makeLink('/settings', span(['Settings', ' ', settingsSVG]), '.grey-text'),
+                makeLink('/admin', span(['Admin']), '.blue-text'),
                 makeLink('/correlation', span('.grey-text .text-darken-3','', ["v", VERSION]), ''),
             ])
         ])

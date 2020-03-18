@@ -8,99 +8,167 @@ import { initSettings } from '../configuration.js'
 import { pick, mix } from 'cycle-onionify';
 import debounce from 'xstream/extra/debounce'
 
-export function IsolatedSettings(sources) {
-    return isolate(Settings, 'settings')(sources)
+export function IsolatedAdminSettings(sources) {
+    return isolate(AdminSettings, 'settings')(sources)
 }
 
-export function Settings(sources) {
+export function AdminSettings(sources) {
 
     const settings$ = sources.onion.state$
 
     const settingsConfig = [{
             group: 'common',
             title: 'Common Settings',
-            settings: [
-                {
-                    field: 'ghostMode',
-                    type: 'checkbox',
-                    class: '.switch',
-                    title: 'Ghost Mode',
-                    props: { type: 'checkbox' }
+            settings: [{
+                    field: 'version',
+                    type: 'text',
+                    class: '.input-field',
+                    title: 'API Version',
+                    props: { type: 'text' }
                 },
                 {
-                    field: 'blur',
-                    class: '.switch',
+                    field: 'debug',
                     type: 'checkbox',
-                    title: 'Blur?',
+                    class: '.switch',
+                    title: 'Debug App?',
                     props: { type: 'checkbox' }
-                },
-                {
-                    field: 'amountBlur',
-                    class: '.range-field',
-                    type: 'range',
-                    title: 'Amount blur?',
-                    props: { type: 'range', min: 0, max: 10 }
                 }
             ]
         },
         {
+            group: 'api',
+            title: 'API Settings',
+            settings: [{
+                field: 'url',
+                class: '.input-field',
+                type: 'text',
+                title: 'LuciusAPI URL',
+                props: {}
+            }]
+        },
+        {
+            group: 'sourire',
+            title: 'Sourire Settings',
+            settings: [{
+                field: 'url',
+                class: '.input-field',
+                type: 'text',
+                title: 'Sourire URL',
+                props: {}
+            }]
+        },
+        {
+            group: 'geneAnnotations',
+            title: 'Gene Annotation Settings',
+            settings: [{
+                field: 'debug',
+                type: 'checkbox',
+                class: '.switch',
+                title: 'Debug component?',
+                props: { type: 'checkbox' }
+            }, {
+                field: 'url',
+                class: '.input-field',
+                type: 'text',
+                title: 'URL for Gene Annotations',
+                props: {}
+            }]
+        },
+      {
+        group: 'compoundAnnotations',
+        title: 'Compound Annotation Settings',
+        settings: [
+        {
+          field: 'version',
+          type: 'text',
+          class: '.input-field',
+          title: 'API Version',
+          props: { type: 'text' }
+        },
+        {
+          field: 'debug',
+          type: 'checkbox',
+          class: '.switch',
+          title: 'Debug component?',
+          props: { type: 'checkbox' }
+        },
+        {
+          field: 'url',
+          class: '.input-field',
+          type: 'text',
+          title: 'URL for Compound Annotations',
+          props: {}
+        }]
+      },
+        {
             group: 'compoundTable',
             title: 'Compound Table Settings',
-            settings: [
-                {
-                    field: 'count',
-                    class: '.range-field',
-                    type: 'range',
-                    title: '# of entries in table',
-                    props: { type: 'range', min: 0, max: 100 }
-                },
+            settings: [{
+                    field: 'debug',
+                    type: 'checkbox',
+                    class: '.switch',
+                    title: 'Debug component?',
+                    props: { type: 'checkbox' }
+                }
             ]
         },
         {
             group: 'headTable',
             title: 'Top Table Settings',
-            settings: [
-                {
-                    field: 'count',
-                    class: '.range-field',
-                    type: 'range',
-                    title: '# of entries in table',
-                    props: { type: 'range', min: 0, max: 20 }
-                },
+            settings: [{
+                    field: 'debug',
+                    type: 'checkbox',
+                    class: '.switch',
+                    title: 'Debug component?',
+                    props: { type: 'checkbox' }
+                }
             ]
         },
         {
             group: 'tailTable',
             title: 'Bottom Table Settings',
-            settings: [
-                {
-                    field: 'count',
-                    class: '.range-field',
-                    type: 'range',
-                    title: '# of entries in table',
-                    props: { type: 'range', min: 0, max: 20 }
-                },
+            settings: [{
+                    field: 'debug',
+                    type: 'checkbox',
+                    class: '.switch',
+                    title: 'Debug component?',
+                    props: { type: 'checkbox' }
+                }
             ]
         },
         {
             group: 'plots',
             title: 'Combined (binned) plots',
-            settings: [
-                {
-                    field: 'bins',
-                    class: '.range-field',
-                    type: 'range',
-                    title: '# of bins in Histogram and Y-direction',
-                    props: { type: 'range', min: 5, max: 50 }
-                },
-                {
-                    field: 'binsX',
-                    class: '.range-field',
-                    type: 'range',
-                    title: '# of bins in X direction',
-                    props: { type: 'range', min: 5, max: 50 }
-                },
+            settings: [{
+                    field: 'debug',
+                    type: 'checkbox',
+                    class: '.switch',
+                    title: 'Debug component?',
+                    props: { type: 'checkbox' }
+                }
             ]
+        },
+        {
+            group: 'form',
+            title: 'Form Settings',
+            settings: [{
+                field: 'debug',
+                type: 'checkbox',
+                class: '.switch',
+                title: 'Debug component?',
+                props: { type: 'checkbox' }
+            }]
+        },
+        {
+            group: 'filter',
+            title: 'Filter Settings',
+            settings: [{
+                field: 'debug',
+                type: 'checkbox',
+                class: '.switch',
+                title: 'Debug component?',
+                props: { type: 'checkbox' }
+            }]
         }
     ]
 
@@ -221,9 +289,9 @@ export function Settings(sources) {
         }
     }
 
-    const Settings = makeSettings(settingsConfig)(sources)
+    const AdminSettings = makeSettings(settingsConfig)(sources)
 
-    const vdom$ = xs.combine(settings$, Settings.DOM)
+    const vdom$ = xs.combine(settings$, AdminSettings.DOM)
         .map(([_, topTableEntries]) =>
             div('.row .grey .lighten-3', { style: { margin: '0px 0px 0px 0px' } }, [
                 div('.row .s12', ['']),
@@ -234,21 +302,19 @@ export function Settings(sources) {
             ])
         ).remember()
 
-    // When the reset button is pressed, we remove the ComPass key from the local storage
-    // and reload the page. The `defaultReducer$` in `index.js` handles taking care of
-    // the deployment scenario.
+    // const apply$ = sources.DOM.select('.apply').events('click')
     const reset$ = sources.DOM.select('.reset').events('click').remember()
 
     // Reset the storage by removing the ComPass key
     const resetStorage$ = reset$.mapTo({ action: "removeItem", key : "ComPass"})
 
     // The router does not reload the same page, so use the browser functionality for that...
-    const router$ = reset$.map(_ => location.reload()).mapTo('/settings').remember()
+    const router$ = reset$.map(_ => location.reload()).mapTo('/admin').remember()
 
     return {
         DOM: vdom$,
-        onion: Settings.onion.compose(debounce(200)),
+        onion: AdminSettings.onion.compose(debounce(200)),
         router: router$,
         storage: resetStorage$
-    };
+    }
 }

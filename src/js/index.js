@@ -1,8 +1,8 @@
-import xs from 'xstream';
+import xs from 'xstream'
 import dropRepeats from 'xstream/extra/dropRepeats'
 
-import { div, nav, a, h3, p, ul, li, h1, h2, i, footer, header, main, svg, g, path, span } from '@cycle/dom';
-import { merge, prop, equals } from 'ramda';
+import { div, nav, a, h3, p, ul, li, h1, h2, i, footer, header, main, svg, g, path, span } from '@cycle/dom'
+import { merge, prop, mergeDeepRight } from 'ramda'
 
 // Workflows
 import DiseaseWorkflow from './pages/disease'
@@ -18,8 +18,9 @@ import { IsolatedSettings } from './pages/settings'
 
 // Utilities
 import { Check } from './components/Check'
-import { pick, mix } from 'cycle-onionify';
+import { pick, mix } from 'cycle-onionify'
 import { initSettings } from './configuration.js'
+import * as deployments from '../../deployments.json'
 import { loggerFactory } from './utils/logger'
 
 export default function Index(sources) {
@@ -98,31 +99,32 @@ export default function Index(sources) {
         ])
     ])]));
 
-    const footer$ = xs.of(
-        footer('.page-footer .grey .darken-4 .grey-text', [
-            // div('.container', [
-            div('.row', { style: { margin: '0px' } }, [
-                div('.col .s12', { style: { margin: '0px' } }, [
-                    p({ style: { margin: '0px' } }, [
-                        'Please use ',
-                        a({ props: { href: '/statistics' } },
-                            'the information'),
-                        ' provided in ComPass with care. ',
-                        'Work instructions can be found via this link: ',
-                        a({ props: { href: 'http://awsaivirl1009.jnj.com/assets/ComPass_WI.pdf' } }, 'Work Instructions.')
-                    ]),
-                    p({ style: { margin: '0px' } }, [
-                        'ComPass does not make any claims. ',
-                        'In case of issues, please include the contents of ', a({ props: { href: '/debug' } }, 'this page'), ' in your bug report'
-                    ]),
-                ])
-            ]),
-            div('.footer-copyright .row', { style: { margin: '0px' } }, [
-                div('.col .s12 .right-align', ['© 2020 By Data intuitive']),
-            ])
-        ])
-        // ])
-    )
+    // We combine with state in order to read the customizations
+    // This works because the defaultReducer runs before anything else
+    const footer$ = xs.combine(xs.of(1), state$)
+          .map(([_, state]) =>
+              footer('.page-footer .grey .darken-4 .grey-text', [
+                  div('.row', { style: { margin: '0px' } }, [
+                      div('.col .s12', { style: { margin: '0px' } }, [
+                          p({ style: { margin: '0px' } }, [
+                              'Please use ',
+                              a({ props: { href: '/statistics' } },
+                                  'the information'),
+                              ' provided in ComPass with care. ',
+                              'Work instructions can be found via this link: ',
+                              a({ props: { href: state.settings.deployment.customizations.wip } }, 'Work Instructions.')
+                          ]),
+                          p({ style: { margin: '0px' } }, [
+                              'ComPass does not make any claims. ',
+                              'In case of issues, please include the contents of ', a({ props: { href: '/debug' } }, 'this page'), ' in your bug report'
+                          ]),
+                      ])
+                  ]),
+                  div('.footer-copyright .row', { style: { margin: '0px' } }, [
+                      div('.col .s12 .right-align', ['© 2020 By Data intuitive']),
+                  ])
+              ])
+            )
 
     const view$ = page$.map(prop('DOM')).flatten().remember()
 
@@ -144,19 +146,24 @@ export default function Index(sources) {
     // Initialize state
     // Storageify ensures the state of the application is constantly cached.
     // We only use the settings part of the stored state.
+    // Please note: with the addition of 'deployments', the requested deployment is added to the settings
+    // Overwrite recursively with the values from `deployments.json` using Ramda's `mergeDeepRight`
+    // The wanted deployment is contained in initSettings.deployment already without further details
     const defaultReducer$ = xs.of(prevState => {
-        // index -- defaultReducer$
+        const desiredDeployment = initSettings.deployment.name
+        const updatedDeployment = mergeDeepRight(initSettings.deployment, deployments[desiredDeployment])
+        const updatedSettings = merge(initSettings, { deployment : updatedDeployment})
         if (typeof prevState === 'undefined') {
             // No pre-existing state information, use default settings
             return ({
-                settings: initSettings,
+                settings: updatedSettings,
             })
         } else {
             // Pre-existing state information.
             // If default settings are newer, use those.
             return (prevState.settings.version == initSettings.version) ?
                 ({ settings: prevState.settings }) :
-                ({ settings: initSettings })
+                ({ settings: updatedSettings })
         }
     })
 

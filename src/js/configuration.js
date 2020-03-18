@@ -1,5 +1,8 @@
 export const initSettings = {
-    version: 3.96,
+    version: 3.103,
+    deployment: {
+      "name": "local",
+    },
     filter: {
         debug: false,
         values: {
@@ -16,12 +19,27 @@ export const initSettings = {
         ghostMode: false,
         modelTranslations: [
           {
-            ui: 'JNJS',
+            ui: 'GSKid',
             model: 'jnjs',
             comment: ''
           },
           {
-            ui: 'JNJB',
+            ui: 'Secondary ID',
+            model: 'jnjb',
+            comment: ''
+          }
+        ],
+        jnj_customizations: {
+            wip: 'http://awsaivirl1009.jnj.com/assets/ComPass_WI.pdf'
+          },
+        jnj_modelTranslations: [
+          {
+            ui: 'jnjs',
+            model: 'jnjs',
+            comment: ''
+          },
+          {
+            ui: 'jnjb',
             model: 'jnjb',
             comment: ''
           }

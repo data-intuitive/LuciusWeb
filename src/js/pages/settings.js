@@ -139,51 +139,6 @@ export function Settings(sources) {
                 },
             ]
         },
-        // {
-        //     group: 'hist',
-        //     title: 'Histogram Settings',
-        //     settings: [{
-        //             field: 'debug',
-        //             type: 'checkbox',
-        //             class: '.switch',
-        //             title: 'Debug component?',
-        //             props: { type: 'checkbox' }
-        //         },
-        //         {
-        //             field: 'bins',
-        //             class: '.range-field',
-        //             type: 'range',
-        //             title: '# of bins',
-        //             props: { type: 'range', min: 5, max: 50 }
-        //         }
-        //     ]
-        // },
-        // {
-        //     group: 'sim',
-        //     title: 'Similarity Plot Settings',
-        //     settings: [{
-        //             field: 'debug',
-        //             type: 'checkbox',
-        //             class: '.switch',
-        //             title: 'Debug component?',
-        //             props: { type: 'checkbox' }
-        //         },
-        //         {
-        //             field: 'binsX',
-        //             class: '.range-field',
-        //             type: 'range',
-        //             title: '# of bins in X direction',
-        //             props: { type: 'range', min: 5, max: 50 }
-        //         },
-        //         {
-        //             field: 'binsY',
-        //             class: '.range-field',
-        //             type: 'range',
-        //             title: '# of bins in Y direction',
-        //             props: { type: 'range', min: 5, max: 50 }
-        //         }
-        //     ]
-        // },
         {
             group: 'api',
             title: 'API Settings',
@@ -393,7 +348,7 @@ export function Settings(sources) {
     const Settings = makeSettings(settingsConfig)(sources)
 
     const vdom$ = xs.combine(settings$, Settings.DOM)
-        .map(([state, topTableEntries]) =>
+        .map(([_, topTableEntries]) =>
             div('.row .grey .lighten-3', { style: { margin: '0px 0px 0px 0px' } }, [
                 div('.row .s12', ['']),
                 topTableEntries,
@@ -403,18 +358,19 @@ export function Settings(sources) {
             ])
         ).remember()
 
-    const apply$ = sources.DOM.select('.apply').events('click')
-    const reset$ = sources.DOM.select('.reset').events('click')
+    // const apply$ = sources.DOM.select('.apply').events('click')
+    const reset$ = sources.DOM.select('.reset').events('click').remember()
 
-    const resetReducer$ = reset$
-        .map(click => prevState => initSettings)
-        .remember()
+    // Reset the storage by removing the ComPass key
+    const resetStorage$ = reset$.mapTo({ action: "removeItem", key : "ComPass"})
+
+    // The router does not reload the same page, so use the browser functionality for that...
+    const router$ = reset$.map(_ => location.reload()).mapTo('/settings').remember()
 
     return {
         DOM: vdom$,
-        onion: xs.merge(
-            resetReducer$,
-            Settings.onion.compose(debounce(200))
-        ),
+        onion: Settings.onion.compose(debounce(200)),
+        router: router$,
+        storage: resetStorage$
     };
 }

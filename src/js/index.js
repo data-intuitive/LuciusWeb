@@ -190,7 +190,7 @@ export default function Index(sources) {
             page$.map(prop('onion')).filter(Boolean).flatten()
         ),
         DOM: vdom$,
-        router: router$,
+        router: xs.merge(router$, page$.map(prop('router')).filter(Boolean).flatten()).remember().debug(),
         HTTP: page$.map(prop('HTTP')).filter(Boolean).flatten(),
         vega: page$.map(prop('vega')).filter(Boolean).flatten(),
         alert: page$.map(prop('alert')).filter(Boolean).flatten(),
@@ -200,7 +200,8 @@ export default function Index(sources) {
         ),
         popup: page$.map(prop('popup')).filter(Boolean).flatten(),
         modal: page$.map(prop('modal')).filter(Boolean).flatten(),
-        ac: page$.map(prop('ac')).filter(Boolean).flatten()
+        ac: page$.map(prop('ac')).filter(Boolean).flatten(),
+        storage: page$.map(prop('storage')).filter(Boolean).flatten()
     }
 
 }

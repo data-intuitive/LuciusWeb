@@ -58,6 +58,17 @@ export function AdminSettings(sources) {
             }]
         },
         {
+            group: 'stats',
+            title: 'Statistics Settings',
+            settings: [{
+                field: 'endpoint',
+                class: '.input-field',
+                type: 'text',
+                title: 'Statistics URL',
+                props: {}
+            }]
+        },
+        {
             group: 'geneAnnotations',
             title: 'Gene Annotation Settings',
             settings: [{

@@ -27,7 +27,6 @@ function Home(sources) {
 
     const checkProps$ = sources.onion.state$
         .compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
-        .startWith({ settings: initSettings })
         .map(state => merge(state.settings.form, state.settings.api))
     const CheckSink = Check(merge(sources, { props: checkProps$ }))
 

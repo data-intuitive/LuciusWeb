@@ -28,7 +28,7 @@ export function AdminSettings(sources) {
                     type: 'select',
                     class: '.switch',
                     title: 'Deployment',
-                    options: props(keys(deployments), deployments).map(x => x.name), //keys(deployments),
+                    options: deployments.map(x => x.name),
                     props: { type: 'checkbox' }
                 }
             ]
@@ -377,7 +377,7 @@ export function AdminSettings(sources) {
     // - restructure deployments.js to an array of deployments rather than a hashmap
     const deploymentReducer$ = deploymentUpdated$.map(settings => prevState => {
         const desiredDeploymentName = settings.deployment.name
-        const desiredDeployment = R.head(R.props(R.keys(deployments), deployments).filter(x => x.name == desiredDeploymentName))
+        const desiredDeployment = R.head(deployments.filter(x => x.name == desiredDeploymentName))
         const updatedDeployment = R.mergeDeepRight(prevState.deployment, desiredDeployment)
         const updatedSettings = R.merge(prevState, { deployment : updatedDeployment})
         const distributedAdminSettings = R.mergeDeepRight(updatedSettings, updatedSettings.deployment.services)

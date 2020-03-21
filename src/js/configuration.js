@@ -1,7 +1,7 @@
 export const initSettings = {
-    version: 3.103,
+    version: 3.104,
     deployment: {
-      "name": "local",
+      "name": "Amazon",
     },
     filter: {
         debug: false,

@@ -3,6 +3,7 @@ import dropRepeats from 'xstream/extra/dropRepeats'
 
 import { div, nav, a, h3, p, ul, li, h1, h2, i, footer, header, main, svg, g, path, span } from '@cycle/dom'
 import { merge, prop, mergeDeepRight } from 'ramda'
+import * as R from 'ramda'
 
 // Workflows
 import DiseaseWorkflow from './pages/disease'
@@ -155,8 +156,9 @@ export default function Index(sources) {
     // When it comes to component isolation, having the admin and user configuration together under the
     // related key in settings makes sense. So we add the respective entries from deployment to where they should appear
     const defaultReducer$ = xs.of(prevState => {
-        const desiredDeployment = initSettings.deployment.name
-        const updatedDeployment = mergeDeepRight(initSettings.deployment, deployments[desiredDeployment])
+        const desiredDeploymentName = initSettings.deployment.name
+        const desiredDeployment = R.head(deployments.filter(x => x.name == desiredDeploymentName))
+        const updatedDeployment = mergeDeepRight(initSettings.deployment, desiredDeployment)
         const updatedSettings = merge(initSettings, { deployment : updatedDeployment})
         const distributedAdminSettings = mergeDeepRight(updatedSettings, updatedSettings.deployment.services)
         if (typeof prevState === 'undefined') {

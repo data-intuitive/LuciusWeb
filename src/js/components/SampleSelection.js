@@ -36,7 +36,7 @@ function SampleSelection(sources) {
 
     const logger = loggerFactory('sampleSelection', sources.onion.state$, 'settings.form.debug')
 
-    const state$ = sources.onion.state$.debug()
+    const state$ = sources.onion.state$
 
     const input$ = sources.input
 

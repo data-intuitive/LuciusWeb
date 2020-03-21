@@ -26,7 +26,6 @@ function Admin(sources) {
         .compose(dropRepeats((x,y) => equals(x.core, y.core)))
         .startWith({ core: defaultState, settings: initSettings })
         // .map(state => merge(state, state.settings.admin, state.settings.api))
-        .debug()
 
     const request$ = state$.map(state => ({
             url: state.core.green.url + '/jobs',
@@ -35,11 +34,9 @@ function Admin(sources) {
             'category': 'status'
         })
     )
-    .debug()
 
     const response$$ = sources.HTTP
         .select('status')
-        // .debug()
 
     const invalidResponse$ = response$$
         .map(response$ =>
@@ -48,7 +45,6 @@ function Admin(sources) {
             .replaceError(error => xs.of(error)) // emit error
         )
         .flatten()
-        // .debug()
 
     /**
      * Parse the successful results only.
@@ -64,8 +60,6 @@ function Admin(sources) {
         )
         .flatten()
         .compose(debounce(500))
-        // .map(response => response.body)
-        .debug()
 
     const vdom$ = state$.map( state =>
         div('.container', [

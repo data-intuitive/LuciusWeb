@@ -266,7 +266,7 @@ function CompoundCheck(sources) {
             autocompleteReducer$
         ),
         output: query$,
-        ac: xs.merge(ac$, acOneSolution$).debug()
+        ac: xs.merge(ac$, acOneSolution$)
     };
 }
 

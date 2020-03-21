@@ -29,9 +29,6 @@ export const initSettings = {
             comment: ''
           }
         ],
-        jnj_customizations: {
-            wip: 'http://awsaivirl1009.jnj.com/assets/ComPass_WI.pdf'
-          },
         jnj_modelTranslations: [
           {
             ui: 'jnjs',

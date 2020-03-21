@@ -21,7 +21,7 @@ import { IsolatedAdminSettings } from './pages/adminSettings'
 import { Check } from './components/Check'
 import { pick, mix } from 'cycle-onionify'
 import { initSettings } from './configuration.js'
-import * as deployments from '../../deployments.json'
+import deployments from '../../deployments.json'
 import { loggerFactory } from './utils/logger'
 
 export default function Index(sources) {

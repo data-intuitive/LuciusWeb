@@ -1,12 +1,15 @@
-import { a, div, br, label, input, p, button, code, pre, h2, h4, i, h3, h5, span, ul, li } from '@cycle/dom'
+import { select, option, a, div, br, label, input, p, button, code, pre, h2, h4, i, h3, h5, span, ul, li } from '@cycle/dom'
 import xs from 'xstream'
 import isolate from '@cycle/isolate'
-import { mergeWith, merge, mergeAll } from 'ramda'
-import { clone } from 'ramda';
+import { mergeWith, merge, props, keys, cond } from 'ramda'
+import { clone } from 'ramda'
+import * as R from 'ramda'
 import sampleCombine from 'xstream/extra/sampleCombine'
 import { initSettings } from '../configuration.js'
-import { pick, mix } from 'cycle-onionify';
+import { pick, mix } from 'cycle-onionify'
 import debounce from 'xstream/extra/debounce'
+import deployments from '../../../deployments.json'
+import dropRepeats from 'xstream/extra/dropRepeats'
 
 export function IsolatedAdminSettings(sources) {
     return isolate(AdminSettings, 'settings')(sources)
@@ -16,7 +19,21 @@ export function AdminSettings(sources) {
 
     const settings$ = sources.onion.state$
 
-    const settingsConfig = [{
+    const settingsConfig = [
+        {
+            group: 'deployment',
+            title: 'Deployment',
+            settings: [{
+                    field: 'name',
+                    type: 'select',
+                    class: '.switch',
+                    title: 'Deployment',
+                    options: props(keys(deployments), deployments).map(x => x.name), //keys(deployments),
+                    props: { type: 'checkbox' }
+                }
+            ]
+        },
+        {
             group: 'common',
             title: 'Common Settings',
             settings: [{
@@ -183,18 +200,57 @@ export function AdminSettings(sources) {
         }
     ]
 
+    // Depending on the type of config settings, render the appropriate vdom representation
+    function renderField(config, _state) {
+      if (config.type == 'checkbox') {
+        return (
+            [
+                label('.active', [
+                    input({ props: merge(config.props, { checked: _state }) }),
+                    span('.lever')
+                ])
+            ]
+        )
+      }
+      if (config.type == 'text') {
+        return (
+            [
+                input({ props: merge(config.props, { value: _state }) })
+            ]
+        )
+      }
+      if (config.type == 'select') {
+        const options = config.options
+        const selectedOption = (option) => (_state == option) ? '.grey.lighten-3.black-text' : '.grey.lighten-3.grey-text.text-lighten-1'
+        const optionButtons = options.map(o =>
+                div(
+                  '.col.selection'+selectedOption(o)+'.'+o,
+                  { style : { 'border-style' : 'solid', 'margin' : '2px'}}, [
+                    label(selectedOption(o), [
+                      input('', { props : merge(config.props, { value: o}) }, '' ),
+                      o
+                    ])
+                  ]
+                )
+              )
+        return optionButtons
+      }
+
+    }
+
     const makeSetting = (config) => (sources) => {
         const state$ = sources.onion.state$
 
-        const update$ = (config.type == 'checkbox') ?
-            sources.DOM.select('input').events('click').map(event => event) :
-            sources.DOM.events('input').map(event => event.target.value)
+        const update$ = R.cond([
+          [R.equals('checkbox'), _ => sources.DOM.select('input').events('click').map(event => event) ],
+          [R.equals('text'),     _ => sources.DOM.events('input').map(event => event.target.value) ],
+          [R.equals('select'),   _ => sources.DOM.select('input').events('click').map(event => event.target.value)]
+        ])(config.type)
 
         const vdom$ =
             state$.map(state =>
                 li('.collection-item .row',
                     div('.valign-wrapper', [
-
                         span('.col .l6 .s12 .truncate', [
                             span('.flow-text', [config.title]),
                             span(['  ']),
@@ -202,31 +258,17 @@ export function AdminSettings(sources) {
                         ]),
 
                         div('.col .s6 ' + config.class,
-
-                            (config.type == 'checkbox')
-                            // Checkbox form
-                            ?
-                            [
-                                label('.active', [
-                                    // config.title,
-                                    input({ props: merge(config.props, { checked: state }) }),
-                                    span('.lever'),
-                                ])
-                            ]
-                            // Range or input
-                            :
-                            [
-                                input({ props: merge(config.props, { value: state }) }),
-                                // label(config.field),
-                            ]
+                          renderField(config, state)
                         )
 
                     ])
                 ))
 
-        const updateReducer$ = (config.type == 'checkbox') ?
-            update$.map(update => prevState => !prevState) :
-            update$.map(update => prevState => update)
+        const updateReducer$ = cond([
+          [R.equals('checkbox'), _ => update$.map(update => prevState => !prevState)],
+          [R.equals('text'),     _ => update$.map(update => prevState => update)],
+          [R.equals('select'),   _ => update$.map(update => prevState => update)],
+        ])(config.type)
 
         return {
             DOM: vdom$,
@@ -322,9 +364,32 @@ export function AdminSettings(sources) {
     // The router does not reload the same page, so use the browser functionality for that...
     const router$ = reset$.map(_ => location.reload()).mapTo('/admin').remember()
 
+    // Deployment needs to be tackled globally, does not work in _isolation_
+    const deploymentUpdated$ = settings$
+      .compose(dropRepeats((x,y) => x.deployment.name == y.deployment.name))
+
+    // Just like in index.js:
+    // - fetch the appropriate deployment from deployments.js
+    // - overwrite the relevant entries (endpoints) of the various settings with the correct one
+    //
+    // TODOs: 
+    // - align this with index.js
+    // - restructure deployments.js to an array of deployments rather than a hashmap
+    const deploymentReducer$ = deploymentUpdated$.map(settings => prevState => {
+        const desiredDeploymentName = settings.deployment.name
+        const desiredDeployment = R.head(R.props(R.keys(deployments), deployments).filter(x => x.name == desiredDeploymentName))
+        const updatedDeployment = R.mergeDeepRight(prevState, desiredDeployment)
+        const updatedSettings = R.merge(prevState, { deployment : updatedDeployment})
+        const distributedAdminSettings = R.mergeDeepRight(updatedSettings, updatedSettings.deployment.services)
+        return distributedAdminSettings
+    })
+
     return {
         DOM: vdom$,
-        onion: AdminSettings.onion.compose(debounce(200)),
+        onion: xs.merge(
+          deploymentReducer$.compose(debounce(50)),
+          AdminSettings.onion.compose(debounce(200))
+        ),
         router: router$,
         storage: resetStorage$
     }

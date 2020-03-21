@@ -96,7 +96,7 @@ export default function Index(sources) {
                 makeLink('/target', span(['Target', ' ', targetSVG]), '.red-text'),
                 makeLink('/disease', span(['Disease', ' ', diseaseSVG]), '.pink-text'),
                 makeLink('/settings', span(['Settings', ' ', settingsSVG]), '.grey-text'),
-                makeLink('/admin', span(['Admin']), '.blue-text'),
+                // makeLink('/admin', span(['Admin']), '.blue-text'),
                 makeLink('/correlation', span('.grey-text .text-darken-3','', ["v", VERSION]), ''),
             ])
         ])

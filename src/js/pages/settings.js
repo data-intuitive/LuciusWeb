@@ -229,7 +229,8 @@ export function Settings(sources) {
                 div('.row .s12', ['']),
                 topTableEntries,
                 div('.row .s12', ['']),
-                button('.reset .col .s4 .offset-s4 .btn .grey', 'Reset to Default'),
+                button('.reset .col .s2 .offset-s3 .btn .grey', 'Reset to Default'),
+                button('.admin .col .s2 .offset-s2 .btn .grey .lighten-2 .grey-text', 'Go to Admin Settings'),
                 div('.row .s12', ['']),
             ])
         ).remember()
@@ -238,17 +239,23 @@ export function Settings(sources) {
     // and reload the page. The `defaultReducer$` in `index.js` handles taking care of
     // the deployment scenario.
     const reset$ = sources.DOM.select('.reset').events('click').remember()
-
     // Reset the storage by removing the ComPass key
     const resetStorage$ = reset$.mapTo({ action: "removeItem", key : "ComPass"})
 
+    const admin$ = sources.DOM.select('.admin').events('click').remember()
+
     // The router does not reload the same page, so use the browser functionality for that...
-    const router$ = reset$.map(_ => location.reload()).mapTo('/settings').remember()
+    const resetRouter$ = reset$.map(_ => location.reload()).mapTo('/settings').remember()
+    const adminRouter$ = admin$.mapTo('/admin').remember()
+
+    // This is an effect and should be moved to a driver...
+    // TODO
+    // const reload$ = xs.merge(resetRouter$, adminRouter$).compose(debounce(20)).map(_ => location.reload())
 
     return {
         DOM: vdom$,
         onion: Settings.onion.compose(debounce(200)),
-        router: router$,
+        router: xs.merge(resetRouter$, adminRouter$),
         storage: resetStorage$
     };
 }

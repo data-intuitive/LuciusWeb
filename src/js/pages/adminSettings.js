@@ -376,9 +376,11 @@ export function AdminSettings(sources) {
     // - align this with index.js
     // - restructure deployments.js to an array of deployments rather than a hashmap
     const deploymentReducer$ = deploymentUpdated$.map(settings => prevState => {
+        console.log(prevState)
+        console.log(settings)
         const desiredDeploymentName = settings.deployment.name
         const desiredDeployment = R.head(R.props(R.keys(deployments), deployments).filter(x => x.name == desiredDeploymentName))
-        const updatedDeployment = R.mergeDeepRight(prevState, desiredDeployment)
+        const updatedDeployment = R.mergeDeepRight(prevState.deployment, desiredDeployment)
         const updatedSettings = R.merge(prevState, { deployment : updatedDeployment})
         const distributedAdminSettings = R.mergeDeepRight(updatedSettings, updatedSettings.deployment.services)
         return distributedAdminSettings

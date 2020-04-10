@@ -10,7 +10,7 @@ import { difference, keys, head, prop, assocPath, equals } from 'ramda'
 import { initSettings } from '../configuration'
 
 export const compoundFilterLens = {
-    get: state => ({ core: state.filter, settings: state.settings }),
+    get: state => ({ core: state.filter, settings: state.settings.filter }),
     set: (state, childState) => ({ ...state, filter: childState.core })
 }
 
@@ -51,7 +51,7 @@ function Filter(sources) {
         .filter(input => isEmptyState(input))
 
     const modifiedState$ = xs.combine(input$, state$)
-        .filter(([input, state]) => !isEmptyState(state))
+        .filter(([_, state]) => !isEmptyState(state))
         .map(([i, state]) => ({ ...state, core: { ...state.core, input: i } }))
         .compose(dropRepeats(equals))
 
@@ -73,7 +73,7 @@ function Filter(sources) {
     const expandProtocolUI$ = sources.DOM
         .select('.protocol')
         .events('click')
-        .fold((x, y) => !x, false)
+        .fold((x, _) => !x, false)
         .startWith(false)
 
     const expandProtocol$ = xs.merge(expandProtocolUI$, expandAnyGhost$).remember()
@@ -81,14 +81,14 @@ function Filter(sources) {
     const expandTypeUI$ = sources.DOM
         .select('.type')
         .events('click')
-        .fold((x, y) => !x, false)
+        .fold((x, _) => !x, false)
         .startWith(false)
 
     const expandType$ = xs.merge(expandTypeUI$, expandAnyGhost$).remember()
 
     // Helper functions for options: all unset or all set
     const noFilter = (selectedOptions, possibleOptions) => (selectedOptions.length == possibleOptions.length)
-    const allFilter = (selectedOptions, possibleOptions) => (selectedOptions.length == 0)
+    // const allFilter = (selectedOptions, possibleOptions) => (selectedOptions.length == 0)
 
     /**
      * Given an option from a list of options (x) and a selection, return the properties for a checkbox
@@ -143,9 +143,9 @@ function Filter(sources) {
             const selectedProtocols = state.core.output.protocol
             const selectedTypes = state.core.output.type
 
-            const possibleConcentrations = state.settings.filter.values.concentration
-            const possibleProtocols = state.settings.filter.values.protocol
-            const possibleTypes = state.settings.filter.values.type
+            const possibleConcentrations = state.settings.values.concentration
+            const possibleProtocols = state.settings.values.protocol
+            const possibleTypes = state.settings.values.type
 
             return div([
                 div('.col .s12 .l4', [
@@ -187,9 +187,11 @@ function Filter(sources) {
 
     // Push filter through as output field ONLY when filter fields are collapsed
     // This is to avoid too frequent updates
-    const filter$ = expandAny$.compose(sampleCombine(modifiedState$))
-        .map(([t, state]) => state.core.output)
-        .startWith(initSettings.filter.values)
+    // merge with the first state update in order to have at least 1 cycle
+    const filter$ = xs.merge(
+      state$.take(1).map(s => s.core.output),
+      expandAny$.compose(sampleCombine(modifiedState$)).map(([_, state]) => state.core.output)
+    ).remember()
 
     // Toggles for filter options
     const toggledGhost$ = 
@@ -220,14 +222,10 @@ function Filter(sources) {
     /**
      * Reducers
      */
-    // default Reducer
-    const defaultReducer$ = xs.of(prevState => ({
-        ...prevState,
-        core: {
-            ...prevState.core,
-            output: initSettings.filter.values
-        }
-    }))
+    // Add the filter values from the settings (and originally from deployments.json) to the current values
+    const defaultReducer$ = xs.of(prevState =>
+            ({...prevState, core: {...prevState.core, output: prevState.settings.values } })
+        )
 
     const inputReducer$ = input$.map(i => prevState => ({ ...prevState, core: { ...prevState.core, input: i } }))
 
@@ -249,7 +247,6 @@ function Filter(sources) {
             return updatedState
         })
 
-
     const outputReducer$ = filter$.map(i => prevState => ({ ...prevState, core: { ...prevState.core, output: i } }))
 
     return {
@@ -264,7 +261,7 @@ function Filter(sources) {
             outputReducer$,
             toggleReducer$
         )
-    };
+    }
 
 }
 

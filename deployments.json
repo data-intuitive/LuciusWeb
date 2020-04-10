@@ -1,10 +1,17 @@
 [
   {
-    "name": "Local",
+    "name": "Local-GSK",
     "customizations": {
         "wi": "https://github.com/data-intuitive/LuciusCore"
       },
     "services": {
+      "filter": {
+        "values": {
+          "concentration": [ "0.08", "10.0", "2.0", "0.4"],
+          "protocol": ["BT20"],
+          "type": ["NA"]
+        }
+      },
       "stats" : {
         "endpoint": "classPath=com.dataintuitive.luciusapi.statistics"
       },
@@ -23,11 +30,48 @@
     }
   },
   {
-    "name": "Amazon",
+    "name": "Local-JNJ",
     "customizations": {
         "wi": "https://github.com/data-intuitive/LuciusCore"
       },
     "services": {
+      "filter": {
+        "values": {
+          "concentration": ["0.1", "1", "10", "30"],
+          "protocol": ["MCF7", "PBMC"],
+          "type": ["test", "poscon"]
+        }
+      },
+      "stats" : {
+        "endpoint": "classPath=com.dataintuitive.luciusapi.statistics"
+      },
+      "api" : {
+        "url": "http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&sync=true&timeout=30"
+      },
+      "sourire": {
+        "url": "http://localhost:9999/molecule/"
+      },
+      "geneAnnotations" : {
+        "url" : "http://localhost:8082/gene/symbol/"
+      },
+      "compoundAnnotations" : {
+        "url" : "http://localhost:8082/drugbank/"
+      }
+    }
+  },
+  {
+    "name": "Amazon-GSK",
+    "customizations": {
+        "wi": "https://github.com/data-intuitive/LuciusCore"
+      },
+    "services": {
+      "filter": {
+        "values": {
+          "concentration": [ "0.08", "10.0", "2.0", "0.4"],
+          "protocol": ["BT20"],
+          "type": ["NA"]
+        }
+      },
       "stats" : {
         "endpoint": "classPath=com.dataintuitive.luciusapi.statistics"
       },

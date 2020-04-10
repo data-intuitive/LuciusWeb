@@ -156,10 +156,15 @@ export default function Index(sources) {
     // When it comes to component isolation, having the admin and user configuration together under the
     // related key in settings makes sense. So we add the respective entries from deployment to where they should appear
     const defaultReducer$ = xs.of(prevState => {
+        // Which deployment to use?
         const desiredDeploymentName = initSettings.deployment.name
+        // Fetch the deployment
         const desiredDeployment = R.head(deployments.filter(x => x.name == desiredDeploymentName))
+        // Merge the deployment in settings.deployment
         const updatedDeployment = mergeDeepRight(initSettings.deployment, desiredDeployment)
+        // Merge the updated deployment with the settings, by key.
         const updatedSettings = merge(initSettings, { deployment : updatedDeployment})
+        // Do the same with the administrative settings
         const distributedAdminSettings = mergeDeepRight(updatedSettings, updatedSettings.deployment.services)
         if (typeof prevState === 'undefined') {
             // No pre-existing state information, use default settings

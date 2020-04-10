@@ -1,15 +1,10 @@
 export const initSettings = {
-    version: 3.104,
+    version: 3.111,
     deployment: {
-      "name": "Amazon",
+      "name": "Local-JNJ",
     },
     filter: {
         debug: false,
-        values: {
-            concentration: ['0.1', '1', '10', '30'],
-            protocol: ['MCF7', 'PBMC'],
-            type: ['test', 'poscon']
-        }
     },
     common: {
         version: "v2",

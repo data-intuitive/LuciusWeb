@@ -13,7 +13,6 @@ import { stateDebug } from '../utils/utils'
 import { loggerFactory } from '~/../../src/js/utils/logger'
 import { convertToCSV } from '../utils/export'
 import delay from 'xstream/extra/delay'
-import { initSettings } from '../configuration'
 
 // Granular access to the settings
 // We _copy_ the results array to the root of this element's scope.
@@ -25,7 +24,8 @@ const headTableLens = {
             table: state.settings.headTable,
             api: state.settings.api,
             common: state.settings.common,
-            sourire: state.settings.sourire
+            sourire: state.settings.sourire,
+            filter: state.settings.filter
         }
     }),
     set: (state, childState) => ({...state, headTable: childState.core, settings: {...state.settings, headTable: childState.settings.table } })
@@ -41,7 +41,8 @@ const tailTableLens = {
             table: state.settings.tailTable,
             api: state.settings.api,
             common: state.settings.common,
-            sourire: state.settings.sourire
+            sourire: state.settings.sourire,
+            filter: state.settings.filter
         }
     }),
     set: (state, childState) => ({...state, tailTable: childState.core, settings: {...state.settings, tailTable: childState.settings.table } })
@@ -57,7 +58,8 @@ const compoundContainerTableLens = {
             table: state.settings.compoundTable,
             api: state.settings.api,
             common: state.settings.common,
-            sourire: state.settings.sourire
+            sourire: state.settings.sourire,
+            filter: state.settings.filter
         }
     }),
     set: (state, childState) => ({...state, compoundTable: childState.core, settings: {...state.settings, compoundTable: childState.settings.table } })
@@ -228,8 +230,8 @@ function makeTable(tableComponent, tableLens, scope = 'scope1') {
                 let filterDiffs = map(key => ({
                             'key': key,
                             'selectedValues': prop(key, state.core.input.filter),
-                            'possibleValues': prop(key, initSettings.filter.values),
-                            'intersection': intersection(prop(key, state.core.input.filter), prop(key, initSettings.filter.values))
+                            'possibleValues': prop(key, state.settings.filter.values),
+                            'intersection': intersection(prop(key, state.core.input.filter), prop(key, state.settings.filter.values))
                         }),
                         filterKeys)
                     // Only show filters if something is filtered, so no filter if all or none of the options are selected !

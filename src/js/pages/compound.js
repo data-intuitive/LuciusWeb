@@ -53,7 +53,7 @@ export default function CompoundWorkflow(sources) {
     };
 
     const CompoundFormSink = isolate(CompoundForm, { onion: formLens })(sources)
-    const signature$ = CompoundFormSink.output //.startWith('BRCA1')
+    const signature$ = CompoundFormSink.output
 
     // Initialize if not yet done in parent (i.e. router) component (useful for testing)
     const defaultReducer$ = xs.of(prevState => {

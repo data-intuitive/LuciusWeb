@@ -79,7 +79,7 @@
         "url": "https://compass.data-intuitive.com:445/jobs?context=luciusapi&appName=luciusapi&sync=true&timeout=30"
       },
       "sourire": {
-        "url": "https://compass.data-intuitive.com:445/molecule/"
+        "url": "https://compass.data-intuitive.com/molecule/"
       },
       "geneAnnotations" : {
         "url" : "https://compass.data-intuitive.com/gene/symbol/"

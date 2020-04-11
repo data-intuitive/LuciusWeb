@@ -189,7 +189,7 @@ function Filter(sources) {
     // This is to avoid too frequent updates
     // merge with the first state update in order to have at least 1 cycle
     const filter$ = xs.merge(
-      state$.take(1).map(s => s.core.output),
+      state$.take(1).map(s => s.settings.values),
       expandAny$.compose(sampleCombine(modifiedState$)).map(([_, state]) => state.core.output)
     ).remember()
 

@@ -256,9 +256,9 @@ function Filter(sources) {
         DOM: vdom$,
         output: filter$,
         onion: xs.merge(
-            defaultReducer$,
-            inputReducer$,
-            outputReducer$,
+            defaultReducer$.debug("DEFAULTRED"),
+            inputReducer$.debug("INPUTRED"),
+            outputReducer$.debug("OUTPUTRED"),
             toggleReducer$
         )
     }

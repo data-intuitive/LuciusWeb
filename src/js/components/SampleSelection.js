@@ -6,6 +6,7 @@ import xs from 'xstream';
 import { ENTER_KEYCODE } from '../utils/keycodes.js'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import debounce from 'xstream/extra/debounce'
+import delay from 'xstream/extra/delay'
 import { loggerFactory } from '~/../../src/js/utils/logger'
 import { CompoundAnnotation } from '../components/CompoundAnnotation'
 import { safeModelToUi } from '../modelTranslations'
@@ -91,7 +92,6 @@ function SampleSelection(sources) {
                 'category': 'samples'
             }
         })
-        // .remember()
 
     const response$ = sources.HTTP
         .select('samples')
@@ -99,7 +99,7 @@ function SampleSelection(sources) {
             response$.replaceError(() => xs.of(emptyData))
         )
         .flatten()
-        // .remember()
+        .compose(delay(10000))
 
     const data$ = response$
         .map(res => res.body)
@@ -112,7 +112,7 @@ function SampleSelection(sources) {
         .map(ev => ev.ownerTarget.id)
 
     // Helper function for rendering the table, based on the state
-    const makeTable = (state, annotation) => {
+    const makeTable = (state, annotation, initialization) => {
         const data = state.core.data
         const blurStyle = (state.settings.common.blur) ? { style: { filter: 'blur(' + state.settings.common.amountBlur + 'px)' } } : {}
         const selectedClass = (selected) => (selected) ? '.black-text' : '.grey-text .text-lighten-2'
@@ -159,7 +159,9 @@ function SampleSelection(sources) {
                     div('.col .s10 .offset-s1 .l8 .offset-l2', [table('.striped .centered', tableContent)]),
                     annotation,
                     div('.row .s6 .offset-s3', [
-                        button('.doSelect .btn .col .offset-s4 .s4 .orange .darken-2', 'Select'),
+                        (initialization)
+                          ? span([])
+                          : button('.doSelect .btn .col .offset-s4 .s4 .orange .darken-2', 'Select')
                     ]),
                 ])
             ])
@@ -168,10 +170,23 @@ function SampleSelection(sources) {
 
     const initVdom$ = emptyState$.mapTo(div())
 
-    const loadingVdom$ = xs.combine(request$, modifiedState$).mapTo(div())
+    const loadingVdom$ = request$.compose(sampleCombine(state$))
+      .map( ([_, state]) =>
+        // Use the same makeTable function, pass a initialization=true parameter and a body DOM with preloading
+        makeTable(
+          state,
+          div('.col.s10.offset-s1.l8.offset-l2', [
+            div('.progress.orange.lighten-3', { style: { margin: '2px 0px 2px 0px'} }, [
+              div('.indeterminate', {style : { "background-color" : 'white' }})
+            ])
+          ]),
+          true
+        )
+      )
+      .remember()
 
     const loadedVdom$ = xs.combine(modifiedState$, compoundAnnotations.DOM)
-        .map(([state, annotation]) => makeTable(state, annotation))
+        .map(([state, annotation]) => makeTable(state, annotation, false))
 
     const vdom$ = xs.merge(initVdom$, loadingVdom$, loadedVdom$)
 

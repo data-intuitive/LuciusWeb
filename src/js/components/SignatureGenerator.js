@@ -6,7 +6,7 @@ import xs from 'xstream';
 import { logThis, log } from '../utils/logger'
 import { ENTER_KEYCODE } from '../utils/keycodes.js'
 import dropRepeats from 'xstream/extra/dropRepeats'
-import debounce from 'xstream/extra/debounce'
+import delay from 'xstream/extra/delay'
 import { loggerFactory } from '~/../../src/js/utils/logger'
 import { stringify } from 'querystring';
 import { isNullOrUndefined } from 'util';
@@ -115,7 +115,7 @@ function SignatureGenerator(sources) {
         .startWith(div('.card .orange .lighten-3', []))
 
     const invalidVdom$ = invalidSignature$
-        .map(s => div('.card .orange .lighten-3', [
+        .map(_ => div('.card .orange .lighten-3', [
             div('.card-content .red-text .text-darken-1', [
                 div('.row', { style: { fontSize: "16px", fontStyle: 'bold' } }, [
                     p('.center', { style: { fontSize: "26px" } }, "The resulting signature is empty, please check the sample selection!")
@@ -124,7 +124,20 @@ function SignatureGenerator(sources) {
         ]))
         .startWith(div('.card .orange .lighten-3', []))
 
-    const vdom$ = xs.merge(invalidVdom$, validVdom$)
+    const loadingVdom$ = request$.compose(sampleCombine(state$))
+        .mapTo(
+          div('.card .orange .lighten-3', [
+            div('.card-content .orange-text .text-darken-4', [
+              span('.card-title', 'Signature:'),
+              div('.progress.orange.lighten-3.yellow-text', { style: { margin: '2px 0px 2px 0px'} }, [
+                div('.indeterminate', {style : { "background-color" : 'orange' }})
+              ])
+            ])
+          ]))
+        .startWith(div('.card .orange .lighten-3', []))
+        .remember()
+
+    const vdom$ = xs.merge(loadingVdom$, invalidVdom$, validVdom$)
 
     const signature$ = xs.merge(validSignature$, invalidSignature$).remember()
 
@@ -145,7 +158,7 @@ function SignatureGenerator(sources) {
         DOM: vdom$,
         output: signature$,
         HTTP: xs.merge(
-            request$, 
+            request$,
             geneAnnotationQuery.HTTP
         ),
         onion: xs.merge(

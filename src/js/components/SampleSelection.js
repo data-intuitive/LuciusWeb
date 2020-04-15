@@ -99,7 +99,6 @@ function SampleSelection(sources) {
             response$.replaceError(() => xs.of(emptyData))
         )
         .flatten()
-        .compose(delay(10000))
 
     const data$ = response$
         .map(res => res.body)

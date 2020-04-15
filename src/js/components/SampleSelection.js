@@ -133,6 +133,7 @@ function SampleSelection(sources) {
             td(selectedClass(entry.use), entry.concentration),
             td(selectedClass(entry.use), entry.batch),
             td(selectedClass(entry.use), entry.year),
+            td(selectedClass(entry.use), entry.time),
             td(selectedClass(entry.use), entry.significantGenes)
 
         ]);
@@ -145,6 +146,7 @@ function SampleSelection(sources) {
             th('Conc'),
             th('Batch'),
             th('Year'),
+            th('Time'),
             th('Sign. Genes')
         ]);
 
@@ -155,7 +157,7 @@ function SampleSelection(sources) {
         return (
             div([
                 div('.row', [
-                    div('.col .s10 .offset-s1 .l8 .offset-l2', [table('.striped .centered', tableContent)]),
+                    div('.col .s10 .offset-s1 .l10 .offset-l1', [table('.striped .centered', tableContent)]),
                     annotation,
                     div('.row .s6 .offset-s3', [
                         (initialization)
@@ -174,7 +176,7 @@ function SampleSelection(sources) {
         // Use the same makeTable function, pass a initialization=true parameter and a body DOM with preloading
         makeTable(
           state,
-          div('.col.s10.offset-s1.l8.offset-l2', [
+          div('.col.s10.offset-s1.l10.offset-l1', [
             div('.progress.orange.lighten-3', { style: { margin: '2px 0px 2px 0px'} }, [
               div('.indeterminate', {style : { "background-color" : 'white' }})
             ])

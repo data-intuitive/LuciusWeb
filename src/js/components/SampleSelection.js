@@ -107,7 +107,7 @@ function SampleSelection(sources) {
 
     const useClick$ = sources.DOM
         .select('.selection')
-        .events('click')
+        .events('click', { preventDefault: true })
         .map(ev => ev.ownerTarget.id)
 
     // Helper function for rendering the table, based on the state
@@ -116,18 +116,15 @@ function SampleSelection(sources) {
         const blurStyle = (state.settings.common.blur) ? { style: { filter: 'blur(' + state.settings.common.amountBlur + 'px)' } } : {}
         const selectedClass = (selected) => (selected) ? '.black-text' : '.grey-text .text-lighten-2'
         let rows = data.map(entry => [
-            // td('.selection', { props: { id: entry.id } }, [
-            //     (entry.use) ? i('.small .material-icons .red-text','remove')
-            //     : i('.small .material-icons .green-text','add')
-            // ]),
             td('.selection', { props: { id: entry.id } }, [
+                // label('', { props: { id: entry.id } }, [
                 label('', { props: { id: entry.id } }, [
                     input('.grey', { props: { type: 'checkbox', checked: entry.use, id: entry.id } }, 'tt'),
                     span([''])
                 ])
             ]),
-            td('.compoundPopup' + selectedClass(entry.use), blurStyle, entry.jnjs),
-            td(selectedClass(entry.use), blurStyle, (entry.compoundname.length > 10) ? entry.compoundname.substring(0, 10) + '...' : entry.compoundname),
+            td('.compoundPopup' + selectedClass(entry.use), blurStyle, entry.compound_id),
+            td(selectedClass(entry.use), blurStyle, (entry.compound_name.length > 10) ? entry.compound_name.substring(0, 10) + '...' : entry.compound_name),
             td(selectedClass(entry.use), entry.id),
             td(selectedClass(entry.use), entry.protocolname),
             td(selectedClass(entry.use), entry.concentration),
@@ -139,7 +136,7 @@ function SampleSelection(sources) {
         ]);
         const header = tr([
             th('Use?'),
-            th(safeModelToUi('jnjs')),
+            th(safeModelToUi('id')),
             th('Name'),
             th('Sample'),
             th('Protocol'),
@@ -209,6 +206,8 @@ function SampleSelection(sources) {
             var newEl = clone(el)
             const switchUse = (id === el.id)
             newEl.use = (switchUse) ? !el.use : el.use
+            // console.log(el)
+            // console.log(newEl)
             return newEl
         })
         return ({

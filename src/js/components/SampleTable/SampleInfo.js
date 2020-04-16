@@ -35,26 +35,27 @@ export function SampleInfo(sources) {
         let hStylewBlur = { style: merge(blur, { margin: '0px', fontWeight: 'bold' }) }
         let pStylewBlur = { style: merge(blur, { margin: '0px' }) }
         let urlSourire = props.sourire.url
-        let url = urlSourire + encodeURIComponent(sample.smiles).replace(/%20/g, '+')
+        let url = urlSourire + encodeURIComponent(sample.compound_smiles).replace(/%20/g, '+')
         return div('.col .s12', [
             div('.col .s6 .l4', { style: { margin: '15px 0px 0px 0px' } }, [
                 p('.col .s12 .grey-text', hStyle, 'Sample Info:'),
                 p(pStyle, entry('Sample ID: ', sample.id)),
                 p(pStyle, entry('protocolname: ', sample.protocolname)),
                 p(pStyle, entry('Concentration: ', sample.concentration)),
+                p(pStyle, entry('Time: ', sample.time)),
                 p(pStyle, entry('Year: ', sample.year)),
                 p(pStyle, entry('Plate ID: ', sample.plateid)),
             ]),
             div('.col .s6 .l4', { style: { margin: '15px 0px 0px 0px' } }, [
                 p('.col .s12 .grey-text', hStyle, 'Compound Info:'),
-                p(pStylewBlur, entry('Name: ', sample.compoundname)),
-                p(pStylewBlur, entry(safeModelToUi('jnjs') + ": ", sample.jnjs)),
-                p(pStylewBlur, entry(safeModelToUi('jnjb') + ": ", sample.jnjb)),
-                p(pStyle, entry('Type: ', sample.Type)),
-                p('.s12', entry('Targets: ', sample.targets.join(', '))),
+                p(pStylewBlur, entry('Name: ', sample.compound_name)),
+                p(pStylewBlur, entry(safeModelToUi('id') + ": ", sample.compound_id)),
+                // p(pStylewBlur, entry(safeModelToUi('jnjb') + ": ", sample.jnjb)),
+                p(pStyle, entry('Type: ', sample.compound_type)),
+                p('.s12', entry('Targets: ', sample.compound_targets.join(', '))),
             ]),
             div('.col .s4 .offset-s8 .l4', { style: merge(blur, { margin: '20px 0px 0px 0px' }) }, [
-                (sample.smiles != null && sample.smiles != 'NA' && sample.smiles != 'No Smiles') ?
+                (sample.compound_smiles != null && sample.compound_smiles != 'NA' && sample.compound_smiles != 'No Smiles') ?
                 img('.col .s12 .valign', { props: { src: url } }) :
                 ''
             ]),
@@ -65,7 +66,7 @@ export function SampleInfo(sources) {
         .map(([sample, zoom, props, blur]) => {
             let urlSourire = props.sourire.url
             let bgcolor = (sample.zhang >= 0) ? 'rgba(44,123,182, 0.08)' : 'rgba(215,25,28, 0.08)'
-            let url = urlSourire + encodeURIComponent(sample.smiles).replace(/%20/g, '+')
+            let url = urlSourire + encodeURIComponent(sample.compound_smiles).replace(/%20/g, '+')
             let zhangRounded = (sample.zhang != null) ? sample.zhang.toFixed(3) : 'NA'
 
             return li('.collection-item  .zoom', { style: { 'background-color': bgcolor } }, [
@@ -73,10 +74,10 @@ export function SampleInfo(sources) {
                     div('.col .s1 .left-align', { style: { fontWeight: 'bold' } }, [zhangRounded]),
                     div('.col .s2', [sample.id]),
                     div('.col .s1', [sample.protocolname]),
-                    div('.col .s2', { style: blur }, [(sample.jnjs != "NA") ? sample.jnjs : '']),
-                    div('.col .s3', { style: blur }, [sample.compoundname]),
+                    div('.col .s2', { style: blur }, [(sample.compound_id != "NA") ? sample.compound_id : '']),
+                    div('.col .s3', { style: blur }, [sample.compound_name]),
                     div('.col .s3 .center-align', { style: blur }, [
-                        ((sample.smiles != null && sample.smiles != 'NA' && sample.smiles != 'No Smiles') && zoom == false) ?
+                        ((sample.compound_smiles != null && sample.compound_smiles != 'NA' && sample.compound_smiles != 'No Smiles') && zoom == false) ?
                         img({ props: { src: url, height: 50, 'object-fit': 'contain' } }) :
                         ''
                     ]),

@@ -12,6 +12,20 @@
           "type": ["NA"]
         }
       },
+      "common": {
+        "modelTranslations": [
+          {
+            "ui": "GSKid",
+            "model": "id",
+            "comment": ""
+          },
+          {
+            "ui": "Secondary ID",
+            "model": "jnjb",
+            "comment": ""
+          }
+        ]
+      },
       "stats" : {
         "endpoint": "classPath=com.dataintuitive.luciusapi.statistics"
       },
@@ -35,6 +49,20 @@
         "wi": "https://github.com/data-intuitive/LuciusCore"
       },
     "services": {
+      "common": {
+        "modelTranslations": [
+          {
+            "ui": "jnjs",
+            "model": "id",
+            "comment": ""
+          },
+          {
+            "ui": "jnjb",
+            "model": "jnjb",
+            "comment": ""
+          }
+        ]
+      },
       "filter": {
         "values": {
           "concentration": ["0.1", "1", "10", "30"],

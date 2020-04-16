@@ -12,30 +12,6 @@ export const initSettings = {
         blur: false,
         amountBlur: 5,
         ghostMode: false,
-        modelTranslations: [
-          {
-            ui: 'GSKid',
-            model: 'jnjs',
-            comment: ''
-          },
-          {
-            ui: 'Secondary ID',
-            model: 'jnjb',
-            comment: ''
-          }
-        ],
-        jnj_modelTranslations: [
-          {
-            ui: 'jnjs',
-            model: 'jnjs',
-            comment: ''
-          },
-          {
-            ui: 'jnjb',
-            model: 'jnjb',
-            comment: ''
-          }
-        ]
     },
     compoundTable: {
         type: 'compoundTable',

@@ -49,6 +49,13 @@
         "wi": "https://github.com/data-intuitive/LuciusCore"
       },
     "services": {
+      "filter": {
+        "values": {
+          "concentration": ["0.1", "1", "10", "30"],
+          "protocol": ["MCF7", "PBMC"],
+          "type": ["test", "poscon"]
+        }
+      },
       "common": {
         "modelTranslations": [
           {
@@ -62,13 +69,6 @@
             "comment": ""
           }
         ]
-      },
-      "filter": {
-        "values": {
-          "concentration": ["0.1", "1", "10", "30"],
-          "protocol": ["MCF7", "PBMC"],
-          "type": ["test", "poscon"]
-        }
       },
       "stats" : {
         "endpoint": "classPath=com.dataintuitive.luciusapi.statistics"
@@ -99,6 +99,20 @@
           "protocol": ["BT20"],
           "type": ["NA"]
         }
+      },
+      "common": {
+        "modelTranslations": [
+          {
+            "ui": "GSKid",
+            "model": "id",
+            "comment": ""
+          },
+          {
+            "ui": "Secondary ID",
+            "model": "jnjb",
+            "comment": ""
+          }
+        ]
       },
       "stats" : {
         "endpoint": "classPath=com.dataintuitive.luciusapi.statistics"

@@ -136,7 +136,7 @@ function SampleSelection(sources) {
         ]);
         const header = tr([
             th('Use?'),
-            th(safeModelToUi('id')),
+            th(safeModelToUi('id', state.settings.common.modelTranslations)),
             th('Name'),
             th('Sample'),
             th('Protocol'),

@@ -9,7 +9,7 @@ import { safeModelToUi } from '../../modelTranslations'
 export function SampleInfo(sources) {
 
     const state$ = sources.onion.state$
-    const props$ = sources.props
+    const props$ = sources.props.debug("props")
 
     const click$ = sources.DOM.select('.zoom').events('click').mapTo(1)
     const zoomed$ = click$
@@ -49,8 +49,7 @@ export function SampleInfo(sources) {
             div('.col .s6 .l4', { style: { margin: '15px 0px 0px 0px' } }, [
                 p('.col .s12 .grey-text', hStyle, 'Compound Info:'),
                 p(pStylewBlur, entry('Name: ', sample.compound_name)),
-                p(pStylewBlur, entry(safeModelToUi('id') + ": ", sample.compound_id)),
-                // p(pStylewBlur, entry(safeModelToUi('jnjb') + ": ", sample.jnjb)),
+                p(pStylewBlur, entry(safeModelToUi('id', props.common.modelTranslations) + ": ", sample.compound_id)),
                 p(pStyle, entry('Type: ', sample.compound_type)),
                 p('.s12', entry('Targets: ', sample.compound_targets.join(', '))),
             ]),

@@ -1,18 +1,12 @@
 import xs from 'xstream';
-import sampleCombine from 'xstream/extra/sampleCombine';
-import { a, h, p, div, br, label, input, code, table, tr, td, b, h2, button, svg, h1, th, thead, tbody, ul, li } from '@cycle/dom';
-import { clone, equals } from 'ramda';
-import { log } from '../../utils/logger'
-import { ENTER_KEYCODE } from '../../utils/keycodes.js'
-import { keys, filter, head } from 'ramda'
+import { ul, li } from '@cycle/dom';
 import { pick, mix } from 'cycle-onionify';
 import isolate from '@cycle/isolate'
 import { SampleInfo } from './SampleInfo'
-import dropRepeats from 'xstream/extra/dropRepeats'
 
 const sampleTableLens = {
-    get: state => (state.core.data),
-    set: (state, childState) => state
+    get: state => state.core.data,
+    set: (state, _) => state
 }
 
 function SampleTable(sources) {
@@ -20,7 +14,7 @@ function SampleTable(sources) {
     const array$ = sources.onion.state$
 
     const childrenSinks$ = array$.map(array => {
-        return array.map((item, index) => isolate(SampleInfo, index)(sources))
+        return array.map((_, index) => isolate(SampleInfo, index)(sources))
     });
 
     const vdom$ = childrenSinks$
@@ -32,8 +26,8 @@ function SampleTable(sources) {
                     })
                     .startWith(ul('.collection', [li('.collection-item .center-align .grey-text','no query yet...')]))
 
-    return { 
-            DOM: vdom$,
+    return {
+      DOM: vdom$,
     };
 
 }

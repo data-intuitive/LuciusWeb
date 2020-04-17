@@ -110,12 +110,10 @@ function Filter(sources) {
      * @param {*} selection Array with selection
      */
     const filterSwitch = (filter, option, selectedOptions) => div(
-        '.collection-item ' + '.' + filter + '-options', { props: { id: option } }, [
+        '.collection-item ' + '.' + filter + '-options', { props: { id: option }}, [
             label({ props: { id: option } }, [
                 input(isSelectedProps(option, selectedOptions), ''),
-                // label('', { props: { id: option } }, 
-                span({ props: { id: option } }, [option])
-                // )
+                span({ props: { id: option }, style: { padding : 2} }, [option])
             ])
         ])
 
@@ -126,14 +124,23 @@ function Filter(sources) {
      * @param {*} selection Array of selections (multiple)
      */
     const togglableFilter = (filter, toggle, possibleOptions, selectedOptions) =>
-        toggle ?
-            div('.col .s10 .offset-s1', [ //{ style: { position: 'absolute', left: '0px', top: '50%', width: '50%', 'z-index': '1' } }, [
-                div('.collection .selection ',
-                    possibleOptions.map(option => filterSwitch(filter, option, selectedOptions))
+        toggle
+          ? div('.col .s12', [
+              div('.col.l6.s12', [
+                div('.collection .selection',
+                    possibleOptions
+                      .filter((_,i) => i < possibleOptions.length/2)
+                      .map(option => filterSwitch(filter, option, selectedOptions))
+                )]),
+              div('.col.l6.s12', [
+                div('.collection .selection',
+                    possibleOptions
+                      .filter((_,i) => i >= possibleOptions.length/2)
+                      .map(option => filterSwitch(filter, option, selectedOptions))
                 )
-
-            ]) :
-            div('.protocol .col .s10 .offset-s1', [''])
+              ])
+            ])
+          : div('.protocol .col .s10 .offset-s1', [''])
 
     const emptyVdom$ = emptyState$.mapTo(div())
 
@@ -148,27 +155,33 @@ function Filter(sources) {
             const possibleTypes = state.settings.values.type
 
             return div([
-                div('.col .s12 .l4', [
+                div('.col .s12', [
                     div('.chip .concentration .col .s12', [
                         span('.concentration .blue-grey-text', [
-                            noFilter(selectedConcentrations, possibleConcentrations) ? 'No Concentration Filter' : 'Concentrations: ' + selectedConcentrations.join(', ')
+                            noFilter(selectedConcentrations, possibleConcentrations)
+                              ? 'No Concentration Filter'
+                              : 'Concentrations: ' + selectedConcentrations.join(', ')
                         ])
                     ]),
                     togglableFilter('concentration', toggleConcentration, possibleConcentrations, selectedConcentrations)
                 ]),
-                div('.col .s12 .l4', [
+                div('.col .s12', [
                     div('.chip .protocol .col .s12', [
                         span('.protocol .blue-grey-text', [
-                            noFilter(selectedProtocols, possibleProtocols) ? 'No Protocol Filter' : 'Protocols: ' + selectedProtocols.join(', ')
+                            noFilter(selectedProtocols, possibleProtocols)
+                              ? 'No Protocol Filter'
+                              : 'Protocols: ' + selectedProtocols.join(', ')
                         ])
                     ]),
                     togglableFilter('protocol', toggleProtocol, possibleProtocols, selectedProtocols)
 
                 ]),
-                div('.col .s12 .l4', [
+                div('.col .s12', [
                     div('.chip .type .col .s12', [
                         span('.type .blue-grey-text', [
-                            noFilter(selectedTypes, possibleTypes) ? 'No Type Filter' : 'Types: ' + selectedTypes.join(', ')
+                            noFilter(selectedTypes, possibleTypes)
+                              ? 'No Type Filter'
+                              : 'Types: ' + selectedTypes.join(', ')
                         ])
                     ]),
                     togglableFilter('type', toggleType, possibleTypes, selectedTypes)
@@ -241,7 +254,6 @@ function Filter(sources) {
         xs.merge(aDown$, aUp$)
             .compose(dropRepeats(equals))
             .remember()
-            .debug('a')
 
     /**
      * Reducers
@@ -274,7 +286,6 @@ function Filter(sources) {
               return updatedState
             } else {
               // If a is pressed during the click, toggle ALL values
-              console.log("not yet implemented")
               const filterKey = head(keys(clickedFilter))
               // values currently selected
               const currentValues = prop(filterKey, prevState.core.output)

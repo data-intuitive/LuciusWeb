@@ -194,30 +194,54 @@ function Filter(sources) {
     ).remember()
 
     // Toggles for filter options
-    const toggledGhost$ = 
+    const toggledGhost$ =
               ghostChanges$
                 .filter(state => typeof state.core.ghost.deselect !== 'undefined')
                 .map(state => state.core.ghost.deselect)
                 .compose(dropRepeats(equals))
 
     const concentrationToggled$ =
-              sources.DOM.select('.concentration-options')
-                  .events('click')
-                  .map(function (ev) { ev.preventDefault(); return ev; })
-                  .map(ev => ev.ownerTarget.id)
-                  .map(value => ({ concentration: value }))
+        sources.DOM.select('.concentration-options')
+            .events('click')
+            .map(function (ev) { ev.preventDefault(); return ev; })
+            .map(ev => ev.ownerTarget.id)
+            .map(value => ({ concentration: value }))
 
-    const protocolToggled$ = sources.DOM.select('.protocol-options')
-        .events('click')
-        .map(function (ev) { ev.preventDefault(); return ev; })
-        .map(ev => ev.ownerTarget.id)
-        .map(value => ({ protocol: value }))
+    const protocolToggled$ =
+        sources.DOM.select('.protocol-options')
+            .events('click')
+            .map(function (ev) { ev.preventDefault(); return ev; })
+            .map(ev => ev.ownerTarget.id)
+            .map(value => ({ protocol: value }))
 
-    const typeToggled$ = sources.DOM.select('.type-options')
-        .events('click')
-        .map(function (ev) { ev.preventDefault(); return ev; })
-        .map(ev => ev.ownerTarget.id)
-        .map(value => ({ type: value }))
+    const typeToggled$ =
+        sources.DOM.select('.type-options')
+            .events('click')
+            .map(function (ev) { ev.preventDefault(); return ev; })
+            .map(ev => ev.ownerTarget.id)
+            .map(value => ({ type: value }))
+
+    const aDown$ =
+        sources.DOM.select('document')
+            .events('keydown')
+            .map(ev => ev.code)
+            .filter(code => code == "KeyA")
+            .mapTo(true)
+            .startWith(false)
+
+    // A modifier stream
+    const aUp$ =
+        sources.DOM.select('document')
+            .events('keyup')
+            .map(ev => ev.code)
+            .filter(code => code == "KeyA")
+            .mapTo(false)
+
+    const a$ =
+        xs.merge(aDown$, aUp$)
+            .compose(dropRepeats(equals))
+            .remember()
+            .debug('a')
 
     /**
      * Reducers
@@ -229,23 +253,39 @@ function Filter(sources) {
 
     const inputReducer$ = input$.map(i => prevState => ({ ...prevState, core: { ...prevState.core, input: i } }))
 
-    const toggleReducer$ = xs.merge(
-        concentrationToggled$, protocolToggled$, typeToggled$, toggledGhost$)
-        .map(clickedConcentration => prevState => {
-            // We want this function to work for 3 the different filters, so first get the appropriate one
-            const filterKey = head(keys(clickedConcentration))
-            const filterValue = prop(filterKey, clickedConcentration)
-            // if already included, remove it from the list
-            const currentArrayForFilterKey = prop(filterKey, prevState.core.output)
-            const alreadyIncluded = currentArrayForFilterKey.includes(filterValue)
-            const newArrayForFilterKey = alreadyIncluded ?
-                currentArrayForFilterKey.filter(el => el != filterValue) : // the value has to be removed from the list
-                currentArrayForFilterKey.concat(filterValue) // the value has to be added to the list
-            // When all options are _excluded_, reset to all options _included_
-            // const cleanArrayForFilterKey = (newArrayForFilterKey.length == 4) ? [] : newArrayForFilterKey
-            const updatedState = assocPath(['core', 'output', filterKey], newArrayForFilterKey, prevState)
-            return updatedState
-        })
+    const toggleReducer$ =
+        xs.merge(concentrationToggled$, protocolToggled$, typeToggled$, toggledGhost$)
+          .compose(sampleCombine(a$))
+          .map(([clickedFilter, a]) => prevState => {
+            // a is a modifier key. If it's not pressed it's the usual behaviour
+            if (a == false) {
+              // We want this function to work for 3 the different filters, so first get the appropriate one
+              const filterKey = head(keys(clickedFilter))
+              const filterValue = prop(filterKey, clickedFilter)
+              // if already included, remove it from the list
+              const currentArrayForFilterKey = prop(filterKey, prevState.core.output)
+              const alreadyIncluded = currentArrayForFilterKey.includes(filterValue)
+              const newArrayForFilterKey = alreadyIncluded ?
+                  currentArrayForFilterKey.filter(el => el != filterValue) : // the value has to be removed from the list
+                  currentArrayForFilterKey.concat(filterValue) // the value has to be added to the list
+              // When all options are _excluded_, reset to all options _included_
+              // const cleanArrayForFilterKey = (newArrayForFilterKey.length == 4) ? [] : newArrayForFilterKey
+              const updatedState = assocPath(['core', 'output', filterKey], newArrayForFilterKey, prevState)
+              return updatedState
+            } else {
+              // If a is pressed during the click, toggle ALL values
+              console.log("not yet implemented")
+              const filterKey = head(keys(clickedFilter))
+              // values currently selected
+              const currentValues = prop(filterKey, prevState.core.output)
+              // possible values
+              const allValues = prop(filterKey, prevState.settings.values)
+              // possible - current values
+              const newValues = allValues.filter(v => !currentValues.includes(v))
+              const updatedState = assocPath(['core', 'output', filterKey], newValues, prevState)
+              return updatedState
+            }
+          })
 
     const outputReducer$ = filter$.map(i => prevState => ({ ...prevState, core: { ...prevState.core, output: i } }))
 

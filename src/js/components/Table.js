@@ -4,7 +4,7 @@ import debounce from 'xstream/extra/debounce'
 import { a, h, p, div, br, label, input, code, table, tr, td, b, h2, button, svg, h5, th, thead, tbody, i, span, ul, li } from '@cycle/dom';
 import { log } from '../utils/logger'
 import { ENTER_KEYCODE } from '../utils/keycodes.js'
-import { keys, values, filter, head, equals, map, prop, clone, omit, merge, intersection } from 'ramda'
+import { keys, values, filter, head, equals, map, prop, clone, omit, merge, intersection, difference } from 'ramda'
 // import { tableContent, tableContentLens } from './tableContent/tableContent'
 import isolate from '@cycle/isolate'
 import dropRepeats from 'xstream/extra/dropRepeats'
@@ -227,17 +227,32 @@ function makeTable(tableComponent, tableLens, scope = 'scope1') {
             .compose(dropRepeats((x, y) => equals(x.core.input.filter, y.core.input.filter)))
             .map(state => {
                 let filterKeys = keys(state.core.input.filter)
-                let filterDiffs = map(key => ({
+                // Derive some relevant information and store it in an object
+                let filterDiffs =
+                  map(
+                    key => ({
                             'key': key,
                             'selectedValues': prop(key, state.core.input.filter),
                             'possibleValues': prop(key, state.settings.filter.values),
-                            'intersection': intersection(prop(key, state.core.input.filter), prop(key, state.settings.filter.values))
-                        }),
-                        filterKeys)
-                    // Only show filters if something is filtered, so no filter if all or none of the options are selected !
-                const nonEmptyFilters = filter(filter => !(filter.intersection.length == filter.possibleValues.length) && !(filter.selectedValues.length == 0), filterDiffs)
-                    .map(filter => ({ key: filter.key, values: filter.selectedValues }))
-                let divs = map(filter => div('.chip', chipStyle, [filter.key + 's', ': ', filter.values.join(', ')]), nonEmptyFilters)
+                            'intersection': intersection(prop(key, state.core.input.filter), prop(key, state.settings.filter.values)),
+                            'difference': difference(prop(key, state.settings.filter.values), prop(key, state.core.input.filter)),
+                            'half': ((prop(key, state.settings.filter.values).length/2 - prop(key, state.core.input.filter).length ) < 0)
+                            }),
+                    filterKeys
+                  )
+                // Only show filters if something is filtered, so no filter if all or none of the options are selected !
+                const nonEmptyFilters =
+                  filter(
+                    filter => !(filter.intersection.length == filter.possibleValues.length) && !(filter.selectedValues.length == 0),
+                    filterDiffs
+                  )
+                  .map(filter => ({ ...filter, values: filter.selectedValues }))
+                let divs = map(filter =>
+                  div('.chip', chipStyle,
+                    (filter.half)
+                      ? [ filter.key + 's excluded', ': ', filter.difference.join(', ') ]
+                      : [filter.key + 's included', ': ', filter.values.join(', ') ]
+                  ), nonEmptyFilters)
                 return divs
             }).startWith([])
 

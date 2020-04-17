@@ -32,7 +32,7 @@ export function SampleInfo(sources) {
     const detail = (sample, props, blur) => {
         let hStyle = { style: { margin: '0px', fontWeight: 'bold' } }
         let pStyle = { style: { margin: '0px' } }
-        let hStylewBlur = { style: merge(blur, { margin: '0px', fontWeight: 'bold' }) }
+        // let hStylewBlur = { style: merge(blur, { margin: '0px', fontWeight: 'bold' }) }
         let pStylewBlur = { style: merge(blur, { margin: '0px' }) }
         let urlSourire = props.sourire.url
         let url = urlSourire + encodeURIComponent(sample.compound_smiles).replace(/%20/g, '+')

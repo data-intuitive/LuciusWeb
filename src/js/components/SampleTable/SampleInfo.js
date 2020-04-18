@@ -1,5 +1,5 @@
 import xs from 'xstream'
-import { i, a, h, p, div, br, label, input, code, table, tr, td, b, h2, button, svg, h1, th, thead, tbody, li, span, img, em } from '@cycle/dom'
+import { i, a, h, p, div, br, label, input, pre, code, table, tr, td, b, h2, button, svg, h1, th, thead, tbody, li, span, img, em } from '@cycle/dom'
 import { log } from '../../utils/logger'
 import { merge } from 'ramda'
 import dropRepeats from 'xstream/extra/dropRepeats'
@@ -23,6 +23,13 @@ export function SampleInfo(sources) {
         ]
     }
 
+    function entrySmall(key, value) {
+        return [
+            span('.col .s6 .l2', { style: { fontWeight: 'lighter' } }, key),
+            span('.col .s6 .l2', (value.length != 0) ? value : '')
+        ]
+    }
+
     const blur$ = props$
         .filter(props => props.common.blur != undefined)
         .filter(props => props.common.blur)
@@ -36,6 +43,7 @@ export function SampleInfo(sources) {
         let pStylewBlur = { style: merge(blur, { margin: '0px' }) }
         let urlSourire = props.sourire.url
         let url = urlSourire + encodeURIComponent(sample.compound_smiles).replace(/%20/g, '+')
+        const _filters = (sample.filters[0] != undefined) ? sample.filters[0] : []
         return div('.col .s12', [
             div('.col .s6 .l4', { style: { margin: '15px 0px 0px 0px' } }, [
                 p('.col .s12 .grey-text', hStyle, 'Sample Info:'),
@@ -53,11 +61,15 @@ export function SampleInfo(sources) {
                 p(pStyle, entry('Type: ', sample.compound_type)),
                 p('.s12', entry('Targets: ', sample.compound_targets.join(', '))),
             ]),
-            div('.col .s4 .offset-s8 .l4', { style: merge(blur, { margin: '20px 0px 0px 0px' }) }, [
+            div('.col .s12 .offset-s8 .l4', { style: merge(blur, { margin: '20px 0px 0px 0px' }) }, [
                 (sample.compound_smiles != null && sample.compound_smiles != 'NA' && sample.compound_smiles != 'No Smiles') ?
                 img('.col .s12 .valign', { props: { src: url } }) :
                 ''
             ]),
+            div('.col .s12 .l12', { style: { margin: '15px 0px 0px 0px' } },
+              [p('.col .s12.grey-text', hStyle, 'Filter Info:')]
+                .concat(_filters.map( x => p(pStyle, entrySmall(x[0], x[1])) ))
+            )
         ])
     }
 

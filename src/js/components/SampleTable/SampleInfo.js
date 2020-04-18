@@ -9,7 +9,7 @@ import { safeModelToUi } from '../../modelTranslations'
 export function SampleInfo(sources) {
 
     const state$ = sources.onion.state$
-    const props$ = sources.props.debug("props")
+    const props$ = sources.props
 
     const click$ = sources.DOM.select('.zoom').events('click').mapTo(1)
     const zoomed$ = click$

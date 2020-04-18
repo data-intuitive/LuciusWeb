@@ -18,6 +18,7 @@ export const compoundFilterLens = {
  * Provide a filter form. We inject (via input) a signature in order to hide the form when an empty signature is present.
  *
  * Please note that the filter state object contains the values for the filter that should be _included_.
+ * If the filter is empty, it means all values should be included (no filter)
  *
  * - input$: stream of signature updates
  * - output$: to be consumed by components that require filter functionality, object with filter values.
@@ -146,19 +147,29 @@ function Filter(sources) {
 
     const loadedVdom$ = xs.combine(modifiedState$, expandConcentration$, expandProtocol$, expandType$)
         .map(([state, toggleConcentration, toggleProtocol, toggleType]) => {
-            const selectedConcentrations = state.core.output.concentration
-            const selectedProtocols = state.core.output.protocol
-            const selectedTypes = state.core.output.type
-
             const possibleConcentrations = state.settings.values.concentration
             const possibleProtocols = state.settings.values.protocol
             const possibleTypes = state.settings.values.type
+
+            const selectedConcentrations =
+              (state.core.output.concentration == undefined)
+                ? possibleConcentrations
+                : state.core.output.concentration
+            const selectedProtocols =
+              (state.core.output.protocol == undefined)
+                ? possibleProtocols
+                : state.core.output.protocol
+            const selectedTypes =
+              (state.core.output.type == undefined)
+                ? possibleTypes
+                : state.core.output.type
 
             return div([
                 div('.col .s12', [
                     div('.chip .concentration .col .s12', [
                         span('.concentration .blue-grey-text', [
                             noFilter(selectedConcentrations, possibleConcentrations)
+                            // (selectedConcentrations == undefined)
                               ? 'No Concentration Filter'
                               : 'Concentrations: ' + selectedConcentrations.join(', ')
                         ])
@@ -169,6 +180,7 @@ function Filter(sources) {
                     div('.chip .protocol .col .s12', [
                         span('.protocol .blue-grey-text', [
                             noFilter(selectedProtocols, possibleProtocols)
+                            // (selectedProtocols == undefined)
                               ? 'No Protocol Filter'
                               : 'Protocols: ' + selectedProtocols.join(', ')
                         ])
@@ -180,6 +192,7 @@ function Filter(sources) {
                     div('.chip .type .col .s12', [
                         span('.type .blue-grey-text', [
                             noFilter(selectedTypes, possibleTypes)
+                            // (selectedTypes == undefined)
                               ? 'No Type Filter'
                               : 'Types: ' + selectedTypes.join(', ')
                         ])
@@ -200,11 +213,31 @@ function Filter(sources) {
 
     // Push filter through as output field ONLY when filter fields are collapsed
     // This is to avoid too frequent updates
-    // merge with the first state update in order to have at least 1 cycle
+    // merge with the first state update in order to have at a value during initialization
+    // When the filter is not set, ALL values are present and we transform that into NO values
     const filter$ = xs.merge(
-      state$.take(1).map(s => s.settings.values),
-      expandAny$.compose(sampleCombine(modifiedState$)).map(([_, state]) => state.core.output)
-    ).remember()
+        state$.take(1).map(state => ({...state, core : {...state.core, output : state.settings.values}})),
+        expandAny$.compose(sampleCombine(modifiedState$)).map(([_, state]) => state)
+      )
+      // .map(state => state.settings.values)
+      .map(state => {
+        const filterKeys = keys(state.settings.values)
+        var o = {}
+        // Mutable approach to transforming the values
+        filterKeys
+          .forEach(key => {
+            // If no values are present, ALL values are selected
+            const actual =
+              (prop(key, state.core.output) == undefined)
+                ? prop(key, state.settings.values)
+                : prop(key, state.core.output)
+            if (difference(prop(key, state.settings.values), actual).length != 0) {
+              o[key] = prop(key, state.core.output)
+            }
+          })
+        return o
+      })
+      .remember()
 
     // Toggles for filter options
     const toggledGhost$ =
@@ -275,7 +308,11 @@ function Filter(sources) {
               const filterKey = head(keys(clickedFilter))
               const filterValue = prop(filterKey, clickedFilter)
               // if already included, remove it from the list
-              const currentArrayForFilterKey = prop(filterKey, prevState.core.output)
+              // take into account that no filter means ALL values included
+              const currentArrayForFilterKey =
+                (prop(filterKey, prevState.core.output) == undefined)
+                  ? prop(filterKey, prevState.settings.values)
+                  : prop(filterKey, prevState.core.output)
               const alreadyIncluded = currentArrayForFilterKey.includes(filterValue)
               const newArrayForFilterKey = alreadyIncluded ?
                   currentArrayForFilterKey.filter(el => el != filterValue) : // the value has to be removed from the list
@@ -298,7 +335,9 @@ function Filter(sources) {
             }
           })
 
-    const outputReducer$ = filter$.map(i => prevState => ({ ...prevState, core: { ...prevState.core, output: i } }))
+    const outputReducer$ =
+      filter$
+        .map(i => prevState => ({ ...prevState, core: { ...prevState.core, output: i } }))
 
     return {
         log: xs.merge(

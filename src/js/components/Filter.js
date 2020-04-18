@@ -325,7 +325,10 @@ function Filter(sources) {
               // If a is pressed during the click, toggle ALL values
               const filterKey = head(keys(clickedFilter))
               // values currently selected
-              const currentValues = prop(filterKey, prevState.core.output)
+              const currentValues =
+                (prop(filterKey, prevState.core.output) != undefined)
+                  ? prop(filterKey, prevState.core.output)
+                  : prop(filterKey, prevState.settings.values) 
               // possible values
               const allValues = prop(filterKey, prevState.settings.values)
               // possible - current values

@@ -43,7 +43,7 @@ export function SampleInfo(sources) {
         let pStylewBlur = { style: merge(blur, { margin: '0px' }) }
         let urlSourire = props.sourire.url
         let url = urlSourire + encodeURIComponent(sample.compound_smiles).replace(/%20/g, '+')
-        const _filters = (sample.filters[0] != undefined) ? sample.filters[0] : []
+        const _filters = (sample.filters != undefined) ? sample.filters : []
         return div('.col .s12', [
             div('.col .s6 .l4', { style: { margin: '15px 0px 0px 0px' } }, [
                 p('.col .s12 .grey-text', hStyle, 'Sample Info:'),

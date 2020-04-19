@@ -65,40 +65,46 @@ function Statistics(sources) {
     const loadingVdom$ = request$
         .mapTo(container([p('Loading...')]))
 
+    const extracts = (els) => els.map(x => span(x + " "))
+
     const loadedVdom$ = data$
         .map(data => container([
 
-            // div('.row', [
-            div('.col .s3 .green .darken-3 .center-align', [p('.green-text .text-darken-3', { style: { fontSize: 'large' } }, ['nothing'])]),
-            div('.col .s3 .green .darken-3 .center-align', [p('.white-text', { style: { fontSize: 'huge' } }, ['MCF7'])]),
-            div('.col .s3 .green .darken-3 .center-align', [p('.white-text', { style: { fontSize: 'large' } }, ['PBMC'])]),
-            div('.col .s3 .green .darken-3 .center-align', [p('.white-text', { style: { fontSize: 'large' } }, ['Total'])]),
-
-            // ]),
-            // div('.row', [
-            div('.col .s3', [p(['# profiles'])]),
-            div('.col .s3 .center-align', [p(data.samples.mcf7)]),
-            div('.col .s3 .center-align', [p(data.samples.pbmc)]),
-            div('.col .s3 .center-align', [p(data.samples.total)]),
-
-            // ]),
-            // div('.row', [
-            div('.col .s3', [p(['# informative profiles'])]),
-            div('.col .s3 .center-align', [p(data.informative.mcf7)]),
-            div('.col .s3 .center-align', [p(data.informative.pbmc)]),
-            div('.col .s3 .center-align', [p(data.informative.total)]),
-
-            // ]),
-            // div('.row', [
-            div('.col .s3', [p(['# unique compounds'])]),
-            div('.col .s3 .center-align', [p(data.compounds.mcf7)]),
-            div('.col .s3 .center-align', [p(data.compounds.pbmc)]),
-            div('.col .s3 .center-align', [p(data.compounds.total)]),
-
-            // ])
-            // p(['# Compounds: ', data.compounds]),
-            // p(['# Samples: ', data.samples]),
-            // p(['# Genes: ', data.genes]),
+          div('.row', [
+            div('.col .s4 .green .darken-3 .center-align', [p('.green-text .text-darken-3', { style: { fontSize: 'large' } }, ['nothing'])]),
+            div('.col .s4 .green .darken-3 .center-align', [p('.white-text', { style: { fontSize: 'large' } }, ["Extract (at most 10 entries)"])]),
+            div('.col .s4 .green .darken-3 .center-align', [p('.white-text', { style: { fontSize: 'large' } }, ['Total'])])
+          ]),
+          div('.row', [
+            div('.col .s4', [p(['# profiles'])]),
+            div('.col .s4', [p('', { style : { fontSize : 'small' }}, extracts(data.samples.sample))]),
+            div('.col .s4 .center-align', [p(data.samples.total)])
+          ]),
+          div('.row', [
+            div('.col .s4', [p(['# informative profiles'])]),
+            div('.col .s4 .center-align', [p([" "])]),
+            div('.col .s4 .center-align', [p(data.informative.total)])
+          ]),
+          div('.row', [
+            div('.col .s4', [p(['# unique compounds'])]),
+            div('.col .s4', [p('', { style : { fontSize : 'small' }}, extracts(data.compounds.sample))]),
+            div('.col .s4 .center-align', [p(data.compounds.total)])
+          ]),
+          div('.row', [
+            div('.col .s4', [p(['# concentrations'])]),
+            div('.col .s4', [p('', { style : { fontSize : 'small' }}, extracts(data.concentrations.sample))]),
+            div('.col .s4 .center-align', [p(data.concentrations.total)])
+          ]),
+          div('.row', [
+            div('.col .s4', [p(['# protocols'])]),
+            div('.col .s4', [p('', { style : { fontSize : 'small' }}, extracts(data.protocols.sample))]),
+            div('.col .s4 .center-align', [p(data.protocols.total)])
+          ]),
+          div('.row', [
+            div('.col .s4', [p(['# types'])]),
+            div('.col .s4', [p('', { style : { fontSize : 'small' }}, extracts(data.types.sample))]),
+            div('.col .s4 .center-align', [p(data.types.total)])
+          ])
         ])
         )
 

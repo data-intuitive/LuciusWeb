@@ -1,21 +1,21 @@
 [
   {
-    "name": "Local-GSK",
+    "name": "Local-DI",
     "customizations": {
         "wi": "https://github.com/data-intuitive/LuciusCore"
       },
     "services": {
       "filter": {
         "values": {
-          "concentration": [ "0.08", "10.0", "2.0", "0.4"],
-          "protocol": ["BT20"],
+          "concentration": ["0.5", "4.0", "1.5", "-0.5", "-6.0", "4.5", "-2.0", "5.0", "-8.0", "0.0", "3.5", "-Infinity", "-4.0", "-5.5", "-7.0", "3.0", "-1.5", "-1.0", "-2.5", "-6.5", "1.0", "2.5", "-3.0", "-4.5", "2.0"] ,
+          "protocol": ["breast", "N/A", "bone", "adipose", "skin", "central nervous system", "prostate", "ovary", "endometrium", "haematopoietic", "liver", "lung", "large intestine", "stomach", "blood", "other", "muscle", "kidney"],
           "type": ["NA"]
         }
       },
       "common": {
         "modelTranslations": [
           {
-            "ui": "GSKid",
+            "ui": "ID",
             "model": "id",
             "comment": ""
           },
@@ -88,22 +88,22 @@
     }
   },
   {
-    "name": "Amazon-GSK",
+    "name": "AWS-DI",
     "customizations": {
         "wi": "https://github.com/data-intuitive/LuciusCore"
       },
     "services": {
       "filter": {
         "values": {
-          "concentration": [ "0.08", "10.0", "2.0", "0.4"],
-          "protocol": ["BT20"],
+          "concentration": ["0.5", "4.0", "1.5", "-0.5", "-6.0", "4.5", "-2.0", "5.0", "-8.0", "0.0", "3.5", "-Infinity", "-4.0", "-5.5", "-7.0", "3.0", "-1.5", "-1.0", "-2.5", "-6.5", "1.0", "2.5", "-3.0", "-4.5", "2.0"] ,
+          "protocol": ["breast", "N/A", "bone", "adipose", "skin", "central nervous system", "prostate", "ovary", "endometrium", "haematopoietic", "liver", "lung", "large intestine", "stomach", "blood", "other", "muscle", "kidney"],
           "type": ["NA"]
         }
       },
       "common": {
         "modelTranslations": [
           {
-            "ui": "GSKid",
+            "ui": "ID",
             "model": "id",
             "comment": ""
           },

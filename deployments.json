@@ -118,16 +118,16 @@
         "endpoint": "classPath=com.dataintuitive.luciusapi.statistics"
       },
       "api" : {
-        "url": "https://compass.data-intuitive.com:445/jobs?context=luciusapi&appName=luciusapi&sync=true&timeout=30"
+        "url": "https://compass.data-intuitive.app:445/jobs?context=luciusapi&appName=luciusapi&sync=true&timeout=30"
       },
       "sourire": {
-        "url": "https://compass.data-intuitive.com/molecule/"
+        "url": "https://compass.data-intuitive.app/molecule/"
       },
       "geneAnnotations" : {
-        "url" : "https://compass.data-intuitive.com/gene/symbol/"
+        "url" : "https://compass.data-intuitive.app/gene/symbol/"
       },
       "compoundAnnotations" : {
-        "url" : "https://compass.data-intuitive.com/drugbank/"
+        "url" : "https://compass.data-intuitive.app/drugbank/"
       }
     }
   }

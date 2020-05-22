@@ -68,7 +68,7 @@ export function SampleInfo(sources) {
             ]),
             div('.col .s12 .l12', { style: { margin: '15px 0px 0px 0px' } },
               [p('.col .s12.grey-text', hStyle, 'Filter Info:')]
-                .concat(_filters.map( x => p(pStyle, entrySmall(x[0], x[1])) ))
+                .concat(_filters.map( x => p(pStyle, entrySmall(x.key, x.value)) ))
             )
         ])
     }

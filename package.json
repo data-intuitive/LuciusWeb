@@ -16,7 +16,7 @@
         "prod": "NODE_ENV=production webpack-dev-server -d --progress --colors --inline --host 0.0.0.0",
         "start": "npm install && node server.js",
         "electron": "electron .",
-        "build": "NODE_ENV=production webpack",
+        "build": "webpack",
         "pack": "build --dir",
         "dist": "build",
         "startelectron": "npm install && electron ."

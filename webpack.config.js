@@ -16,7 +16,7 @@ var PATH = {
     BUILD: path.resolve(__dirname, "build")
 };
 
-var entry = PRODUCTION 
+var entry = PRODUCTION
             ? ['./src/js/main']
             : [
                 'webpack-dev-server/client?http://localhost:8080',
@@ -25,7 +25,7 @@ var entry = PRODUCTION
              ];
 
 module.exports = {
-  watch: true,
+  watch: false,
   entry: ['./src/js/main'], //entry,
   output: {
     path: path.join(__dirname, 'dist'),

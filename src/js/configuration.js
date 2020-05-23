@@ -1,7 +1,7 @@
 export const initSettings = {
     version: 3.111,
     deployment: {
-      "name": "AWS-DI",
+      "name": "local",
     },
     filter: {
         debug: false,

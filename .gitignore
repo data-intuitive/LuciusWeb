@@ -4,3 +4,5 @@ dist
 fonts
 specs
 .cache/
+etc/gsk
+etc/jnj

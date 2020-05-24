@@ -25,7 +25,7 @@ import { makeAutocompleteDriver } from './drivers/makeAutocompleteDriver';
 import './main.scss'
 
 import fromEvent from 'xstream/extra/fromEvent'
-// import xs from 'xstream'
+import xs from 'xstream'
 
 console.log(VERSION)
 
@@ -41,7 +41,8 @@ const drivers = {
     resize: () => fromEvent(window, 'resize'),
     log: logDriver,
     modal: makeModalDriver(),
-    ac: makeAutocompleteDriver()
+    ac: makeAutocompleteDriver(),
+    deployments: () => xs.fromPromise(fetch('/deployments.json').then(m => m.json())).debug('main.js')
 };
 
 let StatifiedMain = onionify(storageify(Index, { key: 'ComPass' }));

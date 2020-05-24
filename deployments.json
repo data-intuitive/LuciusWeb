@@ -1,6 +1,6 @@
 [
   {
-    "name": "local",
+    "name": "default",
     "customizations": {
         "wi": "https://github.com/data-intuitive/LuciusWeb"
       },

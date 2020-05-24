@@ -2,13 +2,9 @@ import { select, option, a, div, br, label, input, p, button, code, pre, h2, h4,
 import xs from 'xstream'
 import isolate from '@cycle/isolate'
 import { mergeWith, merge, props, keys, cond } from 'ramda'
-import { clone } from 'ramda'
 import * as R from 'ramda'
-import sampleCombine from 'xstream/extra/sampleCombine'
-import { initSettings } from '../configuration.js'
 import { pick, mix } from 'cycle-onionify'
 import debounce from 'xstream/extra/debounce'
-import deployments from '../../../deployments.json'
 import dropRepeats from 'xstream/extra/dropRepeats'
 
 export function IsolatedAdminSettings(sources) {
@@ -19,7 +15,7 @@ export function AdminSettings(sources) {
 
     const settings$ = sources.onion.state$
 
-    const settingsConfig = [
+    const settingsConfig$ = sources.deployments.map(deployments => ([
         {
             group: 'deployment',
             title: 'Deployment',
@@ -198,7 +194,7 @@ export function AdminSettings(sources) {
                 props: { type: 'checkbox' }
             }]
         }
-    ]
+    ]))
 
     // Depending on the type of config settings, render the appropriate vdom representation
     function renderField(config, _state) {
@@ -312,10 +308,10 @@ export function AdminSettings(sources) {
         }
     }
 
-    const makeSettings = (settingsObj) => (sources) => {
+    const makeSettings = (settingsConf$, sources) => {
         const settings$ = sources.onion.state$
 
-        const groups$ = xs.of(settingsObj)
+        const groups$ = settingsConf$
             .map(groups =>
                 groups.map(group =>
                     isolate(makeSettingsGroup(group), group.group)(sources)
@@ -342,7 +338,7 @@ export function AdminSettings(sources) {
         }
     }
 
-    const AdminSettings = makeSettings(settingsConfig)(sources)
+    const AdminSettings = makeSettings(settingsConfig$, sources)
 
     const vdom$ = xs.combine(settings$, AdminSettings.DOM)
         .map(([_, topTableEntries]) =>
@@ -372,10 +368,11 @@ export function AdminSettings(sources) {
     // - fetch the appropriate deployment from deployments.js
     // - overwrite the relevant entries (endpoints) of the various settings with the correct one
     //
-    // TODOs: 
+    // TODOs:
     // - align this with index.js
     // - restructure deployments.js to an array of deployments rather than a hashmap
-    const deploymentReducer$ = deploymentUpdated$.map(settings => prevState => {
+    const deploymentReducer$ = xs.combine(deploymentUpdated$, sources.deployments)
+      .map(([settings, deployments]) => prevState => {
         const desiredDeploymentName = settings.deployment.name
         const desiredDeployment = R.head(deployments.filter(x => x.name == desiredDeploymentName))
         const updatedDeployment = R.mergeDeepRight(prevState.deployment, desiredDeployment)

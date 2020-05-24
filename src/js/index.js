@@ -1,5 +1,4 @@
 import xs from 'xstream'
-import dropRepeats from 'xstream/extra/dropRepeats'
 
 import { div, nav, a, h3, p, ul, li, h1, h2, i, footer, header, main, svg, g, path, span } from '@cycle/dom'
 import { merge, prop, mergeDeepRight } from 'ramda'
@@ -22,8 +21,10 @@ import { IsolatedAdminSettings } from './pages/adminSettings'
 import { Check } from './components/Check'
 import { pick, mix } from 'cycle-onionify'
 import { initSettings } from './configuration.js'
-import deployments from '../../deployments.json'
+// import initDeployments from '../../deployments.json'
 import { loggerFactory } from './utils/logger'
+
+// console.log("initDeployments " + initDeployments)
 
 export default function Index(sources) {
     const { router } = sources;
@@ -155,9 +156,10 @@ export default function Index(sources) {
     // The wanted deployment is contained in initSettings.deployment already without further details
     // When it comes to component isolation, having the admin and user configuration together under the
     // related key in settings makes sense. So we add the respective entries from deployment to where they should appear
-    const defaultReducer$ = xs.of(prevState => {
+    const defaultReducer$ = sources.deployments.map(deployments => prevState => {
         // Which deployment to use?
         const desiredDeploymentName = initSettings.deployment.name
+      console.log(desiredDeploymentName)
         // Fetch the deployment
         const desiredDeployment = R.head(deployments.filter(x => x.name == desiredDeploymentName))
         // Merge the deployment in settings.deployment
@@ -179,6 +181,33 @@ export default function Index(sources) {
                 ({ settings: distributedAdminSettings })
         }
     })
+
+    // When deployments.json is read (via the deployments driver), update the state
+    // const defaultReducer$ = xs.of(prevState => {
+    //     // Which deployment to use?
+    //     const desiredDeploymentName = initSettings.deployment.name
+    //   console.log(desiredDeploymentName)
+    //     // Fetch the deployment
+    //     const desiredDeployment = R.head(initDeployments.filter(x => x.name == desiredDeploymentName))
+    //     // Merge the deployment in settings.deployment
+    //     const updatedDeployment = mergeDeepRight(initSettings.deployment, desiredDeployment)
+    //     // Merge the updated deployment with the settings, by key.
+    //     const updatedSettings = merge(initSettings, { deployment : updatedDeployment})
+    //     // Do the same with the administrative settings
+    //     const distributedAdminSettings = mergeDeepRight(updatedSettings, updatedSettings.deployment.services)
+    //     if (typeof prevState === 'undefined') {
+    //         // No pre-existing state information, use default settings
+    //         return ({
+    //             settings: distributedAdminSettings,
+    //         })
+    //     } else {
+    //         // Pre-existing state information.
+    //         // If default settings are newer, use those.
+    //         return (prevState.settings.version == initSettings.version) ?
+    //             ({ settings: prevState.settings }) :
+    //             ({ settings: distributedAdminSettings })
+    //     }
+    // })
 
     // Capture link targets and send to router driver
     const router$ = sources.DOM.select('a').events('click')
@@ -214,7 +243,8 @@ export default function Index(sources) {
         popup: page$.map(prop('popup')).filter(Boolean).flatten(),
         modal: page$.map(prop('modal')).filter(Boolean).flatten(),
         ac: page$.map(prop('ac')).filter(Boolean).flatten(),
-        storage: page$.map(prop('storage')).filter(Boolean).flatten()
+        storage: page$.map(prop('storage')).filter(Boolean).flatten(),
+        deployments: page$.map(prop('deployments')).filter(Boolean).flatten()
     }
 
 }

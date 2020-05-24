@@ -1,32 +1,10 @@
-const autoprefixer = require('autoprefixer')
 const ExtractTextPlugin = require('mini-css-extract-plugin')
 var path = require('path');
 var webpack = require('webpack');
 
-const sassLoaders = [
-  'css-loader',
-  'sass-loader?indentedSyntax=sass&includePaths[]=' + path.resolve(__dirname, './src')
-]
-
-var DEVELOPMENT = process.env.NODE_ENV === 'development';
-var PRODUCTION = process.env.NODE_ENV === 'production';
-
-var PATH = {
-    WWW: path.resolve(__dirname, "dist"),
-    BUILD: path.resolve(__dirname, "build")
-};
-
-var entry = PRODUCTION
-            ? ['./src/js/main']
-            : [
-                'webpack-dev-server/client?http://localhost:8080',
-                //'webpack/hot/dev-server',
-                './src/js/main'
-             ];
-
 module.exports = {
   watch: false,
-  entry: ['./src/js/main'], //entry,
+  entry: ['./src/js/main'],
   output: {
     path: path.join(__dirname, 'dist'),
     publicPath: '/dist/',
@@ -38,6 +16,9 @@ module.exports = {
     contentBase: './',
     hot: false
   },
+  // externals: {
+  //   deployments: './deployments.json'
+  // },
   module: {
     rules: [
       {
@@ -68,10 +49,10 @@ module.exports = {
         }
       ]
       },
-    {
-        test: /\.ico$/,
-        loader: "url-loader",
-        query: { mimetype: "image/x-icon" }
+      {
+          test: /\.ico$/,
+          loader: "url-loader",
+          query: { mimetype: "image/x-icon" }
       }
     ]
   },
@@ -90,11 +71,9 @@ module.exports = {
     })  ],
   resolve: {
     extensions: ['.js', '.sass'],
-    // root: [path.join(__dirname, './src')]
     modules: [
      path.join(__dirname, "src"),
      "node_modules"
    ]
   }
 };
-

@@ -1,7 +1,7 @@
 export const initSettings = {
     version: 3.111,
     deployment: {
-      "name": "local",
+      "name": "default",
     },
     filter: {
         debug: false,

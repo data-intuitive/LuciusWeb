@@ -42,7 +42,7 @@ const drivers = {
     log: logDriver,
     modal: makeModalDriver(),
     ac: makeAutocompleteDriver(),
-    deployments: () => xs.fromPromise(fetch('/deployments.json').then(m => m.json())).debug('main.js')
+    deployments: () => xs.fromPromise(fetch('/deployments.json').then(m => m.json()))
 };
 
 let StatifiedMain = onionify(storageify(Index, { key: 'ComPass' }));

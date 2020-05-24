@@ -18,13 +18,9 @@ import { IsolatedSettings } from './pages/settings'
 import { IsolatedAdminSettings } from './pages/adminSettings'
 
 // Utilities
-import { Check } from './components/Check'
-import { pick, mix } from 'cycle-onionify'
 import { initSettings } from './configuration.js'
-// import initDeployments from '../../deployments.json'
+import initDeployments from '../../deployments.json'
 import { loggerFactory } from './utils/logger'
-
-// console.log("initDeployments " + initDeployments)
 
 export default function Index(sources) {
     const { router } = sources;
@@ -62,7 +58,6 @@ export default function Index(sources) {
     //     .compose(dropRepeats(equals))
     //     .mapTo(i('.small .material-icons', 'flight_takeoff'))
     //     .startWith(span())
-
 
     const compoundSVG = svg({ attrs: { height: '16pt', viewBox: '0 0 20 30' } }, [
         svg.g([
@@ -106,8 +101,8 @@ export default function Index(sources) {
 
     // We combine with state in order to read the customizations
     // This works because the defaultReducer runs before anything else
-    const footer$ = xs.combine(xs.of(1), state$)
-          .map(([_, state]) =>
+    const footer$ = xs.combine(xs.of(1), sources.deployments, state$)
+          .map(([_, depl, state]) =>
               footer('.page-footer .grey .darken-4 .grey-text', [
                   div('.row', { style: { margin: '0px' } }, [
                       div('.col .s12', { style: { margin: '0px' } }, [
@@ -156,12 +151,11 @@ export default function Index(sources) {
     // The wanted deployment is contained in initSettings.deployment already without further details
     // When it comes to component isolation, having the admin and user configuration together under the
     // related key in settings makes sense. So we add the respective entries from deployment to where they should appear
-    const defaultReducer$ = sources.deployments.map(deployments => prevState => {
+    const defaultReducer$ = xs.of(prevState => {
         // Which deployment to use?
         const desiredDeploymentName = initSettings.deployment.name
-      console.log(desiredDeploymentName)
         // Fetch the deployment
-        const desiredDeployment = R.head(deployments.filter(x => x.name == desiredDeploymentName))
+        const desiredDeployment = R.head(initDeployments.filter(x => x.name == desiredDeploymentName))
         // Merge the deployment in settings.deployment
         const updatedDeployment = mergeDeepRight(initSettings.deployment, desiredDeployment)
         // Merge the updated deployment with the settings, by key.
@@ -181,33 +175,6 @@ export default function Index(sources) {
                 ({ settings: distributedAdminSettings })
         }
     })
-
-    // When deployments.json is read (via the deployments driver), update the state
-    // const defaultReducer$ = xs.of(prevState => {
-    //     // Which deployment to use?
-    //     const desiredDeploymentName = initSettings.deployment.name
-    //   console.log(desiredDeploymentName)
-    //     // Fetch the deployment
-    //     const desiredDeployment = R.head(initDeployments.filter(x => x.name == desiredDeploymentName))
-    //     // Merge the deployment in settings.deployment
-    //     const updatedDeployment = mergeDeepRight(initSettings.deployment, desiredDeployment)
-    //     // Merge the updated deployment with the settings, by key.
-    //     const updatedSettings = merge(initSettings, { deployment : updatedDeployment})
-    //     // Do the same with the administrative settings
-    //     const distributedAdminSettings = mergeDeepRight(updatedSettings, updatedSettings.deployment.services)
-    //     if (typeof prevState === 'undefined') {
-    //         // No pre-existing state information, use default settings
-    //         return ({
-    //             settings: distributedAdminSettings,
-    //         })
-    //     } else {
-    //         // Pre-existing state information.
-    //         // If default settings are newer, use those.
-    //         return (prevState.settings.version == initSettings.version) ?
-    //             ({ settings: prevState.settings }) :
-    //             ({ settings: distributedAdminSettings })
-    //     }
-    // })
 
     // Capture link targets and send to router driver
     const router$ = sources.DOM.select('a').events('click')

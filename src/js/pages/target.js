@@ -158,14 +158,14 @@ function TargetWorkflow(sources) {
             hist
         ]) => div('.row .target', { style: { margin: '0px 0px 0px 0px' } }, [
             formDOM,
-            div('.col .s10 .offset-s1', [signatureForm]),
-            div('.row', ''),
-            div('.col .s10 .offset-s1', pageStyle, [
-                div('.row', [filter]),
-                div('.row ', [div('.col .s12 .l6 .offset-l3', [
-                    hist
-                ])]),
-            ]),
+            // div('.col .s10 .offset-s1', [signatureForm]),
+            // div('.row', ''),
+            // div('.col .s10 .offset-s1', pageStyle, [
+            //     div('.row', [filter]),
+            //     div('.row ', [div('.col .s12 .l6 .offset-l3', [
+            //         hist
+            //     ])]),
+            // ]),
             div('.row', ''),
             div('.col .s10 .offset-s1', pageStyle, [
                 div('.col .s12', [table]),

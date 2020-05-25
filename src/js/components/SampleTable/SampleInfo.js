@@ -19,7 +19,7 @@ export function SampleInfo(sources) {
     function entry(key, value) {
         return [
             span('.col .s4', { style: { fontWeight: 'lighter' } }, key),
-            span('.col .s8', (value.length != 0) ? value : '')
+            span('.col .s8', { style : { overflow: 'hidden', 'text-overflow': 'ellipsis' }}, (value.length != 0) ? value : '')
         ]
     }
 
@@ -83,7 +83,7 @@ export function SampleInfo(sources) {
             return li('.collection-item  .zoom', { style: { 'background-color': bgcolor } }, [
                 div('.row', { style: { fontWeight: 'small' } }, [
                     div('.col .s1 .left-align', { style: { fontWeight: 'bold' } }, [zhangRounded]),
-                    div('.col .s2', [sample.id]),
+                    div('.col .s2', { style : { overflow: 'hidden', 'text-overflow': 'ellipsis' }}, [sample.id]),
                     div('.col .s1', [sample.protocolname]),
                     div('.col .s2', { style: blur }, [(sample.compound_id != "NA") ? sample.compound_id : '']),
                     div('.col .s3', { style: blur }, [sample.compound_name]),

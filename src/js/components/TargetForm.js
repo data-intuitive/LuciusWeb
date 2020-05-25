@@ -26,7 +26,7 @@ function TargetForm(sources) {
         targetQuery$.startWith('')
         )
         .map(([
-            formDom, 
+            formDom,
             targetQuery
         ]) =>
             div([

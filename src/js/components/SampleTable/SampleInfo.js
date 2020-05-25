@@ -18,7 +18,7 @@ export function SampleInfo(sources) {
 
     function entry(key, value) {
         return [
-            span('.col .s4', { style: { fontWeight: 'lighter' } }, key),
+            span('.col .s4 .grey-text.text-darken-1', { style: { fontWeight: 'lighter' } }, key),
             span('.col .s8', { style : { overflow: 'hidden', 'text-overflow': 'ellipsis' }}, (value.length != 0) ? value : '')
         ]
     }

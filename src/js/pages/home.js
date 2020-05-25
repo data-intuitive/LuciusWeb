@@ -3,19 +3,11 @@ import { div, nav, a, h3, p, ul, li, h1, h2, i, footer, header, main, svg, g, pa
 import { merge, prop, equals } from 'ramda';
 
 import { Check } from '../components/Check'
-import { IsolatedSettings } from './settings'
-
-import flattenSequentially from 'xstream/extra/flattenSequentially'
-import { pick, mix } from 'cycle-onionify';
-import { initSettings } from '../configuration'
-import debounce from 'xstream/extra/debounce'
 import dropRepeats from 'xstream/extra/dropRepeats'
-
 import { logoSVG } from '../index'
 
 const appear = {
     style: {
-        // fontSize: '14px',
         opacity: '0',
         transition: 'opacity 4s',
         delayed: { opacity: '1' },
@@ -33,7 +25,7 @@ function Home(sources) {
     const vdom$ = xs.combine(CheckSink.DOM)
         .map(([check]) => div([
             div({ style: { 'z-index': -1, height: '100%', overflow: 'hidden', position: 'absolute', opacity: 0.08, 'text-align': 'center', width: '100%' } },
-                Array(60).fill().map(i => div({ style: { width: '25%', display: 'inline-block' } }, [logoSVG]))),
+                Array(60).fill().map(_ => div({ style: { width: '25%', display: 'inline-block' } }, [logoSVG]))),
             div('.row .transparent', [
                 h2('.col .l6 .m8 .s10 offset-l3 .offset-m2 .offset-s1', { style: { 'vertical-align': 'top' } }, [
                     'Welcome to ComPass',

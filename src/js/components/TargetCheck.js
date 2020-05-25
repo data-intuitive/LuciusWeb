@@ -88,7 +88,6 @@ function TargetCheck(sources) {
         'category': 'targets'
       }
     })
-    .debug()
     .remember()
 
   const response$ = sources.HTTP
@@ -101,7 +100,6 @@ function TargetCheck(sources) {
 
   const data$ = response$
     .map(res => res.body.result.data)
-    .debug()
 
   const initVdom$ = emptyState$
     .mapTo(div())

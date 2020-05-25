@@ -130,7 +130,7 @@ function CompoundCheck(sources) {
         ])
     })
 
-  const vdom$ = xs.merge(initVdom$, loadedVdom$).startWith(div())//.remember()
+  const vdom$ = xs.merge(initVdom$, loadedVdom$).startWith(div())
 
   // Set a initial reducer, showing suggestions
   const defaultReducer$ = xs.of(prevState => {
@@ -215,7 +215,7 @@ function CompoundCheck(sources) {
     // input from autocomplete (clicking an option)
     acInput$,
     // input from having one solution left in the autocomplete, extract the remaning target
-    acOneSolution$.map(info => info.data[0].jnjs)
+    acOneSolution$.map(info => info.data[0].id)
   )
     .map(input => prevState => {
       const newInput = input

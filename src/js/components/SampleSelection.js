@@ -105,11 +105,6 @@ function SampleSelection(sources) {
         .map(json => json.result.data)
         .remember()
 
-    const useClick$ = sources.DOM
-        .select('.selection')
-        .events('click', { preventDefault: true })
-        .map(ev => ev.ownerTarget.id)
-
     // Helper function for rendering the table, based on the state
     const makeTable = (state, annotation, initialization) => {
         const data = state.core.data
@@ -205,24 +200,71 @@ function SampleSelection(sources) {
         }
     })
 
-    const selectReducer$ = useClick$.map(id => prevState => {
-        const newData = prevState.core.data.map(el => {
-            // One sample object
-            var newEl = clone(el)
-            const switchUse = (id === el.id)
-            newEl.use = (switchUse) ? !el.use : el.use
-            // console.log(el)
-            // console.log(newEl)
-            return newEl
-        })
-        return ({
-            ...prevState,
-            core: {
-                ...prevState.core,
-                data: newData,
-                output: newData.filter(x => x.use).map(x => x.id)
-            }
-        })
+    const useClick$ = sources.DOM
+        .select('.selection')
+        .events('click', { preventDefault: true })
+        .map(ev => ev.ownerTarget.id)
+
+    const aDown$ =
+        sources.DOM.select('document')
+            .events('keydown')
+            .map(ev => ev.code)
+            .filter(code => code == "KeyA")
+            .mapTo(true)
+            .startWith(false)
+
+    // A modifier stream
+    const aUp$ =
+        sources.DOM.select('document')
+            .events('keyup')
+            .map(ev => ev.code)
+            .filter(code => code == "KeyA")
+            .mapTo(false)
+
+    const a$ =
+        xs.merge(aDown$, aUp$)
+            .compose(dropRepeats(equals))
+
+    const selectReducer$ = 
+      useClick$
+        .compose(sampleCombine(a$))
+        .map(([id, a]) => prevState => {
+          // a = false is the usual behavior
+          if (!a) {
+            const newData = prevState.core.data.map(el => {
+              // One sample object
+              var newEl = clone(el)
+              const switchUse = (id === el.id)
+              newEl.use = (switchUse) ? !el.use : el.use
+              // console.log(el)
+              // console.log(newEl)
+              return newEl
+            })
+            return ({
+                ...prevState,
+                core: {
+                    ...prevState.core,
+                    data: newData,
+                    output: newData.filter(x => x.use).map(x => x.id)
+                }
+            })
+        } else {
+            const newData = prevState.core.data.map(el => {
+              // One sample object
+              var newEl = clone(el)
+              newEl.use = !el.use
+              return newEl
+            })
+            return ({
+                ...prevState,
+                core: {
+                    ...prevState.core,
+                    data: newData,
+                    output: newData.filter(x => x.use).map(x => x.id)
+                }
+            })
+
+        }
     })
 
     const defaultReducer$ = xs.of(prevState => ({...prevState, core: { input: '', data: [] } }))

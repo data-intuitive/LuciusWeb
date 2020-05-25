@@ -314,9 +314,10 @@ function Filter(sources) {
                   ? prop(filterKey, prevState.settings.values)
                   : prop(filterKey, prevState.core.output)
               const alreadyIncluded = currentArrayForFilterKey.includes(filterValue)
-              const newArrayForFilterKey = alreadyIncluded ?
-                  currentArrayForFilterKey.filter(el => el != filterValue) : // the value has to be removed from the list
-                  currentArrayForFilterKey.concat(filterValue) // the value has to be added to the list
+              // does the value have to be removed from the list?
+              const newArrayForFilterKey = alreadyIncluded
+                  ? currentArrayForFilterKey.filter(el => el != filterValue)
+                  : currentArrayForFilterKey.concat(filterValue) // the value has to be added to the list
               // When all options are _excluded_, reset to all options _included_
               // const cleanArrayForFilterKey = (newArrayForFilterKey.length == 4) ? [] : newArrayForFilterKey
               const updatedState = assocPath(['core', 'output', filterKey], newArrayForFilterKey, prevState)

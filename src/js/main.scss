@@ -1,16 +1,14 @@
-// body {
-//     display: flex;
-//     min-height: 100vh;
-//     flex-direction: column;
-// }
-
 /* Colors for workflows, to be overriden when printed */
+
+html {
+    font-family: 'Roboto'
+}
 
 body {
     display: flex;
     min-height: 100vh;
     flex-direction: column;
-    height: 100%
+    height: 100%;
 }
 
 main {

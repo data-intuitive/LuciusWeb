@@ -117,17 +117,22 @@ function SampleSelection(sources) {
         const selectedClass = (selected) => (selected) ? '.black-text' : '.grey-text .text-lighten-2'
         let rows = data.map(entry => [
             td('.selection', { props: { id: entry.id } }, [
-                // label('', { props: { id: entry.id } }, [
                 label('', { props: { id: entry.id } }, [
                     input('.grey', { props: { type: 'checkbox', checked: entry.use, id: entry.id } }, 'tt'),
                     span([''])
                 ])
             ]),
             td('.compoundPopup' + selectedClass(entry.use), blurStyle, entry.compound_id),
-            td(selectedClass(entry.use), blurStyle, (entry.compound_name.length > 10) ? entry.compound_name.substring(0, 10) + '...' : entry.compound_name),
-            td(selectedClass(entry.use), entry.id),
+            td(selectedClass(entry.use), blurStyle,
+              (entry.compound_name.length > 20) ? entry.compound_name.substring(0, 20) + '...' : entry.compound_name
+            ),
+            td(".left-align" + selectedClass(entry.use),
+              (entry.id.length > 30) ? entry.id.substring(0, 30) + '...' : entry.id
+            ),
             td(selectedClass(entry.use), entry.protocolname),
-            td(selectedClass(entry.use), entry.concentration),
+            td(selectedClass(entry.use),
+              (entry.concentration.length > 6) ? entry.concentration.substring(0, 6) + '...' : entry.concentration
+            ),
             td(selectedClass(entry.use), entry.batch),
             td(selectedClass(entry.use), entry.year),
             td(selectedClass(entry.use), entry.time),

@@ -21,7 +21,7 @@ import { preventDefaultDriver } from './drivers/preventDefaultDriver';
 import switchPath from 'switch-path'
 import { makeModalDriver } from './drivers/makeModalDriver'
 import { makeAutocompleteDriver } from './drivers/makeAutocompleteDriver';
-
+import initDeployments from '../../deployments.json'
 import './main.scss'
 
 import fromEvent from 'xstream/extra/fromEvent'

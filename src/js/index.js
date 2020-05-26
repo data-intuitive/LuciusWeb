@@ -101,8 +101,8 @@ export default function Index(sources) {
 
     // We combine with state in order to read the customizations
     // This works because the defaultReducer runs before anything else
-    const footer$ = xs.combine(xs.of(1), sources.deployments, state$)
-          .map(([_, depl, state]) =>
+    const footer$ = state$
+          .map(state =>
               footer('.page-footer .grey .darken-4 .grey-text', [
                   div('.row', { style: { margin: '0px' } }, [
                       div('.col .s12', { style: { margin: '0px' } }, [
@@ -176,6 +176,20 @@ export default function Index(sources) {
         }
     })
 
+    const deploymentsReducer$ = sources.deployments.map(deployments => prevState => {
+        // Which deployment to use?
+        const desiredDeploymentName = prevState.settings.deployment.name
+        // Fetch the deployment
+        const desiredDeployment = R.head(deployments.filter(x => x.name == desiredDeploymentName))
+        // Merge the deployment in settings.deployment
+        const updatedDeployment = mergeDeepRight(prevState.settings.deployment, desiredDeployment)
+        // Merge the updated deployment with the settings, by key.
+        const updatedSettings = merge(prevState.settings, { deployment : updatedDeployment})
+        // Do the same with the administrative settings
+        const distributedAdminSettings = mergeDeepRight(updatedSettings, updatedSettings.deployment.services)
+        return ({...prevState, settings: distributedAdminSettings })
+      })
+
     // Capture link targets and send to router driver
     const router$ = sources.DOM.select('a').events('click')
         .map(ev => ev.target.pathname)
@@ -196,10 +210,11 @@ export default function Index(sources) {
         ),
         onion: xs.merge(
             defaultReducer$,
+            deploymentsReducer$,
             page$.map(prop('onion')).filter(Boolean).flatten()
         ),
         DOM: vdom$,
-        router: xs.merge(router$, page$.map(prop('router')).filter(Boolean).flatten()).remember().debug(),
+        router: xs.merge(router$, page$.map(prop('router')).filter(Boolean).flatten()).remember(),
         HTTP: page$.map(prop('HTTP')).filter(Boolean).flatten(),
         vega: page$.map(prop('vega')).filter(Boolean).flatten(),
         alert: page$.map(prop('alert')).filter(Boolean).flatten(),

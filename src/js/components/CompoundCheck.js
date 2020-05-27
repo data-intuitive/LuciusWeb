@@ -151,7 +151,8 @@ function CompoundCheck(sources) {
   // Reducer for showing suggestions again after an input event
   const inputReducer$ = input$.map(value => prevState =>
     ({
-      ...prevState, core: {
+      ...prevState,
+      core: {
         ...prevState.core,
         showSuggestions: true,
         validated: false,
@@ -192,7 +193,7 @@ function CompoundCheck(sources) {
     .map(data => ({
       el: '.compoundQuery',
       data: data,
-      render: function (data) { return mergeAll(data.map(d => ({ [d.jnjs + ' - ' + titleCase(d.name)]: null }))) },
+      render: function (data) { return mergeAll(data.map(d => ({ [d.jnjs + ' - ' + d.name]: null }))) },
       strip: function (str) {
         return str.split(" - ")[0];
       }
@@ -204,7 +205,7 @@ function CompoundCheck(sources) {
     .map(data => ({
       el: '.compoundQuery',
       data: data,
-      render: function (data) { return mergeAll(data.map(d => ({ [d.jnjs + ' - ' + titleCase(d.name)]: null }))) },
+      render: function (data) { return mergeAll(data.map(d => ({ [d.jnjs + ' - ' + d.name]: null }))) },
       strip: function (str) {
         return str.split(" - ")[0];
       }
@@ -215,7 +216,7 @@ function CompoundCheck(sources) {
     // input from autocomplete (clicking an option)
     acInput$,
     // input from having one solution left in the autocomplete, extract the remaning target
-    acOneSolution$.map(info => info.data[0].id)
+    acOneSolution$.map(info => info.data[0].jnjs)
   )
     .map(input => prevState => {
       const newInput = input
@@ -226,7 +227,6 @@ function CompoundCheck(sources) {
           showSuggestions: false,
           validated: true,
           output: newInput,
-
         }
       })
     })

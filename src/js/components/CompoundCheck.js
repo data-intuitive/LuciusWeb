@@ -193,7 +193,7 @@ function CompoundCheck(sources) {
     .map(data => ({
       el: '.compoundQuery',
       data: data,
-      render: function (data) { return mergeAll(data.map(d => ({ [d.jnjs + ' - ' + d.name]: null }))) },
+      render: function (data) { return mergeAll(data.map(d => ({ [d.compound_id + ' - ' + d.name]: null }))) },
       strip: function (str) {
         return str.split(" - ")[0];
       }
@@ -205,7 +205,7 @@ function CompoundCheck(sources) {
     .map(data => ({
       el: '.compoundQuery',
       data: data,
-      render: function (data) { return mergeAll(data.map(d => ({ [d.jnjs + ' - ' + d.name]: null }))) },
+      render: function (data) { return mergeAll(data.map(d => ({ [d.compound_id + ' - ' + d.name]: null }))) },
       strip: function (str) {
         return str.split(" - ")[0];
       }
@@ -216,7 +216,7 @@ function CompoundCheck(sources) {
     // input from autocomplete (clicking an option)
     acInput$,
     // input from having one solution left in the autocomplete, extract the remaning target
-    acOneSolution$.map(info => info.data[0].jnjs)
+    acOneSolution$.map(info => info.data[0].compound_id)
   )
     .map(input => prevState => {
       const newInput = input

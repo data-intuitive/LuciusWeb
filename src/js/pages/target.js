@@ -57,7 +57,7 @@ function TargetWorkflow(sources) {
     const logger = loggerFactory('target', sources.onion.state$, 'settings.common.debug')
 
     const formLens = {
-        get: state => ({ form: state.form, settings: { form: state.settings.form, api: state.settings.api } }),
+        get: state => ({ form: state.form, settings: { form: state.settings.form, api: state.settings.api, common: state.settings.common} }),
         set: (state, childState) => ({...state, form: childState.form })
     };
 

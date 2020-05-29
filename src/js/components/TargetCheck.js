@@ -104,7 +104,7 @@ function TargetCheck(sources) {
   const initVdom$ = emptyState$
     .mapTo(div())
 
-  const loadedVdom$ = modifiedState$
+  const loadedVdom$ = state$
     .map(state => {
       const query = state.core.input
       const validated = state.core.validated
@@ -182,7 +182,7 @@ function TargetCheck(sources) {
       data: data,
       render: function (data) { return mergeAll(data.map(d => ({ [d.target + ' (' + d.count + " occurrences)"]: null }))) },
       strip: function (str) {
-        return str.split(" (")[0];
+        return str; //.split(" (")[0];
       }
     }))
   // Trigger an update when only one result is left so we can handle that in the AutoComplete driver
@@ -193,16 +193,16 @@ function TargetCheck(sources) {
       data: data,
       render: function (data) { return mergeAll(data.map(d => ({ [d.target + ' (' + d.count + " occurrences)"]: null }))) },
       strip: function (str) {
-        return str.split(" (")[0];
+        return str //.split(" (")[0];
       }
     }))
 
   // When a suggestion is clicked or autocomplete is 'finished', update the state so the query becomes this
   const autocompleteReducer$ = xs.merge(
     // input from autocomplete (clicking an option)
-    acInput$,
+    acInput$, //.map(str => str.split(" (")[0]).debug(),
     // input from having one solution left in the autocomplete, extract the remaning target
-    acOneSolution$.map(info => info.data[0].target)
+    // acOneSolution$.map(info => info.data[0].target).debug()
   )
     .map(input => prevState => {
       const newInput = input

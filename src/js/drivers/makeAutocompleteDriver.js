@@ -9,50 +9,50 @@ import xs from 'xstream';
  *     el: the selector for the element to apply the autocomplete to
  *     data: A JSON object with the data
  *     render: A function taking the data object and rendering a string for the options
- *     strip: A function taking a string (from render) and strips it to the text we need in the input field 
+ *     strip: A function taking a string (from render) and strips it to the text we need in the input field
  *   }
- * 
+ *
  * Output: stream of selected 'values' (from strip function).
  */
 function makeAutocompleteDriver() {
 
-    var ac = undefined
+  var ac = undefined
 
-    function autocompleteDriver(in$) {
+  function autocompleteDriver(in$) {
 
-        const selection$ = xs.create({
+    const selection$ = xs.create({
 
-            start: (listener) => {
-                in$.addListener({
-                    next: (acInfo) => {
-                        const elem = document.querySelector(acInfo.el)
-                        if (elem == undefined) {
-                            console.error('Undefined element passed to AutocompleteDriver')
-                        } else {
-                            ac = M.Autocomplete.init(elem, {
-                                data: acInfo.render(acInfo.data),
-                                onAutocomplete: function (str) {
-                                    listener.next(acInfo.strip(str))
-                                    ac.close()
-                                }
-                            })
-                            if (ac.isOpen || acInfo.data.length == 1) { ac.close() }
-                            else { ac.open() }
-                        }
-                    },
-                    error: (m) => {
-                        console.error(m)
-                    }
-                })
-            },
-            stop: () => { }
+      start: (listener) => {
+        in$.addListener({
+          next: (acInfo) => {
+            const elem = document.querySelector(acInfo.el)
+            if (elem == undefined) {
+              console.error('Undefined element passed to AutocompleteDriver')
+            } else {
+              ac = M.Autocomplete.init(elem, {
+                data: acInfo.render(acInfo.data),
+                onAutocomplete: function (str) {
+                  listener.next(acInfo.strip(str))
+                }
+              })
+              ac.open()
+              // if (ac.isOpen || acInfo.data.length == 1) { ac.close() }
+              // else { ac.open() }
+            }
+          },
+          error: (m) => {
+            console.error(m)
+          }
         })
+      },
+      stop: () => { }
+    })
 
-        return selection$
+    return selection$
 
-    }
+  }
 
-    return autocompleteDriver
+  return autocompleteDriver
 
 }
 

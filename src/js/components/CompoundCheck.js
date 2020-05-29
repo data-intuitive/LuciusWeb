@@ -195,7 +195,7 @@ function CompoundCheck(sources) {
       data: data,
       render: function (data) { return mergeAll(data.map(d => ({ [d.compound_id + ' - ' + d.name]: null }))) },
       strip: function (str) {
-        return str.split(" - ")[0];
+        return str; //.split(" - ")[0];
       }
     }))
 
@@ -207,7 +207,7 @@ function CompoundCheck(sources) {
       data: data,
       render: function (data) { return mergeAll(data.map(d => ({ [d.compound_id + ' - ' + d.name]: null }))) },
       strip: function (str) {
-        return str.split(" - ")[0];
+        return str; //.split(" - ")[0];
       }
     }))
 

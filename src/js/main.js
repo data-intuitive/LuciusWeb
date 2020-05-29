@@ -10,6 +10,7 @@ import storageDriver from '@cycle/storage';
 import { makeRouterDriver } from 'cyclic-router';
 import onionify from 'cycle-onionify';
 import storageify from "cycle-storageify";
+import delay from 'xstream/extra/delay'
 
 import Index from './index';
 
@@ -21,7 +22,6 @@ import { preventDefaultDriver } from './drivers/preventDefaultDriver';
 import switchPath from 'switch-path'
 import { makeModalDriver } from './drivers/makeModalDriver'
 import { makeAutocompleteDriver } from './drivers/makeAutocompleteDriver';
-import initDeployments from '../../deployments.json'
 import './main.scss'
 
 import fromEvent from 'xstream/extra/fromEvent'

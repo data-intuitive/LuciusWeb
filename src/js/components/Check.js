@@ -1,11 +1,8 @@
 import { a, div, br, label, input, p, button, code, pre, i, span } from '@cycle/dom'
 import xs from 'xstream'
-import isolate from '@cycle/isolate'
-import { mergeWith, merge } from 'ramda'
 import { clone, equal, equals, mergeAll, omit } from 'ramda';
 import dropRepeats from 'xstream/extra/dropRepeats'
 import debounce from 'xstream/extra/debounce'
-import sampleCombine from 'xstream/extra/sampleCombine'
 
 // Alert the user when last response time is 1.5 times higher than the minimum
 // over the history of the jobserver.
@@ -19,11 +16,12 @@ function Check(sources) {
         .compose(dropRepeats((x, y) => equals(x, y)))
         .remember()
 
-    const modifiedState$ = state$
-        .compose(dropRepeats((x, y) => equals(omit(['result'], x), omit(['result'], y))))
+    // Combine with deployments to the up-to-date endpoint config
+    const modifiedState$ = xs.combine(state$, sources.deployments)
+        .map(([state, _]) => state)
 
     const request$ = xs.combine(modifiedState$, props$)
-        .map(([state, props]) => {
+        .map(([_, props]) => {
             return {
                 url: props.url + '&classPath=com.dataintuitive.luciusapi.statistics',
                 method: 'POST',
@@ -47,7 +45,7 @@ function Check(sources) {
 
     /**
      * Parse the successful results only.
-     * 
+     *
      * We add a little wait time (`debounce`) in order for the jobserver
      * to be up-to-date with the actual jobs. Otherwize, we measure the
      * wrong job times.
@@ -96,9 +94,6 @@ function Check(sources) {
         .map(i => span(".grey-text", ".".repeat(i)))
         .endWhen(validResponseJobs$)
 
-    // const loadingVdom$ = request$
-    //     .mapTo('...')
-
     /**
      * Calculate a measure for the performance of the API.
      * We currently look at the difference between the last
@@ -115,7 +110,7 @@ function Check(sources) {
         return lastEntry / (minEntry * factor) //statsTable.average()
     }
 
-    // Apply the metric to the jobs listing    
+    // Apply the metric to the jobs listing
     const responseMetric$ = jobs$
         .map(jobs => differenceWithStatisticsResponses(jobs, LATENCY_FACTOR))
 

@@ -101,16 +101,18 @@ function TargetWorkflow(sources) {
         .startWith({ text: 'Welcome to Target Workflow', duration: 4000 })
 
     const TargetFormSink = isolate(TargetForm, { onion: formLens, DOM: 'form' })(sources)
-    const target$ = TargetFormSink.output
+    // TODO: Check if this is not better moved to the targetform component itself
+    // Especially after the change in autocomplete behavior.
+    const target$ = TargetFormSink.output.map(t => t.split(" (")[0])
 
     const TableContainer = makeTable(CompoundTable, compoundTableLens)
 
     const Table = isolate(TableContainer, { onion: compoundContainerTableLens })
-        ({...sources, input: target$.map((t) => ({ query: t })).remember() });
+        ({...sources, input: target$.map((t) => ({ query: t}) ).remember() });
 
     // Granular access to global state and parts of settings
     const thisFormLens = {
-        get: state => ({ form: state.sform, settings: { form: state.settings.form, api: state.settings.api } }),
+        get: state => ({ form: state.sform, settings: { form: state.settings.form, api: state.settings.api, common: state.settings.common } }),
         set: (state, childState) => ({...state, sform: childState.form })
     };
 
@@ -131,7 +133,7 @@ function TargetWorkflow(sources) {
 
     // Histogram plot component
     const histogram = isolate(Histogram, { onion: histLens })
-        ({...sources, input: xs.combine(signature$, filter$, target$).map(([s, f, t]) => ({ signature: s, filter: f, target: t })).remember() });
+        ({...sources, input: xs.combine(signature$, filter$, target$.debug()).map(([s, f, t]) => ({ signature: s, filter: f, target: t })).remember() });
 
     const pageStyle = {
         style: {
@@ -158,14 +160,14 @@ function TargetWorkflow(sources) {
             hist
         ]) => div('.row .target', { style: { margin: '0px 0px 0px 0px' } }, [
             formDOM,
-            // div('.col .s10 .offset-s1', [signatureForm]),
-            // div('.row', ''),
-            // div('.col .s10 .offset-s1', pageStyle, [
-            //     div('.row', [filter]),
-            //     div('.row ', [div('.col .s12 .l6 .offset-l3', [
-            //         hist
-            //     ])]),
-            // ]),
+            div('.col .s10 .offset-s1', [signatureForm]),
+            div('.row', ''),
+            div('.col .s10 .offset-s1', pageStyle, [
+                div('.row', [filter]),
+                div('.row ', [div('.col .s12 .l6 .offset-l3', [
+                    hist
+                ])]),
+            ]),
             div('.row', ''),
             div('.col .s10 .offset-s1', pageStyle, [
                 div('.col .s12', [table]),

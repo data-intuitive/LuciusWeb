@@ -66,7 +66,8 @@ function SignatureGenerator(sources) {
                 method: 'POST',
                 send: {
                     version: 'v2',
-                    samples: state.core.input.join(" ")
+                    samples: state.core.input.join(" "),
+                    pvalue: state.settings.common.pvalue
                 },
                 'category': 'generateSignature'
             }

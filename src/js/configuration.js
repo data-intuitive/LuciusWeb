@@ -1,5 +1,5 @@
 export const initSettings = {
-    version: 3.111,
+    version: 4.001,
     deployment: {
       "name": "default",
     },
@@ -12,6 +12,7 @@ export const initSettings = {
         blur: false,
         amountBlur: 5,
         ghostMode: false,
+        pvalue: 0.05
     },
     compoundTable: {
         type: 'compoundTable',

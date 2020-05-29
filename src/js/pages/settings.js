@@ -20,12 +20,19 @@ export function Settings(sources) {
             group: 'common',
             title: 'Common Settings',
             settings: [
+                // {
+                //     field: 'ghostMode',
+                //     type: 'checkbox',
+                //     class: '.switch',
+                //     title: 'Ghost Mode',
+                //     props: { type: 'checkbox' }
+                // },
                 {
-                    field: 'ghostMode',
-                    type: 'checkbox',
-                    class: '.switch',
-                    title: 'Ghost Mode',
-                    props: { type: 'checkbox' }
+                    field: 'pvalue',
+                    class: 'text',
+                    type: '.input-field',
+                    title: 'p-value',
+                    props: { type: 'text' }
                 },
                 {
                     field: 'blur',

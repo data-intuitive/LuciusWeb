@@ -87,7 +87,8 @@ function SampleSelection(sources) {
                 method: 'POST',
                 send: {
                     version: 'v2',
-                    query: state.core.input
+                    query: state.core.input,
+                    pvalue: state.settings.common.pvalue
                 },
                 'category': 'samples'
             }

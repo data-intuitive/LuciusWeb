@@ -40,6 +40,7 @@ function SampleSelection(sources) {
     const state$ = sources.onion.state$
 
     const input$ = sources.input
+      // .startWith("BRD-K28907958") // REMOVE ME !!!
 
     // When the component should not be shown, including empty signature
     const isEmptyState = (state) => {
@@ -203,7 +204,7 @@ function SampleSelection(sources) {
 
     const useClick$ = sources.DOM
         .select('.selection')
-        .events('click', { preventDefault: true })
+        .events('click', { preventDefault: true } )
         .map(ev => ev.ownerTarget.id)
 
     const aDown$ =

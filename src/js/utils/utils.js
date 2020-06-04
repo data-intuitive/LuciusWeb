@@ -20,17 +20,17 @@ export function widthStream(domSource$, el) {
         // .debug(log)
 }
 
-export const titleCase = (phrase) => {
-    return phrase
-      .toLowerCase().replace(/^\w|\s\w|\(\w|-\w\/\w/g, function(w) {return w.toUpperCase()})
-  };
+export const titleCase = (phrase) =>
+    (phrase != null)
+      ? phrase.toLowerCase().replace(/^\w|\s\w|\(\w|-\w\/\w/g, function(w) {return w.toUpperCase()})
+      : ""
 
 /**
  * Take the absolute value of a gene in a very basic way.
  */
 export const absGene = (signedGene) => signedGene.replace('-', '').trim()
 
-/** 
+/**
  * For later use: Array extensions
  */
 Array.prototype.sum = Array.prototype.sum || function() {

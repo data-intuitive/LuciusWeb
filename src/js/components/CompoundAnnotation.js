@@ -93,8 +93,8 @@ function CompoundAnnotation(sources, id = ".compoundPopup") {
       div('.l6.s12.col', [
         // p([b('.grey-text.text-lighten-1', "Drugbank Search Field: "), (annotation.searchField != null) ? annotation.searchField : "N/A"]),
         showEntry("Mechanism of Action", titleCase(annotation.mechanismOfAction)),
-        showEntry("Indication", titleCase(annotation.indication)),
-        showEntry("Therapeutic Group", titleCase(annotation.therapeuticGroup)),
+        showEntry("Indication", titleCase(annotation.indication.join(", "))),
+        showEntry("Therapeutic Group", titleCase(annotation.therapeuticGroup.join(", "))),
         span('.col.s12', {style: {'margin-block-end': '0px'}}, [b('.grey-text.text-lighten-1', "Targets: ")]),
         ul('.col.s12', {style: {'margin-block-start': '0px'}}, targetResults.map(item => li("- " + item))),
       ])

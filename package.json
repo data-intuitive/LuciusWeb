@@ -92,7 +92,7 @@
         "ramda": "^0.26.1",
         "scss-loader": "0.0.1",
         "switch-path": "^1.2.0",
-        "vega": "^5.9.0",
+        "vega": "^5.17.3",
         "vega-cli": "^5.9.0",
         "xstream": "^11.11.0"
     }

@@ -7,7 +7,7 @@ import { clone, equals, omit } from 'ramda';
 import { histogramVegaSpec } from './HistogramSpec.js'
 import { similarityPlotVegaSpec } from './SimilarityPlotSpec.js'
 import { widthStream } from '../../utils/utils'
-import { loggerFactory } from '~/../../src/js/utils/logger'
+import { loggerFactory } from '../../utils/logger'
 import { parse } from 'vega-parser'
 
 // const elementID = '#hist'

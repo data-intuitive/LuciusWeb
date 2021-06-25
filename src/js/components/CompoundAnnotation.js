@@ -1,4 +1,4 @@
-import { loggerFactory } from '~/../../src/js/utils/logger'
+import { loggerFactory } from '../utils/logger'
 import xs from 'xstream'
 import { keys, values, filter, head, equals, map, prop, clone, omit, merge } from 'ramda'
 import dropRepeats from 'xstream/extra/dropRepeats'

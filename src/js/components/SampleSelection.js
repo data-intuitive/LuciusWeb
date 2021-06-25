@@ -7,7 +7,7 @@ import { ENTER_KEYCODE } from '../utils/keycodes.js'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import debounce from 'xstream/extra/debounce'
 import delay from 'xstream/extra/delay'
-import { loggerFactory } from '~/../../src/js/utils/logger'
+import { loggerFactory } from '../utils/logger'
 import { CompoundAnnotation } from '../components/CompoundAnnotation'
 import { safeModelToUi } from '../modelTranslations'
 

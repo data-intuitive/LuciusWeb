@@ -11,7 +11,7 @@ import { CorrelationPlot, correlationPlotsLens } from '../components/BinnedPlots
 import { makeTable, headTableLens, tailTableLens } from '../components/Table'
 import { initSettings } from './settings'
 import { Filter, compoundFilterLens } from '../components/Filter'
-import { loggerFactory } from '~/../../src/js/utils/logger'
+import { loggerFactory } from '../utils/logger'
 import { SampleTable, sampleTableLens } from '../components/SampleTable/SampleTable'
 
 // Support for ghost mode

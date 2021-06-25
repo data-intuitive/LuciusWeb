@@ -10,7 +10,7 @@ import isolate from '@cycle/isolate'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import dropUntil from 'xstream/extra/dropUntil'
 import { stateDebug } from '../utils/utils'
-import { loggerFactory } from '~/../../src/js/utils/logger'
+import { loggerFactory } from '../utils/logger'
 import { convertToCSV } from '../utils/export'
 import delay from 'xstream/extra/delay'
 

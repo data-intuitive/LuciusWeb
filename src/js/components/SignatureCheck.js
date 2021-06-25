@@ -6,7 +6,7 @@ import {log, logThis} from '../utils/logger'
 import {ENTER_KEYCODE} from '../utils/keycodes.js'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import debounce from 'xstream/extra/debounce'
-import { loggerFactory } from '~/../../src/js/utils/logger'
+import { loggerFactory } from '../utils/logger'
 
 import { check, flash, play_arrow } from 'webpack-material-design-icons'
 
@@ -60,6 +60,7 @@ function SignatureCheck(sources) {
         'category' : 'checkSignature'
       }})
     .remember()
+    .debug()
 
   // Catch the response in a stream
   // Handle errors by returning an empty object
@@ -74,6 +75,7 @@ function SignatureCheck(sources) {
   const data$ = response$
     .map(res => res.body)
     .map(json => json.result.data)
+    .debug()
 
   // Helper function for rendering the table, based on the state
   const makeTable = (data) => {

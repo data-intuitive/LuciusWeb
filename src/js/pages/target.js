@@ -17,7 +17,7 @@ import { pick, mix } from 'cycle-onionify';
 import { initSettings } from './settings'
 import debounce from 'xstream/extra/debounce'
 import dropRepeats from 'xstream/extra/dropRepeats'
-import { loggerFactory } from '~/../../src/js/utils/logger'
+import { loggerFactory } from '../utils/logger'
 import isolate from '@cycle/isolate'
 import { SignatureForm, formLens } from '../components/SignatureForm'
 import { Filter, compoundFilterLens } from '../components/Filter'

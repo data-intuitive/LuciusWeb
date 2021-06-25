@@ -4,7 +4,7 @@ import { clone, equals, mergeAll } from 'ramda';
 import xs from 'xstream';
 import dropRepeats from 'xstream/extra/dropRepeats'
 import debounce from 'xstream/extra/debounce'
-import { loggerFactory } from '~/../../src/js/utils/logger'
+import { loggerFactory } from '../utils/logger'
 
 const checkLens = {
   get: state => ({ core: (typeof state.form !== 'undefined') ? state.form.check : {}, settings: state.settings }),

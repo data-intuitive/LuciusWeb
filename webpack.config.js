@@ -14,7 +14,8 @@ module.exports = {
     inline: true,
     historyApiFallback: true,
     contentBase: './',
-    hot: false
+    hot: false,
+    port: 4040
   },
   // externals: {
   //   deployments: './deployments.json'
@@ -24,7 +25,7 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        loaders: ['babel-loader']
+        use: ['babel-loader']
       },
       {
         test: /\.scss$/,
@@ -36,23 +37,22 @@ module.exports = {
           }
         ]
       },
-      { test: /\.css$/, loader: "style-loader!css-loader" },
+      { test: /\.css$/, use: ["style-loader", "css-loader"] },
       {
         test: /\.(jpe?g|woff2?|ttf|eot|svg|png|gif)(\?v=\d+\.\d+\.\d+)?$/,
         use: [
-        {
-          loader: 'file-loader',
-          options: {
-            name: '[name].[ext]',
-            outputPath: 'fonts/'
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[name].[ext]',
+              outputPath: 'fonts/'
+            }
           }
-        }
-      ]
+        ]
       },
       {
           test: /\.ico$/,
-          loader: "url-loader",
-          query: { mimetype: "image/x-icon" }
+          use: [ "url-loader" ]
       }
     ]
   },
@@ -65,7 +65,7 @@ module.exports = {
       'window.jQuery': 'jquery',
     }),
     new webpack.HotModuleReplacementPlugin(),
-    new webpack.NamedModulesPlugin(),
+    // new webpack.NamedModulesPlugin(),
     new webpack.DefinePlugin({
       VERSION: JSON.stringify(require("./package.json").version)
     })  ],

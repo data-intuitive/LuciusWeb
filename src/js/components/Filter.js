@@ -5,7 +5,7 @@ import { clone, merge, mergeAll } from 'ramda';
 import xs from 'xstream';
 import { ENTER_KEYCODE } from '../utils/keycodes.js'
 import dropRepeats from 'xstream/extra/dropRepeats'
-import { loggerFactory } from '~/../../src/js/utils/logger'
+import { loggerFactory } from '../utils/logger'
 import { difference, keys, head, prop, assocPath, equals } from 'ramda'
 import { initSettings } from '../configuration'
 

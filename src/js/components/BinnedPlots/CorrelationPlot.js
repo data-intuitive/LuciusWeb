@@ -6,7 +6,7 @@ import { h, p, div, br, label, input, code, table, tr, td, b, h2, button, svg, h
 import { clone, equals, omit } from 'ramda';
 import { CorrelationVegaSpec } from './CorrelationSpec.js'
 import { widthStream } from '../../utils/utils'
-import { loggerFactory } from '~/../../src/js/utils/logger'
+import { loggerFactory } from '../../utils/logger'
 import { parse } from 'vega-parser'
 
 // Granular access to the settings, only api and sim keys

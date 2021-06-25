@@ -10,7 +10,7 @@ import { makeTable, headTableLens, tailTableLens } from '../components/Table'
 import { BinnedPlots, plotsLens } from '../components/BinnedPlots/BinnedPlots'
 import { Filter, compoundFilterLens } from '../components/Filter'
 import concat from 'xstream/extra/dropRepeats'
-import { loggerFactory } from '~/../../src/js/utils/logger'
+import { loggerFactory } from '../utils/logger'
 import { SampleTable, sampleTableLens } from '../components/SampleTable/SampleTable'
 
 // Support for ghost mode

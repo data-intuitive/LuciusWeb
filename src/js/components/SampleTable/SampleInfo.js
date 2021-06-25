@@ -78,7 +78,7 @@ export function SampleInfo(sources) {
             let urlSourire = props.sourire.url
             let bgcolor = (sample.zhang >= 0) ? 'rgba(44,123,182, 0.08)' : 'rgba(215,25,28, 0.08)'
             let url = urlSourire + encodeURIComponent(sample.compound_smiles).replace(/%20/g, '+')
-            let zhangRounded = (sample.zhang != null) ? sample.zhang.toFixed(3) : 'NA'
+            let zhangRounded = (sample.zhang != null) ? parseFloat(sample.zhang).toFixed(3) : 'NA'
 
             return li('.collection-item  .zoom', { style: { 'background-color': bgcolor } }, [
                 div('.row', { style: { fontWeight: 'small' } }, [

@@ -87,7 +87,8 @@ export function SampleInfo(sources) {
           div('.col .s1', [sample.cell]),
           div('.col .s2', { style: blur }, [(sample.trt_id != "NA") ? sample.trt_id : '']),
           div('.col .s3', { style: blur }, [sample.trt_name]),
-          div('.col .s3 .center-align', { style: blur }, [
+          div('.col .s1', { style: blur }, [sample.trt]),
+          div('.col .s2 .center-align', { style: blur }, [
             ((sample.smiles != null && sample.smiles != 'N/A' && sample.smiles != 'No Smiles') && zoom == false) ?
             img({ props: { src: url, height: 50, 'object-fit': 'contain' } }) :
             ''

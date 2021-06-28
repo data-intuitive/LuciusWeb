@@ -11,24 +11,35 @@ const sampleTableLens = {
 
 function SampleTable(sources) {
 
-    const array$ = sources.onion.state$
+  const array$ = sources.onion.state$
 
-    const childrenSinks$ = array$.map(array => {
-        return array.map((_, index) => isolate(SampleInfo, index)(sources))
-    });
+  const childrenSinks$ = array$.map(array => {
+      return array.map((_, index) => isolate(SampleInfo, index)(sources))
+  });
 
-    const vdom$ = childrenSinks$
-                    .compose(pick('DOM'))
-                    .compose(mix(xs.combine))
-                    .map(itemVNodes => {
-                        return ul('.collection', {style : {'margin-top' : '0px', 'margin-bottom':'0px'}}, [
-                                ].concat(itemVNodes))
-                    })
-                    .startWith(ul('.collection', [li('.collection-item .center-align .grey-text','no query yet...')]))
+  const listStyle = {style : {'margin-top' : '0px', 'margin-bottom':'0px'}}
 
-    return {
-      DOM: vdom$,
-    };
+  const vdom$ =
+    childrenSinks$
+      .compose(pick('DOM'))
+      .compose(mix(xs.combine))
+      .map(itemVNodes =>
+        ul(
+          '.collection',
+          listStyle,
+          [].concat(itemVNodes)
+        )
+      )
+      .startWith(
+        ul(
+          '.collection',
+          [ li('.collection-item .center-align .grey-text','no query yet...') ]
+        )
+      )
+
+  return {
+    DOM: vdom$,
+  };
 
 }
 

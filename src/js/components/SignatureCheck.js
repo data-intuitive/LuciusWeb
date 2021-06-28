@@ -60,7 +60,6 @@ function SignatureCheck(sources) {
         'category' : 'checkSignature'
       }})
     .remember()
-    .debug()
 
   // Catch the response in a stream
   // Handle errors by returning an empty object
@@ -75,7 +74,6 @@ function SignatureCheck(sources) {
   const data$ = response$
     .map(res => res.body)
     .map(json => json.result.data)
-    .debug()
 
   // Helper function for rendering the table, based on the state
   const makeTable = (data) => {

@@ -15,7 +15,7 @@ module.exports = {
     historyApiFallback: true,
     contentBase: './',
     hot: false,
-    port: 4040
+    port: 3000
   },
   // externals: {
   //   deployments: './deployments.json'

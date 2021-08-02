@@ -119,16 +119,16 @@ function SampleSelection(sources) {
                     span([''])
                 ])
             ]),
-            td('.compoundPopup' + selectedClass(entry.use), blurStyle, entry.compound_id),
+            td('.compoundPopup' + selectedClass(entry.use), blurStyle, entry.trt_id),
             td(selectedClass(entry.use), blurStyle,
-              (entry.compound_name.length > 20) ? entry.compound_name.substring(0, 20) + '...' : entry.compound_name
+              (entry.trt_name.length > 20) ? entry.trt_name.substring(0, 20) + '...' : entry.trt_name
             ),
             td(".left-align" + selectedClass(entry.use),
               (entry.id.length > 30) ? entry.id.substring(0, 30) + '...' : entry.id
             ),
-            td(selectedClass(entry.use), entry.protocolname),
+            td(selectedClass(entry.use), entry.cell),
             td(selectedClass(entry.use),
-              (entry.concentration.length > 6) ? entry.concentration.substring(0, 6) + '...' : entry.concentration
+              (entry.dose.length > 6) ? entry.dose.substring(0, 6) + '...' : entry.dose
             ),
             td(selectedClass(entry.use), entry.batch),
             td(selectedClass(entry.use), entry.year),

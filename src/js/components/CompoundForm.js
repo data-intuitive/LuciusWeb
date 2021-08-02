@@ -33,8 +33,8 @@ function CompoundForm(sources) {
         SignatureGeneratorSink.DOM,
         )
         .map(([
-            formDom, 
-            selectionDOM, 
+            formDom,
+            selectionDOM,
             signatureDOM,
         ]) =>
             div([

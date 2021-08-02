@@ -1,9 +1,6 @@
 import xs from 'xstream'
 import { i, a, h, p, div, br, label, input, pre, code, table, tr, td, b, h2, button, svg, h1, th, thead, tbody, li, span, img, em } from '@cycle/dom'
-import { log } from '../../utils/logger'
 import { merge } from 'ramda'
-import dropRepeats from 'xstream/extra/dropRepeats'
-import { stateDebug } from '../../utils/utils'
 import { safeModelToUi } from '../../modelTranslations'
 
 export function SampleInfo(sources) {
@@ -36,65 +33,160 @@ export function SampleInfo(sources) {
     .map(props => ({ filter: 'blur(' + props.common.amountBlur + 'px)' }))
     .startWith({ filter: 'blur(0px)' })
 
-  const detail = (sample, props, blur) => {
+  function sourireUrl(base, smiles) {
+    let url = base + encodeURIComponent(smiles).replace(/%20/g, '+')
+    return url
+  }
+
+  const row = (sample, props, blur, zoom) => {
+    let zhangRounded = (sample.zhang != null) ? parseFloat(sample.zhang).toFixed(3) : 'NA'
+    return {
+      trt_cp:
+        div('.row', {style: {fontWeight: 'small'}}, [
+          div('.col .s1 .left-align', {style: {fontWeight: 'bold'}}, [zhangRounded]),
+          div('.col .s2', {style: {overflow: 'hidden', 'text-overflow': 'ellipsis'}}, [sample.id]),
+          div('.col .s1', [sample.cell]),
+          div('.col .s2', {style: blur}, [(sample.trt_id != "NA") ? sample.trt_id : '']),
+          div('.col .s3', {style: blur}, [sample.trt_name]),
+          div('.col .s1', {style: blur}, [sample.trt]),
+          div('.col .s2 .center-align', {style: blur}, [
+            ((sample.smiles != null && sample.smiles != 'N/A' && sample.smiles != 'No Smiles') && zoom == false) ?
+              img({props: {src: sourireUrl(props.sourire.url, sample.smiles), height: 50, 'object-fit': 'contain'}}) :
+              ''
+          ])
+        ]),
+      trt_sh:
+        div('.row', {style: {fontWeight: 'small'}}, [
+          div('.col .s1 .left-align', {style: {fontWeight: 'bold'}}, [zhangRounded]),
+          div('.col .s2', {style: {overflow: 'hidden', 'text-overflow': 'ellipsis'}}, [sample.id]),
+          div('.col .s1', [sample.cell]),
+          div('.col .s2', {style: blur}, [(sample.trt_id != "NA") ? sample.trt_id : '']),
+          div('.col .s3', {style: blur}, [sample.trt_name]),
+          div('.col .s1', {style: blur}, [sample.trt]),
+          div('.col .s2 .center-align', {style: blur}, [
+            ((sample.trt_name != null && sample.trt_name != 'N/A') && zoom == false) ?
+              span({ style: { color: 'black', opacity: 0.4, "font-size": "clamp(16px, 5vw, 26px)", height: 50, display: "block", "font-family": 'Nova Mono', 'object-fit': 'contain', fontWeight: "bold" } }, [sample.trt_name]):
+              ''
+          ])
+        ]),
+      _default:
+        div('.row', {style: {fontWeight: 'small'}}, [
+          div('.col .s1 .left-align', {style: {fontWeight: 'bold'}}, [zhangRounded]),
+          div('.col .s2', {style: {overflow: 'hidden', 'text-overflow': 'ellipsis'}}, [sample.id]),
+          div('.col .s9', ["Treatment type not yet implemented"]),
+        ])
+    }
+  }
+
+  const rowDetail = (sample, props, blur) => {
     let hStyle = { style: { margin: '0px', fontWeight: 'bold' } }
     let pStyle = { style: { margin: '0px' } }
-    // let hStylewBlur = { style: merge(blur, { margin: '0px', fontWeight: 'bold' }) }
     let pStylewBlur = { style: merge(blur, { margin: '0px' }) }
-    let urlSourire = props.sourire.url
-    let url = urlSourire + encodeURIComponent(sample.smiles).replace(/%20/g, '+')
     const _filters = (sample.filters != undefined) ? sample.filters : []
-    return div('.col .s12', [
-      div('.col .s6 .l4', { style: { margin: '15px 0px 0px 0px' } }, [
-        p('.col .s12 .grey-text', hStyle, 'Sample Info:'),
-        p(pStyle, entry('Sample ID: ', sample.id)),
-        p(pStyle, entry('Cell: ', sample.cell)),
-        p(pStyle, entry('Dose: ', sample.dose)),
-        p(pStyle, entry('Time: ', sample.time)),
-        p(pStyle, entry('Year: ', sample.year)),
-        p(pStyle, entry('Plate: ', sample.plate)),
-      ]),
-      div('.col .s6 .l4', { style: { margin: '15px 0px 0px 0px' } }, [
-        p('.col .s12 .grey-text', hStyle, 'Treatment Info:'),
-        p(pStylewBlur, entry('Name: ', sample.trt_name)),
-        p(pStylewBlur, entry(safeModelToUi('id', props.common.modelTranslations) + ": ", sample.trt_id)),
-        p(pStyle, entry('Type: ', sample.trt)),
-        p('.s12', entry('Targets: ', sample.targets.join(', '))),
-      ]),
-      div('.col .s12 .offset-s8 .l4', { style: merge(blur, { margin: '20px 0px 0px 0px' }) }, [
-        (sample.smiles != null && sample.smiles != 'NA' && sample.smiles != 'No Smiles') ?
-        img('.col .s12 .valign', { props: { src: url } }) :
-        ''
-      ]),
-      div('.col .s12 .l12', { style: { margin: '15px 0px 0px 0px' } },
-        [p('.col .s12.grey-text', hStyle, 'Filter Info:')]
-        .concat(_filters.map( x => p(pStyle, entrySmall(x.key, x.value)) ))
-      )
-    ])
+    return {
+      trt_cp:
+        div('.col .s12', [
+          div('.col .s6 .l4', { style: { margin: '15px 0px 0px 0px' } }, [
+            p('.col .s12 .grey-text', hStyle, 'Sample Info:'),
+            p(pStyle, entry('Sample ID: ', sample.id)),
+            p(pStyle, entry('Cell: ', sample.cell)),
+            p(pStyle, entry('Dose: ', sample.dose)),
+            p(pStyle, entry('Time: ', sample.time)),
+            p(pStyle, entry('Year: ', sample.year)),
+            p(pStyle, entry('Plate: ', sample.plate)),
+          ]),
+          div('.col .s6 .l4', { style: { margin: '15px 0px 0px 0px' } }, [
+            p('.col .s12 .grey-text', hStyle, 'Treatment Info:'),
+            p(pStylewBlur, entry('Name: ', sample.trt_name)),
+            p(pStylewBlur, entry(safeModelToUi('id', props.common.modelTranslations) + ": ", sample.trt_id)),
+            p(pStyle, entry('Type: ', sample.trt)),
+            p('.s12', entry('Targets: ', sample.targets.join(', '))),
+          ]),
+          div('.col .s12 .offset-s8 .l4', { style: merge(blur, { margin: '20px 0px 0px 0px' }) }, [
+            (sample.smiles != null && sample.smiles != 'N/A' && sample.smiles != 'No Smiles') ?
+            img('.col .s12 .valign', { props: { src: sourireUrl(props.sourire.url, sample.smiles) } }) :
+            ''
+          ]),
+          div('.col .s12 .l12', { style: { margin: '15px 0px 0px 0px' } },
+            [p('.col .s12.grey-text', hStyle, 'Filter Info:')]
+            .concat(_filters.map( x => p(pStyle, entrySmall(x.key, x.value)) ))
+          )
+        ]),
+      trt_sh:
+        div([
+          div('.row', [
+            div('.col .s4 .l4', { style: { margin: '15px 0px 0px 0px' } }, [
+              p('.col .s12 .grey-text', hStyle, 'Sample Info:'),
+              p(pStyle, entry('Sample ID: ', sample.id)),
+              p(pStyle, entry('Cell: ', sample.cell)),
+              p(pStyle, entry('Dose: ', sample.dose)),
+              p(pStyle, entry('Time: ', sample.time)),
+              p(pStyle, entry('Year: ', sample.year)),
+              p(pStyle, entry('Plate: ', sample.plate)),
+            ]),
+            div('.col .s4 .l4', { style: { margin: '15px 0px 0px 0px' } }, [
+              p('.col .s12 .grey-text', hStyle, 'Treatment Info:'),
+              p(pStylewBlur, entry('Name: ', sample.trt_name)),
+              p(pStylewBlur, entry(safeModelToUi('id', props.common.modelTranslations) + ": ", sample.trt_id)),
+              p(pStyle, entry('Type: ', sample.trt)),
+              p('.s12', entry('Targets: ', sample.targets.join(', '))),
+            ]),
+            div('.col .s4 .l4', { style: merge(blur, { height: '100%', margin: '30px 0px 0px 0px' }) }, [
+              ((sample.trt_name != null && sample.trt_name != 'N/A'))
+                ? div('.col .s12', {style: {color: 'black', opacity: 0.4, "font-size": "clamp(16px, 5vw, 50px)", "font-family": 'Nova Mono', 'object-fit': 'contain', fontWeight: "bold"}}, [sample.trt_name])
+                : div()
+            ])
+          ]),
+          div('.row', { style: { margin: '15px 0px 0px 0px' } },
+            [p('.col .s12.grey-text', hStyle, 'Filter Info:')]
+            .concat(_filters.map( x => p(pStyle, entrySmall(x.key, x.value)) ))
+          )
+        ]),
+      _default:
+        div('.row', {style: {fontWeight: 'small'}}, [
+        div('.col .s12', [
+          div('.col .s6 .l4', { style: { margin: '15px 0px 0px 0px' } }, [
+            p('.col .s12 .grey-text', hStyle, 'Sample Info:'),
+            p(pStyle, entry('Sample ID: ', sample.id)),
+            p(pStyle, entry('Cell: ', sample.cell)),
+            p(pStyle, entry('Dose: ', sample.dose)),
+            p(pStyle, entry('Time: ', sample.time)),
+            p(pStyle, entry('Year: ', sample.year)),
+            p(pStyle, entry('Plate: ', sample.plate)),
+          ]),
+          div('.col .s6 .l4', { style: { margin: '15px 0px 0px 0px' } }, [
+            p('.col .s12 .grey-text', hStyle, 'Treatment Info:'),
+            p(pStylewBlur, entry('Name: ', sample.trt_name)),
+            p(pStylewBlur, entry(safeModelToUi('id', props.common.modelTranslations) + ": ", sample.trt_id)),
+            p(pStyle, entry('Type: ', sample.trt)),
+            p('.s12', entry('Targets: ', sample.targets.join(', '))),
+          ]),
+          div('.col .s12 .offset-s8 .l4', { style: merge(blur, { margin: '20px 0px 0px 0px' }) }, [
+            (sample.smiles != null && sample.smiles != 'N/A' && sample.smiles != 'No Smiles') ?
+            img('.col .s12 .valign', { props: { src: sourireUrl(props.sourire.url, sample.smiles) } }) :
+            ''
+          ]),
+          div('.col .s12 .l12', { style: { margin: '15px 0px 0px 0px' } },
+            [p('.col .s12.grey-text', hStyle, 'Filter Info:')]
+            .concat(_filters.map( x => p(pStyle, entrySmall(x.key, x.value)) ))
+          )
+        ])
+      ])
+
+    }
   }
 
   const vdom$ = xs.combine(state$, zoomed$, props$, blur$)
     .map(([sample, zoom, props, blur]) => {
-      let urlSourire = props.sourire.url
       let bgcolor = (sample.zhang >= 0) ? 'rgba(44,123,182, 0.08)' : 'rgba(215,25,28, 0.08)'
-      let url = urlSourire + encodeURIComponent(sample.smiles).replace(/%20/g, '+')
-      let zhangRounded = (sample.zhang != null) ? parseFloat(sample.zhang).toFixed(3) : 'NA'
+      const updtProps = {...props, bgColor: bgcolor}
 
-      return li('.collection-item  .zoom', { style: { 'background-color': bgcolor } }, [
-        div('.row', { style: { fontWeight: 'small' } }, [
-          div('.col .s1 .left-align', { style: { fontWeight: 'bold' } }, [zhangRounded]),
-          div('.col .s2', { style : { overflow: 'hidden', 'text-overflow': 'ellipsis' }}, [sample.id]),
-          div('.col .s1', [sample.cell]),
-          div('.col .s2', { style: blur }, [(sample.trt_id != "NA") ? sample.trt_id : '']),
-          div('.col .s3', { style: blur }, [sample.trt_name]),
-          div('.col .s1', { style: blur }, [sample.trt]),
-          div('.col .s2 .center-align', { style: blur }, [
-            ((sample.smiles != null && sample.smiles != 'N/A' && sample.smiles != 'No Smiles') && zoom == false) ?
-            img({ props: { src: url, height: 50, 'object-fit': 'contain' } }) :
-            ''
-          ]),
-        ]),
-        (zoom) ? div('.row', [detail(sample, props, blur)]) : div()
+      const thisRow = row(sample, updtProps, blur, zoom)
+      const thisRowDetail = rowDetail(sample, updtProps, blur)
+
+      return li('.collection-item .zoom', {style: {'background-color': bgcolor}}, [
+        thisRow[sample.trt] ? thisRow[sample.trt] : thisRow["_default"],
+        (zoom) ? div('.row', [thisRowDetail[sample.trt] ? thisRowDetail[sample.trt] : thisRowDetail["_default"]]) : div()
       ])
     })
     .startWith(li('.collection-itm .zoom', [p('Just one item!!!')]))

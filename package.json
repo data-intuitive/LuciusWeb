@@ -1,6 +1,6 @@
 {
     "name": "LuciusWeb",
-    "version": "4.2.1",
+    "version": "5.0.0-alpha2",
     "description": "Web interface for ComPass aka Lucius",
     "repository": {
         "type": "git",
@@ -20,34 +20,6 @@
         "pack": "build --dir",
         "dist": "build",
         "startelectron": "npm install && electron ."
-    },
-    "build": {
-        "appId": "yourappid",
-        "category": "your.app.category.type",
-        "dmg": {
-            "contents": [
-                {
-                    "x": 110,
-                    "y": 150
-                },
-                {
-                    "x": 240,
-                    "y": 150,
-                    "type": "link",
-                    "path": "/Applications"
-                }
-            ]
-        },
-        "linux": {
-            "target": [
-                "AppImage",
-                "deb"
-            ]
-        },
-        "win": {
-            "target": "squirrel",
-            "icon": "build/icon.ico"
-        }
     },
     "author": "Toni Verbeiren",
     "license": "Apache v2",

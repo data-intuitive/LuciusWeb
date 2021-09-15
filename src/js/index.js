@@ -23,32 +23,27 @@ import initDeployments from '../../deployments.json'
 import { loggerFactory } from './utils/logger'
 
 export default function Index(sources) {
-    const { router } = sources;
+  const {router} = sources;
 
-    const logger = loggerFactory('index', sources.onion.state$, 'settings.common.debug')
+  const logger = loggerFactory('index', sources.onion.state$, 'settings.common.debug')
 
-    const state$ = sources.onion.state$
+  const state$ = sources.onion.state$
 
-    const match$ = router.define({
-            '/': Home,
-            '/disease': DiseaseWorkflow,
-            '/compound': CompoundWorkflow,
-            '/target': TargetWorkflow,
-            '/statistics': StatisticsWorkflow,
-            '/settings': IsolatedSettings,
-            '/correlation': CorrelationWorkflow,
-            '/debug': Debug,
-            '/admin': IsolatedAdminSettings,
-            '*': Home
-        })
-        .remember();
-
-    const page$ = match$.map(({ path, value }) => {
-            return value(Object.assign({}, sources, {
-                router: sources.router.path(path)
-            }))
-        })
-        .remember()
+  const page$ = router.routedComponent({
+    '/': Home,
+    '/disease': {
+      '/': DiseaseWorkflow,
+      // '/:id': id => sources => DiseaseWorkflow({props$: id, ...sources})
+    },
+    '/compound': CompoundWorkflow,
+    '/target': TargetWorkflow,
+    '/statistics': StatisticsWorkflow,
+    '/settings': IsolatedSettings,
+    '/correlation': CorrelationWorkflow,
+    '/debug': Debug,
+    '/admin': IsolatedAdminSettings,
+    '*': Home
+  })(sources)
 
     const makeLink = (path, label, options) => li([a(options, { props: { href: path } }, label)]);
 
@@ -199,6 +194,8 @@ export default function Index(sources) {
     const prevent$ = sources.DOM.select('a').events('click').filter(ev => ev.target.pathname == '/debug');
 
     const history$ = sources.onion.state$.fold((acc, x) => acc.concat([x]), [{}])
+
+
 
     return {
         log: xs.merge(

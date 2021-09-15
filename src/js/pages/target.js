@@ -14,13 +14,13 @@ import { CompoundTable, compoundTableLens } from '../components/CompoundTable/Co
 import { Histogram, histLens } from '../components/Histogram/Histogram'
 
 import { pick, mix } from 'cycle-onionify';
-import { initSettings } from './settings'
+import { initSettings } from '../configuration.js'
 import debounce from 'xstream/extra/debounce'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import { loggerFactory } from '../utils/logger'
 import isolate from '@cycle/isolate'
 import { SignatureForm, formLens } from '../components/SignatureForm'
-import { Filter, compoundFilterLens } from '../components/Filter'
+import { Filter, filterLens } from '../components/Filter'
 
 // Support for ghost mode
 import { scenario } from '../scenarios/targetScenario'
@@ -128,12 +128,12 @@ function TargetWorkflow(sources) {
     const signature$ = signatureForm.output
 
     // Filter Form
-    const filterForm = isolate(Filter, { onion: compoundFilterLens })({...sources, input: signature$ })
+    const filterForm = isolate(Filter, { onion: filterLens })({...sources, input: signature$ })
     const filter$ = filterForm.output
 
     // Histogram plot component
     const histogram = isolate(Histogram, { onion: histLens })
-        ({...sources, input: xs.combine(signature$, filter$, target$.debug()).map(([s, f, t]) => ({ signature: s, filter: f, target: t })).remember() });
+        ({...sources, input: xs.combine(signature$, filter$, target$).map(([s, f, t]) => ({ signature: s, filter: f, target: t })).remember() });
 
     const pageStyle = {
         style: {
@@ -197,7 +197,8 @@ function TargetWorkflow(sources) {
             scenarioReducer$
         ),
         HTTP: xs.merge(
-            TargetFormSink.HTTP,
+          TargetFormSink.HTTP,
+          filterForm.HTTP,
             Table.HTTP,
             signatureForm.HTTP,
             histogram.HTTP

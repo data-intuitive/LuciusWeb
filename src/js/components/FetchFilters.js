@@ -1,4 +1,5 @@
 import xs from 'xstream'
+import debounce from 'xstream/extra/debounce'
 
 function FetchFilters(sources) {
 
@@ -14,8 +15,7 @@ function FetchFilters(sources) {
       send: {},
       'category': 'filters'
     })
-    )
-    .remember()
+  )
 
   const response$$ = sources.HTTP
     .select('filters')
@@ -23,8 +23,7 @@ function FetchFilters(sources) {
   // TODO: fall back to default filters set in config file
   const validResponse$ = response$$
     .map(response$ =>
-      response$
-      .replaceError(error => xs.empty())
+      response$.replaceError(_ => xs.empty())
     )
     .flatten()
     .map(result => result.body.result.data)

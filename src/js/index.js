@@ -31,10 +31,11 @@ export default function Index(sources) {
 
   const page$ = router.routedComponent({
     '/': Home,
-    '/disease': {
-      '/': DiseaseWorkflow,
-      // '/:id': id => sources => DiseaseWorkflow({props$: id, ...sources})
-    },
+    '/disease' : DiseaseWorkflow,
+    // '/disease': {
+    //   '/': DiseaseWorkflow,
+    //   // '/:id': id => sources => DiseaseWorkflow({props$: id, ...sources})
+    // },
     '/compound': CompoundWorkflow,
     '/target': TargetWorkflow,
     '/statistics': StatisticsWorkflow,

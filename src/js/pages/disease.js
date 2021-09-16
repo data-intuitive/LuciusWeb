@@ -27,8 +27,6 @@ function DiseaseWorkflow(sources) {
 
   const state$ = sources.onion.state$
 
-  console.log(sources)
-
   // Scenario for ghost mode
   const scenarioReducer$ = sources.onion.state$
     .take(1)

@@ -69,6 +69,34 @@ export function SampleInfo(sources) {
               ''
           ])
         ]),
+      trt_lig:
+        div('.row', {style: {fontWeight: 'small'}}, [
+          div('.col .s1 .left-align', {style: {fontWeight: 'bold'}}, [zhangRounded]),
+          div('.col .s2', {style: {overflow: 'hidden', 'text-overflow': 'ellipsis'}}, [sample.id]),
+          div('.col .s1', [sample.cell]),
+          div('.col .s2', {style: blur}, [(sample.trt_id != "NA") ? sample.trt_id : '']),
+          div('.col .s3', {style: blur}, [sample.trt_name]),
+          div('.col .s1', {style: blur}, [sample.trt]),
+          div('.col .s2 .center-align', {style: blur}, [
+            ((sample.trt_name != null && sample.trt_name != 'N/A') && zoom == false) ?
+              span({ style: { color: 'black', opacity: 0.4, "font-size": "clamp(16px, 5vw, 26px)", height: 50, display: "block", "font-family": 'Nova Mono', 'object-fit': 'contain', fontWeight: "bold" } }, [sample.trt_name]):
+              ''
+          ])
+        ]),
+      ctl_vector:
+        div('.row', {style: {fontWeight: 'small'}}, [
+          div('.col .s1 .left-align', {style: {fontWeight: 'bold'}}, [zhangRounded]),
+          div('.col .s2', {style: {overflow: 'hidden', 'text-overflow': 'ellipsis'}}, [sample.id]),
+          div('.col .s1', [sample.cell]),
+          div('.col .s2', {style: blur}, [(sample.trt_id != "NA") ? sample.trt_id : '']),
+          div('.col .s3', {style: blur}, [sample.trt_name]),
+          div('.col .s1', {style: blur}, [sample.trt]),
+          div('.col .s2 .center-align', {style: blur}, [
+            ((sample.trt_name != null && sample.trt_name != 'N/A') && zoom == false) ?
+              span({ style: { color: 'black', opacity: 0.4, "font-size": "clamp(16px, 5vw, 26px)", height: 50, display: "block", "font-family": 'Nova Mono', 'object-fit': 'contain', fontWeight: "bold" } }, [sample.trt_name]):
+              ''
+          ])
+        ]),
       _default:
         div('.row', {style: {fontWeight: 'small'}}, [
           div('.col .s1 .left-align', {style: {fontWeight: 'bold'}}, [zhangRounded]),
@@ -113,6 +141,66 @@ export function SampleInfo(sources) {
           )
         ]),
       trt_sh:
+        div([
+          div('.row', [
+            div('.col .s4 .l4', { style: { margin: '15px 0px 0px 0px' } }, [
+              p('.col .s12 .grey-text', hStyle, 'Sample Info:'),
+              p(pStyle, entry('Sample ID: ', sample.id)),
+              p(pStyle, entry('Cell: ', sample.cell)),
+              p(pStyle, entry('Dose: ', sample.dose)),
+              p(pStyle, entry('Time: ', sample.time)),
+              p(pStyle, entry('Year: ', sample.year)),
+              p(pStyle, entry('Plate: ', sample.plate)),
+            ]),
+            div('.col .s4 .l4', { style: { margin: '15px 0px 0px 0px' } }, [
+              p('.col .s12 .grey-text', hStyle, 'Treatment Info:'),
+              p(pStylewBlur, entry('Name: ', sample.trt_name)),
+              p(pStylewBlur, entry(safeModelToUi('id', props.common.modelTranslations) + ": ", sample.trt_id)),
+              p(pStyle, entry('Type: ', sample.trt)),
+              p('.s12', entry('Targets: ', sample.targets.join(', '))),
+            ]),
+            div('.col .s4 .l4', { style: merge(blur, { height: '100%', margin: '30px 0px 0px 0px' }) }, [
+              ((sample.trt_name != null && sample.trt_name != 'N/A'))
+                ? div('.col .s12', {style: {color: 'black', opacity: 0.4, "font-size": "clamp(16px, 5vw, 50px)", "font-family": 'Nova Mono', 'object-fit': 'contain', fontWeight: "bold"}}, [sample.trt_name])
+                : div()
+            ])
+          ]),
+          div('.row', { style: { margin: '15px 0px 0px 0px' } },
+            [p('.col .s12.grey-text', hStyle, 'Filter Info:')]
+            .concat(_filters.map( x => p(pStyle, entrySmall(x.key, x.value)) ))
+          )
+        ]),
+      trt_lig:
+        div([
+          div('.row', [
+            div('.col .s4 .l4', { style: { margin: '15px 0px 0px 0px' } }, [
+              p('.col .s12 .grey-text', hStyle, 'Sample Info:'),
+              p(pStyle, entry('Sample ID: ', sample.id)),
+              p(pStyle, entry('Cell: ', sample.cell)),
+              p(pStyle, entry('Dose: ', sample.dose)),
+              p(pStyle, entry('Time: ', sample.time)),
+              p(pStyle, entry('Year: ', sample.year)),
+              p(pStyle, entry('Plate: ', sample.plate)),
+            ]),
+            div('.col .s4 .l4', { style: { margin: '15px 0px 0px 0px' } }, [
+              p('.col .s12 .grey-text', hStyle, 'Treatment Info:'),
+              p(pStylewBlur, entry('Name: ', sample.trt_name)),
+              p(pStylewBlur, entry(safeModelToUi('id', props.common.modelTranslations) + ": ", sample.trt_id)),
+              p(pStyle, entry('Type: ', sample.trt)),
+              p('.s12', entry('Targets: ', sample.targets.join(', '))),
+            ]),
+            div('.col .s4 .l4', { style: merge(blur, { height: '100%', margin: '30px 0px 0px 0px' }) }, [
+              ((sample.trt_name != null && sample.trt_name != 'N/A'))
+                ? div('.col .s12', {style: {color: 'black', opacity: 0.4, "font-size": "clamp(16px, 5vw, 50px)", "font-family": 'Nova Mono', 'object-fit': 'contain', fontWeight: "bold"}}, [sample.trt_name])
+                : div()
+            ])
+          ]),
+          div('.row', { style: { margin: '15px 0px 0px 0px' } },
+            [p('.col .s12.grey-text', hStyle, 'Filter Info:')]
+            .concat(_filters.map( x => p(pStyle, entrySmall(x.key, x.value)) ))
+          )
+        ]),
+      ctl_vector:
         div([
           div('.row', [
             div('.col .s4 .l4', { style: { margin: '15px 0px 0px 0px' } }, [

@@ -168,7 +168,7 @@ function intent(domSource$) {
   }
 }
 
-function model(
+export function model(
   possibleValues$,
   input$,
   filterValuesAction$,
@@ -180,7 +180,6 @@ function model(
   const defaultReducer$ = xs.of((prevState) => ({
     ...prevState,
     core: {
-      ...prevState.core,
       output: {},
       filter_output: {},
       state: {dose: false, cell: false, trtType: false},
@@ -200,10 +199,7 @@ function model(
           ...prevState.settings.filter,
           values: fvs,
         },
-      },
-      core: {
-        ...prevState.core,
-      },
+      }
     })
   )
 
@@ -228,13 +224,15 @@ function model(
             ? prop(filterKey, prevState.settings.filter.values)
             : prop(filterKey, prevState.core.output)
         const alreadyIncluded = currentArrayForFilterKey.includes(filterValue)
-        // does the value have to be removed from the list?
-        const newArrayForFilterKey = alreadyIncluded
-          ? currentArrayForFilterKey.filter((el) => el != filterValue)
-          : currentArrayForFilterKey.concat(filterValue) // the value has to be added to the list
+        // does the value have to be removed from the list or added?
+        const newArrayForFilterKey =
+          alreadyIncluded
+            ? currentArrayForFilterKey.filter((el) => el != filterValue)
+            : currentArrayForFilterKey.concat(filterValue) // the value has to be added to the list
+        // add the updated array to the appropriate key but sort first
         const updatedState = assocPath(
           ["core", "output", filterKey],
-          newArrayForFilterKey,
+          newArrayForFilterKey.sort(),
           prevState
         )
         return updatedState
@@ -250,9 +248,10 @@ function model(
         const allValues = prop(filterKey, prevState.settings.filter.values)
         // possible - current values
         const newValues = allValues.filter((v) => !currentValues.includes(v))
+        // add the updated array to the appropriate key but sort first
         const updatedState = assocPath(
           ["core", "output", filterKey],
-          newValues,
+          newValues.sort(),
           prevState
         )
         return updatedState

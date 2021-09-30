@@ -17,6 +17,11 @@ main {
 
 @import 'materialize-css/sass/components/color-variables';
 @import 'materialize-css/sass/components/color-classes';
+.genetic {
+    @extend .red;
+    @extend .lighten-5;
+}
+
 .compound {
     @extend .orange;
     @extend .lighten-5;
@@ -52,6 +57,7 @@ a:hover #border {
     /* no background color for printing */
     .compound,
     .disease,
+    .genetic,
     .target {
         background-color: white !important
     }

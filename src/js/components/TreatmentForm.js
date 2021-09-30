@@ -1,28 +1,28 @@
 import isolate from "@cycle/isolate"
 import { div } from "@cycle/dom"
 import xs from "xstream"
-import { CompoundCheck, checkLens } from "./CompoundCheck"
+import { TreatmentCheck, checkLens } from "./TreatmentCheck"
 import { SampleSelection, sampleSelectionLens } from "./SampleSelection"
 import { SignatureGenerator, signatureLens } from "./SignatureGenerator"
 import { loggerFactory } from "../utils/logger"
 
-function CompoundForm(sources) {
+function TreatmentForm(sources) {
   const logger = loggerFactory(
-    "compoundForm",
+    "treatmentForm",
     sources.onion.state$,
     "settings.debug"
   )
 
   const state$ = sources.onion.state$
 
-  const CompoundCheckSink = isolate(CompoundCheck, { onion: checkLens })(
+  const TreatmentCheckSink = isolate(TreatmentCheck, { onion: checkLens })(
     sources
   )
-  const compoundQuery$ = CompoundCheckSink.output.remember()
+  const treatmentQuery$ = TreatmentCheckSink.output.remember()
 
   const SampleSelectionSink = isolate(SampleSelection, {
     onion: sampleSelectionLens,
-  })({ ...sources, input: compoundQuery$ })
+  })({ ...sources, input: treatmentQuery$ })
   const sampleSelection$ = SampleSelectionSink.output.remember()
 
   const SignatureGeneratorSink = isolate(SignatureGenerator, {
@@ -32,7 +32,7 @@ function CompoundForm(sources) {
 
   const vdom$ = xs
     .combine(
-      CompoundCheckSink.DOM.startWith(div()),
+      TreatmentCheckSink.DOM.startWith(div()),
       SampleSelectionSink.DOM,
       SignatureGeneratorSink.DOM
     )
@@ -47,33 +47,33 @@ function CompoundForm(sources) {
     )
 
   const defaultReducer$ = xs.of((prevState) => {
-    // CompoundForm -- default Reducer
+    // treatmentForm -- default Reducer
     return { ...prevState, form: {}, sampleSelection: {}, signature: {} }
   })
 
   return {
     log: xs.merge(
       logger(state$, "state$"),
-      CompoundCheckSink.log,
+      TreatmentCheckSink.log,
       SampleSelectionSink.log,
       SignatureGeneratorSink.log
     ),
     DOM: vdom$,
     onion: xs.merge(
       defaultReducer$,
-      CompoundCheckSink.onion,
+      TreatmentCheckSink.onion,
       SampleSelectionSink.onion,
       SignatureGeneratorSink.onion
     ),
     HTTP: xs.merge(
-      CompoundCheckSink.HTTP,
+      TreatmentCheckSink.HTTP,
       SampleSelectionSink.HTTP,
       SignatureGeneratorSink.HTTP
     ),
     output: signature$,
     modal: xs.merge(SignatureGeneratorSink.modal, SampleSelectionSink.modal),
-    ac: CompoundCheckSink.ac,
+    ac: TreatmentCheckSink.ac,
   }
 }
 
-export { CompoundForm }
+export { TreatmentForm }

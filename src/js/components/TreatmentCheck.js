@@ -118,7 +118,7 @@ function TreatmentCheck(sources) {
     const validated = state.core.validated
     return div([
       div(
-        ".row  .green .darken-4 .white-text",
+        ".row .genetic .darken-4 .white-text",
         { style: { padding: "20px 10px 10px 10px" } },
         [
           div(".Default .waves-effect .col .s1 .center-align", [

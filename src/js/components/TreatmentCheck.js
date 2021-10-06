@@ -217,7 +217,7 @@ function TreatmentCheck(sources) {
     core: { ...prevState.core, data: newData },
   }))
 
-  // Whenever more than 1 option is available per our treatment query, we list the options.
+  // Feed the autocomplete driver
   const ac$ = data$
     .filter((data) => data.length > 1)
     .map((data) => ({

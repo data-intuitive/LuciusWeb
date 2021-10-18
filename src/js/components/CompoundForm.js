@@ -1,7 +1,7 @@
 import isolate from "@cycle/isolate"
 import { div } from "@cycle/dom"
 import xs from "xstream"
-import { CompoundCheck, checkLens } from "./CompoundCheck"
+import { TreatmentCheck, checkLens, treatmentLikeFilter } from "./TreatmentCheck"
 import { SampleSelection, sampleSelectionLens } from "./SampleSelection"
 import { SignatureGenerator, signatureLens } from "./SignatureGenerator"
 import { loggerFactory } from "../utils/logger"
@@ -15,8 +15,8 @@ function CompoundForm(sources) {
 
   const state$ = sources.onion.state$
 
-  const CompoundCheckSink = isolate(CompoundCheck, { onion: checkLens })(
-    sources
+  const CompoundCheckSink = isolate(TreatmentCheck, { onion: checkLens })(
+    sources, treatmentLikeFilter.COMPOUND
   )
   const compoundQuery$ = CompoundCheckSink.output.remember()
 

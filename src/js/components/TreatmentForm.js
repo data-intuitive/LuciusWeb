@@ -1,7 +1,7 @@
 import isolate from "@cycle/isolate"
 import { div } from "@cycle/dom"
 import xs from "xstream"
-import { TreatmentCheck, checkLens } from "./TreatmentCheck"
+import { TreatmentCheck, checkLens, treatmentLikeFilter } from "./TreatmentCheck"
 import { SampleSelection, sampleSelectionLens } from "./SampleSelection"
 import { SignatureGenerator, signatureLens } from "./SignatureGenerator"
 import { loggerFactory } from "../utils/logger"
@@ -16,7 +16,7 @@ function TreatmentForm(sources) {
   const state$ = sources.onion.state$
 
   const TreatmentCheckSink = isolate(TreatmentCheck, { onion: checkLens })(
-    sources
+    sources, treatmentLikeFilter.GENETIC
   )
   const treatmentQuery$ = TreatmentCheckSink.output.remember()
 

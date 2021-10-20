@@ -17,13 +17,19 @@ const checkLens = {
   }),
 }
 
+const treatmentLikeFilter = {
+  COMPOUND : "compound",
+  GENETIC : "genetic",
+  COMPOUND_AND_GENETIC : "compound genetic"
+}
+
 /**
  * Form for entering treatments with autocomplete.
  *
  * Input: Form input
  * Output: treatment (string)
  */
-function TreatmentCheck(sources) {
+function TreatmentCheck(sources, likeFilter) {
   // States of autosuggestion field:
   // - Less than N characters -> no query, no suggestions
   // - N or more -> with every character a query is done (after 500ms). suggestions are shown
@@ -89,7 +95,7 @@ function TreatmentCheck(sources) {
     .filter((state) => state.core.input.length >= 1)
     .filter((state) => state.core.showSuggestions)
     .compose(debounce(200))
-
+    
   const request$ = triggerRequest$.map((state) => {
     return {
       url:
@@ -99,7 +105,7 @@ function TreatmentCheck(sources) {
       send: {
         version: "v2",
         query: state.core.input,
-        like: "genetic"
+        like: likeFilter
       },
       category: "treatments",
     }
@@ -297,4 +303,4 @@ function TreatmentCheck(sources) {
   }
 }
 
-export { TreatmentCheck, checkLens }
+export { TreatmentCheck, checkLens, treatmentLikeFilter }

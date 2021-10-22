@@ -16,7 +16,7 @@ function TreatmentForm(sources) {
   const state$ = sources.onion.state$
 
   const TreatmentCheckSink = isolate(TreatmentCheck, { onion: checkLens })(
-    sources, treatmentLikeFilter.GENETIC
+    sources
   )
   const treatmentQuery$ = TreatmentCheckSink.output.remember()
 
@@ -76,4 +76,4 @@ function TreatmentForm(sources) {
   }
 }
 
-export { TreatmentForm }
+export { TreatmentForm, treatmentLikeFilter }

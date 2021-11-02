@@ -1,7 +1,7 @@
 import { div } from "@cycle/dom"
 import xs from "xstream"
 import isolate from "@cycle/isolate"
-import { TreatmentForm} from "../components/TreatmentForm"
+import { TreatmentForm, treatmentLikeFilter } from "../components/TreatmentForm"
 import { initSettings } from "../configuration.js"
 import { makeTable, headTableLens, tailTableLens } from "../components/Table"
 import { BinnedPlots, plotsLens } from "../components/BinnedPlots/BinnedPlots"
@@ -48,6 +48,7 @@ export default function GeneticWorkflow(sources) {
         common: state.settings.common,
         geneAnnotations: state.settings.geneAnnotations,
         compoundAnnotations: state.settings.compoundAnnotations,
+        treatmentLike: treatmentLikeFilter.GENETIC,
       },
     }),
     set: (state, childState) => ({ ...state, form: childState.form }),

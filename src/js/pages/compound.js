@@ -1,7 +1,7 @@
 import { div } from "@cycle/dom"
 import xs from "xstream"
 import isolate from "@cycle/isolate"
-import { CompoundForm } from "../components/CompoundForm"
+import { TreatmentForm, treatmentLikeFilter } from "../components/TreatmentForm"
 import { initSettings } from "../configuration.js"
 import { makeTable, headTableLens, tailTableLens } from "../components/Table"
 import { BinnedPlots, plotsLens } from "../components/BinnedPlots/BinnedPlots"
@@ -48,6 +48,7 @@ export default function CompoundWorkflow(sources) {
         common: state.settings.common,
         geneAnnotations: state.settings.geneAnnotations,
         compoundAnnotations: state.settings.compoundAnnotations,
+        treatmentLike: treatmentLikeFilter.COMPOUND,
       },
     }),
     set: (state, childState) => ({ ...state, form: childState.form }),
@@ -68,8 +69,8 @@ export default function CompoundWorkflow(sources) {
     }
   })
 
-  const CompoundFormSink = isolate(CompoundForm, { onion: formLens })(sources)
-  const signature$ = CompoundFormSink.output.remember()
+  const TreatmentFormSink = isolate(TreatmentForm, { onion: formLens })(sources)
+  const signature$ = TreatmentFormSink.output.remember()
 
   // Filter Form
   const filterForm = isolate(Filter, { onion: filterLens })({
@@ -120,7 +121,7 @@ export default function CompoundWorkflow(sources) {
 
   const vdom$ = xs
     .combine(
-      CompoundFormSink.DOM,
+      TreatmentFormSink.DOM,
       filterForm.DOM,
       binnedPlots.DOM,
       headTable.DOM,
@@ -143,7 +144,7 @@ export default function CompoundWorkflow(sources) {
   return {
     log: xs.merge(
       logger(state$, "state$"),
-      CompoundFormSink.log,
+      TreatmentFormSink.log,
       filterForm.log,
       binnedPlots.log,
       headTable.log,
@@ -152,7 +153,7 @@ export default function CompoundWorkflow(sources) {
     DOM: vdom$.startWith(div()),
     onion: xs.merge(
       defaultReducer$,
-      CompoundFormSink.onion,
+      TreatmentFormSink.onion,
       binnedPlots.onion,
       filterForm.onion,
       headTable.onion,
@@ -160,7 +161,7 @@ export default function CompoundWorkflow(sources) {
       scenarioReducer$
     ),
     HTTP: xs.merge(
-      CompoundFormSink.HTTP,
+      TreatmentFormSink.HTTP,
       filterForm.HTTP,
       binnedPlots.HTTP,
       headTable.HTTP,
@@ -168,7 +169,7 @@ export default function CompoundWorkflow(sources) {
     ),
     vega: binnedPlots.vega,
     popup: scenarioPopup$,
-    modal: xs.merge(CompoundFormSink.modal),
-    ac: CompoundFormSink.ac,
+    modal: xs.merge(TreatmentFormSink.modal),
+    ac: TreatmentFormSink.ac,
   }
 }

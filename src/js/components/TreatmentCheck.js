@@ -29,7 +29,7 @@ const treatmentLikeFilter = {
  * Input: Form input
  * Output: treatment (string)
  */
-function TreatmentCheck(sources, likeFilter) {
+function TreatmentCheck(sources) {
   // States of autosuggestion field:
   // - Less than N characters -> no query, no suggestions
   // - N or more -> with every character a query is done (after 500ms). suggestions are shown
@@ -105,7 +105,7 @@ function TreatmentCheck(sources, likeFilter) {
       send: {
         version: "v2",
         query: state.core.input,
-        like: likeFilter
+        like: state.settings.treatmentLike
       },
       category: "treatments",
     }

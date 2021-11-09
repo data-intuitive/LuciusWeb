@@ -184,9 +184,6 @@ export function model(
       filter_output: {},
       state: {dose: false, cell: false, trtType: false},
     },
-    settings: {
-      filter: {values: {}}
-    }
   }))
 
   // When the query for the current filter values returns we want to update

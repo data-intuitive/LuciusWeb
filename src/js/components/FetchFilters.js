@@ -1,5 +1,5 @@
 import xs from 'xstream'
-import debounce from 'xstream/extra/debounce'
+import delay from 'xstream/extra/delay'
 
 function FetchFilters(sources) {
 
@@ -31,7 +31,7 @@ function FetchFilters(sources) {
   return {
     // We don't initialize the stream here so we know exactly when the
     // information is available.
-    filters: validResponse$,
+    filters: validResponse$.compose(delay(2000)),
     HTTP: request$
   }
 }

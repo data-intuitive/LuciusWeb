@@ -1,6 +1,6 @@
 import sampleCombine from "xstream/extra/sampleCombine"
 import { i, div, input } from "@cycle/dom"
-import { equals, mergeAll } from "ramda"
+import { prop, equals, mergeAll } from "ramda"
 import xs from "xstream"
 import dropRepeats from "xstream/extra/dropRepeats"
 import debounce from "xstream/extra/debounce"
@@ -207,7 +207,7 @@ function TreatmentCheck(sources) {
         ...prevState.core,
         showSuggestions: false,
         validated: true,
-        input: state.settings.common.hourglass.treatment,
+        input: prop(state.settings.treatmentLike, state.settings.common.example)
       },
     }))
 

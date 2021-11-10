@@ -19,11 +19,11 @@
         }
       },
       "common": {
-        "hourglass": {
+        "example": {
           "compound" : "BRD-K93645900",
           "signature" : "-WRONG HSPA1A DNAJB1 DDIT4 -TSEN2",
-          "treatment" : "MELK",
-          "target" : "MELK"
+          "genetic" : "MELK",
+          "target": "MELK"
         },
         "modelTranslations": [
           {

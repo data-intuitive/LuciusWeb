@@ -16,6 +16,9 @@ import {
 import { scenario } from "../scenarios/compoundScenario"
 import { runScenario } from "../utils/scenario"
 
+import dropRepeats from "xstream/extra/dropRepeats"
+import { equals } from "ramda"
+
 export default function GeneticWorkflow(sources) {
   const logger = loggerFactory(
     "genetic",
@@ -50,8 +53,9 @@ export default function GeneticWorkflow(sources) {
         compoundAnnotations: state.settings.compoundAnnotations,
         treatmentLike: treatmentLikeFilter.GENETIC,
       },
+      ui: state.ui !== undefined ? state.ui.form : {},
     }),
-    set: (state, childState) => ({ ...state, form: childState.form, dirty: childState.form.dirty }),
+    set: (state, childState) => ({ ...state, form: childState.form }),
   }
 
   // Initialize if not yet done in parent (i.e. router) component (useful for testing)
@@ -68,6 +72,22 @@ export default function GeneticWorkflow(sources) {
       }
     }
   })
+
+  // Use dropRepeats else the stream gets in an infinite loop
+  // TODO: investigate if this is the best way to solve the loop or if it can be prevented in a more structural way
+  // const uiReducer$ = state$.compose(dropRepeats((x, y) => equals(x.form.sampleSelection.dirty, y.form.sampleSelection.dirty)))
+  const uiReducer$ = state$.compose(dropRepeats((x, y) => equals(x, y)))
+  .map(state => 
+    prevState =>
+    ({...prevState,
+      ui: {
+        form: {
+          signature: {dirty: state.form.sampleSelection.dirty},
+        },
+        plots: {dirty: state.form.sampleSelection.dirty},
+      },
+    })
+  )
 
   const TreatmentFormSink = isolate(TreatmentForm, { onion: formLens })(sources)
   const signature$ = TreatmentFormSink.output.remember()
@@ -158,7 +178,8 @@ export default function GeneticWorkflow(sources) {
       filterForm.onion,
       headTable.onion,
       tailTable.onion,
-      scenarioReducer$
+      scenarioReducer$,
+      uiReducer$,
     ),
     HTTP: xs.merge(
       TreatmentFormSink.HTTP,

@@ -35,7 +35,7 @@ const sampleSelectionLens = {
   // get: state => ({core: state.form.sampleSelection, settings: state.settings}),
   set: (state, childState) => ({
     ...state,
-    form: { ...state.form, sampleSelection: childState.core, dirty: childState.core.dirty},
+    form: { ...state.form, sampleSelection: childState.core},
   }),
 }
 

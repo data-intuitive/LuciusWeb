@@ -21,7 +21,7 @@ const emptyData = {
 }
 
 const signatureLens = {
-    get: state => ({ core: state.form.signature, settings: state.settings }),
+    get: state => ({ core: state.form.signature, settings: state.settings, dirty: state.form.dirty }),
     set: (state, childState) => ({ ...state, form: { ...state.form, signature: childState.core } })
 };
 
@@ -103,8 +103,10 @@ function view(state$, request$, response$, geneAnnotationQuery) {
         .startWith(div('.card .orange .lighten-3', []))
         .remember()
 
+    const dirtyVdom$ = state$.map(s => div('.card .orange .lighten-3', [p('.center', "SignatureGenerator dirty: " + s.dirty)] ))
+
     return {
-        vdom$: xs.merge(loadingVdom$, invalidVdom$, validVdom$),
+        vdom$: xs.combine(dirtyVdom$, xs.merge(loadingVdom$, invalidVdom$, validVdom$)).map(([d, s]) => div([d, s])),
         signature$: signature$
     }
 }

@@ -51,7 +51,7 @@ export default function GeneticWorkflow(sources) {
         treatmentLike: treatmentLikeFilter.GENETIC,
       },
     }),
-    set: (state, childState) => ({ ...state, form: childState.form }),
+    set: (state, childState) => ({ ...state, form: childState.form, dirty: childState.form.dirty }),
   }
 
   // Initialize if not yet done in parent (i.e. router) component (useful for testing)

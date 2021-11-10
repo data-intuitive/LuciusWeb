@@ -35,7 +35,7 @@ const sampleSelectionLens = {
   // get: state => ({core: state.form.sampleSelection, settings: state.settings}),
   set: (state, childState) => ({
     ...state,
-    form: { ...state.form, sampleSelection: childState.core },
+    form: { ...state.form, sampleSelection: childState.core, dirty: childState.core.dirty},
   }),
 }
 
@@ -258,7 +258,7 @@ function SampleSelection(sources) {
     .filter((code) => code == "AltLeft")
     .mapTo(false)
 
-  const a$ = xs.merge(aDown$, aUp$).compose(dropRepeats(equals))
+  const a$ = xs.merge(aDown$, aUp$).compose(dropRepeats(equals)).startWith(false)
 
   const selectReducer$ = useClick$
     .compose(sampleCombine(a$))
@@ -313,6 +313,11 @@ function SampleSelection(sources) {
     core: { ...prevState.core, request: req },
   }))
 
+  const dirtyReducer$ = a$.map((a) => (prevState) => ({
+    ...prevState,
+    core: {...prevState.core, dirty: a },
+  }))
+
   const sampleSelection$ = xs
     .merge(
       sources.DOM.select(".doSelect").events("click"),
@@ -334,7 +339,8 @@ function SampleSelection(sources) {
       inputReducer$,
       requestReducer$,
       dataReducer$,
-      selectReducer$
+      selectReducer$,
+      dirtyReducer$
     ),
     output: sampleSelection$,
     modal: compoundAnnotations.modal,

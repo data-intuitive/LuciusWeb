@@ -15,7 +15,7 @@ import { parse } from 'vega-parser'
 
 // Granular access to the settings, only api and sim keys
 const plotsLens = {
-    get: state => ({ core: state.plots, settings: { plots: state.settings.plots, api: state.settings.api } }),
+    get: state => ({ core: state.plots, settings: { plots: state.settings.plots, api: state.settings.api }, dirty: state.dirty }),
     set: (state, childState) => ({...state, plots: childState.core })
 };
 
@@ -241,14 +241,18 @@ function BinnedPlots(sources) {
             div('.red .white-text', [p('An error occured !!!')]),
             div('.red .white-text', [p('An error occured !!!')])))
 
+    
+    const dirtyVdom$ = state$.map(s => div('.card .orange .lighten-3', [p('.center', "BinnedPlots dirty: " + s.dirty)] ))
+
     // Merge the streams, last event is shown...
-    const vdom$ = xs.merge(
+    const vdom$ = xs.combine(dirtyVdom$, xs.merge(
         initVdom$,
         errorVdom$,
         loadingVdom$,
         emptyLoadedVdom$,
         nonEmptyLoadedVdom$
     )
+    ).map(([d, s]) => div([d, s]))
 
     // ========================================================================
 

@@ -76,17 +76,18 @@ export default function GeneticWorkflow(sources) {
   // Use dropRepeats else the stream gets in an infinite loop
   // TODO: investigate if this is the best way to solve the loop or if it can be prevented in a more structural way
   // const uiReducer$ = state$.compose(dropRepeats((x, y) => equals(x.form.sampleSelection.dirty, y.form.sampleSelection.dirty)))
-  const uiReducer$ = state$.compose(dropRepeats((x, y) => equals(x, y)))
+  const uiReducer$ = state$.compose(dropRepeats(equals))
   .map(state => 
     prevState =>
     ({...prevState,
       ui: {
         form: {
-          signature: {dirty: state.form.sampleSelection.dirty},
+          sampleSelection: {dirty: state.form.check.dirty },
+          signature: {dirty: state.form.sampleSelection.dirty || state.form.check.dirty },
         },
-        plots: {dirty: state.form.sampleSelection.dirty},
-        headTable: {dirty: state.form.sampleSelection.dirty},
-        tailTable: {dirty: state.form.sampleSelection.dirty},
+        plots: {dirty: state.form.sampleSelection.dirty || state.form.check.dirty || state.filter.dirty },
+        headTable: {dirty: state.form.sampleSelection.dirty || state.form.check.dirty || state.filter.dirty },
+        tailTable: {dirty: state.form.sampleSelection.dirty || state.form.check.dirty || state.filter.dirty },
       },
     })
   )

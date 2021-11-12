@@ -283,6 +283,23 @@ function TreatmentCheck(sources) {
 
   // const history$ = sources.onion.state$.fold((acc, x) => acc.concat([x]), [{}])
 
+  // Handle emitting dirty states
+  // TODO become clean when the selection is reverted to the last clean state
+  const makeDirty$ = newInput$
+    .mapTo(true)
+    .startWith(false).debug("make dirty")
+
+  // A modifier stream
+  const makeClean$ = run$
+    .mapTo(false).debug("make clean")
+
+  const dirty$ = xs.merge(makeDirty$, makeClean$).compose(dropRepeats(equals)).startWith(false)
+
+  const dirtyReducer$ = dirty$.map((dirty) => (prevState) => ({
+    ...prevState,
+    core: {...prevState.core, dirty: dirty },
+  }))
+
   return {
     log: xs.merge(
       logger(state$, "state$")
@@ -296,7 +313,8 @@ function TreatmentCheck(sources) {
       dataReducer$,
       requestReducer$,
       setDefaultReducer$,
-      autocompleteReducer$
+      autocompleteReducer$,
+      dirtyReducer$,
     ),
     output: query$,
     ac: ac$

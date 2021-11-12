@@ -294,6 +294,22 @@ export function model(
       }
     })
 
+  // Handle emitting dirty states
+  // TODO become clean when the selection is reverted to the last clean state
+  const makeDirty$ = filterValuesAction$
+    .mapTo(true)
+    .startWith(false)
+
+  const makeClean$ = outputReducer$
+    .mapTo(false)
+
+  const dirty$ = xs.merge(makeDirty$, makeClean$).compose(dropRepeats(equals)).startWith(false)
+
+  const dirtyReducer$ = dirty$.map((dirty) => (prevState) => ({
+    ...prevState,
+    core: {...prevState.core, dirty: dirty },
+  }))
+
   return xs.merge(
     defaultReducer$,
     inputReducer$,
@@ -301,6 +317,7 @@ export function model(
     filterReducer$,
     toggleReducer$,
     outputReducer$,
+    dirtyReducer$,
   )
 }
 

@@ -11,6 +11,7 @@ import {
   th,
   thead,
   tbody,
+  p,
 } from "@cycle/dom"
 import { clone, equals, merge } from "ramda"
 import xs from "xstream"
@@ -31,6 +32,7 @@ const sampleSelectionLens = {
   get: (state) => ({
     core: typeof state.form !== "undefined" ? state.form.sampleSelection : {},
     settings: state.settings,
+    ui: state.ui !== undefined ? state.ui.sampleSelection : {dirty: false},
   }),
   // get: state => ({core: state.form.sampleSelection, settings: state.settings}),
   set: (state, childState) => ({
@@ -226,7 +228,11 @@ function SampleSelection(sources) {
     .combine(modifiedState$, compoundAnnotations.DOM)
     .map(([state, annotation]) => makeTable(state, annotation, false))
 
-  const vdom$ = xs.merge(initVdom$, loadingVdom$, loadedVdom$)
+  const dirtyVdom$ = state$.map(s => div('.card .orange .lighten-3', [p('.center', "SampleSelection dirty: " + s.ui.dirty)] ))
+
+  const vdom$ = xs.combine(dirtyVdom$, 
+    xs.merge(initVdom$, loadingVdom$, loadedVdom$)
+  ).map(([d, s]) => div([d, s]))
 
   const dataReducer$ = data$.map((data) => (prevState) => {
     const newData = data.map((el) => merge(el, { use: true }))
@@ -313,11 +319,6 @@ function SampleSelection(sources) {
     core: { ...prevState.core, request: req },
   }))
 
-  const dirtyReducer$ = a$.map((a) => (prevState) => ({
-    ...prevState,
-    core: {...prevState.core, dirty: a },
-  }))
-
   const sampleSelection$ = xs
     .merge(
       sources.DOM.select(".doSelect").events("click"),
@@ -329,6 +330,24 @@ function SampleSelection(sources) {
     )
     .compose(sampleCombine(state$))
     .map(([ev, state]) => state.core.output)
+
+
+  // Handle emitting dirty states
+  // TODO become clean when the selection is reverted to the last clean state
+  const makeDirty$ = useClick$
+    .mapTo(true)
+    .startWith(false)
+
+  const makeClean$ = sampleSelection$
+    .mapTo(false)
+
+  const dirty$ = xs.merge(makeDirty$, makeClean$).compose(dropRepeats(equals)).startWith(false)
+
+  const dirtyReducer$ = dirty$.map((dirty) => (prevState) => ({
+    ...prevState,
+    core: {...prevState.core, dirty: dirty },
+  }))
+
 
   return {
     log: xs.merge(logger(state$, "state$")),

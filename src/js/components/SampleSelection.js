@@ -16,7 +16,7 @@ import {
 import { clone, equals, merge } from "ramda"
 import xs from "xstream"
 import dropRepeats from "xstream/extra/dropRepeats"
-import delay from 'xstream/extra/delay'
+import debounce from 'xstream/extra/debounce'
 import { loggerFactory } from "../utils/logger"
 import { CompoundAnnotation } from "../components/CompoundAnnotation"
 import { safeModelToUi } from "../modelTranslations"
@@ -338,21 +338,13 @@ function SampleSelection(sources) {
 
   const makeClean$ = sampleSelection$
     .mapTo(false)
-  
-  // Kindly borrowed from https://flexiple.com/javascript-array-equality/
-  function arrayEquals(a, b) {
-      return Array.isArray(a) &&
-          Array.isArray(b) &&
-          a.length === b.length &&
-          a.every((val, index) => val === b[index]);
-  }
 
   const identical$ = xs.combine(sampleSelection$, state$)
-    .map(([output, state]) => arrayEquals(output, state.core.output) )
+    .map(([output, state]) => equals(output, state.core.output) )
     .filter(i => i == true)
     .mapTo(false)
-    .compose(delay(10))
-    // TODO: Check if the delay is best way to solve 'makeDirty$' and 'identical$' fire at the same-ish time and 'makeDirty$' winning.
+    .compose(debounce(1))
+    // TODO: Check if the delay/debounce is best way to solve 'makeDirty$' and 'identical$' fire at the same-ish time and 'makeDirty$' winning.
     // Ideally 'makeDirty$' wouldn't fire in this case
   
   const dirty$ = xs.merge(makeDirty$, makeClean$, identical$)

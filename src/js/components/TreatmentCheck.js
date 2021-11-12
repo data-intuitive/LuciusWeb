@@ -3,7 +3,6 @@ import { i, div, input } from "@cycle/dom"
 import { equals, mergeAll } from "ramda"
 import xs from "xstream"
 import dropRepeats from "xstream/extra/dropRepeats"
-import delay from 'xstream/extra/delay'
 import debounce from "xstream/extra/debounce"
 import { loggerFactory } from "../utils/logger"
 
@@ -296,7 +295,7 @@ function TreatmentCheck(sources) {
     .map(([output, state]) => output === state.core.input )
     .filter(i => i == true)
     .mapTo(false)
-    .compose(delay(10))
+    .compose(debounce(1))
     // TODO: Check if the delay is best way to solve 'makeDirty$' and 'identical$' fire at the same-ish time and 'makeDirty$' winning.
     // Ideally 'makeDirty$' wouldn't fire in this case
 

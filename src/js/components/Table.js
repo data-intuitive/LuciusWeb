@@ -62,6 +62,7 @@ const headTableLens = {
       sourire: state.settings.sourire,
       filter: state.settings.filter,
     },
+    ui: state.ui !== undefined ? state.ui.headTable : {dirty: false},
   }),
   set: (state, childState) => ({
     ...state,
@@ -83,6 +84,7 @@ const tailTableLens = {
       sourire: state.settings.sourire,
       filter: state.settings.filter,
     },
+    ui: state.ui !== undefined ? state.ui.headTable : {dirty: false},
   }),
   set: (state, childState) => ({
     ...state,
@@ -104,6 +106,7 @@ const compoundContainerTableLens = {
       sourire: state.settings.sourire,
       filter: state.settings.filter,
     },
+    ui: state.ui !== undefined ? state.ui.compoundTable : {dirty: false},
   }),
   set: (state, childState) => ({
     ...state,
@@ -570,7 +573,11 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
       div(".red .white-text", [p("An error occured !!!")])
     )
 
-    const vdom$ = xs.merge(initVdom$, errorVdom$, loadingVdom$.remember(), loadedVdom$)
+    const dirtyVdom$ = state$.map(s => div('.card .orange .lighten-3', [p('.center', "Table dirty: " + s.ui.dirty)] ))
+
+    const vdom$ = xs.combine(dirtyVdom$, 
+      xs.merge(initVdom$, errorVdom$, loadingVdom$.remember(), loadedVdom$)
+    ).map(([d, s]) => div([d, s]))
 
     // ========================================================================
 

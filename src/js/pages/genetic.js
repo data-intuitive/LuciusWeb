@@ -85,6 +85,8 @@ export default function GeneticWorkflow(sources) {
           signature: {dirty: state.form.sampleSelection.dirty},
         },
         plots: {dirty: state.form.sampleSelection.dirty},
+        headTable: {dirty: state.form.sampleSelection.dirty},
+        tailTable: {dirty: state.form.sampleSelection.dirty},
       },
     })
   )

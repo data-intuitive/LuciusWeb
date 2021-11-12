@@ -3,6 +3,7 @@ import { i, div, input } from "@cycle/dom"
 import { equals, mergeAll } from "ramda"
 import xs from "xstream"
 import dropRepeats from "xstream/extra/dropRepeats"
+import delay from 'xstream/extra/delay'
 import debounce from "xstream/extra/debounce"
 import { loggerFactory } from "../utils/logger"
 
@@ -284,16 +285,24 @@ function TreatmentCheck(sources) {
   // const history$ = sources.onion.state$.fold((acc, x) => acc.concat([x]), [{}])
 
   // Handle emitting dirty states
-  // TODO become clean when the selection is reverted to the last clean state
   const makeDirty$ = newInput$
     .mapTo(true)
-    .startWith(false).debug("make dirty")
+    .startWith(false)
 
-  // A modifier stream
   const makeClean$ = run$
-    .mapTo(false).debug("make clean")
+    .mapTo(false)
 
-  const dirty$ = xs.merge(makeDirty$, makeClean$).compose(dropRepeats(equals)).startWith(false)
+  const identical$ = xs.combine(query$, state$)
+    .map(([output, state]) => output === state.core.input )
+    .filter(i => i == true)
+    .mapTo(false)
+    .compose(delay(10))
+    // TODO: Check if the delay is best way to solve 'makeDirty$' and 'identical$' fire at the same-ish time and 'makeDirty$' winning.
+    // Ideally 'makeDirty$' wouldn't fire in this case
+
+  const dirty$ = xs.merge(makeDirty$, makeClean$, identical$)
+    .compose(dropRepeats(equals))
+    .startWith(false)
 
   const dirtyReducer$ = dirty$.map((dirty) => (prevState) => ({
     ...prevState,

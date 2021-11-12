@@ -16,6 +16,7 @@ import {
 import { clone, equals, merge } from "ramda"
 import xs from "xstream"
 import dropRepeats from "xstream/extra/dropRepeats"
+import delay from 'xstream/extra/delay'
 import { loggerFactory } from "../utils/logger"
 import { CompoundAnnotation } from "../components/CompoundAnnotation"
 import { safeModelToUi } from "../modelTranslations"
@@ -331,23 +332,37 @@ function SampleSelection(sources) {
     .compose(sampleCombine(state$))
     .map(([ev, state]) => state.core.output)
 
-
   // Handle emitting dirty states
-  // TODO become clean when the selection is reverted to the last clean state
   const makeDirty$ = useClick$
     .mapTo(true)
-    .startWith(false)
 
   const makeClean$ = sampleSelection$
     .mapTo(false)
+  
+  // Kindly borrowed from https://flexiple.com/javascript-array-equality/
+  function arrayEquals(a, b) {
+      return Array.isArray(a) &&
+          Array.isArray(b) &&
+          a.length === b.length &&
+          a.every((val, index) => val === b[index]);
+  }
 
-  const dirty$ = xs.merge(makeDirty$, makeClean$).compose(dropRepeats(equals)).startWith(false)
+  const identical$ = xs.combine(sampleSelection$, state$)
+    .map(([output, state]) => arrayEquals(output, state.core.output) )
+    .filter(i => i == true)
+    .mapTo(false)
+    .compose(delay(10))
+    // TODO: Check if the delay is best way to solve 'makeDirty$' and 'identical$' fire at the same-ish time and 'makeDirty$' winning.
+    // Ideally 'makeDirty$' wouldn't fire in this case
+  
+  const dirty$ = xs.merge(makeDirty$, makeClean$, identical$)
+    .compose(dropRepeats(equals))
+    .startWith(false)
 
   const dirtyReducer$ = dirty$.map((dirty) => (prevState) => ({
     ...prevState,
     core: {...prevState.core, dirty: dirty },
   }))
-
 
   return {
     log: xs.merge(logger(state$, "state$")),
@@ -359,7 +374,7 @@ function SampleSelection(sources) {
       requestReducer$,
       dataReducer$,
       selectReducer$,
-      dirtyReducer$
+      dirtyReducer$,
     ),
     output: sampleSelection$,
     modal: compoundAnnotations.modal,

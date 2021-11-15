@@ -33,7 +33,7 @@ const sampleSelectionLens = {
   get: (state) => ({
     core: typeof state.form !== "undefined" ? state.form.sampleSelection : {},
     settings: state.settings,
-    ui: state.ui !== undefined ? state.ui.sampleSelection : {dirty: false},
+    ui: (state.ui??{}).sampleSelection ?? {dirty: false}, // Get state.ui.sampleSelection in a safe way or else get a default
   }),
   // get: state => ({core: state.form.sampleSelection, settings: state.settings}),
   set: (state, childState) => ({

@@ -284,22 +284,9 @@ function TreatmentCheck(sources) {
   // const history$ = sources.onion.state$.fold((acc, x) => acc.concat([x]), [{}])
 
   // Handle emitting dirty states
-  const makeDirty$ = newInput$
-    .mapTo(true)
-    .startWith(false)
-
-  const makeClean$ = run$
-    .mapTo(false)
-
-  const identical$ = xs.combine(query$, state$)
-    .map(([output, state]) => output === state.core.input )
-    .filter(i => i == true)
-    .mapTo(false)
-    .compose(debounce(1))
-    // TODO: Check if the delay is best way to solve 'makeDirty$' and 'identical$' fire at the same-ish time and 'makeDirty$' winning.
-    // Ideally 'makeDirty$' wouldn't fire in this case
-
-  const dirty$ = xs.merge(makeDirty$, makeClean$, identical$)
+  const dirty$ = xs.combine(query$, state$.map(state => state.core.input))
+    .map(([output, current]) => !equals(output, current))
+    .compose(debounce(10))
     .compose(dropRepeats(equals))
     .startWith(false)
 

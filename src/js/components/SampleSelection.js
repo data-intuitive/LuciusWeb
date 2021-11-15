@@ -333,21 +333,9 @@ function SampleSelection(sources) {
     .map(([ev, state]) => state.core.output)
 
   // Handle emitting dirty states
-  const makeDirty$ = useClick$
-    .mapTo(true)
-
-  const makeClean$ = sampleSelection$
-    .mapTo(false)
-
-  const identical$ = xs.combine(sampleSelection$, state$)
-    .map(([output, state]) => equals(output, state.core.output) )
-    .filter(i => i == true)
-    .mapTo(false)
-    .compose(debounce(1))
-    // TODO: Check if the delay/debounce is best way to solve 'makeDirty$' and 'identical$' fire at the same-ish time and 'makeDirty$' winning.
-    // Ideally 'makeDirty$' wouldn't fire in this case
-  
-  const dirty$ = xs.merge(makeDirty$, makeClean$, identical$)
+  const dirty$ = xs.combine(sampleSelection$, state$.map(state => state.core.output))
+    .map(([output, current]) => !equals(output, current))
+    .compose(debounce(10))
     .compose(dropRepeats(equals))
     .startWith(false)
 

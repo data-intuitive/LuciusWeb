@@ -229,11 +229,17 @@ function SampleSelection(sources) {
     .combine(modifiedState$, compoundAnnotations.DOM)
     .map(([state, annotation]) => makeTable(state, annotation, false))
 
-  const dirtyVdom$ = state$.map(s => div('.card .orange .lighten-3', [p('.center', "SampleSelection dirty: " + s.ui.dirty)] ))
+  const dirtyWrapper = (dirty, s) => {
+    return (
+      div({ style: { opacity: dirty ? 0.2 : 1.0 } },[
+        div('.card .orange .lighten-3', [ p('.center', "SampleSelection dirty: " + dirty) ]),
+        s
+      ])
+    )
+  }
 
-  const vdom$ = xs.combine(dirtyVdom$, 
-    xs.merge(initVdom$, loadingVdom$, loadedVdom$)
-  ).map(([d, s]) => div([d, s]))
+  const vdom$ = xs.combine(state$, xs.merge(initVdom$, loadingVdom$, loadedVdom$))
+    .map(([state, vdom]) => dirtyWrapper(state.ui.dirty, vdom))
 
   const dataReducer$ = data$.map((data) => (prevState) => {
     const newData = data.map((el) => merge(el, { use: true }))

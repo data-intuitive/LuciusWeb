@@ -179,7 +179,7 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
       .map((state) => state.settings)
       .compose(dropRepeats(equals)) // Avoid updates to vdom$ when no real change
 
-    const expandOptions$ = modifiedState$
+    const expandOptions$ = state$
       .map((state) => state.core.expandOptions)
       .compose(dropRepeats(equals)) // Avoid updates to vdom$ when no real change
 

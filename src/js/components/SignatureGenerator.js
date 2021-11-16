@@ -11,6 +11,7 @@ import { loggerFactory } from '../utils/logger'
 import { stringify } from 'querystring';
 import { GeneAnnotationQuery } from './GeneAnnotationQuery'
 import { absGene } from '../utils/utils'
+import { dirtyWrapperStream } from "../utils/ui"
 
 const emptyData = {
     body: {
@@ -105,18 +106,8 @@ function view(state$, request$, response$, geneAnnotationQuery) {
         .startWith(div('.card .orange .lighten-3', []))
         .remember()
 
-    //const dirtyVdom$ = state$.map(s => div('.card .orange .lighten-3', [p('.center', "SignatureGenerator dirty: " + s.ui.dirty)] ))
-    const dirtyWrapper = (dirty, s) => {
-        return (
-          div({ style: { opacity: dirty ? 0.2 : 1.0 } },[
-            div('.card .orange .lighten-3', [ p('.center', "SignatureGenerator dirty: " + dirty) ]),
-            s
-          ])
-        )
-      }
-    
-    const vdom$ = xs.combine(state$, xs.merge(loadingVdom$, invalidVdom$, validVdom$))
-        .map(([state, vdom]) => dirtyWrapper(state.ui.dirty, vdom))
+    // Wrap component vdom with an extra div that handles being dirty
+    const vdom$ = dirtyWrapperStream( state$, xs.merge(loadingVdom$, invalidVdom$, validVdom$), "SignatureGenerator" )
 
     return {
         vdom$: vdom$,

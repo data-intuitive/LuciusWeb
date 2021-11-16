@@ -48,6 +48,7 @@ import { loggerFactory } from "../utils/logger"
 import { convertToCSV } from "../utils/export"
 import delay from "xstream/extra/delay"
 import debounce from "xstream/extra/debounce"
+import { dirtyWrapperStream } from "../utils/ui"
 
 // Granular access to the settings
 // We _copy_ the results array to the root of this element's scope.
@@ -573,11 +574,8 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
       div(".red .white-text", [p("An error occured !!!")])
     )
 
-    const dirtyVdom$ = state$.map(s => div('.card .orange .lighten-3', [p('.center', "Table dirty: " + s.ui.dirty)] ))
-
-    const vdom$ = xs.combine(dirtyVdom$, 
-      xs.merge(initVdom$, errorVdom$, loadingVdom$.remember(), loadedVdom$)
-    ).map(([d, s]) => div([d, s]))
+    // Wrap component vdom with an extra div that handles being dirty
+    const vdom$ = dirtyWrapperStream(state$, xs.merge(initVdom$, errorVdom$, loadingVdom$.remember(), loadedVdom$), "Table")
 
     // ========================================================================
 

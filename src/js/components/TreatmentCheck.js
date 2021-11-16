@@ -5,6 +5,7 @@ import xs from "xstream"
 import dropRepeats from "xstream/extra/dropRepeats"
 import debounce from "xstream/extra/debounce"
 import { loggerFactory } from "../utils/logger"
+import { dirtyUiReducer } from "../utils/ui"
 
 const checkLens = {
   get: (state) => ({
@@ -283,17 +284,8 @@ function TreatmentCheck(sources) {
 
   // const history$ = sources.onion.state$.fold((acc, x) => acc.concat([x]), [{}])
 
-  // Handle emitting dirty states
-  const dirty$ = xs.combine(query$, state$.map(state => state.core.input))
-    .map(([output, current]) => !equals(output, current))
-    .compose(debounce(10))
-    .compose(dropRepeats(equals))
-    .startWith(false)
-
-  const dirtyReducer$ = dirty$.map((dirty) => (prevState) => ({
-    ...prevState,
-    core: {...prevState.core, dirty: dirty },
-  }))
+  // Logic and reducer stream that monitors if this component became dirty
+  const dirtyReducer$ = dirtyUiReducer(query$, state$.map(state => state.core.input))
 
   return {
     log: xs.merge(

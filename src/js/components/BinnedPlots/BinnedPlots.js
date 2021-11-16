@@ -9,6 +9,7 @@ import { similarityPlotVegaSpec } from './SimilarityPlotSpec.js'
 import { widthStream } from '../../utils/utils'
 import { loggerFactory } from '../../utils/logger'
 import { parse } from 'vega-parser'
+import { dirtyWrapperStream } from "../../utils/ui"
 
 // const elementID = '#hist'
 // const component = 'histogram'
@@ -247,14 +248,16 @@ function BinnedPlots(sources) {
     const dirtyVdom$ = state$.map(s => div('.card .orange .lighten-3', [p('.center', "BinnedPlots dirty: " + s.ui.dirty)] ))
 
     // Merge the streams, last event is shown...
-    const vdom$ = xs.combine(dirtyVdom$, xs.merge(
-        initVdom$,
-        errorVdom$,
-        loadingVdom$,
-        emptyLoadedVdom$,
-        nonEmptyLoadedVdom$
-    )
-    ).map(([d, s]) => div([d, s]))
+    // Wrap component vdom with an extra div that handles being dirty
+    const vdom$ = dirtyWrapperStream(state$, 
+        xs.merge(
+            initVdom$,
+            errorVdom$,
+            loadingVdom$,
+            emptyLoadedVdom$,
+            nonEmptyLoadedVdom$
+        ), 
+        "BinnedPlots" )
 
     // ========================================================================
 

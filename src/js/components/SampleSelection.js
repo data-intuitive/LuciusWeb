@@ -20,6 +20,7 @@ import debounce from 'xstream/extra/debounce'
 import { loggerFactory } from "../utils/logger"
 import { CompoundAnnotation } from "../components/CompoundAnnotation"
 import { safeModelToUi } from "../modelTranslations"
+import { dirtyUiReducer, dirtyWrapperStream } from "../utils/ui"
 
 const emptyData = {
   body: {
@@ -229,17 +230,8 @@ function SampleSelection(sources) {
     .combine(modifiedState$, compoundAnnotations.DOM)
     .map(([state, annotation]) => makeTable(state, annotation, false))
 
-  const dirtyWrapper = (dirty, s) => {
-    return (
-      div({ style: { opacity: dirty ? 0.2 : 1.0 } },[
-        div('.card .orange .lighten-3', [ p('.center', "SampleSelection dirty: " + dirty) ]),
-        s
-      ])
-    )
-  }
-
-  const vdom$ = xs.combine(state$, xs.merge(initVdom$, loadingVdom$, loadedVdom$))
-    .map(([state, vdom]) => dirtyWrapper(state.ui.dirty, vdom))
+  // Wrap component with an extra div that handles being dirty
+  const vdom$ = dirtyWrapperStream( state$, xs.merge(initVdom$, loadingVdom$, loadedVdom$), "SampleSelection")
 
   const dataReducer$ = data$.map((data) => (prevState) => {
     const newData = data.map((el) => merge(el, { use: true }))
@@ -338,17 +330,8 @@ function SampleSelection(sources) {
     .compose(sampleCombine(state$))
     .map(([ev, state]) => state.core.output)
 
-  // Handle emitting dirty states
-  const dirty$ = xs.combine(sampleSelection$, state$.map(state => state.core.output))
-    .map(([output, current]) => !equals(output, current))
-    .compose(debounce(10))
-    .compose(dropRepeats(equals))
-    .startWith(false)
-
-  const dirtyReducer$ = dirty$.map((dirty) => (prevState) => ({
-    ...prevState,
-    core: {...prevState.core, dirty: dirty },
-  }))
+  // Logic and reducer stream that monitors if this component became dirty
+  const dirtyReducer$ = dirtyUiReducer(sampleSelection$, state$.map(state => state.core.output))
 
   return {
     log: xs.merge(logger(state$, "state$")),

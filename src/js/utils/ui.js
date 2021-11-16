@@ -9,7 +9,6 @@ import { div, p } from "@cycle/dom"
 // If these are not the same then it suggests that the user made a change, hence the state is dirty.
 function dirtyUiStream(output$, current$) {
     return xs.combine(output$, current$)
-        .debug()
         .map(([output, current]) => !equals(output, current))
         .compose(debounce(10))
         .compose(dropRepeats(equals))

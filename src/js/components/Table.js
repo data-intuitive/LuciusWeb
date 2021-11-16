@@ -85,7 +85,7 @@ const tailTableLens = {
       sourire: state.settings.sourire,
       filter: state.settings.filter,
     },
-    ui: state.ui !== undefined ? state.ui.headTable : {dirty: false},
+    ui: (state.ui??{}).tailTable ?? {dirty: false}, // Get state.ui.tailTable in a safe way or else get a default
   }),
   set: (state, childState) => ({
     ...state,
@@ -107,7 +107,7 @@ const compoundContainerTableLens = {
       sourire: state.settings.sourire,
       filter: state.settings.filter,
     },
-    ui: state.ui !== undefined ? state.ui.compoundTable : {dirty: false},
+    ui: (state.ui??{}).compoundTable ?? {dirty: false}, // Get state.ui.compoundTable in a safe way or else get a default
   }),
   set: (state, childState) => ({
     ...state,

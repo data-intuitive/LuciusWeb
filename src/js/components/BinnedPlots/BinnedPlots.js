@@ -17,7 +17,7 @@ import { dirtyWrapperStream } from "../../utils/ui"
 // Granular access to the settings, only api and sim keys
 const plotsLens = {
     get: state => ({ core: state.plots, settings: { plots: state.settings.plots, api: state.settings.api }, 
-        ui: state.ui !== undefined ? state.ui.plots : {dirty: false},
+        ui: (state.ui??{}).plots ?? {dirty: false}, // Get state.ui.prots in a safe way or else get a default
     }),
     set: (state, childState) => ({...state, plots: childState.core })
 };

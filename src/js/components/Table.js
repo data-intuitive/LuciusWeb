@@ -40,6 +40,7 @@ import {
   merge,
   intersection,
   difference,
+  max,
 } from "ramda"
 // import { tableContent, tableContentLens } from './tableContent/tableContent'
 import isolate from "@cycle/isolate"
@@ -179,7 +180,7 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
       .map((state) => state.settings)
       .compose(dropRepeats(equals)) // Avoid updates to vdom$ when no real change
 
-    const expandOptions$ = modifiedState$
+    const expandOptions$ = state$
       .map((state) => state.core.expandOptions)
       .compose(dropRepeats(equals)) // Avoid updates to vdom$ when no real change
 
@@ -189,31 +190,31 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
       .events("click")
       .mapTo(5)
       .startWith(0)
-      .fold((x, y) => x + y, 0)
     const min5$ = sources.DOM.select(".min5")
       .events("click")
-      .mapTo(5)
+      .mapTo(-5)
       .startWith(0)
-      .fold((x, y) => x + y, 0)
     const plus10$ = sources.DOM.select(".plus10")
       .events("click")
       .mapTo(10)
       .startWith(0)
-      .fold((x, y) => x + y, 0)
     const min10$ = sources.DOM.select(".min10")
       .events("click")
-      .mapTo(10)
+      .mapTo(-10)
       .startWith(0)
-      .fold((x, y) => x + y, 0)
+
+    const defaultAmountToDisplay$ = newInput$.map(state => parseInt(state.settings.table.count))
+    const amountToDisplay$ = xs
+      .merge(defaultAmountToDisplay$, plus5$, min5$, plus10$, min10$)
+      .fold((x, y) => max(0, x + y), 0)
 
     // ========================================================================
 
     const triggerRequest$ = xs
-      .combine(newInput$, plus5$, min5$, plus10$, min10$)
-      .map(([state, plus5, min5, plus10, min10]) => {
+      .combine(newInput$, amountToDisplay$)
+      .map(([state, amountToDisplay]) => {
         const tableType = state.settings.table.type
-        const cnt =
-          parseInt(state.settings.table.count) + plus5 - min5 + plus10 - min10
+        const cnt = max(1, amountToDisplay)
         // Set a limit on the results depending on the type of table:
         return tableType == "compoundTable"
           ? { ...state, core: { ...state.core, count: { limit: cnt } } }

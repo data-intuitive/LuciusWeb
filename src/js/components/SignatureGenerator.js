@@ -107,7 +107,7 @@ function view(state$, request$, response$, geneAnnotationQuery) {
         .remember()
 
     // Wrap component vdom with an extra div that handles being dirty
-    const vdom$ = dirtyWrapperStream( state$, xs.merge(loadingVdom$, invalidVdom$, validVdom$), "SignatureGenerator" )
+    const vdom$ = dirtyWrapperStream( state$, xs.merge(loadingVdom$, invalidVdom$, validVdom$) )
 
     return {
         vdom$: vdom$,

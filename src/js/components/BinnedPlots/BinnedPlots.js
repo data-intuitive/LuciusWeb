@@ -245,8 +245,6 @@ function BinnedPlots(sources) {
             div('.red .white-text', [p('An error occured !!!')])))
 
     
-    const dirtyVdom$ = state$.map(s => div('.card .orange .lighten-3', [p('.center', "BinnedPlots dirty: " + s.ui.dirty)] ))
-
     // Merge the streams, last event is shown...
     // Wrap component vdom with an extra div that handles being dirty
     const vdom$ = dirtyWrapperStream(state$, 
@@ -256,8 +254,7 @@ function BinnedPlots(sources) {
             loadingVdom$,
             emptyLoadedVdom$,
             nonEmptyLoadedVdom$
-        ), 
-        "BinnedPlots" )
+        ) )
 
     // ========================================================================
 

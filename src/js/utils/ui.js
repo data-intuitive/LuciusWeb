@@ -52,5 +52,5 @@ function dirtyWrapper(dirty, inner, debugName) {
 // Supports setting 'debugName' which adds an extra div with text in it to display the current dirty state on the vdom
 export function dirtyWrapperStream(state$, inner$, debugName) {
     return xs.combine(state$, inner$)
-    .map(([state, inner]) => dirtyWrapper(state.ui.dirty, inner, debugName))
+    .map(([state, inner]) => dirtyWrapper( (state.ui ?? {}).dirty ?? false, inner, debugName))
 }

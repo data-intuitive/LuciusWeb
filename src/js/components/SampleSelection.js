@@ -230,8 +230,8 @@ function SampleSelection(sources) {
     .combine(modifiedState$, compoundAnnotations.DOM)
     .map(([state, annotation]) => makeTable(state, annotation, false))
 
-  // Wrap component with an extra div that handles being dirty
-  const vdom$ = dirtyWrapperStream( state$, xs.merge(initVdom$, loadingVdom$, loadedVdom$), "SampleSelection")
+  // Wrap component vdom with an extra div that handles being dirty
+  const vdom$ = dirtyWrapperStream( state$, xs.merge(initVdom$, loadingVdom$, loadedVdom$))
 
   const dataReducer$ = data$.map((data) => (prevState) => {
     const newData = data.map((el) => merge(el, { use: true }))

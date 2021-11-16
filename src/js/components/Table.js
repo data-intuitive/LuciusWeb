@@ -575,7 +575,7 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
     )
 
     // Wrap component vdom with an extra div that handles being dirty
-    const vdom$ = dirtyWrapperStream(state$, xs.merge(initVdom$, errorVdom$, loadingVdom$.remember(), loadedVdom$), "Table")
+    const vdom$ = dirtyWrapperStream(state$, xs.merge(initVdom$, errorVdom$, loadingVdom$.remember(), loadedVdom$) )
 
     // ========================================================================
 

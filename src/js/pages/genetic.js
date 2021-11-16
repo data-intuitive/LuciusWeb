@@ -53,7 +53,7 @@ export default function GeneticWorkflow(sources) {
         compoundAnnotations: state.settings.compoundAnnotations,
         treatmentLike: treatmentLikeFilter.GENETIC,
       },
-      ui: state.ui !== undefined ? state.ui.form : {},
+      ui: (state.ui ?? {} ).form ?? {},
     }),
     set: (state, childState) => ({ ...state, form: childState.form }),
   }
@@ -74,22 +74,24 @@ export default function GeneticWorkflow(sources) {
   })
 
   // Use dropRepeats else the stream gets in an infinite loop
-  // TODO: investigate if this is the best way to solve the loop or if it can be prevented in a more structural way
-  // const uiReducer$ = state$.compose(dropRepeats((x, y) => equals(x.form.sampleSelection.dirty, y.form.sampleSelection.dirty)))
   const uiReducer$ = state$.compose(dropRepeats(equals))
   .map(state => 
-    prevState =>
-    ({...prevState,
-      ui: {
-        form: {
-          sampleSelection: {dirty: state.form.check.dirty },
-          signature: {dirty: state.form.sampleSelection.dirty || state.form.check.dirty },
+    prevState => {
+      const dirtyCheck = state.form.check.dirty
+      const dirtySampleSelection = state.form.sampleSelection.dirty
+      const dirtyFilter = state.filter.dirty
+      return ({...prevState,
+        ui: {
+          form: {
+            sampleSelection: {dirty: dirtyCheck },
+            signature: {dirty: dirtyCheck || dirtySampleSelection },
+          },
+          plots: {dirty: dirtyCheck || dirtySampleSelection || dirtyFilter },
+          headTable: {dirty: dirtyCheck || dirtySampleSelection || dirtyFilter },
+          tailTable: {dirty: dirtyCheck || dirtySampleSelection || dirtyFilter },
         },
-        plots: {dirty: state.form.sampleSelection.dirty || state.form.check.dirty || state.filter.dirty },
-        headTable: {dirty: state.form.sampleSelection.dirty || state.form.check.dirty || state.filter.dirty },
-        tailTable: {dirty: state.form.sampleSelection.dirty || state.form.check.dirty || state.filter.dirty },
-      },
-    })
+      })
+    }
   )
 
   const TreatmentFormSink = isolate(TreatmentForm, { onion: formLens })(sources)

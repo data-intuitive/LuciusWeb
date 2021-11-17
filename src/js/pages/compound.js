@@ -79,6 +79,7 @@ export default function CompoundWorkflow(sources) {
     prevState => {
       const dirtyCheck = state.form.check.dirty
       const dirtySampleSelection = state.form.sampleSelection.dirty
+      const busySignature = state.form.signature.busy
       const dirtyFilter = state.filter.dirty
       return ({...prevState,
         ui: {
@@ -86,9 +87,9 @@ export default function CompoundWorkflow(sources) {
             sampleSelection: {dirty: dirtyCheck },
             signature: {dirty: dirtyCheck || dirtySampleSelection },
           },
-          plots: {dirty: dirtyCheck || dirtySampleSelection || dirtyFilter },
-          headTable: {dirty: dirtyCheck || dirtySampleSelection || dirtyFilter },
-          tailTable: {dirty: dirtyCheck || dirtySampleSelection || dirtyFilter },
+          headTable: {dirty: dirtyCheck || dirtySampleSelection || busySignature || dirtyFilter },
+          tailTable: {dirty: dirtyCheck || dirtySampleSelection || busySignature || dirtyFilter },
+          plots:     {dirty: dirtyCheck || dirtySampleSelection || busySignature || dirtyFilter },
         },
       })
     }

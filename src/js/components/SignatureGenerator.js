@@ -11,7 +11,7 @@ import { loggerFactory } from '../utils/logger'
 import { stringify } from 'querystring';
 import { GeneAnnotationQuery } from './GeneAnnotationQuery'
 import { absGene } from '../utils/utils'
-import { dirtyWrapperStream } from "../utils/ui"
+import { busyUiReducer, dirtyWrapperStream } from "../utils/ui"
 
 const emptyData = {
     body: {
@@ -38,12 +38,15 @@ function model(newInput$, request$, data$) {
         const requestReducer$ = request$.map(req => prevState => ({ ...prevState, core: { ...prevState.core, request: req } }))
         // Add data from API to state, update output key when relevant
         const dataReducer$ = data$.map(newData => prevState => ({ ...prevState, core: { ...prevState.core, data: newData, output: newData.join(" ") } }))
+        // Logic and reducer stream that monitors if this component is busy
+        const busyReducer$ = busyUiReducer(newInput$, data$)
 
     return xs.merge(
         defaultReducer$,
         inputReducer$,
         dataReducer$,
-        requestReducer$
+        requestReducer$,
+        busyReducer$,
     )
 }
 

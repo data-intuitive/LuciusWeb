@@ -26,6 +26,17 @@ export function dirtyUiReducer(output$, current$) {
         }))
 }
 
+// Reducer dedicated to outputting the busy state of a component into the component onion
+export function busyUiReducer(start$, finished$) {
+  
+  const busy$ = xs.merge(start$.mapTo(true), finished$.mapTo(false))
+  
+  return busy$.map((busy) => (prevState) => ({
+    ...prevState,
+    core: {...prevState.core, busy: busy },
+    }))
+}
+
 // Provide wrapper that encapsulates the inner portion with an extra div that sets opacity
 // Supports setting 'debugName' which adds an extra div with text in it to display the current dirty state on the vdom
 function dirtyWrapper(dirty, inner, debugName) {

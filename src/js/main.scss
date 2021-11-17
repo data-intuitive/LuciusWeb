@@ -42,6 +42,12 @@ main {
     @extend .lighten-5;
 }
 
+div.disabled {
+    // check https://stackoverflow.com/questions/33264310/in-html-can-i-disable-user-interaction-with-an-entire-dom-sub-tree/33264477
+    // for more info and further steps to make
+    pointer-events: none; 
+}
+
 
 /* home svg styling and hover */
 

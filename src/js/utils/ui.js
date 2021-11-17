@@ -41,14 +41,14 @@ export function busyUiReducer(start$, finished$) {
 // Supports setting 'debugName' which adds an extra div with text in it to display the current dirty state on the vdom
 function dirtyWrapper(dirty, inner, debugName) {
     const withDebug = (
-      div({ style: { opacity: dirty ? 0.2 : 1.0 } },[
+      div(dirty ? '.disabled' : '.enabled', { style: { opacity: dirty ? 0.2 : 1.0 } },[
         div('.card .orange .lighten-3', [ p('.center', debugName + " dirty: " + dirty) ]),
         inner
       ])
     )
 
     const withoutDebug = (
-        div({ style: { opacity: dirty ? 0.2 : 1.0 } },[
+        div(dirty ? '.disabled' : '.enabled', { style: { opacity: dirty ? 0.2 : 1.0 } },[
           inner
         ])
       )

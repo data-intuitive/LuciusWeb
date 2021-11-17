@@ -13,7 +13,7 @@ import {
 } from "../components/SampleTable/SampleTable"
 
 // Support for ghost mode
-import { scenario } from "../scenarios/compoundScenario"
+import { scenario } from "../scenarios/treatmentScenario"
 import { runScenario } from "../utils/scenario"
 
 export default function GeneticWorkflow(sources) {
@@ -26,18 +26,15 @@ export default function GeneticWorkflow(sources) {
   const state$ = sources.onion.state$
 
   // Scenario for ghost mode
-  const scenarioReducer$ = sources.onion.state$
+  const scenarios$ = sources.onion.state$
     .take(1)
     .filter((state) => state.settings.common.ghostMode)
-    .mapTo(runScenario(scenario).scenarioReducer$)
+    .map(state => runScenario(scenario(state.settings.common.ghost.genetic)))
+  const scenarioReducer$ = scenarios$.map(s => s.scenarioReducer$)
     .flatten()
-    .startWith((prevState) => prevState)
-  const scenarioPopup$ = sources.onion.state$
-    .take(1)
-    .filter((state) => state.settings.common.ghostMode)
-    .mapTo(runScenario(scenario).scenarioPopup$)
+  const scenarioPopup$ = scenarios$.map(s => s.scenarioPopup$)
     .flatten()
-    .startWith({ text: "Welcome to Genetic Perturbation Workflow", duration: 4000 })
+    .startWith({ text: "Welcome to Genetic Workflow", duration: 4000 })
 
   const formLens = {
     get: (state) => ({

@@ -1,5 +1,5 @@
 export const initSettings = {
-    version: 4.001,
+    version: 5.1,
     deployment: {
       "name": "default",
     },

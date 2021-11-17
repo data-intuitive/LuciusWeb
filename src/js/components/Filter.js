@@ -157,7 +157,7 @@ function intent(domSource$) {
   const action$ = xs.merge(
     doseToggled$,
     protocolToggled$,
-    typeToggled$
+    typeToggled$,
     // toggledGhost$
   )
 
@@ -485,7 +485,7 @@ function Filter(sources) {
   // Ghost mode, inject changes via external state updates...
   // const ghostChanges$ = modifiedState$
   //   .filter((state) => typeof state.core.ghost !== "undefined")
-  //   .compose(dropRepeats());
+  //   .compose(dropRepeats())
 
   const actions = intent(sources.DOM)
 
@@ -513,7 +513,7 @@ function Filter(sources) {
     DOM: vdom$,
     HTTP: filterQuery.HTTP,
     onion: reducers$,
-    output: outputTrigger$
+    output: outputTrigger$.debug('filter')
   }
 }
 

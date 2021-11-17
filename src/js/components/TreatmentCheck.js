@@ -281,8 +281,6 @@ function TreatmentCheck(sources) {
     .map(([_, state]) => state.core.input)
     .remember()
 
-  // const history$ = sources.onion.state$.fold((acc, x) => acc.concat([x]), [{}])
-
   return {
     log: xs.merge(
       logger(state$, "state$")

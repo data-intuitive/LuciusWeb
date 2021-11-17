@@ -13,62 +13,10 @@ import { loggerFactory } from '../utils/logger'
 const formLens = {
   get: state => ({ form: state.form, settings: { form: state.settings.form, api: state.settings.api, common: state.settings.common } }),
   set: (state, childState) => ({ ...state, form: childState.form })
-};
+}
 
-function SignatureForm(sources) {
-
-  const logger = loggerFactory('signatureForm', sources.onion.state$, 'settings.form.debug')
-
-  const state$ = sources.onion.state$
-  const domSource$ = sources.DOM;
-  const props$ = sources.props;
-
-  // Check Signature subcomponent, via isolation
-  const signatureCheckSink = isolate(SignatureCheck, { onion: checkLens })(sources)
-  const signatureCheckDom$ = signatureCheckSink.DOM;
-  const signatureCheckHTTP$ = signatureCheckSink.HTTP;
-  const signatureCheckReducer$ = signatureCheckSink.onion;
-
-  // Valid query?
-  const validated$ = state$.map(state => state.form.validated)
-
-  const vdom$ = xs.combine(state$, signatureCheckDom$, validated$)
-    .map(
-      ([state, checkdom, validated]) => {
-        const query = state.form.query
-        return div(
-          [
-            div('.row  .pink .darken-4 .white-text', { style: { padding: '20px 10px 10px 10px' } }, [
-              // label('Query: '),
-              div('.Default .waves-effect .col .s1 .center-align', [
-                i('.large  .center-align .material-icons .pink-text', { style: { fontSize: '45px', fontColor: 'gray' } }, 'search'),
-              ]),
-              input('.Query .col s10 .white-text', { style: { fontSize: '20px' }, props: { type: 'text', value: query }, value: query }),
-              (validated)
-              ? div('.SignatureCheck .waves-effect .col .s1 .center-align', [
-                i('.large .material-icons', { style: { fontSize: '45px', fontColor: 'grey' } }, ['play_arrow'])])
-              : div('.SignatureCheck .col .s1 .center-align', [
-                i('.large .material-icons .pink-text', { style: { fontSize: '45px', fontColor: 'grey' } }, 'play_arrow')])
-              // ])
-            ]),
-            div([
-              (!validated || query == '') ? div([checkdom]) : div()
-            ])
-          ])
-      });
-
-  // Update in query, or simply ENTER
-  const newQuery$ = xs.merge(
-    domSource$.select('.Query').events('input').map(ev => ev.target.value),
-    // Ghost
-    state$.map(state => state.form.query).compose(dropRepeats())
-  )
-
-  // Updated state is propagated and picked up by the necessary components
-  const click$ = domSource$.select('.SignatureCheck').events('click')
-  const enter$ = domSource$.select('.Query').events('keydown').filter(({ keyCode, ctrlKey }) => keyCode === ENTER_KEYCODE && ctrlKey === false);
-  const update$ = xs.merge(click$, enter$)//.debug(log)
-
+function model(newQuery$, state$, sources, signatureCheckSink) {
+  
   // Set a default signature for demo purposes
   const setDefault$ = sources.DOM.select('.Default').events('click')
   const setDefaultReducer$ =
@@ -102,7 +50,7 @@ function SignatureForm(sources) {
         },
       })
     }
-  });
+  })
 
   // Update the state when input changes
   const queryReducer$ = newQuery$.map(query => prevState => {
@@ -132,10 +80,90 @@ function SignatureForm(sources) {
   // When update is clicked, update the query. Onionify does the rest
   const childReducer$ = signatureCheckSink.onion
 
+  return xs.merge(
+    defaultReducer$,
+    setDefaultReducer$,
+    queryReducer$,
+    invalidateReducer$,
+    childReducer$,
+    validateReducer$,
+  )
+}
+
+function view(state$, signatureCheckDom$) {
+
+  // Valid query?
+  const validated$ = state$.map(state => state.form.validated)
+
+  var result$ = xs.combine(state$, signatureCheckDom$, validated$)
+  .map(
+    ([state, checkdom, validated]) => {
+      const query = state.form.query
+      return div(
+        [
+          div('.row  .pink .darken-4 .white-text', { style: { padding: '20px 10px 10px 10px' } }, [
+            // label('Query: '),
+            div('.Default .waves-effect .col .s1 .center-align', [
+              i('.large  .center-align .material-icons .pink-text', { style: { fontSize: '45px', fontColor: 'gray' } }, 'search'),
+            ]),
+            input('.Query .col s10 .white-text', { style: { fontSize: '20px' }, props: { type: 'text', value: query }, value: query }),
+            (validated)
+            ? div('.SignatureCheck .waves-effect .col .s1 .center-align', [
+              i('.large .material-icons', { style: { fontSize: '45px', fontColor: 'grey' } }, ['play_arrow'])])
+            : div('.SignatureCheck .col .s1 .center-align', [
+              i('.large .material-icons .pink-text', { style: { fontSize: '45px', fontColor: 'grey' } }, 'play_arrow')])
+            // ])
+          ]),
+          div([
+            (!validated || query == '') ? div([checkdom]) : div()
+          ])
+        ])
+    })
+    return result$;
+}
+
+function intent(domSource$) {
+    // Updated state is propagated and picked up by the necessary components
+    const click$ = domSource$.select('.SignatureCheck').events('click')
+    const enter$ = domSource$.select('.Query').events('keydown').filter(({ keyCode, ctrlKey }) => keyCode === ENTER_KEYCODE && ctrlKey === false);
+    const update$ = xs.merge(click$, enter$)//.debug(log)
+
+    return {
+      update$: update$
+    }
+}
+
+function SignatureForm(sources) {
+
+  const logger = loggerFactory('signatureForm', sources.onion.state$, 'settings.form.debug')
+
+  const state$ = sources.onion.state$
+  const domSource$ = sources.DOM;
+  const props$ = sources.props;
+
+  // Check Signature subcomponent, via isolation
+  const signatureCheckSink = isolate(SignatureCheck, { onion: checkLens })(sources)
+  const signatureCheckDom$ = signatureCheckSink.DOM;
+  const signatureCheckHTTP$ = signatureCheckSink.HTTP;
+  const signatureCheckReducer$ = signatureCheckSink.onion;
+
+  // Update in query, or simply ENTER
+  const newQuery$ = xs.merge(
+    domSource$.select('.Query').events('input').map(ev => ev.target.value),
+    // Ghost
+    state$.map(state => state.form.query).compose(dropRepeats())
+  )
+
+  const reducers$ = model(newQuery$, state$, sources, signatureCheckSink)
+
+  const vdom$ = view(state$, signatureCheckDom$)
+
+  const actions$ = intent(domSource$)
+
   // When GO clicked or enter -> send updated 'value' to sink
   // Maybe catch when no valid query?
   const query$ = xs.merge(
-    update$,
+    actions$.update$,
     // Ghost mode
     sources.onion.state$.map(state => state.form.ghost).filter(ghost => ghost).compose(dropRepeats())
     )
@@ -149,14 +177,7 @@ function SignatureForm(sources) {
       signatureCheckSink.log
     ),
     DOM: vdom$,
-    onion: xs.merge(
-      defaultReducer$,
-      setDefaultReducer$,
-      queryReducer$,
-      invalidateReducer$,
-      childReducer$,
-      validateReducer$,
-    ),
+    onion: reducers$,
     HTTP: signatureCheckHTTP$,
     output: query$
   };

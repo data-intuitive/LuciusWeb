@@ -14,6 +14,7 @@ import {
 } from "ramda"
 import { FetchFilters } from "./FetchFilters"
 import debounce from 'xstream/extra/debounce'
+import { dirtyUiReducer } from "../utils/ui"
 
 // A typical Lens with one exception:
 // We allow the child state settings for filter to propagate to
@@ -173,7 +174,8 @@ export function model(
   input$,
   filterValuesAction$,
   modifier$,
-  filterAction$
+  filterAction$,
+  state$,
 ) {
 
   // Add the filter values from the settings (and originally from deployments.json) to the current values
@@ -270,29 +272,35 @@ export function model(
   // merge with the first state update in order to have at a value during initialization
   // When the filter is not set, ALL values are present and we transform that into NO values
   // We use the filter_output key for this, to keep it separate from the normal output key
-  const outputReducer$ =
-    filterAction$
-    .map(_ => (prevState) => {
-      const filterKeys = keys(prevState.settings.filter.values)
-      var o = {}
-      // Mutable approach to transforming the values
-      filterKeys.forEach((key) => {
-        // If no values are present, ALL values are selected
-        const actual =
-          prop(key, prevState.core.output) == undefined
-          ? prop(key, prevState.settings.filter.values)
-          : prop(key, prevState.core.output)
-        if (
-          difference(prop(key, prevState.settings.filter.values), actual).length != 0
-        ) {
-          o[key] = prop(key, prevState.core.output)
-        }
-      })
-      return {
-        ...prevState,
-        core: { ...prevState.core, filter_output: o },
+  function minimizeFilterOutput(state) {
+    const filterKeys = keys(state.settings.filter.values)
+    var o = {}
+    // Mutable approach to transforming the values
+    filterKeys.forEach((key) => {
+      // If no values are present, ALL values are selected
+      const actual =
+        prop(key, state.core.output) == undefined
+        ? prop(key, state.settings.filter.values)
+        : prop(key, state.core.output)
+      if (
+        difference(prop(key, state.settings.filter.values), actual).length != 0
+      ) {
+        o[key] = prop(key, state.core.output)
       }
+    
     })
+    return o
+  }
+
+  const outputReducer$ = filterAction$.map(_ => (prevState) => ({
+      ...prevState,
+      core: { ...prevState.core, filter_output: minimizeFilterOutput(prevState) },
+    }))
+
+  const minimizedCurrentOutput$ = state$.map((state) => minimizeFilterOutput(state))
+
+  // Logic and reducer stream that monitors if this component became dirty
+  const dirtyReducer$ = dirtyUiReducer(minimizedCurrentOutput$, state$.map(state => state.core.filter_output))
 
   return xs.merge(
     defaultReducer$,
@@ -301,6 +309,7 @@ export function model(
     filterReducer$,
     toggleReducer$,
     outputReducer$,
+    dirtyReducer$,
   )
 }
 
@@ -496,7 +505,8 @@ function Filter(sources) {
       input$,
       actions.filterValuesAction$,
       actions.modifier$,
-      actions.filterAction$
+      actions.filterAction$,
+      state$,
   )
 
   const outputTrigger$ =

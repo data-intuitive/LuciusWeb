@@ -16,6 +16,9 @@ import {
 import { scenario } from "../scenarios/treatmentScenario"
 import { runScenario } from "../utils/scenario"
 
+import dropRepeats from "xstream/extra/dropRepeats"
+import { equals } from "ramda"
+
 export default function GeneticWorkflow(sources) {
   const logger = loggerFactory(
     "genetic",
@@ -47,6 +50,7 @@ export default function GeneticWorkflow(sources) {
         compoundAnnotations: state.settings.compoundAnnotations,
         treatmentLike: treatmentLikeFilter.GENETIC,
       },
+      ui: (state.ui ?? {} ).form ?? {},
     }),
     set: (state, childState) => ({ ...state, form: childState.form }),
   }
@@ -65,6 +69,28 @@ export default function GeneticWorkflow(sources) {
       }
     }
   })
+
+  // Use dropRepeats else the stream gets in an infinite loop
+  const uiReducer$ = state$.compose(dropRepeats(equals))
+  .map(state => 
+    prevState => {
+      const dirtyCheck = state.form.check.dirty
+      const dirtySampleSelection = state.form.sampleSelection.dirty
+      const busySignature = state.form.signature.busy
+      const dirtyFilter = state.filter.dirty
+      return ({...prevState,
+        ui: {
+          form: {
+            sampleSelection: {dirty: dirtyCheck },
+            signature: {dirty: dirtyCheck || dirtySampleSelection },
+          },
+          headTable: {dirty: dirtyCheck || dirtySampleSelection || busySignature || dirtyFilter },
+          tailTable: {dirty: dirtyCheck || dirtySampleSelection || busySignature || dirtyFilter },
+          plots:     {dirty: dirtyCheck || dirtySampleSelection || busySignature || dirtyFilter },
+        },
+      })
+    }
+  )
 
   const TreatmentFormSink = isolate(TreatmentForm, { onion: formLens })(sources)
   const signature$ = TreatmentFormSink.output.remember()
@@ -155,7 +181,8 @@ export default function GeneticWorkflow(sources) {
       filterForm.onion,
       headTable.onion,
       tailTable.onion,
-      scenarioReducer$
+      scenarioReducer$,
+      uiReducer$,
     ),
     HTTP: xs.merge(
       TreatmentFormSink.HTTP,

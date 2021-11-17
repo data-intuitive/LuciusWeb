@@ -5,6 +5,7 @@ import xs from "xstream"
 import dropRepeats from "xstream/extra/dropRepeats"
 import debounce from "xstream/extra/debounce"
 import { loggerFactory } from "../utils/logger"
+import { dirtyUiReducer } from "../utils/ui"
 
 const checkLens = {
   get: (state) => ({
@@ -281,6 +282,9 @@ function TreatmentCheck(sources) {
     .map(([_, state]) => state.core.input)
     .remember()
 
+  // Logic and reducer stream that monitors if this component became dirty
+  const dirtyReducer$ = dirtyUiReducer(query$, state$.map(state => state.core.input))
+
   return {
     log: xs.merge(
       logger(state$, "state$")
@@ -294,7 +298,8 @@ function TreatmentCheck(sources) {
       dataReducer$,
       requestReducer$,
       setDefaultReducer$,
-      autocompleteReducer$
+      autocompleteReducer$,
+      dirtyReducer$,
     ),
     output: query$,
     ac: ac$

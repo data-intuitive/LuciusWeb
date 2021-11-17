@@ -11,13 +11,16 @@ import {
   th,
   thead,
   tbody,
+  p,
 } from "@cycle/dom"
 import { clone, equals, merge } from "ramda"
 import xs from "xstream"
 import dropRepeats from "xstream/extra/dropRepeats"
+import debounce from 'xstream/extra/debounce'
 import { loggerFactory } from "../utils/logger"
 import { CompoundAnnotation } from "../components/CompoundAnnotation"
 import { safeModelToUi } from "../modelTranslations"
+import { dirtyUiReducer, dirtyWrapperStream } from "../utils/ui"
 
 const emptyData = {
   body: {
@@ -31,11 +34,12 @@ const sampleSelectionLens = {
   get: (state) => ({
     core: typeof state.form !== "undefined" ? state.form.sampleSelection : {},
     settings: state.settings,
+    ui: (state.ui??{}).sampleSelection ?? {dirty: false}, // Get state.ui.sampleSelection in a safe way or else get a default
   }),
   // get: state => ({core: state.form.sampleSelection, settings: state.settings}),
   set: (state, childState) => ({
     ...state,
-    form: { ...state.form, sampleSelection: childState.core },
+    form: { ...state.form, sampleSelection: childState.core},
   }),
 }
 
@@ -226,7 +230,8 @@ function SampleSelection(sources) {
     .combine(modifiedState$, compoundAnnotations.DOM)
     .map(([state, annotation]) => makeTable(state, annotation, false))
 
-  const vdom$ = xs.merge(initVdom$, loadingVdom$, loadedVdom$)
+  // Wrap component vdom with an extra div that handles being dirty
+  const vdom$ = dirtyWrapperStream( state$, xs.merge(initVdom$, loadingVdom$, loadedVdom$))
 
   const dataReducer$ = data$.map((data) => (prevState) => {
     const newData = data.map((el) => merge(el, { use: true }))
@@ -258,7 +263,7 @@ function SampleSelection(sources) {
     .filter((code) => code == "AltLeft")
     .mapTo(false)
 
-  const a$ = xs.merge(aDown$, aUp$).compose(dropRepeats(equals))
+  const a$ = xs.merge(aDown$, aUp$).compose(dropRepeats(equals)).startWith(false)
 
   const selectReducer$ = useClick$
     .compose(sampleCombine(a$))
@@ -325,6 +330,9 @@ function SampleSelection(sources) {
     .compose(sampleCombine(state$))
     .map(([ev, state]) => state.core.output)
 
+  // Logic and reducer stream that monitors if this component became dirty
+  const dirtyReducer$ = dirtyUiReducer(sampleSelection$, state$.map(state => state.core.output))
+
   return {
     log: xs.merge(logger(state$, "state$")),
     DOM: vdom$,
@@ -334,7 +342,8 @@ function SampleSelection(sources) {
       inputReducer$,
       requestReducer$,
       dataReducer$,
-      selectReducer$
+      selectReducer$,
+      dirtyReducer$,
     ),
     output: sampleSelection$,
     modal: compoundAnnotations.modal,

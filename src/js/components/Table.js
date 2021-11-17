@@ -49,6 +49,7 @@ import { loggerFactory } from "../utils/logger"
 import { convertToCSV } from "../utils/export"
 import delay from "xstream/extra/delay"
 import debounce from "xstream/extra/debounce"
+import { dirtyWrapperStream } from "../utils/ui"
 
 // Granular access to the settings
 // We _copy_ the results array to the root of this element's scope.
@@ -63,6 +64,7 @@ const headTableLens = {
       sourire: state.settings.sourire,
       filter: state.settings.filter,
     },
+    ui: (state.ui??{}).headTable ?? {dirty: false}, // Get state.ui.headTable in a safe way or else get a default
   }),
   set: (state, childState) => ({
     ...state,
@@ -84,6 +86,7 @@ const tailTableLens = {
       sourire: state.settings.sourire,
       filter: state.settings.filter,
     },
+    ui: (state.ui??{}).tailTable ?? {dirty: false}, // Get state.ui.tailTable in a safe way or else get a default
   }),
   set: (state, childState) => ({
     ...state,
@@ -105,6 +108,7 @@ const compoundContainerTableLens = {
       sourire: state.settings.sourire,
       filter: state.settings.filter,
     },
+    ui: (state.ui??{}).compoundTable ?? {dirty: false}, // Get state.ui.compoundTable in a safe way or else get a default
   }),
   set: (state, childState) => ({
     ...state,
@@ -571,7 +575,8 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
       div(".red .white-text", [p("An error occured !!!")])
     )
 
-    const vdom$ = xs.merge(initVdom$, errorVdom$, loadingVdom$.remember(), loadedVdom$)
+    // Wrap component vdom with an extra div that handles being dirty
+    const vdom$ = dirtyWrapperStream(state$, xs.merge(initVdom$, errorVdom$, loadingVdom$.remember(), loadedVdom$) )
 
     // ========================================================================
 

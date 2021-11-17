@@ -1,6 +1,6 @@
 import sampleCombine from "xstream/extra/sampleCombine"
 import { i, div, input } from "@cycle/dom"
-import { equals, mergeAll } from "ramda"
+import { prop, equals, mergeAll } from "ramda"
 import xs from "xstream"
 import dropRepeats from "xstream/extra/dropRepeats"
 import debounce from "xstream/extra/debounce"
@@ -208,7 +208,7 @@ function TreatmentCheck(sources) {
         ...prevState.core,
         showSuggestions: false,
         validated: true,
-        input: state.settings.common.hourglass.treatment,
+        input: prop(state.settings.treatmentLike, state.settings.common.example)
       },
     }))
 
@@ -281,8 +281,6 @@ function TreatmentCheck(sources) {
     .compose(sampleCombine(state$))
     .map(([_, state]) => state.core.input)
     .remember()
-
-  // const history$ = sources.onion.state$.fold((acc, x) => acc.concat([x]), [{}])
 
   // Logic and reducer stream that monitors if this component became dirty
   const dirtyReducer$ = dirtyUiReducer(query$, state$.map(state => state.core.input))

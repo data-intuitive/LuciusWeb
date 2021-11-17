@@ -24,7 +24,7 @@ function model(newQuery$, state$, sources, signatureCheckSink) {
     .compose(sampleCombine(state$))
     .map(([_, state]) => prevState => {
       let newState = clone(prevState)
-      newState.form.query = state.settings.common.hourglass.signature //'ENSG00000012048 -WRONG HSPA1A DNAJB1 DDIT4 -TSEN2'
+      newState.form.query = state.settings.common.example.signature //'ENSG00000012048 -WRONG HSPA1A DNAJB1 DDIT4 -TSEN2'
       newState.form.validated = false
       return newState
     })

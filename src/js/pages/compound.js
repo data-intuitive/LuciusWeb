@@ -13,7 +13,7 @@ import {
 } from "../components/SampleTable/SampleTable"
 
 // Support for ghost mode
-import { scenario } from "../scenarios/compoundScenario"
+import { scenario } from "../scenarios/treatmentScenario"
 import { runScenario } from "../utils/scenario"
 
 import dropRepeats from "xstream/extra/dropRepeats"
@@ -29,16 +29,13 @@ export default function CompoundWorkflow(sources) {
   const state$ = sources.onion.state$
 
   // Scenario for ghost mode
-  const scenarioReducer$ = sources.onion.state$
+  const scenarios$ = sources.onion.state$
     .take(1)
     .filter((state) => state.settings.common.ghostMode)
-    .mapTo(runScenario(scenario).scenarioReducer$)
+    .map(state => runScenario(scenario(state.settings.common.ghost.compound)))
+  const scenarioReducer$ = scenarios$.map(s => s.scenarioReducer$)
     .flatten()
-    .startWith((prevState) => prevState)
-  const scenarioPopup$ = sources.onion.state$
-    .take(1)
-    .filter((state) => state.settings.common.ghostMode)
-    .mapTo(runScenario(scenario).scenarioPopup$)
+  const scenarioPopup$ = scenarios$.map(s => s.scenarioPopup$)
     .flatten()
     .startWith({ text: "Welcome to Compound Workflow", duration: 4000 })
 

@@ -159,15 +159,15 @@ function SampleSelection(sources) {
       ),
       td(
         ".left-align" + selectedClass(entry.use),
-        entry.id.length > 30 ? entry.id.substring(0, 30) + "..." : entry.id
+        entry.id.length > 30 ? entry.id.substring(0, 40) + "..." : entry.id
       ),
       td(selectedClass(entry.use), entry.cell),
       td(
         selectedClass(entry.use),
         entry.dose.length > 6 ? entry.dose.substring(0, 6) + "..." : entry.dose
       ),
-      td(selectedClass(entry.use), entry.batch),
-      td(selectedClass(entry.use), entry.year),
+      // td(selectedClass(entry.use), entry.batch),
+      // td(selectedClass(entry.use), entry.year),
       td(selectedClass(entry.use), entry.time),
       td(selectedClass(entry.use), entry.significantGenes),
     ])
@@ -176,10 +176,10 @@ function SampleSelection(sources) {
       th(safeModelToUi("id", state.settings.common.modelTranslations)),
       th("Name"),
       th("Sample"),
-      th("Protocol"),
-      th("Conc"),
-      th("Batch"),
-      th("Year"),
+      th("Cell"),
+      th("Dose"),
+      // th("Batch"),
+      // th("Year"),
       th("Time"),
       th("Sign. Genes"),
     ])

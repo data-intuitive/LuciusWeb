@@ -9,6 +9,23 @@ import {
 import { merge } from "ramda"
 import { safeModelToUi } from "../../modelTranslations"
 
+export function SampleInfoHeader(bgcolor) {
+    return li(
+    ".collection-item .zoom",
+    { style: { "background-color": bgcolor} },
+    [
+      div(".row", { style: { fontWeight: "small" } }, [
+        div(".col .s1 .left-align", { style: { fontWeight: "bold" } }, ["Zhang Score"]),
+        div(".col .s2", { style: { fontWeight: "bold" } }, ["Sample ID"]),
+        div(".col .s1", { style: { fontWeight: "bold" } }, ["Cell"]),
+        div(".col .s2", { style: { fontWeight: "bold" } }, ["Treatment ID"]),
+        div(".col .s3", { style: { fontWeight: "bold" } }, ["Treatment Name"]),
+        div(".col .s1", { style: { fontWeight: "bold" } }, ["Treatment Type"]),
+        div(".col .s2 .center-align", { style: { fontWeight: "bold" } }, ["Visualization"]),
+      ])
+  ])
+}
+
 export function SampleInfo(sources) {
   const state$ = sources.onion.state$
   const props$ = sources.props

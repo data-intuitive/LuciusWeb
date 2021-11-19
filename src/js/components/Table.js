@@ -208,9 +208,11 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
       .startWith(0)
 
     const defaultAmountToDisplay$ = newInput$.map(state => parseInt(state.settings.table.count))
-    const amountToDisplay$ = xs
-      .merge(defaultAmountToDisplay$, plus5$, min5$, plus10$, min10$)
+      .compose(dropRepeats(equals))
+    const diffAmountToDisplay$ = xs
+      .merge(plus5$, min5$, plus10$, min10$)
       .fold((x, y) => max(0, x + y), 0)
+    const amountToDisplay$ = xs.combine(defaultAmountToDisplay$, diffAmountToDisplay$).map(([a, b]) => a + b)
 
     // ========================================================================
 

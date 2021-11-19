@@ -9,6 +9,21 @@ import {
 import { merge } from "ramda"
 import { safeModelToUi } from "../../modelTranslations"
 
+import img_trt_cp          from "/images/treatmentTypes/TRT_CP.png"
+import img_trt_lig         from "/images/treatmentTypes/TRT_LIG.png"
+import img_trt_sh          from "/images/treatmentTypes/TRT_SH.png"
+import img_trt_sh_cgs      from "/images/treatmentTypes/TRT_SH.CGS.png"
+import img_trt_oe          from "/images/treatmentTypes/TRT_OE.png"
+import img_trt_oe_mut      from "/images/treatmentTypes/TRT_OE.MUT.png"
+import img_trt_xpr         from "/images/treatmentTypes/TRT_XPR.png"
+import img_ctl_vehicle     from "/images/treatmentTypes/CTL_VEHICLE.png"
+import img_ctl_vector      from "/images/treatmentTypes/CTL_VECTOR.png"
+//import img_trt_sh_css      from "/images/treatmentTypes/TRT_SH.CSS.png" // MISSING!
+import img_ctl_vehicle_cns from "/images/treatmentTypes/CTL_VEHICLE.CNS.png"
+import img_ctl_vector_cns  from "/images/treatmentTypes/CTL_VECTOR.png"
+import img_ctl_untrt_cns   from "/images/treatmentTypes/CTL_UNTRT.CNS.png"
+import img_ctl_untrt       from "/images/treatmentTypes/CTL_UNTRT.png"
+
 export function SampleInfoHeader(bgcolor) {
     return li(
     ".collection-item .zoom",
@@ -70,20 +85,20 @@ export function SampleInfo(sources) {
 
   const imgForTrt = (trt) => {
     let knownTrt = {
-      "trt_cp":          img(".trt_img", { props: { alt: trt, src: "/images/treatmentTypes/TRT_CP.png"}}),
-      "trt_lig":         img(".trt_img", { props: { alt: trt, src: "/images/treatmentTypes/TRT_LIG.png" }}),
-      "trt_sh":          img(".trt_img", { props: { alt: trt, src: "/images/treatmentTypes/TRT_SH.png" }}),
-      "trt_sh.cgs":      img(".trt_img", { props: { alt: trt, src: "/images/treatmentTypes/TRT_SH.CGS.png" }}),
-      "trt_oe":          img(".trt_img", { props: { alt: trt, src: "/images/treatmentTypes/TRT_OE.png" }}),
-      "trt_oe.mut":      img(".trt_img", { props: { alt: trt, src: "/images/treatmentTypes/TRT_OE.MUT.png" }}),
-      "trt_xpr":         img(".trt_img", { props: { alt: trt, src: "/images/treatmentTypes/TRT_XPR.png" }}),
-      "ctl_vehicle":     img(".trt_img", { props: { alt: trt, src: "/images/treatmentTypes/CTL_VEHICLE.png" }}),
-      "ctl_vector":      img(".trt_img", { props: { alt: trt, src: "/images/treatmentTypes/CTL_VECTOR.png" }}),
-      //"trt_sh.css":      img(".trt_img", { props: { alt: trt, src: "/images/treatmentTypes/TRT_SH.CSS.png" }}), // MISSING!
-      "ctl_vehicle.cns": img(".trt_img", { props: { alt: trt, src: "/images/treatmentTypes/CTL_VEHICLE.CNS.png" }}),
-      "ctl_vector.cns":  img(".trt_img", { props: { alt: trt, src: "/images/treatmentTypes/CTL_VECTOR.png" }}),
-      "ctl_untrt.cns":   img(".trt_img", { props: { alt: trt, src: "/images/treatmentTypes/CTL_UNTRT.CNS.png" }}),
-      "ctl_untrt":       img(".trt_img", { props: { alt: trt, src: "/images/treatmentTypes/CTL_UNTRT.png" }}),
+      "trt_cp":          img(".trt_img", { props: { alt: trt, src: img_trt_cp }}),
+      "trt_lig":         img(".trt_img", { props: { alt: trt, src: img_trt_lig }}),
+      "trt_sh":          img(".trt_img", { props: { alt: trt, src: img_trt_sh }}),
+      "trt_sh.cgs":      img(".trt_img", { props: { alt: trt, src: img_trt_sh_cgs }}),
+      "trt_oe":          img(".trt_img", { props: { alt: trt, src: img_trt_oe }}),
+      "trt_oe.mut":      img(".trt_img", { props: { alt: trt, src: img_trt_oe_mut }}),
+      "trt_xpr":         img(".trt_img", { props: { alt: trt, src: img_trt_xpr }}),
+      "ctl_vehicle":     img(".trt_img", { props: { alt: trt, src: img_ctl_vehicle }}),
+      "ctl_vector":      img(".trt_img", { props: { alt: trt, src: img_ctl_vector }}),
+      //"trt_sh.css":      img(".trt_img", { props: { alt: trt, src: img_trt_sh_css }}), // MISSING!
+      "ctl_vehicle.cns": img(".trt_img", { props: { alt: trt, src: img_ctl_vehicle_cns }}),
+      "ctl_vector.cns":  img(".trt_img", { props: { alt: trt, src: img_ctl_vector_cns }}),
+      "ctl_untrt.cns":   img(".trt_img", { props: { alt: trt, src: img_ctl_untrt_cns }}),
+      "ctl_untrt":       img(".trt_img", { props: { alt: trt, src: img_ctl_untrt }}),
       "_default":        p([trt])
     }
 

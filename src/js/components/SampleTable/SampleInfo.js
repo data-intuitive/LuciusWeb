@@ -68,6 +68,28 @@ export function SampleInfo(sources) {
     return url
   }
 
+  const imgForTrt = (trt) => {
+    let knownTrt = {
+      "trt_cp":          img(".trt_img", { props: { alt: trt, src: "/images/treatmentTypes/TRT_CP.png"}}),
+      "trt_lig":         img(".trt_img", { props: { alt: trt, src: "/images/treatmentTypes/TRT_LIG.png" }}),
+      "trt_sh":          img(".trt_img", { props: { alt: trt, src: "/images/treatmentTypes/TRT_SH.png" }}),
+      "trt_sh.cgs":      img(".trt_img", { props: { alt: trt, src: "/images/treatmentTypes/TRT_SH.CGS.png" }}),
+      "trt_oe":          img(".trt_img", { props: { alt: trt, src: "/images/treatmentTypes/TRT_OE.png" }}),
+      "trt_oe.mut":      img(".trt_img", { props: { alt: trt, src: "/images/treatmentTypes/TRT_OE.MUT.png" }}),
+      "trt_xpr":         img(".trt_img", { props: { alt: trt, src: "/images/treatmentTypes/TRT_XPR.png" }}),
+      "ctl_vehicle":     img(".trt_img", { props: { alt: trt, src: "/images/treatmentTypes/CTL_VEHICLE.png" }}),
+      "ctl_vector":      img(".trt_img", { props: { alt: trt, src: "/images/treatmentTypes/CTL_VECTOR.png" }}),
+      //"trt_sh.css":      img(".trt_img", { props: { alt: trt, src: "/images/treatmentTypes/TRT_SH.CSS.png" }}), // MISSING!
+      "ctl_vehicle.cns": img(".trt_img", { props: { alt: trt, src: "/images/treatmentTypes/CTL_VEHICLE.CNS.png" }}),
+      "ctl_vector.cns":  img(".trt_img", { props: { alt: trt, src: "/images/treatmentTypes/CTL_VECTOR.png" }}),
+      "ctl_untrt.cns":   img(".trt_img", { props: { alt: trt, src: "/images/treatmentTypes/CTL_UNTRT.CNS.png" }}),
+      "ctl_untrt":       img(".trt_img", { props: { alt: trt, src: "/images/treatmentTypes/CTL_UNTRT.png" }}),
+      "_default":        p([trt])
+    }
+
+    return knownTrt[trt] ?? knownTrt["_default"]
+  }
+
   const row = (sample, props, blur, zoom) => {
     let zhangRounded =
       sample.zhang != null ? parseFloat(sample.zhang).toFixed(3) : "NA"
@@ -86,7 +108,7 @@ export function SampleInfo(sources) {
           sample.trt_id != "NA" ? sample.trt_id : "",
         ]),
         div(".col .s3", { style: blur }, [sample.trt_name]),
-        div(".col .s1", { style: blur }, [sample.trt]),
+        div(".col .s1", { style: blur }, [ imgForTrt(sample.trt) ]),
         div(".col .s2 .center-align", { style: blur }, [
           sample.smiles != null &&
           sample.smiles != "N/A" &&
@@ -116,7 +138,7 @@ export function SampleInfo(sources) {
           sample.trt_id != "NA" ? sample.trt_id : "",
         ]),
         div(".col .s3", { style: blur }, [sample.trt_name]),
-        div(".col .s1", { style: blur }, [sample.trt]),
+        div(".col .s1", { style: blur }, [ imgForTrt(sample.trt) ]),
         div(".col .s2 .center-align", { style: blur }, [
           sample.trt_name != null && sample.trt_name != "N/A" && zoom == false
             ? span(
@@ -151,7 +173,7 @@ export function SampleInfo(sources) {
           sample.trt_id != "NA" ? sample.trt_id : "",
         ]),
         div(".col .s3", { style: blur }, [sample.trt_name]),
-        div(".col .s1", { style: blur }, [sample.trt]),
+        div(".col .s1", { style: blur }, [ imgForTrt(sample.trt) ]),
         div(".col .s2 .center-align", { style: blur }, [
           sample.trt_name != null && sample.trt_name != "N/A" && zoom == false
             ? span(
@@ -186,7 +208,7 @@ export function SampleInfo(sources) {
           sample.trt_id != "NA" ? sample.trt_id : "",
         ]),
         div(".col .s3", { style: blur }, [sample.trt_name]),
-        div(".col .s1", { style: blur }, [sample.trt]),
+        div(".col .s1", { style: blur }, [ imgForTrt(sample.trt) ]),
         div(".col .s2 .center-align", { style: blur }, [
           sample.trt_name != null && sample.trt_name != "N/A" && zoom == false
             ? span(

@@ -54,7 +54,7 @@ export function SampleInfo(sources) {
     return [
       span(
         ".col .s4 .grey-text.text-darken-1",
-        { style: { fontWeight: "lighter" } },
+        { style: { fontWeight: "lighter", whiteSpace: "nowrap"} },
         key
       ),
       span(

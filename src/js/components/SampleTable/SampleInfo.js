@@ -67,8 +67,8 @@ export function SampleInfo(sources) {
 
   function entrySmall(key, value) {
     return [
-      span(".col .s6 .l2", { style: { fontWeight: "lighter" } }, key),
-      span(".col .s6 .l2", value.length != 0 ? value : ""),
+      span(".col .s4 .m2", { style: { fontWeight: "lighter" } }, key),
+      span(".col .s8 .m4", value.length != 0 ? value : ""),
     ]
   }
 
@@ -258,47 +258,79 @@ export function SampleInfo(sources) {
     }
   }
 
+
+
+
   const rowDetail = (sample, props, blur) => {
     let hStyle = { style: { margin: "0px", fontWeight: "bold" } }
     let pStyle = { style: { margin: "0px" } }
     let pStylewBlur = { style: merge(blur, { margin: "0px" }) }
     const _filters = sample.filters != undefined ? sample.filters : []
+
+    const samplePart =
+      [
+        p(".col .s12 .grey-text", hStyle, "Sample Info:"),
+        p(pStyle, entry("Sample ID: ", sample.id)),
+        p(pStyle, entry("Cell: ", sample.cell)),
+        p(pStyle, entry("Dose: ", sample.dose)),
+        p(pStyle, entry("Time: ", sample.time)),
+        p(pStyle, entry("Year: ", sample.year)),
+        p(pStyle, entry("Plate: ", sample.plate)),
+      ]
+
+    const treatmentPart =
+      [
+        p(".col .s12 .grey-text", hStyle, "Treatment Info:"),
+        p(pStylewBlur, entry("Name: ", sample.trt_name)),
+        p(
+          pStylewBlur,
+          entry(
+            safeModelToUi("id", props.common.modelTranslations) + ": ",
+            sample.trt_id
+          )
+        ),
+        p(pStyle, entry("Type: ", sample.trt)),
+        p(".s12", entry("Targets: ", sample.targets.join(", "))),
+      ]
+
+    const visualizeTextPart =
+      [
+        sample.trt_name != null && sample.trt_name != "N/A"
+          ? div(
+              ".col .s12",
+              {
+                style: {
+                  color: "black",
+                  opacity: 0.4,
+                  "font-size": "clamp(16px, 5vw, 26px)",
+                  "font-family": "Nova Mono",
+                  "object-fit": "contain",
+                  fontWeight: "bold",
+                },
+              },
+              [sample.trt_name]
+            )
+          : div(),
+      ]
+
+    const visualizeSmilesPart = 
+      [
+        sample.smiles != null &&
+        sample.smiles != "N/A" &&
+        sample.smiles != "No Smiles"
+          ? img(".col .s12 .valign", {
+              props: { src: sourireUrl(props.sourire.url, sample.smiles) },
+            })
+          : "",
+      ]
+
     return {
       trt_cp: div(".col .s12", [
-        div(".col .s6 .l4", { style: { margin: "15px 0px 0px 0px" } }, [
-          p(".col .s12 .grey-text", hStyle, "Sample Info:"),
-          p(pStyle, entry("Sample ID: ", sample.id)),
-          p(pStyle, entry("Cell: ", sample.cell)),
-          p(pStyle, entry("Dose: ", sample.dose)),
-          p(pStyle, entry("Time: ", sample.time)),
-          p(pStyle, entry("Year: ", sample.year)),
-          p(pStyle, entry("Plate: ", sample.plate)),
-        ]),
-        div(".col .s6 .l4", { style: { margin: "15px 0px 0px 0px" } }, [
-          p(".col .s12 .grey-text", hStyle, "Treatment Info:"),
-          p(pStylewBlur, entry("Name: ", sample.trt_name)),
-          p(
-            pStylewBlur,
-            entry(
-              safeModelToUi("id", props.common.modelTranslations) + ": ",
-              sample.trt_id
-            )
-          ),
-          p(pStyle, entry("Type: ", sample.trt)),
-          p(".s12", entry("Targets: ", sample.targets.join(", "))),
-        ]),
-        div(
-          ".col .s12 .offset-s8 .l4",
-          { style: merge(blur, { margin: "20px 0px 0px 0px" }) },
-          [
-            sample.smiles != null &&
-            sample.smiles != "N/A" &&
-            sample.smiles != "No Smiles"
-              ? img(".col .s12 .valign", {
-                  props: { src: sourireUrl(props.sourire.url, sample.smiles) },
-                })
-              : "",
-          ]
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
+        div(".col .s12 .offset-s8 .offset-m8 .l4", 
+          {style: merge(blur, { margin: "20px 0px 0px 0px" }) }, 
+          visualizeSmilesPart
         ),
         div(
           ".col .s12 .l12",
@@ -310,55 +342,12 @@ export function SampleInfo(sources) {
       ]),
       trt_sh: div([
         div(".row", [
-          div(".col .s4 .l4", { style: { margin: "15px 0px 0px 0px" } }, [
-            p(".col .s12 .grey-text", hStyle, "Sample Info:"),
-            p(pStyle, entry("Sample ID: ", sample.id)),
-            p(pStyle, entry("Cell: ", sample.cell)),
-            p(pStyle, entry("Dose: ", sample.dose)),
-            p(pStyle, entry("Time: ", sample.time)),
-            p(pStyle, entry("Year: ", sample.year)),
-            p(pStyle, entry("Plate: ", sample.plate)),
-          ]),
-          div(".col .s4 .l4", { style: { margin: "15px 0px 0px 0px" } }, [
-            p(".col .s12 .grey-text", hStyle, "Treatment Info:"),
-            p(pStylewBlur, entry("Name: ", sample.trt_name)),
-            p(
-              pStylewBlur,
-              entry(
-                safeModelToUi("id", props.common.modelTranslations) + ": ",
-                sample.trt_id
-              )
-            ),
-            p(pStyle, entry("Type: ", sample.trt)),
-            p(".s12", entry("Targets: ", sample.targets.join(", "))),
-          ]),
-          div(
-            ".col .s4 .l4",
-            {
-              style: merge(blur, {
-                height: "100%",
-                margin: "30px 0px 0px 0px",
-              }),
-            },
-            [
-              sample.trt_name != null && sample.trt_name != "N/A"
-                ? div(
-                    ".col .s12",
-                    {
-                      style: {
-                        color: "black",
-                        opacity: 0.4,
-                        "font-size": "clamp(16px, 5vw, 50px)",
-                        "font-family": "Nova Mono",
-                        "object-fit": "contain",
-                        fontWeight: "bold",
-                      },
-                    },
-                    [sample.trt_name]
-                  )
-                : div(),
-            ]
+          div(".col .s12 .m12 .l2 .push-s4 .push-m4 .push-l10 .center-align",
+            { style: merge(blur, { height: "100%", "margin-top": "30px"}) },
+            visualizeTextPart
           ),
+          div(".col .s12 .m6 .l4 .pull-l2", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
+          div(".col .s12 .m6 .l4 .pull-l2", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
         ]),
         div(
           ".row",
@@ -370,55 +359,12 @@ export function SampleInfo(sources) {
       ]),
       trt_lig: div([
         div(".row", [
-          div(".col .s4 .l4", { style: { margin: "15px 0px 0px 0px" } }, [
-            p(".col .s12 .grey-text", hStyle, "Sample Info:"),
-            p(pStyle, entry("Sample ID: ", sample.id)),
-            p(pStyle, entry("Cell: ", sample.cell)),
-            p(pStyle, entry("Dose: ", sample.dose)),
-            p(pStyle, entry("Time: ", sample.time)),
-            p(pStyle, entry("Year: ", sample.year)),
-            p(pStyle, entry("Plate: ", sample.plate)),
-          ]),
-          div(".col .s4 .l4", { style: { margin: "15px 0px 0px 0px" } }, [
-            p(".col .s12 .grey-text", hStyle, "Treatment Info:"),
-            p(pStylewBlur, entry("Name: ", sample.trt_name)),
-            p(
-              pStylewBlur,
-              entry(
-                safeModelToUi("id", props.common.modelTranslations) + ": ",
-                sample.trt_id
-              )
-            ),
-            p(pStyle, entry("Type: ", sample.trt)),
-            p(".s12", entry("Targets: ", sample.targets.join(", "))),
-          ]),
-          div(
-            ".col .s4 .l4",
-            {
-              style: merge(blur, {
-                height: "100%",
-                margin: "30px 0px 0px 0px",
-              }),
-            },
-            [
-              sample.trt_name != null && sample.trt_name != "N/A"
-                ? div(
-                    ".col .s12",
-                    {
-                      style: {
-                        color: "black",
-                        opacity: 0.4,
-                        "font-size": "clamp(16px, 5vw, 50px)",
-                        "font-family": "Nova Mono",
-                        "object-fit": "contain",
-                        fontWeight: "bold",
-                      },
-                    },
-                    [sample.trt_name]
-                  )
-                : div(),
-            ]
+          div(".col .s12 .m12 .l2 .push-s4 .push-m4 .push-l10 .center-align",
+            { style: merge(blur, { height: "100%", "margin-top": "30px"}) },
+            visualizeTextPart
           ),
+          div(".col .s12 .m6 .l4 .pull-l2", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
+          div(".col .s12 .m6 .l4 .pull-l2", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
         ]),
         div(
           ".row",
@@ -430,55 +376,12 @@ export function SampleInfo(sources) {
       ]),
       ctl_vector: div([
         div(".row", [
-          div(".col .s4 .l4", { style: { margin: "15px 0px 0px 0px" } }, [
-            p(".col .s12 .grey-text", hStyle, "Sample Info:"),
-            p(pStyle, entry("Sample ID: ", sample.id)),
-            p(pStyle, entry("Cell: ", sample.cell)),
-            p(pStyle, entry("Dose: ", sample.dose)),
-            p(pStyle, entry("Time: ", sample.time)),
-            p(pStyle, entry("Year: ", sample.year)),
-            p(pStyle, entry("Plate: ", sample.plate)),
-          ]),
-          div(".col .s4 .l4", { style: { margin: "15px 0px 0px 0px" } }, [
-            p(".col .s12 .grey-text", hStyle, "Treatment Info:"),
-            p(pStylewBlur, entry("Name: ", sample.trt_name)),
-            p(
-              pStylewBlur,
-              entry(
-                safeModelToUi("id", props.common.modelTranslations) + ": ",
-                sample.trt_id
-              )
-            ),
-            p(pStyle, entry("Type: ", sample.trt)),
-            p(".s12", entry("Targets: ", sample.targets.join(", "))),
-          ]),
-          div(
-            ".col .s4 .l4",
-            {
-              style: merge(blur, {
-                height: "100%",
-                margin: "30px 0px 0px 0px",
-              }),
-            },
-            [
-              sample.trt_name != null && sample.trt_name != "N/A"
-                ? div(
-                    ".col .s12",
-                    {
-                      style: {
-                        color: "black",
-                        opacity: 0.4,
-                        "font-size": "clamp(16px, 5vw, 50px)",
-                        "font-family": "Nova Mono",
-                        "object-fit": "contain",
-                        fontWeight: "bold",
-                      },
-                    },
-                    [sample.trt_name]
-                  )
-                : div(),
-            ]
+          div(".col .s12 .m12 .l2 .push-s4 .push-m4 .push-l10 .center-align",
+            { style: merge(blur, { height: "100%", "margin-top": "30px"}) },
+            visualizeTextPart
           ),
+          div(".col .s12 .m6 .l4 .pull-l2", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
+          div(".col .s12 .m6 .l4 .pull-l2", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
         ]),
         div(
           ".row",
@@ -490,42 +393,11 @@ export function SampleInfo(sources) {
       ]),
       _default: div(".row", { style: { fontWeight: "small" } }, [
         div(".col .s12", [
-          div(".col .s6 .l4", { style: { margin: "15px 0px 0px 0px" } }, [
-            p(".col .s12 .grey-text", hStyle, "Sample Info:"),
-            p(pStyle, entry("Sample ID: ", sample.id)),
-            p(pStyle, entry("Cell: ", sample.cell)),
-            p(pStyle, entry("Dose: ", sample.dose)),
-            p(pStyle, entry("Time: ", sample.time)),
-            p(pStyle, entry("Year: ", sample.year)),
-            p(pStyle, entry("Plate: ", sample.plate)),
-          ]),
-          div(".col .s6 .l4", { style: { margin: "15px 0px 0px 0px" } }, [
-            p(".col .s12 .grey-text", hStyle, "Treatment Info:"),
-            p(pStylewBlur, entry("Name: ", sample.trt_name)),
-            p(
-              pStylewBlur,
-              entry(
-                safeModelToUi("id", props.common.modelTranslations) + ": ",
-                sample.trt_id
-              )
-            ),
-            p(pStyle, entry("Type: ", sample.trt)),
-            p(".s12", entry("Targets: ", sample.targets.join(", "))),
-          ]),
-          div(
-            ".col .s12 .offset-s8 .l4",
-            { style: merge(blur, { margin: "20px 0px 0px 0px" }) },
-            [
-              sample.smiles != null &&
-              sample.smiles != "N/A" &&
-              sample.smiles != "No Smiles"
-                ? img(".col .s12 .valign", {
-                    props: {
-                      src: sourireUrl(props.sourire.url, sample.smiles),
-                    },
-                  })
-                : "",
-            ]
+          div(".col .s12 .m6 .l4 .pull-l2", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
+          div(".col .s12 .m6 .l4 .pull-l2", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
+          div(".col .s12 .offset-s8 .l4",
+            { style: merge(blur, { margin: "20px 0px 0px 0px" }) }, 
+            visualizeSmilesPart
           ),
           div(
             ".col .s12 .l12",

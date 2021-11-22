@@ -342,12 +342,12 @@ export function SampleInfo(sources) {
       ]),
       trt_sh: div([
         div(".row", [
-          div(".col .s12 .m12 .l2 .push-s4 .push-m4 .push-l10 .center-align",
-            { style: merge(blur, { height: "100%", "margin-top": "30px"}) },
-            visualizeTextPart
-          ),
-          div(".col .s12 .m6 .l4 .pull-l2", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
-          div(".col .s12 .m6 .l4 .pull-l2", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
+          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
+          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
+          div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
+          { style: merge(blur, { height: "100%", "margin-top": "30px"}) },
+          visualizeTextPart
+        ),
         ]),
         div(
           ".row",
@@ -359,12 +359,12 @@ export function SampleInfo(sources) {
       ]),
       trt_lig: div([
         div(".row", [
-          div(".col .s12 .m12 .l2 .push-s4 .push-m4 .push-l10 .center-align",
-            { style: merge(blur, { height: "100%", "margin-top": "30px"}) },
-            visualizeTextPart
-          ),
-          div(".col .s12 .m6 .l4 .pull-l2", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
-          div(".col .s12 .m6 .l4 .pull-l2", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
+          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
+          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
+          div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
+          { style: merge(blur, { height: "100%", "margin-top": "30px"}) },
+          visualizeTextPart
+        ),
         ]),
         div(
           ".row",
@@ -376,12 +376,12 @@ export function SampleInfo(sources) {
       ]),
       ctl_vector: div([
         div(".row", [
-          div(".col .s12 .m12 .l2 .push-s4 .push-m4 .push-l10 .center-align",
+          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
+          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
+          div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
             { style: merge(blur, { height: "100%", "margin-top": "30px"}) },
             visualizeTextPart
           ),
-          div(".col .s12 .m6 .l4 .pull-l2", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
-          div(".col .s12 .m6 .l4 .pull-l2", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
         ]),
         div(
           ".row",
@@ -393,9 +393,9 @@ export function SampleInfo(sources) {
       ]),
       _default: div(".row", { style: { fontWeight: "small" } }, [
         div(".col .s12", [
-          div(".col .s12 .m6 .l4 .pull-l2", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
-          div(".col .s12 .m6 .l4 .pull-l2", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
-          div(".col .s12 .offset-s8 .l4",
+          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
+          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
+          div(".col .s12 .offset-s8 .offset-m8 .l4", 
             { style: merge(blur, { margin: "20px 0px 0px 0px" }) }, 
             visualizeSmilesPart
           ),

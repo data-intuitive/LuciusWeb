@@ -108,7 +108,7 @@ function SampleSelection(sources) {
     return {
       url:
         state.settings.api.url +
-        "&classPath=com.dataintuitive.luciusapi.compoundToSamples",
+        "&classPath=com.dataintuitive.luciusapi.treatmentToPerturbations",
       method: "POST",
       send: {
         version: "v2",

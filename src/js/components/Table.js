@@ -420,12 +420,12 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
                   ".material-icons .grey-text",
                   {
                     style: {
-                      fontSize: "16px",
+                      fontSize: "20px",
                       "background-color": settings.table.color,
                       opacity: 0.5,
                     },
                   },
-                  "add"
+                  expandOptions ? "arrow_drop_up" : "arrow_drop_down"
                 ),
               ]),
               div(".white-text .col .s7 .valign .right-align", filterText),

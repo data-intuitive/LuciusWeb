@@ -24,10 +24,10 @@ import img_ctl_vector_cns  from "/images/treatmentTypes/CTL_VECTOR.png"
 import img_ctl_untrt_cns   from "/images/treatmentTypes/CTL_UNTRT.CNS.png"
 import img_ctl_untrt       from "/images/treatmentTypes/CTL_UNTRT.png"
 
-export function SampleInfoHeader(bgcolor) {
+export function SampleInfoHeader(bgcolor, color) {
     return li(
-    ".collection-item .zoom",
-    { style: { "background-color": bgcolor} },
+    ".collection-item .hide-on-med-and-down .zoom",
+    { style: { backgroundColor: bgcolor, borderBottom: "2px solid " + color} },
     [
       div(".row", { style: { fontWeight: "small" } }, [
         div(".col .s1 .left-align", { style: { fontWeight: "bold" } }, ["Zhang Score"]),
@@ -83,166 +83,139 @@ export function SampleInfo(sources) {
     return url
   }
 
-  const imgForTrt = (trt) => {
-    let knownTrt = {
-      "trt_cp":          img(".trt_img", { props: { alt: trt, src: img_trt_cp }}),
-      "trt_lig":         img(".trt_img", { props: { alt: trt, src: img_trt_lig }}),
-      "trt_sh":          img(".trt_img", { props: { alt: trt, src: img_trt_sh }}),
-      "trt_sh.cgs":      img(".trt_img", { props: { alt: trt, src: img_trt_sh_cgs }}),
-      "trt_oe":          img(".trt_img", { props: { alt: trt, src: img_trt_oe }}),
-      "trt_oe.mut":      img(".trt_img", { props: { alt: trt, src: img_trt_oe_mut }}),
-      "trt_xpr":         img(".trt_img", { props: { alt: trt, src: img_trt_xpr }}),
-      "ctl_vehicle":     img(".trt_img", { props: { alt: trt, src: img_ctl_vehicle }}),
-      "ctl_vector":      img(".trt_img", { props: { alt: trt, src: img_ctl_vector }}),
-      //"trt_sh.css":      img(".trt_img", { props: { alt: trt, src: img_trt_sh_css }}), // MISSING!
-      "ctl_vehicle.cns": img(".trt_img", { props: { alt: trt, src: img_ctl_vehicle_cns }}),
-      "ctl_vector.cns":  img(".trt_img", { props: { alt: trt, src: img_ctl_vector_cns }}),
-      "ctl_untrt.cns":   img(".trt_img", { props: { alt: trt, src: img_ctl_untrt_cns }}),
-      "ctl_untrt":       img(".trt_img", { props: { alt: trt, src: img_ctl_untrt }}),
-      "_default":        p([trt])
-    }
 
-    return knownTrt[trt] ?? knownTrt["_default"]
-  }
 
   const row = (sample, props, blur, zoom) => {
     let zhangRounded =
       sample.zhang != null ? parseFloat(sample.zhang).toFixed(3) : "NA"
+
+      const imgForTrt= (trt) => {
+        let knownTrt = {
+          "trt_cp":          img(".trt_img", { props: { alt: trt, src: img_trt_cp }}),
+          "trt_lig":         img(".trt_img", { props: { alt: trt, src: img_trt_lig }}),
+          "trt_sh":          img(".trt_img", { props: { alt: trt, src: img_trt_sh }}),
+          "trt_sh.cgs":      img(".trt_img", { props: { alt: trt, src: img_trt_sh_cgs }}),
+          "trt_oe":          img(".trt_img", { props: { alt: trt, src: img_trt_oe }}),
+          "trt_oe.mut":      img(".trt_img", { props: { alt: trt, src: img_trt_oe_mut }}),
+          "trt_xpr":         img(".trt_img", { props: { alt: trt, src: img_trt_xpr }}),
+          "ctl_vehicle":     img(".trt_img", { props: { alt: trt, src: img_ctl_vehicle }}),
+          "ctl_vector":      img(".trt_img", { props: { alt: trt, src: img_ctl_vector }}),
+          //"trt_sh.css":      img(".trt_img", { props: { alt: trt, src: img_trt_sh_css }}), // MISSING!
+          "ctl_vehicle.cns": img(".trt_img", { props: { alt: trt, src: img_ctl_vehicle_cns }}),
+          "ctl_vector.cns":  img(".trt_img", { props: { alt: trt, src: img_ctl_vector_cns }}),
+          "ctl_untrt.cns":   img(".trt_img", { props: { alt: trt, src: img_ctl_untrt_cns }}),
+          "ctl_untrt":       img(".trt_img", { props: { alt: trt, src: img_ctl_untrt }}),
+          "_default":        p([trt])
+        }
+
+        return knownTrt[trt] ?? knownTrt["_default"]
+      }
+
+      const imgForTrtPart = [ imgForTrt(sample.trt) ]
+
+      const visualizeTextPart = [
+        sample.trt_name != null && sample.trt_name != "N/A" && zoom == false
+          ? span(
+              {
+                style: {
+                  color: "black",
+                  opacity: 0.4,
+                  "font-size": "clamp(16px, 5vw, 26px)",
+                  height: 50,
+                  display: "block",
+                  "font-family": "Nova Mono",
+                  "object-fit": "contain",
+                  fontWeight: "bold",
+                },
+              },
+              [sample.trt_name]
+            )
+          : "",
+      ]
+
+      const visualizeSmilesPart = [
+        sample.smiles != null &&
+        sample.smiles != "N/A" &&
+        sample.smiles != "No Smiles" &&
+        zoom == false
+          ? img({
+              props: {
+                src: sourireUrl(props.sourire.url, sample.smiles),
+                height: 50,
+                "object-fit": "contain",
+              },
+            })
+          : "",
+      ]
+
     return {
       trt_cp: div(".row", { style: { fontWeight: "small" } }, [
-        div(".col .s1 .left-align", { style: { fontWeight: "bold" } }, [
+        div(".col .s2 .l1 .left-align", { style: { fontWeight: "bold" } }, [
           zhangRounded,
         ]),
-        div(
-          ".col .s2",
-          { style: { overflow: "hidden", "text-overflow": "ellipsis" } },
-          [sample.id]
-        ),
-        div(".col .s1", [sample.cell]),
-        div(".col .s2", { style: blur }, [
-          sample.trt_id != "NA" ? sample.trt_id : "",
-        ]),
-        div(".col .s3", { style: blur }, [sample.trt_name]),
-        div(".col .s1", { style: blur }, [ imgForTrt(sample.trt) ]),
-        div(".col .s2 .center-align", { style: blur }, [
-          sample.smiles != null &&
-          sample.smiles != "N/A" &&
-          sample.smiles != "No Smiles" &&
-          zoom == false
-            ? img({
-                props: {
-                  src: sourireUrl(props.sourire.url, sample.smiles),
-                  height: 50,
-                  "object-fit": "contain",
-                },
-              })
-            : "",
-        ]),
+        // pull info to here on large displays
+        div(".col .s2 .offset-s6 .l1 .push-l8", { style: blur }, imgForTrtPart),
+        div(".col .s2 .l2 .push-l8 .center-align", { style: blur }, visualizeSmilesPart),
+        // data being pulled, otherwise wrapped on new lines
+        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", {style: {whiteSpace: "nowrap"}}, ["Sample ID"]),
+        div(".col .s8 .l2 .pull-l3 .truncate", [sample.id]),
+        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", ["Cell"]),
+        div(".col .s8 .l1 .pull-l3", [sample.cell]),
+        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", {style: {whiteSpace: "nowrap"}}, ["Treatment ID"]),
+        div(".col .s8 .l2 .pull-l3", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
+        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", {style: {whiteSpace: "nowrap"}}, ["Treatment Name"]),
+        div(".col .s8 .l3 .pull-l3", { style: blur }, [sample.trt_name]),
       ]),
       trt_sh: div(".row", { style: { fontWeight: "small" } }, [
-        div(".col .s1 .left-align", { style: { fontWeight: "bold" } }, [
+        div(".col .s2 .l1 .left-align", { style: { fontWeight: "bold" } }, [
           zhangRounded,
         ]),
-        div(
-          ".col .s2",
-          { style: { overflow: "hidden", "text-overflow": "ellipsis" } },
-          [sample.id]
-        ),
-        div(".col .s1", [sample.cell]),
-        div(".col .s2", { style: blur }, [
-          sample.trt_id != "NA" ? sample.trt_id : "",
-        ]),
-        div(".col .s3", { style: blur }, [sample.trt_name]),
-        div(".col .s1", { style: blur }, [ imgForTrt(sample.trt) ]),
-        div(".col .s2 .center-align", { style: blur }, [
-          sample.trt_name != null && sample.trt_name != "N/A" && zoom == false
-            ? span(
-                {
-                  style: {
-                    color: "black",
-                    opacity: 0.4,
-                    "font-size": "clamp(16px, 5vw, 26px)",
-                    height: 50,
-                    display: "block",
-                    "font-family": "Nova Mono",
-                    "object-fit": "contain",
-                    fontWeight: "bold",
-                  },
-                },
-                [sample.trt_name]
-              )
-            : "",
-        ]),
+        // pull info to here on large displays
+        div(".col .s2 .offset-s6 .l1 .push-l8", { style: blur }, imgForTrtPart),
+        div(".col .s2 .l2 .push-l8 .center-align", { style: blur }, visualizeTextPart),
+        // data being pulled, otherwise wrapped on new lines
+        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", {style: {whiteSpace: "nowrap"}}, ["Sample ID"]),
+        div(".col .s8 .l2 .pull-l3 .truncate", [sample.id]),
+        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", ["Cell"]),
+        div(".col .s8 .l1 .pull-l3", [sample.cell]),
+        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", {style: {whiteSpace: "nowrap"}}, ["Treatment ID"]),
+        div(".col .s8 .l2 .pull-l3", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
+        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", {style: {whiteSpace: "nowrap"}}, ["Treatment Name"]),
+        div(".col .s8 .l3 .pull-l3", { style: blur }, [sample.trt_name]),
       ]),
       trt_lig: div(".row", { style: { fontWeight: "small" } }, [
-        div(".col .s1 .left-align", { style: { fontWeight: "bold" } }, [
+        div(".col .s2 .l1 .left-align", { style: { fontWeight: "bold" } }, [
           zhangRounded,
         ]),
-        div(
-          ".col .s2",
-          { style: { overflow: "hidden", "text-overflow": "ellipsis" } },
-          [sample.id]
-        ),
-        div(".col .s1", [sample.cell]),
-        div(".col .s2", { style: blur }, [
-          sample.trt_id != "NA" ? sample.trt_id : "",
-        ]),
-        div(".col .s3", { style: blur }, [sample.trt_name]),
-        div(".col .s1", { style: blur }, [ imgForTrt(sample.trt) ]),
-        div(".col .s2 .center-align", { style: blur }, [
-          sample.trt_name != null && sample.trt_name != "N/A" && zoom == false
-            ? span(
-                {
-                  style: {
-                    color: "black",
-                    opacity: 0.4,
-                    "font-size": "clamp(16px, 5vw, 26px)",
-                    height: 50,
-                    display: "block",
-                    "font-family": "Nova Mono",
-                    "object-fit": "contain",
-                    fontWeight: "bold",
-                  },
-                },
-                [sample.trt_name]
-              )
-            : "",
-        ]),
+        // pull info to here on large displays
+        div(".col .s2 .offset-s6 .l1 .push-l8", { style: blur }, imgForTrtPart),
+        div(".col .s2 .l2 .push-l8 .center-align", { style: blur }, visualizeTextPart),
+        // data being pulled, otherwise wrapped on new lines
+        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", {style: {whiteSpace: "nowrap"}}, ["Sample ID"]),
+        div(".col .s8 .l2 .pull-l3 .truncate", [sample.id]),
+        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", ["Cell"]),
+        div(".col .s8 .l1 .pull-l3", [sample.cell]),
+        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", {style: {whiteSpace: "nowrap"}}, ["Treatment ID"]),
+        div(".col .s8 .l2 .pull-l3", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
+        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", {style: {whiteSpace: "nowrap"}}, ["Treatment Name"]),
+        div(".col .s8 .l3 .pull-l3", { style: blur }, [sample.trt_name]),
       ]),
       ctl_vector: div(".row", { style: { fontWeight: "small" } }, [
-        div(".col .s1 .left-align", { style: { fontWeight: "bold" } }, [
+        div(".col .s2 .l1 .left-align", { style: { fontWeight: "bold" } }, [
           zhangRounded,
         ]),
-        div(
-          ".col .s2",
-          { style: { overflow: "hidden", "text-overflow": "ellipsis" } },
-          [sample.id]
-        ),
-        div(".col .s1", [sample.cell]),
-        div(".col .s2", { style: blur }, [
-          sample.trt_id != "NA" ? sample.trt_id : "",
-        ]),
-        div(".col .s3", { style: blur }, [sample.trt_name]),
-        div(".col .s1", { style: blur }, [ imgForTrt(sample.trt) ]),
-        div(".col .s2 .center-align", { style: blur }, [
-          sample.trt_name != null && sample.trt_name != "N/A" && zoom == false
-            ? span(
-                {
-                  style: {
-                    color: "black",
-                    opacity: 0.4,
-                    "font-size": "clamp(16px, 5vw, 26px)",
-                    height: 50,
-                    display: "block",
-                    "font-family": "Nova Mono",
-                    "object-fit": "contain",
-                    fontWeight: "bold",
-                  },
-                },
-                [sample.trt_name]
-              )
-            : "",
-        ]),
+        // pull info to here on large displays
+        div(".col .s2 .offset-s6 .l1 .push-l8", { style: blur }, imgForTrtPart),
+        div(".col .s2 .l2 .push-l8 .center-align", { style: blur }, visualizeTextPart),
+        // data being pulled, otherwise wrapped on new lines
+        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", {style: {whiteSpace: "nowrap"}}, ["Sample ID"]),
+        div(".col .s8 .l2 .pull-l3 .truncate", [sample.id]),
+        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", ["Cell"]),
+        div(".col .s8 .l1 .pull-l3", [sample.cell]),
+        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", {style: {whiteSpace: "nowrap"}}, ["Treatment ID"]),
+        div(".col .s8 .l2 .pull-l3", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
+        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", {style: {whiteSpace: "nowrap"}}, ["Treatment Name"]),
+        div(".col .s8 .l3 .pull-l3", { style: blur }, [sample.trt_name]),
       ]),
       _default: div(".row", { style: { fontWeight: "small" } }, [
         div(".col .s1 .left-align", { style: { fontWeight: "bold" } }, [
@@ -313,7 +286,7 @@ export function SampleInfo(sources) {
           : div(),
       ]
 
-    const visualizeSmilesPart = 
+    const visualizeSmilesPart =
       [
         sample.smiles != null &&
         sample.smiles != "N/A" &&
@@ -328,8 +301,8 @@ export function SampleInfo(sources) {
       trt_cp: div(".col .s12", [
         div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
         div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
-        div(".col .s12 .offset-s8 .offset-m8 .l4", 
-          {style: merge(blur, { margin: "20px 0px 0px 0px" }) }, 
+        div(".col .s12 .offset-s8 .offset-m8 .l4",
+          {style: merge(blur, { margin: "20px 0px 0px 0px" }) },
           visualizeSmilesPart
         ),
         div(
@@ -395,8 +368,8 @@ export function SampleInfo(sources) {
         div(".col .s12", [
           div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
           div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
-          div(".col .s12 .offset-s8 .offset-m8 .l4", 
-            { style: merge(blur, { margin: "20px 0px 0px 0px" }) }, 
+          div(".col .s12 .offset-s8 .offset-m8 .l4",
+            { style: merge(blur, { margin: "20px 0px 0px 0px" }) },
             visualizeSmilesPart
           ),
           div(

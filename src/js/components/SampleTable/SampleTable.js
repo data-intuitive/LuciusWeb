@@ -20,7 +20,7 @@ function SampleTable(sources) {
 
   const listStyle = {style : {'margin-top' : '0px', 'margin-bottom':'0px'}}
 
-  const sampleInfoHeader$ = props$.map(props => SampleInfoHeader(props.table.bgcolor))
+  const sampleInfoHeader$ = props$.map(props => SampleInfoHeader(props.table.bgcolor, props.table.color))
 
   const composedChildrenSinks$ = childrenSinks$.compose(pick('DOM')).compose(mix(xs.combine))
   const vdom$ = xs.combine(sampleInfoHeader$, composedChildrenSinks$)

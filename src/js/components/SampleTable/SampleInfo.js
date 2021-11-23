@@ -150,72 +150,104 @@ export function SampleInfo(sources) {
 
     return {
       trt_cp: div(".row", { style: { fontWeight: "small" } }, [
-        div(".col .s2 .l1 .left-align", { style: { fontWeight: "bold" } }, [
-          zhangRounded,
+        div(".valign-wrapper", [
+          div(".col .s2 .l1 .left-align", { style: { fontWeight: "bold" } }, [
+            zhangRounded,
+          ]),
+
+          div(".col .l2 .hide-on-med-and-down .truncate", [sample.id]),
+          div(".col .l1 .hide-on-med-and-down", [sample.cell]),
+          div(".col .l2 .hide-on-med-and-down .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
+          div(".col .l3 .hide-on-med-and-down", { style: blur }, [sample.trt_name]),
+
+          div(".col .s2 .offset-s5 .l1", { style: blur }, imgForTrtPart),
+          div(".col .s3 .l2 .center-align", { style: blur }, visualizeSmilesPart),
         ]),
-        // pull info to here on large displays
-        div(".col .s2 .offset-s5 .l1 .push-l8", { style: blur }, imgForTrtPart),
-        div(".col .s3 .l2 .push-l8 .center-align", { style: blur }, visualizeSmilesPart),
-        // info below being pulled, otherwise wrapped on new lines
-        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", {style: {whiteSpace: "nowrap"}}, ["Sample ID"]),
-        div(".col .s8 .l2 .pull-l3 .truncate", [sample.id]),
-        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", ["Cell"]),
-        div(".col .s8 .l1 .pull-l3", [sample.cell]),
-        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", {style: {whiteSpace: "nowrap"}}, ["Treatment ID"]),
-        div(".col .s8 .l2 .pull-l3 .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
-        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", {style: {whiteSpace: "nowrap"}}, ["Treatment Name"]),
-        div(".col .s8 .l3 .pull-l3", { style: blur }, [sample.trt_name]),
+        div(".hide-on-large-only", {style: {paddingTop: "10px"}}, [
+          div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Sample ID"]),
+          div(".col .s8 .truncate", [sample.id]),
+          div(".col .s4 .m3 .offset-m1", ["Cell"]),
+          div(".col .s8", [sample.cell]),
+          div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Treatment ID"]),
+          div(".col .s8 .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
+          div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Treatment Name"]),
+          div(".col .s8", { style: blur }, [sample.trt_name])
+        ])
       ]),
       trt_sh: div(".row", { style: { fontWeight: "small" } }, [
-        div(".col .s2 .l1 .left-align", { style: { fontWeight: "bold" } }, [
-          zhangRounded,
+        div(".valign-wrapper", [
+          div(".col .s2 .l1 .left-align", { style: { fontWeight: "bold" } }, [
+            zhangRounded,
+          ]),
+
+          div(".col .l2 .hide-on-med-and-down .truncate", [sample.id]),
+          div(".col .l1 .hide-on-med-and-down", [sample.cell]),
+          div(".col .l2 .hide-on-med-and-down .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
+          div(".col .l3 .hide-on-med-and-down", { style: blur }, [sample.trt_name]),
+
+          div(".col .s2 .offset-s5 .l1", { style: blur }, imgForTrtPart),
+          div(".col .s3 .l2 .center-align", { style: blur }, visualizeTextPart),
         ]),
-        // pull info to here on large displays
-        div(".col .s2 .offset-s5 .l1 .push-l8", { style: blur }, imgForTrtPart),
-        div(".col .s3 .l2 .push-l8 .center-align", { style: blur }, visualizeTextPart),
-        // info below being pulled, otherwise wrapped on new lines
-        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", {style: {whiteSpace: "nowrap"}}, ["Sample ID"]),
-        div(".col .s8 .l2 .pull-l3 .truncate", [sample.id]),
-        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", ["Cell"]),
-        div(".col .s8 .l1 .pull-l3", [sample.cell]),
-        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", {style: {whiteSpace: "nowrap"}}, ["Treatment ID"]),
-        div(".col .s8 .l2 .pull-l3 .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
-        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", {style: {whiteSpace: "nowrap"}}, ["Treatment Name"]),
-        div(".col .s8 .l3 .pull-l3", { style: blur }, [sample.trt_name]),
+        div(".hide-on-large-only", {style: {paddingTop: "10px"}}, [
+          div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Sample ID"]),
+          div(".col .s8 .truncate", [sample.id]),
+          div(".col .s4 .m3 .offset-m1", ["Cell"]),
+          div(".col .s8", [sample.cell]),
+          div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Treatment ID"]),
+          div(".col .s8 .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
+          div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Treatment Name"]),
+          div(".col .s8", { style: blur }, [sample.trt_name])
+        ])
       ]),
       trt_lig: div(".row", { style: { fontWeight: "small" } }, [
-        div(".col .s2 .l1 .left-align", { style: { fontWeight: "bold" } }, [
-          zhangRounded,
+        div(".valign-wrapper", [
+          div(".col .s2 .l1 .left-align", { style: { fontWeight: "bold" } }, [
+            zhangRounded,
+          ]),
+
+          div(".col .l2 .hide-on-med-and-down .truncate", [sample.id]),
+          div(".col .l1 .hide-on-med-and-down", [sample.cell]),
+          div(".col .l2 .hide-on-med-and-down .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
+          div(".col .l3 .hide-on-med-and-down", { style: blur }, [sample.trt_name]),
+
+          div(".col .s2 .offset-s5 .l1", { style: blur }, imgForTrtPart),
+          div(".col .s3 .l2 .center-align", { style: blur }, visualizeTextPart),
         ]),
-        // pull info to here on large displays
-        div(".col .s2 .offset-s5 .l1 .push-l8", { style: blur }, imgForTrtPart),
-        div(".col .s3 .l2 .push-l8 .center-align", { style: blur }, visualizeTextPart),
-        // info below being pulled, otherwise wrapped on new lines
-        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", {style: {whiteSpace: "nowrap"}}, ["Sample ID"]),
-        div(".col .s8 .l2 .pull-l3 .truncate", [sample.id]),
-        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", ["Cell"]),
-        div(".col .s8 .l1 .pull-l3", [sample.cell]),
-        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", {style: {whiteSpace: "nowrap"}}, ["Treatment ID"]),
-        div(".col .s8 .l2 .pull-l3 .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
-        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", {style: {whiteSpace: "nowrap"}}, ["Treatment Name"]),
-        div(".col .s8 .l3 .pull-l3", { style: blur }, [sample.trt_name]),
+        div(".hide-on-large-only", {style: {paddingTop: "10px"}}, [
+          div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Sample ID"]),
+          div(".col .s8 .truncate", [sample.id]),
+          div(".col .s4 .m3 .offset-m1", ["Cell"]),
+          div(".col .s8", [sample.cell]),
+          div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Treatment ID"]),
+          div(".col .s8 .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
+          div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Treatment Name"]),
+          div(".col .s8", { style: blur }, [sample.trt_name])
+        ])
       ]),
       ctl_vector: div(".row", { style: { fontWeight: "small" } }, [
-        div(".col .s2 .l1 .left-align", { style: { fontWeight: "bold" } }, [
-          zhangRounded,
+        div(".valign-wrapper", [
+          div(".col .s2 .l1 .left-align", { style: { fontWeight: "bold" } }, [
+            zhangRounded,
+          ]),
+
+          div(".col .l2 .hide-on-med-and-down .truncate", [sample.id]),
+          div(".col .l1 .hide-on-med-and-down", [sample.cell]),
+          div(".col .l2 .hide-on-med-and-down .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
+          div(".col .l3 .hide-on-med-and-down", { style: blur }, [sample.trt_name]),
+
+          div(".col .s2 .offset-s5 .l1", { style: blur }, imgForTrtPart),
+          div(".col .s3 .l2 .center-align", { style: blur }, visualizeTextPart),
         ]),
-        // pull info to here on large displays
-        div(".col .s2 .offset-s5 .l1 .push-l8", { style: blur }, imgForTrtPart),
-        div(".col .s3 .l2 .push-l8 .center-align", { style: blur }, visualizeTextPart),
-        // info below being pulled, otherwise wrapped on new lines
-        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", {style: {whiteSpace: "nowrap"}}, ["Sample ID"]),
-        div(".col .s8 .l2 .pull-l3 .truncate", [sample.id]),
-        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", ["Cell"]),
-        div(".col .s8 .l1 .pull-l3", [sample.cell]),
-        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", {style: {whiteSpace: "nowrap"}}, ["Treatment ID"]),
-        div(".col .s8 .l2 .pull-l3 .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
-        div(".col .s4 .m3 .offset-m1 .hide-on-large-only", {style: {whiteSpace: "nowrap"}}, ["Treatment Name"]),
-        div(".col .s8 .l3 .pull-l3", { style: blur }, [sample.trt_name]),
+        div(".hide-on-large-only", {style: {paddingTop: "10px"}}, [
+          div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Sample ID"]),
+          div(".col .s8 .truncate", [sample.id]),
+          div(".col .s4 .m3 .offset-m1", ["Cell"]),
+          div(".col .s8", [sample.cell]),
+          div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Treatment ID"]),
+          div(".col .s8 .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
+          div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Treatment Name"]),
+          div(".col .s8", { style: blur }, [sample.trt_name])
+        ])
       ]),
       _default: div(".row", { style: { fontWeight: "small" } }, [
         div(".col .s1 .left-align", { style: { fontWeight: "bold" } }, [

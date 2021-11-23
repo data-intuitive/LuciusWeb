@@ -154,9 +154,9 @@ export function SampleInfo(sources) {
           zhangRounded,
         ]),
         // pull info to here on large displays
-        div(".col .s2 .offset-s6 .l1 .push-l8", { style: blur }, imgForTrtPart),
-        div(".col .s2 .l2 .push-l8 .center-align", { style: blur }, visualizeSmilesPart),
-        // data being pulled, otherwise wrapped on new lines
+        div(".col .s2 .offset-s5 .l1 .push-l8", { style: blur }, imgForTrtPart),
+        div(".col .s3 .l2 .push-l8 .center-align", { style: blur }, visualizeSmilesPart),
+        // info below being pulled, otherwise wrapped on new lines
         div(".col .s4 .m3 .offset-m1 .hide-on-large-only", {style: {whiteSpace: "nowrap"}}, ["Sample ID"]),
         div(".col .s8 .l2 .pull-l3 .truncate", [sample.id]),
         div(".col .s4 .m3 .offset-m1 .hide-on-large-only", ["Cell"]),
@@ -171,9 +171,9 @@ export function SampleInfo(sources) {
           zhangRounded,
         ]),
         // pull info to here on large displays
-        div(".col .s2 .offset-s6 .l1 .push-l8", { style: blur }, imgForTrtPart),
-        div(".col .s2 .l2 .push-l8 .center-align", { style: blur }, visualizeTextPart),
-        // data being pulled, otherwise wrapped on new lines
+        div(".col .s2 .offset-s5 .l1 .push-l8", { style: blur }, imgForTrtPart),
+        div(".col .s3 .l2 .push-l8 .center-align", { style: blur }, visualizeTextPart),
+        // info below being pulled, otherwise wrapped on new lines
         div(".col .s4 .m3 .offset-m1 .hide-on-large-only", {style: {whiteSpace: "nowrap"}}, ["Sample ID"]),
         div(".col .s8 .l2 .pull-l3 .truncate", [sample.id]),
         div(".col .s4 .m3 .offset-m1 .hide-on-large-only", ["Cell"]),
@@ -188,9 +188,9 @@ export function SampleInfo(sources) {
           zhangRounded,
         ]),
         // pull info to here on large displays
-        div(".col .s2 .offset-s6 .l1 .push-l8", { style: blur }, imgForTrtPart),
-        div(".col .s2 .l2 .push-l8 .center-align", { style: blur }, visualizeTextPart),
-        // data being pulled, otherwise wrapped on new lines
+        div(".col .s2 .offset-s5 .l1 .push-l8", { style: blur }, imgForTrtPart),
+        div(".col .s3 .l2 .push-l8 .center-align", { style: blur }, visualizeTextPart),
+        // info below being pulled, otherwise wrapped on new lines
         div(".col .s4 .m3 .offset-m1 .hide-on-large-only", {style: {whiteSpace: "nowrap"}}, ["Sample ID"]),
         div(".col .s8 .l2 .pull-l3 .truncate", [sample.id]),
         div(".col .s4 .m3 .offset-m1 .hide-on-large-only", ["Cell"]),
@@ -205,9 +205,9 @@ export function SampleInfo(sources) {
           zhangRounded,
         ]),
         // pull info to here on large displays
-        div(".col .s2 .offset-s6 .l1 .push-l8", { style: blur }, imgForTrtPart),
-        div(".col .s2 .l2 .push-l8 .center-align", { style: blur }, visualizeTextPart),
-        // data being pulled, otherwise wrapped on new lines
+        div(".col .s2 .offset-s5 .l1 .push-l8", { style: blur }, imgForTrtPart),
+        div(".col .s3 .l2 .push-l8 .center-align", { style: blur }, visualizeTextPart),
+        // info below being pulled, otherwise wrapped on new lines
         div(".col .s4 .m3 .offset-m1 .hide-on-large-only", {style: {whiteSpace: "nowrap"}}, ["Sample ID"]),
         div(".col .s8 .l2 .pull-l3 .truncate", [sample.id]),
         div(".col .s4 .m3 .offset-m1 .hide-on-large-only", ["Cell"]),
@@ -230,9 +230,6 @@ export function SampleInfo(sources) {
       ]),
     }
   }
-
-
-
 
   const rowDetail = (sample, props, blur) => {
     let hStyle = { style: { margin: "0px", fontWeight: "bold" } }

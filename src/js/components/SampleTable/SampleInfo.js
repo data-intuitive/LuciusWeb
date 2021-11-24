@@ -24,6 +24,15 @@ import img_ctl_vector_cns  from "/images/treatmentTypes/CTL_VECTOR.png"
 import img_ctl_untrt_cns   from "/images/treatmentTypes/CTL_UNTRT.CNS.png"
 import img_ctl_untrt       from "/images/treatmentTypes/CTL_UNTRT.png"
 
+/**
+ * Create a header matching the data order of sample rows displayed in case of large displays
+ * header hides itself in case of small and medium screens
+ * @function SampleInfoHeader
+ * @param {string} bgcolor color of the table background
+ * @param {string} color color of the table foreground
+ * @returns VNode li element with header data
+ */
+
 export function SampleInfoHeader(bgcolor, color) {
     return li(
     ".collection-item .hide-on-med-and-down .zoom",
@@ -41,6 +50,15 @@ export function SampleInfoHeader(bgcolor, color) {
   ])
 }
 
+/**
+ * Create a single table row displaying sample information
+ * Depending on the width displays basic information in one line or multiple lines
+ * When clicked, adds more information in a separate div
+ * @function SampleInfo
+ * @param {stream} sources.onion.state$ stream of sample data to be displayed
+ * @param sources.DOM user click events
+ * @param sources.props semi-static settings
+ */
 export function SampleInfo(sources) {
   const state$ = sources.onion.state$
   const props$ = sources.props
@@ -84,7 +102,18 @@ export function SampleInfo(sources) {
   }
 
 
-
+  /**
+   * Constant lambda function to create a data row for a sample
+   * Uses materialize.css grid features to display basic sample data in a row
+   * Depending on the width of the screen the content is either in one single line
+   * or details get spread into multiple lines
+   * @function row
+   * @param {object} sample the data to be displayed
+   * @param {object} props semi-static settings for ie. sourire url or background colors
+   * @param {style} blur component style to contain blur settings
+   * @param {boolean} zoom boolean to alter component content depending if the rowDetails are expanded or not
+   * @return {object} object with members for each treatment type, each has wrapping div with vdom elements
+   */
   const row = (sample, props, blur, zoom) => {
     let zhangRounded =
       sample.zhang != null ? parseFloat(sample.zhang).toFixed(3) : "NA"
@@ -263,6 +292,14 @@ export function SampleInfo(sources) {
     }
   }
 
+  /**
+   * Constant lambda function to create a data row details for a sample
+   * @function rowDetails
+   * @param {object} sample the data to be displayed
+   * @param {object} props static settings for ie. sourire url or background colors
+   * @param {style} blur component style to contain blur settings
+   * @return {object} object with members for each treatment type, each has wrapping div with vdom elements
+   */
   const rowDetail = (sample, props, blur) => {
     let hStyle = { style: { margin: "0px", fontWeight: "bold" } }
     let pStyle = { style: { margin: "0px" } }

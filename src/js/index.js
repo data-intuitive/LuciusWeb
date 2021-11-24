@@ -48,7 +48,12 @@ export default function Index(sources) {
     '*': Home
   })(sources)
 
-    const makeLink = (path, label, options) => li([a(options, { props: { href: path } }, label)]);
+    const makeLink = (path, label, options) => {
+        const currentPage = window.location.href
+        const highlight = currentPage.endsWith(path)
+
+        return li(highlight ? ".active" : "", [a(options, { props: { href: path } }, label)])
+    }
 
     // TODO: Add a visual reference for ghost mode
     // const ghost$ = state$

@@ -42,7 +42,6 @@ main {
     @extend .lighten-5;
 }
 
-/* Contain treatment type images within the alotted width of its column */
 img.trt_img {
     width: 100%;
     width: -moz-available;          /* WebKit-based browsers will ignore this. */
@@ -50,6 +49,11 @@ img.trt_img {
     width: fill-available;
 }
 
+nav ul li.active span {
+    border-bottom-width: medium;
+    border-bottom-style: solid;
+    padding-bottom: 0.2em;
+}
 
 /* home svg styling and hover */
 

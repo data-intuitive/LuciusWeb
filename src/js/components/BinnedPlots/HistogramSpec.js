@@ -109,9 +109,11 @@ export const histogramVegaSpec = (data) => ({
     "axes": [{
             "orient": "bottom",
             "scale": "xscale",
-            "ticks": false,
-            "labels": false,
-            "domain": false
+            "ticks": true,
+            "labels": true,
+            "domain": false,
+            "title": "Bin size",
+            "titleColor": "grey"
         },
         {
             "orient": "right",
@@ -126,7 +128,9 @@ export const histogramVegaSpec = (data) => ({
                         "fill": { "value": "grey" }
                     }
                 }
-            }
+            },
+            "title": "Zhang Score",
+            "titleColor": "grey"
         }
     ],
     "marks": [{
@@ -265,5 +269,10 @@ export const histogramVegaSpec = (data) => ({
         //         }
         //     }
         // }
-    ]
+    ],
+    "title": {
+        "text": "Similarity Histogram",
+        "anchor": "middle",
+        "color": "grey"
+    }
 })

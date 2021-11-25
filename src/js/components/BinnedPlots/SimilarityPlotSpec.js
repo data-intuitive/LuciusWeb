@@ -57,8 +57,17 @@ export const similarityPlotVegaSpec = (data) => ({
             "orient": "bottom",
             "scale": "xscale",
             "domain": false,
-            "ticks": false,
-            "labels": false
+            "ticks": true,
+            "labels": true,
+            "encode": {
+                "labels": {
+                    "update": {
+                        "fill": { "value": "grey" }
+                    }
+                }
+            },
+            "title": "Bin Index",
+            "titleColor": "grey"
         },
         {
             "orient": "left",
@@ -73,7 +82,9 @@ export const similarityPlotVegaSpec = (data) => ({
                         "fill": { "value": "grey" }
                     }
                 }
-            }
+            },
+            "title": "Zhang Score",
+            "titleColor": "grey"
         }
     ],
 
@@ -85,7 +96,7 @@ export const similarityPlotVegaSpec = (data) => ({
                 "shape": { "value": "circle" },
                 "size": { "scale": "sizeScale", "field": "count" },
                 "x": { "scale": "xscale", "field": "x" },
-                "y": { "scale": "yscale2", "field": "avg" },
+                "y": { "scale": "yscale2", "field": "avg" }
             },
             "update": {
                 "fill": { "scale": "color", "field": "avg" },
@@ -96,8 +107,13 @@ export const similarityPlotVegaSpec = (data) => ({
             "hover": {
                 "fill": { "value": "white" },
                 "fillOpacity": { "value": 0.5 },
-                "stroke": { "value": "grey" },
+                "stroke": { "value": "grey" }
             }
         }
-    }]
+    }],
+    "title": {
+        "text": "Similarity Plot",
+        "anchor": "middle",
+        "color": "grey"
+    }
 })

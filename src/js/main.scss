@@ -42,6 +42,18 @@ main {
     @extend .lighten-5;
 }
 
+img.trt_img {
+    width: 100%;
+    width: -moz-available;          /* WebKit-based browsers will ignore this. */
+    width: -webkit-fill-available;  /* Mozilla-based browsers will ignore this. */
+    width: fill-available;
+}
+
+nav ul li.active span {
+    border-bottom-width: medium;
+    border-bottom-style: solid;
+    padding-bottom: 0.2em;
+}
 
 /* home svg styling and hover */
 

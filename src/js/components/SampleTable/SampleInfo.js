@@ -38,7 +38,7 @@ export function SampleInfoHeader(bgcolor, color) {
     ".collection-item .hide-on-med-and-down .zoom",
     { style: { backgroundColor: bgcolor, borderBottom: "2px solid " + color} },
     [
-      div(".row", { style: { fontWeight: "small" } }, [
+      div(".row", { style: { fontWeight: "small", marginBottom: "5px" } }, [
         div(".col .s1 .left-align", { style: { fontWeight: "bold" } }, ["Zhang Score"]),
         div(".col .s2", { style: { fontWeight: "bold" } }, ["Sample ID"]),
         div(".col .s1", { style: { fontWeight: "bold" } }, ["Cell"]),

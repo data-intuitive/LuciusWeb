@@ -207,7 +207,12 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
       .mapTo(-10)
       .startWith(0)
 
+    // Only take the difference of the default value compared to old value
+    // 1. Prevent state changes adding the default value in the accumulator
+    // 2. Needs to be in the accumulator otherwise we can't reduce the amount of lines less than the default setting
+    // 3. By folding & limiting the value here we prevent (hidden) negative numbers that the user would have to increase before seeing changes again
     const defaultAmountToDisplay$ = newInput$.map(state => parseInt(state.settings.table.count))
+      .fold((acc, newValue) => newValue - acc, 0)
     const amountToDisplay$ = xs
       .merge(defaultAmountToDisplay$, plus5$, min5$, plus10$, min10$)
       .fold((x, y) => max(0, x + y), 0)
@@ -415,12 +420,12 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
                   ".material-icons .grey-text",
                   {
                     style: {
-                      fontSize: "16px",
+                      fontSize: "20px",
                       "background-color": settings.table.color,
                       opacity: 0.5,
                     },
                   },
-                  "add"
+                  expandOptions ? "arrow_drop_up" : "arrow_drop_down"
                 ),
               ]),
               div(".white-text .col .s7 .valign .right-align", filterText),

@@ -102,13 +102,21 @@ export default function GeneticWorkflow(sources) {
   })
   const filter$ = filterForm.output.remember()
 
-  // const filter$ = xs.of({})
+  // setting of how to display the binned plots. Can be "before tables", "after tables", "no"
+  // pull setting into a separate stream to aid function in vdom combining
+  const displayPlots$ = state$
+    .map((state) => state.settings.plots.displayPlots)
+    .startWith("")
+    .compose(dropRepeats(equals))
+    .remember()
+
   // Binned Plots Component
   const binnedPlots = isolate(BinnedPlots, { onion: plotsLens })({
     ...sources,
     input: xs
-      .combine(signature$, filter$)
-      .map(([s, f]) => ({ signature: s, filter: f }))
+      .combine(signature$, filter$, displayPlots$)
+      .filter(([s, f, d]) => d !== "no")
+      .map(([s, f, _]) => ({ signature: s, filter: f }))
       .remember(),
   })
 
@@ -148,18 +156,20 @@ export default function GeneticWorkflow(sources) {
       filterForm.DOM,
       binnedPlots.DOM,
       headTable.DOM,
-      tailTable.DOM
+      tailTable.DOM,
+      displayPlots$,
     )
-    .map(([formDOM, filter, plots, headTable, tailTable]) =>
+    .map(([formDOM, filter, plots, headTable, tailTable, displayPlots]) =>
       div(".row .genetic", { style: { margin: "0px 0px 0px 0px" } }, [
         formDOM,
         div(".col .s10 .offset-s1", pageStyle, [
           div(".row", [filter]),
-          div(".row", [plots]),
+          div(".row", [displayPlots === "before tables" ? plots : div()]),
           div(".col .s12", [headTable]),
           div(".row", []),
           div(".col .s12", [tailTable]),
           div(".row", []),
+          div(".row", [displayPlots === "after tables" ? plots : div()]),
         ]),
       ])
     )

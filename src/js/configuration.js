@@ -58,6 +58,7 @@ export const initSettings = {
     },
     plots: {
         debug: false,
+        displayPlots: 'before tables',
         bins: 40,
         binsX: 20
     },

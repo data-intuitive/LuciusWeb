@@ -12,6 +12,7 @@ describe("defaultReducer", function () {
       xs.empty(),
       xs.empty(),
       xs.empty(),
+      xs.empty(),
       xs.empty()
     )
 
@@ -19,7 +20,8 @@ describe("defaultReducer", function () {
       next(f) {
         const newState = f(state)
         assert.deepStrictEqual(newState.core.output, {})
-        assert.deepStrictEqual(newState.settings.filter, { values: {} })
+        assert.deepStrictEqual(newState.core.filter_output, {})
+        assert.deepStrictEqual(newState.core.state, {dose: false, cell: false, trtType: false})
       },
       error(e) {
         done(e)
@@ -37,6 +39,7 @@ describe("defaultReducer", function () {
       xs.empty(),
       xs.empty(),
       xs.empty(),
+      xs.empty(),
       xs.empty()
     )
 
@@ -44,7 +47,6 @@ describe("defaultReducer", function () {
       next(f) {
         const newState = f(state)
         assert.deepStrictEqual(newState.core.output, {})
-        assert.deepStrictEqual(newState.settings.filter, { values: {} })
       },
       error(e) {
         done(e)
@@ -57,7 +59,7 @@ describe("defaultReducer", function () {
 describe("possibleValuesReducer", function () {
   it("Updates the state with the possible values, leaves the rest intact", () => {
     const state = {
-      core: { entry: "test" },
+      core: { entry: "test", dirty: false },
       settings: {},
     }
 
@@ -73,6 +75,7 @@ describe("possibleValuesReducer", function () {
       xs.empty(),
       xs.empty(),
       xs.empty(),
+      xs.empty(),
       xs.empty()
     )
 
@@ -82,9 +85,6 @@ describe("possibleValuesReducer", function () {
         next(f) {
           const newState = f(state)
           assert.deepStrictEqual(newState.core, state.core)
-          assert.deepStrictEqual(newState.settings.filter, {
-            values: possibleValues,
-          })
         },
         error(e) {
           done(e)
@@ -113,6 +113,7 @@ describe("inputReducer", function () {
     const reducers$ = model(
       xs.empty(),
       input$,
+      xs.empty(),
       xs.empty(),
       xs.empty(),
       xs.empty()
@@ -172,10 +173,13 @@ describe("toggleReducer with and without modifier", function () {
       input$,
       filterValuesAction$,
       modifier$,
+      xs.empty(),
       xs.empty()
     )
 
-    const state$ = reducers$.fold((state, reducer) => reducer(state), undefined)
+    // Predefine filters in settings as possible filters will be updated there
+    const defaultFilter = {settings: {filter: {}}}
+    const state$ = reducers$.fold((state, reducer) => reducer(state), defaultFilter)
 
     // The reducers should generate the following sequence for state.core.output
     let expectedOutput = [

@@ -9,7 +9,7 @@ export default function GeneticWorkflow(sources) {
           treatmentType: treatmentLikeFilter.GENETIC,
           welcomeText: "Welcome to Genetic Workflow",
           mainDivClass: ".row .genetic",
-          loggerName: "generic",
+          loggerName: "genetic",
         },
   }
 

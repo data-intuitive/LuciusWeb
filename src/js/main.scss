@@ -42,6 +42,11 @@ main {
     @extend .lighten-5;
 }
 
+.generic {
+    @extend .green;
+    @extend .lighten-5;
+}
+
 img.trt_img {
     width: 100%;
     width: -moz-available;          /* WebKit-based browsers will ignore this. */

@@ -8,6 +8,7 @@ import * as R from 'ramda'
 import DiseaseWorkflow from './pages/disease'
 import CompoundWorkflow from './pages/compound'
 import GeneticWorkflow from './pages/genetic'
+import GenericTreatmentWorkflow from './pages/genericTreatment'
 import TargetWorkflow from './pages/target'
 import CorrelationWorkflow from './pages/correlation'
 
@@ -40,6 +41,7 @@ export default function Index(sources) {
     '/compound': CompoundWorkflow,
     '/target': TargetWorkflow,
     '/genetic': GeneticWorkflow,
+    '/generic': GenericTreatmentWorkflow,
     '/statistics': StatisticsWorkflow,
     '/settings': IsolatedSettings,
     '/correlation': CorrelationWorkflow,
@@ -92,6 +94,7 @@ export default function Index(sources) {
                 // span('.gradient', 'ComPass')
             ),
             ul('.left .hide-on-med-and-down', [
+                makeLink('/generic', span(['Generic']), '.green-text'),
                 makeLink('/compound', span(['Compound', ' ', compoundSVG]), '.orange-text'),
                 // makeLink('/target', span(['Target', ' ', targetSVG]), '.red-text'),
                 makeLink('/genetic', span(['Genetic', ' ', targetSVG]), '.red-text'),

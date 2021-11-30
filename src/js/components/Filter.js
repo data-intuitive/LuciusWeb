@@ -16,9 +16,17 @@ import { FetchFilters } from "./FetchFilters"
 import debounce from 'xstream/extra/debounce'
 import { dirtyUiReducer } from "../utils/ui"
 
-// A typical Lens with one exception:
-// We allow the child state settings for filter to propagate to
-// the global state because the filter values are fetched in the child.
+/**
+ * @module components/Filter
+ */
+
+/**
+ * A typical Lens with one exception:
+ * We allow the child state settings for filter to propagate to
+ * the global state because the filter values are fetched in the child.
+ * @const filterLens
+ * @type {Lens}
+ */
 export const filterLens = {
   get: (state) => ({
     core: state.filter,
@@ -34,7 +42,12 @@ export const filterLens = {
   }),
 }
 
-// When the component should not be shown, including empty signature
+/**
+ * When the component should not be shown, including empty signature
+ * @function isEmptyState
+ * @param {String} state.core.input input value from previous component to signal if this filter should be displayed empty or not
+ * @returns {boolean} 
+ */
 const isEmptyState = (state) => {
   if (typeof state.core === "undefined") {
     return true
@@ -51,6 +64,15 @@ const isEmptyState = (state) => {
   }
 }
 
+/**
+ * Filter intent, convert events on the dom to actions
+ * @function intent
+ * @param {Stream} domSource$ events from the dom
+ * @returns {Stream} object with:
+ *                    - filterValuesAction$ stream of object where key is filter group (top level) and value is which option is being clicked/modified
+ *                    - modifier$: stream of boolean of modifier key being pressed or not
+ *                    - filterAction$: stream of object where key is filter group (top level) and value is boolean of the group being clicked open or not
+ */
 function intent(domSource$) {
   // const expandAnyGhost$ = ghostChanges$.map(state => state.core.ghost.expand).startWith(false)
 
@@ -169,7 +191,18 @@ function intent(domSource$) {
   }
 }
 
-export function model(
+/**
+ * Filters model, control state changes according to actions
+ * @function model
+ * @param {Stream} possibleValues$ object with 'key': 'array of strings'
+ * @param {Stream} input$ signature string, used to pass to view for it to check if there is any input at all
+ * @param {Stream} filterValuesAction$ object where key is filter group (top level; dose, protocol, type) and value is which option is being clicked/modified
+ * @param {Stream} modifier$ boolean of modifier key being pressed or not
+ * @param {Stream} filterAction$ object where key is filter group (top level; dose, protocol, type) and value is boolean of the group being clicked open or not
+ * @param {Stream} state$ readback of full state object used for comparing committed state vs current state, if not identical means ui is dirty
+ * @returns {Stream} reducers
+ */
+function model(
   possibleValues$,
   input$,
   filterValuesAction$,
@@ -178,7 +211,11 @@ export function model(
   state$,
 ) {
 
-  // Add the filter values from the settings (and originally from deployments.json) to the current values
+  /**
+   * Add the filter values from the settings (and originally from deployments.json) to the current values
+   * @const model/defaultReducer$
+   * @type {Reducer}
+   */
   const defaultReducer$ = xs.of((prevState) => ({
     ...prevState,
     core: {
@@ -188,8 +225,11 @@ export function model(
     },
   }))
 
-  // When the query for the current filter values returns we want to update
-  // the settings
+  /**
+   * When the query for the current filter values returns we want to update the settings
+   * @const model/possibleValuesReducer$
+   * @type {Reducer}
+   */
   const possibleValuesReducer$ = possibleValues$.map((fvs) => (prevState) => ({
       ...prevState,
       settings: {
@@ -202,11 +242,21 @@ export function model(
     })
   )
 
+  /**
+   * Store input so view can access it to see if the content is empty or not
+   * @const model/inputReducer$
+   * @type {Reducer}
+   */
   const inputReducer$ = input$.map((i) => (prevState) => ({
     ...prevState,
     core: { ...prevState.core, input: i },
   }))
 
+  /**
+   * Handle toggling of filters to a state of which filter is currently selected or not
+   * @const model/toggleReducer$
+   * @type {Reducer}
+   */ 
   const toggleReducer$ = filterValuesAction$
     .compose(sampleCombine(modifier$))
     .map(([clickedFilter, a]) => (prevState) => {
@@ -292,6 +342,11 @@ export function model(
     return o
   }
 
+  /**
+   * Output reducer that only outputs to 'filter_output' when changes happened to the opening or closing of the filter top levels
+   * @const model/outputReducer$
+   * @type {Reducer}
+   */
   const outputReducer$ = filterAction$.map(_ => (prevState) => ({
       ...prevState,
       core: { ...prevState.core, filter_output: minimizeFilterOutput(prevState) },
@@ -314,7 +369,10 @@ export function model(
 }
 
 /**
- * view
+ * Filters view, display the component on the vdom
+ * @function view 
+ * @param {Stream} state$ full state onion
+ * @returns {VNodes} VNodes object of either emptyVdom$ or loadedVdom$
  */
 function view(state$) {
 
@@ -475,6 +533,16 @@ function view(state$) {
  *
  * - input$: stream of signature updates
  * - output$: to be consumed by components that require filter functionality, object with filter values.
+ * 
+ * @function Filter
+ * @param {*} sources 
+ *          - onion.state$: default onion atom
+ *          - input$: signature used as trigger for empty or not empty
+ * @returns - log: logger stream,
+ *          - DOM: vdom stream,
+ *          - HTTP: HTTP stream,
+ *          - onion: reducers stream,
+ *          - output: minimized filter selection
  */
 function Filter(sources) {
 
@@ -523,7 +591,7 @@ function Filter(sources) {
     DOM: vdom$,
     HTTP: filterQuery.HTTP,
     onion: reducers$,
-    output: outputTrigger$.debug('filter')
+    output: outputTrigger$
   }
 }
 

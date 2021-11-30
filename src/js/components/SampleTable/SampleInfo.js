@@ -25,14 +25,17 @@ import img_ctl_untrt_cns   from "/images/treatmentTypes/CTL_UNTRT.CNS.png"
 import img_ctl_untrt       from "/images/treatmentTypes/CTL_UNTRT.png"
 
 /**
+ * @module components/SampleTable/SampleInfo
+ */
+
+/**
  * Create a header matching the data order of sample rows displayed in case of large displays
  * header hides itself in case of small and medium screens
  * @function SampleInfoHeader
  * @param {string} bgcolor color of the table background
  * @param {string} color color of the table foreground
- * @returns VNode li element with header data
+ * @returns {VNode} li element with header data
  */
-
 export function SampleInfoHeader(bgcolor, color) {
     return li(
     ".collection-item .hide-on-med-and-down .zoom",
@@ -58,6 +61,7 @@ export function SampleInfoHeader(bgcolor, color) {
  * @param {stream} sources.onion.state$ stream of sample data to be displayed
  * @param sources.DOM user click events
  * @param sources.props semi-static settings
+ * @returns {object} - DOM: VNode stream containing sample information
  */
 export function SampleInfo(sources) {
   const state$ = sources.onion.state$

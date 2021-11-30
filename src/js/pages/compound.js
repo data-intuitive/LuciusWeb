@@ -10,6 +10,7 @@ export default function CompoundWorkflow(sources) {
           welcomeText: "Welcome to Compound Workflow",
           mainDivClass: ".row .compound",
           loggerName: "compound",
+          ghostModeScenarioSelector: ((state) => state.settings.common.ghost.compound),
         },
   }
 

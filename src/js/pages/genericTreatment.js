@@ -27,6 +27,7 @@ export default function GenericTreatmentWorkflow(sources) {
   const workflowMainDivClass = workflow.mainDivClass ?? ".row .generic"
   const workflowTreatmentType = workflow.treatmentType ?? treatmentLikeFilter.COMPOUND_AND_GENETIC
   const workflowLoggerName = workflow.loggerName ?? "generic"
+  const workflowGhostModeScenarioSelector = workflow.ghostModeScenarioSelector ?? ((state) => state.settings.common.ghost.genetic)
 
   const logger = loggerFactory(
     workflowLoggerName,
@@ -40,7 +41,7 @@ export default function GenericTreatmentWorkflow(sources) {
   const scenarios$ = sources.onion.state$
     .take(1)
     .filter((state) => state.settings.common.ghostMode)
-    .map(state => runScenario(scenario(state.settings.common.ghost.genetic)))
+    .map(state => runScenario(scenario( workflowGhostModeScenarioSelector(state) )))
   const scenarioReducer$ = scenarios$.map(s => s.scenarioReducer$)
     .flatten()
   const scenarioPopup$ = scenarios$.map(s => s.scenarioPopup$)
@@ -65,7 +66,7 @@ export default function GenericTreatmentWorkflow(sources) {
 
   // Initialize if not yet done in parent (i.e. router) component (useful for testing)
   const defaultReducer$ = xs.of((prevState) => {
-    // genetic -- defaultReducer
+    // defaultReducer
     if (typeof prevState === "undefined") {
       return {
         settings: initSettings,

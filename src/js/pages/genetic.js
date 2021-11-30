@@ -10,6 +10,7 @@ export default function GeneticWorkflow(sources) {
           welcomeText: "Welcome to Genetic Workflow",
           mainDivClass: ".row .genetic",
           loggerName: "genetic",
+          ghostModeScenarioSelector: ((state) => state.settings.common.ghost.genetic),
         },
   }
 

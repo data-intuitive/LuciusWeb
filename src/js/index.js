@@ -23,6 +23,8 @@ import { initSettings } from './configuration.js'
 import initDeployments from '../../deployments.json'
 import { loggerFactory } from './utils/logger'
 
+import { navbarModule } from "../../navbar.js";
+
 export default function Index(sources) {
   const {router} = sources;
 
@@ -105,11 +107,13 @@ export default function Index(sources) {
             ])
         ]),
         ul(".sidenav", {props: {id: 'mobile-demo'}}, [
-            // TODO use makeLink as in normal navigation bar and certainly use correct pages
-            li(a({props: {href: "sass.html"}}, 'Sass')),
-            li(a({props: {href: "badges.html"}}, 'Components')),
-            li(a({props: {href: "collapsible.html"}}, 'Javascript')),
-            li(a({props: {href: "mobile.html"}}, 'Mobile'))
+            makeLink('/compound', span(['Compound', ' ', compoundSVG]), '.orange-text'),
+            // makeLink('/target', span(['Target', ' ', targetSVG]), '.red-text'),
+            makeLink('/genetic', span(['Genetic', ' ', targetSVG]), '.red-text'),
+            makeLink('/disease', span(['Disease', ' ', diseaseSVG]), '.pink-text'),
+            makeLink('/settings', span(['Settings', ' ', settingsSVG]), '.grey-text'),
+            // makeLink('/admin', span(['Admin']), '.blue-text'),
+            makeLink('/correlation', span('.grey-text .text-darken-3','', ["v", VERSION]), ''),
         ])
     ]));
 

@@ -19,6 +19,11 @@ import { runScenario } from "../utils/scenario"
 import dropRepeats from "xstream/extra/dropRepeats"
 import { equals } from "ramda"
 
+
+/**
+ * @module pages/GenericTreatmentWorkflow
+ */
+
 export default function GenericTreatmentWorkflow(sources) {
 
   // configuration of the generic treatment workflow, should be set by the calling page but provide defaults
@@ -48,6 +53,11 @@ export default function GenericTreatmentWorkflow(sources) {
     .flatten()
     .startWith({ text: workflowWelcomeText, duration: 4000 })
 
+  /**
+   * Lens to pass data from top level to TreatmentForm
+   * @const formLens
+   * @type {Lens}
+   */
   const formLens = {
     get: (state) => ({
       form: state.form,
@@ -64,7 +74,11 @@ export default function GenericTreatmentWorkflow(sources) {
     set: (state, childState) => ({ ...state, form: childState.form }),
   }
 
-  // Initialize if not yet done in parent (i.e. router) component (useful for testing)
+  /**
+   * Default reducer; initialize if not yet done in parent (i.e. router) component (useful for testing)
+   * @const defaultReducer$
+   * @type {Reducer}
+   */
   const defaultReducer$ = xs.of((prevState) => {
     // defaultReducer
     if (typeof prevState === "undefined") {
@@ -79,7 +93,14 @@ export default function GenericTreatmentWorkflow(sources) {
     }
   })
 
-  // Use dropRepeats else the stream gets in an infinite loop
+  /**
+   * UI dirty logic, checks TreatmentCheck, SampleSelection, SignatureGenerator and Filter components if they are dirty or busy
+   * If components are dirty/busy, enable UI dirty overlay in subsequent components.
+   * 
+   * Use dropRepeats else the stream gets in an infinite loop
+   * @const uiReducer$
+   * @type {Reducer}
+   */
   const uiReducer$ = state$.compose(dropRepeats(equals))
   .map(state => 
     prevState => {
@@ -101,25 +122,45 @@ export default function GenericTreatmentWorkflow(sources) {
     }
   )
 
+  /**
+   * Isolated TreatmentForm component/form, which contains TreatmentCheck, SampleSelection and SignatureGenerator
+   * @const TreatmentFormSink
+   * @type {Isolated(Component)}
+   */
   const TreatmentFormSink = isolate(TreatmentForm, { onion: formLens })(sources)
   const signature$ = TreatmentFormSink.output.remember()
 
-  // Filter Form
+  /**
+   * Isolated Filter component
+   * @const filterForm
+   * @type {Isolated(Component)}
+   */
   const filterForm = isolate(Filter, { onion: filterLens })({
     ...sources,
     input: signature$,
   })
   const filter$ = filterForm.output.remember()
 
-  // setting of how to display the binned plots. Can be "before tables", "after tables", "no"
-  // pull setting into a separate stream to aid function in vdom combining
+  /**
+   * Setting of how to display the binned plots. Can be "before tables", "after tables", "no".
+   * Pull setting into a separate stream to aid function in vdom combining
+   * @const displayPlots$
+   * @type {Stream}
+   */
   const displayPlots$ = state$
     .map((state) => state.settings.plots.displayPlots)
     .startWith("")
     .compose(dropRepeats(equals))
     .remember()
 
-  // Binned Plots Component
+  /**
+   * Isolated BinnedPlots component, containing 2 plots (similarity and histogram)
+   * 
+   * Filter outputs if displayPlots$ is 'no' to prevent e.g. API calls when the graphs won't be displayed
+   * Combine signature$ and filter$ into an object for the input stream
+   * @const binnedPlots
+   * @type {Isolated(Component)}
+   */
   const binnedPlots = isolate(BinnedPlots, { onion: plotsLens })({
     ...sources,
     input: xs
@@ -169,7 +210,7 @@ export default function GenericTreatmentWorkflow(sources) {
       displayPlots$,
     )
     .map(([formDOM, filter, plots, headTable, tailTable, displayPlots]) =>
-      div(workflowMainDivClass, { style: { margin: "0px 0px 0px 0px" } }, [
+      div(workflowMainDivClass /* something like ".row .genetic" */ , { style: { margin: "0px 0px 0px 0px" } }, [
         formDOM,
         div(".col .s10 .offset-s1", pageStyle, [
           div(".row", [filter]),

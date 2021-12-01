@@ -124,14 +124,25 @@ export default function GenericTreatmentWorkflow(sources) {
 
   /**
    * Isolated TreatmentForm component/form, which contains TreatmentCheck, SampleSelection and SignatureGenerator
+   * 
+   * Outputs data to 'output'
    * @const TreatmentFormSink
    * @type {Isolated(Component)}
    */
   const TreatmentFormSink = isolate(TreatmentForm, { onion: formLens })(sources)
+
+  /**
+   * Memory stream from TreatmentFormSink output
+   * @const signature$
+   * @type {MemoryStream}
+   */
   const signature$ = TreatmentFormSink.output.remember()
 
   /**
    * Isolated Filter component
+   * 
+   * Takes input data from 'input'
+   * Outputs data to 'output'
    * @const filterForm
    * @type {Isolated(Component)}
    */
@@ -139,13 +150,19 @@ export default function GenericTreatmentWorkflow(sources) {
     ...sources,
     input: signature$,
   })
+
+  /**
+   * Memory stream from filter output
+   * @const filter$
+   * @type {MemoryStream}
+   */
   const filter$ = filterForm.output.remember()
 
   /**
    * Setting of how to display the binned plots. Can be "before tables", "after tables", "no".
    * Pull setting into a separate stream to aid function in vdom combining
    * @const displayPlots$
-   * @type {Stream}
+   * @type {MemoryStream}
    */
   const displayPlots$ = state$
     .map((state) => state.settings.plots.displayPlots)
@@ -155,6 +172,8 @@ export default function GenericTreatmentWorkflow(sources) {
 
   /**
    * Isolated BinnedPlots component, containing 2 plots (similarity and histogram)
+   * 
+   * Takes input data from 'input'
    * 
    * Filter outputs if displayPlots$ is 'no' to prevent e.g. API calls when the graphs won't be displayed
    * Combine signature$ and filter$ into an object for the input stream
@@ -170,11 +189,35 @@ export default function GenericTreatmentWorkflow(sources) {
       .remember(),
   })
 
-  // tables
+  /**
+   * Wrap a table with a table name and an option bar with tsv, json, and amount of lines modifier buttons
+   * Generic table for now, later will be refined to head table during isolation
+   * 
+   * Takes input data from 'input'
+   * @const headTableContainer
+   * @type {Component}
+   */
   const headTableContainer = makeTable(SampleTable, sampleTableLens)
+
+  /**
+   * Wrap a table with a table name and an option bar with tsv, json, and amount of lines modifier buttons
+   * Generic table for now, later will be refined to tail table during isolation
+   * 
+   * Takes input data from 'input'
+   * @const tailTableContainer
+   * @type {Component}
+   */
   const tailTableContainer = makeTable(SampleTable, sampleTableLens)
 
-  // Join settings from api and sourire into props
+  /**
+   * Isolated table for top entries
+   * Add signature$ and filter$ into input stream
+   * 
+   * Takes input data from 'input'
+   * Combine signature$ and filter$ into an object for the input stream
+   * @const headTable
+   * @type {Isolated(Component)}
+   */
   const headTable = isolate(headTableContainer, { onion: headTableLens })({
     ...sources,
     input: xs
@@ -182,6 +225,16 @@ export default function GenericTreatmentWorkflow(sources) {
       .map(([s, f]) => ({ query: s, filter: f }))
       .remember(),
   })
+
+  /**
+   * Isolated table for bottom entries
+   * Add signature$ and filter$ into input stream
+   * 
+   * Takes input data from 'input'
+   * Combine signature$ and filter$ into an object for the input stream
+   * @const headTable
+   * @type {Isolated(Component)}
+   */
   const tailTable = isolate(tailTableContainer, { onion: tailTableLens })({
     ...sources,
     input: xs
@@ -190,6 +243,11 @@ export default function GenericTreatmentWorkflow(sources) {
       .remember(),
   })
 
+  /**
+   * Style object used in div capsulating filter, displayPlots and tables
+   * @const pageStyle
+   * @type {object}
+   */
   const pageStyle = {
     style: {
       fontSize: "14px",

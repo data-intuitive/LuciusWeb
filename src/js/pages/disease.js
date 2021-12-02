@@ -1,6 +1,8 @@
 import { div } from "@cycle/dom"
 import xs from "xstream"
 import isolate from "@cycle/isolate"
+import dropRepeats from "xstream/extra/dropRepeats"
+import { equals } from "ramda"
 
 // Components
 import { SignatureForm, formLens } from "../components/SignatureForm"
@@ -71,22 +73,74 @@ function DiseaseWorkflow(sources) {
     ...sources,
     input: signature$,
   })
+
+  /**
+   * Memory stream from filter output
+   * @const filter$
+   * @type {MemoryStream}
+   */
   const filter$ = filterForm.output.remember()
 
-  // Binned Plots Component
+  /**
+   * Setting of how to display the binned plots. Can be "before tables", "after tables", "no".
+   * Pull setting into a separate stream to aid function in vdom combining
+   * @const displayPlots$
+   * @type {MemoryStream}
+   */
+  const displayPlots$ = state$
+    .map((state) => state.settings.plots.displayPlots)
+    .startWith("")
+    .compose(dropRepeats(equals))
+    .remember()
+
+  /**
+   * Isolated BinnedPlots component, containing 2 plots (similarity and histogram)
+   * 
+   * Takes input data from 'input'
+   * 
+   * Filter outputs if displayPlots$ is 'no' to prevent e.g. API calls when the graphs won't be displayed
+   * Combine signature$ and filter$ into an object for the input stream
+   * @const binnedPlots
+   * @type {Isolated(Component)}
+   */
   const binnedPlots = isolate(BinnedPlots, { onion: plotsLens })({
     ...sources,
     input: xs
-      .combine(signature$, filter$)
-      .map(([s, f]) => ({ signature: s, filter: f }))
+      .combine(signature$, filter$, displayPlots$)
+      .filter(([s, f, d]) => d !== "no")
+      .map(([s, f, _]) => ({ signature: s, filter: f }))
       .remember(),
   })
 
-  // tables
+  /**
+   * Wrap a table with a table name and an option bar with tsv, json, and amount of lines modifier buttons
+   * Generic table for now, later will be refined to head table during isolation
+   * 
+   * Takes input data from 'input'
+   * @const headTableContainer
+   * @type {Component}
+   */
   const headTableContainer = makeTable(SampleTable, sampleTableLens)
+
+  /**
+   * Wrap a table with a table name and an option bar with tsv, json, and amount of lines modifier buttons
+   * Generic table for now, later will be refined to tail table during isolation
+   * 
+   * Takes input data from 'input'
+   * @const tailTableContainer
+   * @type {Component}
+   */
   const tailTableContainer = makeTable(SampleTable, sampleTableLens)
 
-  // Join settings from api and sourire into props
+  /**
+   * Isolated table for top entries
+   * Add signature$ and filter$ into input stream
+   * 
+   * Takes input data from 'input'
+   * Combine signature$ and filter$ into an object for the input stream
+   * @const headTable
+   * @type {Isolated(Component)}
+   */
   const headTable = isolate(headTableContainer, { onion: headTableLens })({
     ...sources,
     input: xs
@@ -94,6 +148,16 @@ function DiseaseWorkflow(sources) {
       .map(([s, f]) => ({ query: s, filter: f }))
       .remember(),
   })
+
+  /**
+   * Isolated table for bottom entries
+   * Add signature$ and filter$ into input stream
+   * 
+   * Takes input data from 'input'
+   * Combine signature$ and filter$ into an object for the input stream
+   * @const headTable
+   * @type {Isolated(Component)}
+   */
   const tailTable = isolate(tailTableContainer, { onion: tailTableLens })({
     ...sources,
     input: xs
@@ -102,6 +166,11 @@ function DiseaseWorkflow(sources) {
       .remember(),
   })
 
+  /**
+   * Style object used in div capsulating filter, displayPlots and tables
+   * @const pageStyle
+   * @type {object}
+   */
   const pageStyle = {
     style: {
       fontSize: "14px",
@@ -118,7 +187,8 @@ function DiseaseWorkflow(sources) {
       filterForm.DOM,
       binnedPlots.DOM,
       headTable.DOM,
-      tailTable.DOM
+      tailTable.DOM,
+      displayPlots$,
       // feedback$
     )
     .map(
@@ -128,18 +198,20 @@ function DiseaseWorkflow(sources) {
         plots,
         headTable,
         tailTable,
+	displayPlots,
         // feedback
       ]) =>
         div(".row .disease", { style: { margin: "0px 0px 0px 0px" } }, [
           form,
           div(".col .s10 .offset-s1", pageStyle, [
             div(".row", [filter]),
-            div(".row", [plots]),
+            div(".row", [displayPlots === "before tables" ? plots : div()]),
             div(".row", []),
             div(".col .s12", [headTable]),
             div(".row", []),
             div(".col .s12", [tailTable]),
             div(".row", []),
+            div(".row", [displayPlots === "after tables" ? plots : div()]),
           ]),
         ])
     )

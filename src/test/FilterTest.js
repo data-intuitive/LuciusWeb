@@ -12,7 +12,6 @@ describe("defaultReducer", function () {
       xs.empty(),
       xs.empty(),
       xs.empty(),
-      xs.empty(),
       xs.empty()
     )
 
@@ -35,7 +34,6 @@ describe("defaultReducer", function () {
       settings: { old: true },
     }
     const reducers$ = model(
-      xs.empty(),
       xs.empty(),
       xs.empty(),
       xs.empty(),
@@ -72,7 +70,6 @@ describe("possibleValuesReducer", function () {
 
     const reducers$ = model(
       possibleValues$,
-      xs.empty(),
       xs.empty(),
       xs.empty(),
       xs.empty(),
@@ -113,7 +110,6 @@ describe("inputReducer", function () {
     const reducers$ = model(
       xs.empty(),
       input$,
-      xs.empty(),
       xs.empty(),
       xs.empty(),
       xs.empty()
@@ -173,7 +169,6 @@ describe("toggleReducer with and without modifier", function () {
       input$,
       filterValuesAction$,
       modifier$,
-      xs.empty(),
       xs.empty()
     )
 

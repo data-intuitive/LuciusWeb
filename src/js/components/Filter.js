@@ -192,6 +192,7 @@ function intent(domSource$) {
 
 /**
  * Filters model, control state changes according to actions
+ * set export for unit tests
  * @function model
  * @param {Stream} possibleValues$ object with 'key': 'array of strings'
  * @param {Stream} input$ signature string, used to pass to view for it to check if there is any input at all
@@ -201,7 +202,7 @@ function intent(domSource$) {
  * @param {Stream} state$ readback of full state object used for comparing committed state vs current state, if not identical means ui is dirty
  * @returns {Stream} reducers
  */
-function model(
+export function model(
   possibleValues$,
   input$,
   filterValuesAction$,

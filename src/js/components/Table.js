@@ -207,12 +207,39 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
       .mapTo(-10)
       .startWith(0)
 
-    // Only take the difference of the default value compared to old value
-    // 1. Prevent state changes adding the default value in the accumulator
-    // 2. Needs to be in the accumulator otherwise we can't reduce the amount of lines less than the default setting
-    // 3. By folding & limiting the value here we prevent (hidden) negative numbers that the user would have to increase before seeing changes again
+    /**
+     * Only take the difference of the default value compared to old value
+     * 
+     * Prevent state changes adding the default value in the accumulator.
+     * Needs to store previous value (fold) and take difference compared to previous value. Simple accumulator would cycle between zero and new value
+     * 
+     * Desired behaviour
+     *                acc   newInput    output
+     * initial        0     5           5
+     * first update   5     5           0
+     * second update  5     5           0
+     * 
+     * Highlight why .fold((acc, newValue) => newValue - acc, 0) doesn't work:
+     *                acc   newInput    output
+     * initial        0     5           5
+     * first update   5     5           0
+     * second update  0     5           5
+     * 
+     * @const defaultAmountToDisplay$
+     * @type {Stream}
+     */
     const defaultAmountToDisplay$ = newInput$.map(state => parseInt(state.settings.table.count))
-      .fold((acc, newValue) => newValue - acc, 0)
+      .fold((acc, newValue) => [newValue , acc[0]], [0, 0])
+      .map((v) => (v[0] - v[1]))
+    
+    /**
+     * Merge all + and - buttons with default value
+     * Default value needs to be in the accumulator otherwise we can't reduce the amount of lines less than the default setting
+     * By folding & limiting the value here we prevent (hidden) negative numbers that the user would have to increase before seeing changes again
+     * 
+     * @const amountToDisplay
+     * @type {Stream}
+     */
     const amountToDisplay$ = xs
       .merge(defaultAmountToDisplay$, plus5$, min5$, plus10$, min10$)
       .fold((x, y) => max(0, x + y), 0)

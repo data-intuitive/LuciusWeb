@@ -221,6 +221,7 @@ export function model(
       output: {},
       filter_output: {},
       state: {dose: false, cell: false, trtType: false},
+      dirty: false,
     },
   }))
 
@@ -571,11 +572,6 @@ function Filter(sources) {
   const input$ = sources.input
 
   const filterQuery = FetchFilters(sources)
-
-  // Ghost mode, inject changes via external state updates...
-  // const ghostChanges$ = modifiedState$
-  //   .filter((state) => typeof state.core.ghost !== "undefined")
-  //   .compose(dropRepeats())
 
   const actions = intent(sources.DOM)
 

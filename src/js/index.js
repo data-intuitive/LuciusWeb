@@ -23,6 +23,8 @@ import { initSettings } from './configuration.js'
 import initDeployments from '../../deployments.json'
 import { loggerFactory } from './utils/logger'
 
+import { navbarModule } from "../../navbar.js";
+
 export default function Index(sources) {
   const {router} = sources;
 
@@ -85,23 +87,35 @@ export default function Index(sources) {
         ])
     ])
 
-    const nav$ = xs.of(header([nav('#navigation .grey .darken-4', [
-        div('.nav-wrapper', [
-            a('.brand-logo .right .grey-text', { props: { href: "/" } },
-                div({ style: { width: '140px' } }, logoSVG),
-                // span('.gradient', 'ComPass')
-            ),
-            ul('.left .hide-on-med-and-down', [
-                makeLink('/compound', span(['Compound', ' ', compoundSVG]), '.orange-text'),
-                // makeLink('/target', span(['Target', ' ', targetSVG]), '.red-text'),
-                makeLink('/genetic', span(['Genetic', ' ', targetSVG]), '.red-text'),
-                makeLink('/disease', span(['Disease', ' ', diseaseSVG]), '.pink-text'),
-                makeLink('/settings', span(['Settings', ' ', settingsSVG]), '.grey-text'),
-                // makeLink('/admin', span(['Admin']), '.blue-text'),
-                makeLink('/correlation', span('.grey-text .text-darken-3','', ["v", VERSION]), ''),
+    const nav$ = xs.of(header([
+        nav('#navigation .grey .darken-4', [
+            div('.nav-wrapper', [
+                a('.brand-logo .right .grey-text', { props: { href: "/" } },
+                    div({ style: { width: '140px' } }, logoSVG),
+                    // span('.gradient', 'ComPass')
+                ),
+                a('.sidenav-trigger', { props: { href: '#' },  attrs: {'data-target': 'mobile-demo' }}, i('.material-icons', 'menu')),
+                ul('.left .hide-on-med-and-down', [
+                    makeLink('/compound', span(['Compound', ' ', compoundSVG]), '.orange-text'),
+                    // makeLink('/target', span(['Target', ' ', targetSVG]), '.red-text'),
+                    makeLink('/genetic', span(['Genetic', ' ', targetSVG]), '.red-text'),
+                    makeLink('/disease', span(['Disease', ' ', diseaseSVG]), '.pink-text'),
+                    makeLink('/settings', span(['Settings', ' ', settingsSVG]), '.grey-text'),
+                    // makeLink('/admin', span(['Admin']), '.blue-text'),
+                    makeLink('/correlation', span('.grey-text .text-darken-3','', ["v", VERSION]), ''),
+                ])
             ])
+        ]),
+        ul(".sidenav", {props: {id: 'mobile-demo'}}, [
+            makeLink('/compound', span(['Compound', ' ', compoundSVG]), '.orange-text'),
+            // makeLink('/target', span(['Target', ' ', targetSVG]), '.red-text'),
+            makeLink('/genetic', span(['Genetic', ' ', targetSVG]), '.red-text'),
+            makeLink('/disease', span(['Disease', ' ', diseaseSVG]), '.pink-text'),
+            makeLink('/settings', span(['Settings', ' ', settingsSVG]), '.grey-text'),
+            // makeLink('/admin', span(['Admin']), '.blue-text'),
+            makeLink('/correlation', span('.grey-text .text-darken-3','', ["v", VERSION]), ''),
         ])
-    ])]));
+    ]));
 
     // We combine with state in order to read the customizations
     // This works because the defaultReducer runs before anything else

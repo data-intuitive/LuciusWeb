@@ -11,9 +11,11 @@ module.exports = {
     filename: 'bundle.js',
   },
   devServer: {
-    inline: true,
+    static: {
+      directory: './',
+    },
+    //inline: true, // removed
     historyApiFallback: true,
-    contentBase: './',
     hot: false,
     port: 3000
   },

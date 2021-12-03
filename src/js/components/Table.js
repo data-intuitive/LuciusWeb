@@ -52,9 +52,20 @@ import debounce from "xstream/extra/debounce"
 import pairwise from "xstream/extra/pairwise"
 import { dirtyWrapperStream } from "../utils/ui"
 
-// Granular access to the settings
-// We _copy_ the results array to the root of this element's scope.
-// This makes it easier to apply fixed scope later in the process
+/**
+ * @module components/Table
+ */
+
+/**
+ * Lens for head/top table
+ *
+ * Granular access to the settings
+ * We _copy_ the results array to the root of this element's scope.
+ * This makes it easier to apply fixed scope later in the process
+ *
+ * @const headTableLens
+ * @type {Lens}
+ */
 const headTableLens = {
   get: (state) => ({
     core: state.headTable,
@@ -74,9 +85,16 @@ const headTableLens = {
   }),
 }
 
-// Granular access to the settings
-// We _copy_ the results array to the root of this element's scope.
-// This makes it easier to apply fixed scope later in the process
+/**
+ * Lens for tail/bottom table
+ *
+ * Granular access to the settings
+ * We _copy_ the results array to the root of this element's scope.
+ * This makes it easier to apply fixed scope later in the process
+ *
+ * @const tailTableLens
+ * @type {Lens}
+ */
 const tailTableLens = {
   get: (state) => ({
     core: state.tailTable,
@@ -96,9 +114,16 @@ const tailTableLens = {
   }),
 }
 
-// Granular access to the settings
-// We _copy_ the results array to the root of this element's scope.
-// This makes it easier to apply fixed scope later in the process
+/**
+ * Lens for compound container table
+ *
+ * Granular access to the settings
+ * We _copy_ the results array to the root of this element's scope.
+ * This makes it easier to apply fixed scope later in the process
+ *
+ * @const compoundContainerTableLens
+ * @type {Lens}
+ */
 const compoundContainerTableLens = {
   get: (state) => ({
     core: state.compoundTable,
@@ -118,6 +143,17 @@ const compoundContainerTableLens = {
   }),
 }
 
+/**
+ * Wrapper for the inner Table function. Needed as we need to pass a function into 'isolate' when isolating components
+ *
+ * Returns a function that wraps a title and options bar around a standard table and the lens passed as parameters
+ *
+ * @function makeTable
+ * @param {Component} tableComponent Inner table component
+ * @param {Lens} tableLens Lens used in the inner table component
+ * @param {*} scope
+ * @returns a component getter function
+ */
 function makeTable(tableComponent, tableLens, scope = "scope1") {
   /**
    * This is a general table container: a post query is sent to the endpoint (configured via settings).
@@ -126,6 +162,14 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
    * In other words, for what we use it, query can be either a signature or a (list of) known/predicted target(s).
    *
    * The lens that defines the rendering of the data is injected using the makeTable function.
+   * @function makeTable/Table
+   * @param {*} sources
+   *          - onion.state$: default onion atom containing the input data
+   *          - input: trigger data from the previous component
+   *          - HTTP: HTTP responses stream
+   *          - DOM: user click events
+   *          - props: settings for e.g. background and foreground colors
+   * @returns a component containing a table with a title and option bar
    */
   return function Table(sources) {
     const logger = loggerFactory(
@@ -143,10 +187,21 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
       // state$.map(state => state.core.input).compose(dropRepeats(equals))
     )
 
+    /**
+     * Provides a stream that only updates when state.core.input is not empty and changes occurred
+     * @const makeTable/Table/modifierState$
+     * @type {Stream}
+     */
     const modifiedState$ = state$
       .filter((state) => !isEmptyState(state))
       .compose(dropRepeats((x, y) => equals(x.core.input, y.core.input)))
 
+    /**
+     * Provides a stream that updates when state.core.input is updated or there is a new input
+     * Combines the default onion atom with the extra input stream
+     * @const makeTable/Table/newInput$
+     * @type {Stream}
+     */
     const newInput$ = xs
       .combine(input$, modifiedState$)
       .map(([newInput, state]) => ({
@@ -155,7 +210,12 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
       }))
       .compose(dropRepeats((x, y) => equals(x.core.input, y.core.input)))
 
-    // When the component should not be shown, including empty query
+    /**
+     * When the component should not be shown, including empty query
+     * @function makeTable/Table/isEmptyState
+     * @param {*} state default onion atom containing the input data
+     * @returns {boolean} state.core.input is empty or undefined
+     */
     const isEmptyState = (state) => {
       if (typeof state.core === "undefined") {
         return true
@@ -173,36 +233,80 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
       }
     }
 
-    // Split off properties in separate stream to make life easier in simple subcomponents
-    // Be aware: this is required to be a memory stream!!!
+    /**
+     * Split off settings in separate stream to make life easier in simple subcomponents
+     * This is required to be a memory stream!
+     * @const makeTable/Table/props$
+     * @type {MemoryStream}
+     */
     const props$ = state$
       .filter((state) => !isEmptyState(state))
       .map((state) => state.settings)
       .compose(dropRepeats(equals))
       .remember()
 
+    /**
+     * Split of settings in a separate stream to drop irrelevant state updates
+     * Drops repeats to avoid updates to vdom$ when there is no real change
+     * @const makeTable/Table/settings$
+     * @type {Stream}
+     */
     const settings$ = state$
       .map((state) => state.settings)
-      .compose(dropRepeats(equals)) // Avoid updates to vdom$ when no real change
+      .compose(dropRepeats(equals))
 
+    /**
+     * Stream of boolean whether the options bar is currently expanded or not
+     * Drops repeats to avoid updates to vdom$ when there is no real change
+     * @const makeTable/Table/expandOptions$
+     * @type {Stream}
+     */
     const expandOptions$ = state$
       .map((state) => state.core.expandOptions)
-      .compose(dropRepeats(equals)) // Avoid updates to vdom$ when no real change
+      .compose(dropRepeats(equals))
 
+    /**
+     * State stream that only updates when state.core.input.query is empty or undefined
+     * @const makeTable/Table/emptyState$
+     * @type {Stream}
+     */
     const emptyState$ = state$.filter((state) => isEmptyState(state))
 
+    /**
+     * Stream of user events when the +5 button is pressed
+     * @const makeTable/Table/plus5$
+     * @type {Stream}
+     */
     const plus5$ = sources.DOM.select(".plus5")
       .events("click")
       .mapTo(5)
       .startWith(0)
+
+    /**
+     * Stream of user events when the -5 button is pressed
+     * @const makeTable/Table/min5$
+     * @type {Stream}
+     */
     const min5$ = sources.DOM.select(".min5")
       .events("click")
       .mapTo(-5)
       .startWith(0)
+
+    /**
+     * Stream of user events when the +10 button is pressed
+     * @const makeTable/Table/plus10$
+     * @type {Stream}
+     */
     const plus10$ = sources.DOM.select(".plus10")
       .events("click")
       .mapTo(10)
       .startWith(0)
+
+    /**
+     * Stream of user events when the -10 button is pressed
+     * @const makeTable/Table/min10$
+     * @type {Stream}
+     */
     const min10$ = sources.DOM.select(".min10")
       .events("click")
       .mapTo(-10)
@@ -210,38 +314,38 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
 
     /**
      * Only take the difference of the default value compared to old value
-     * 
+     *
      * Prevent state changes adding the default value in the accumulator.
      * Needs to have previous and new value and take difference. Simple accumulator with fold would cycle between zero and new value.
-     * 
+     *
      * Desired behaviour
      *                acc   newInput    output
      * initial        0     5           5
      * first update   5     5           0
      * second update  5     5           0
-     * 
+     *
      * Highlight why .fold((acc, newValue) => newValue - acc, 0) doesn't work:
      *                acc   newInput    output
      * initial        0     5           5
      * first update   5     5           0
      * second update  0     5           5
-     * 
+     *
      * pairwise gives us previous and new value but need to make sure that if we only receive 1 value we do get an output, so use .startWith(0)
-     * 
-     * @const defaultAmountToDisplay$
+     *
+     * @const makeTable/Table/defaultAmountToDisplay$
      * @type {Stream}
      */
     const defaultAmountToDisplay$ = newInput$.map(state => parseInt(state.settings.table.count))
       .startWith(0)
       .compose(pairwise)
       .map((v) => (v[1] - v[0]))
-    
+
     /**
      * Merge all + and - buttons with default value
      * Default value needs to be in the accumulator otherwise we can't reduce the amount of lines less than the default setting
      * By folding & limiting the value here we prevent (hidden) negative numbers that the user would have to increase before seeing changes again
-     * 
-     * @const amountToDisplay
+     *
+     * @const makeTable/Table/amountToDisplay
      * @type {Stream}
      */
     const amountToDisplay$ = xs
@@ -265,6 +369,12 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
       .compose(dropRepeats((x, y) => equals(x.core, y.core)))
       .filter((state) => state.core.input.query)
 
+    
+    /**
+     * Makes a HTTP request to the API
+     * @const makeTable/Table/request$
+     * @type {Stream}
+     */
     const request$ = triggerRequest$.map((state) => ({
       send: merge(state.core.count, {
         query: state.core.input.query,
@@ -280,8 +390,19 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
       category: "table",
     }))
 
+    /**
+     * Get HTTP answer of the HTTP request made to the API
+     * Is stream of streams
+     * @const makeTable/Table/response$$
+     * @type {Stream}
+     */
     const response$$ = sources.HTTP.select("table")
 
+    /**
+     * Split off invalid responses from the HTTP answers and create a stream of errors
+     * @const makeTable/Table/invalidResponse$
+     * @type {Stream}
+     */
     const invalidResponse$ = response$$
       .map(
         (response$) =>
@@ -291,12 +412,22 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
       )
       .flatten()
 
+    /**
+     * Split off valid responses from the HTTP answers and create a stream of valid responses
+     * @const makeTable/Table/validResponse$
+     * @type {Stream}
+     */
     const validResponse$ = response$$
       .map((response$) => response$.replaceError((error) => xs.empty()))
       .flatten()
 
     // ========================================================================
 
+    /**
+     * Create stream of valid data received from the API
+     * @const makeTable/Table/data$
+     * @type {Stream}
+     */
     const data$ = validResponse$.map((result) => result.body.result.data)
 
     // Convert to TSV and JSON
@@ -312,12 +443,23 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
 
     // ========================================================================
 
-    // Table with samples/compounds -- depending on the tableComponent
+    /**
+     * Table with samples/compounds -- depending on the tableComponent
+     *
+     * Additionally pass settings into a separate props stream into the component
+     * @const makeTable/Table/tableContent
+     * @type {Isolated(Component)}
+     */
     const tableContent = isolate(tableComponent, {
       onion: tableLens,
       "*": scope,
     })({ ...sources, props: props$ })
 
+    /**
+     * Style used to display in the title which filters are applied
+     * @const makeTable/Table/chipStyle
+     * @type {Object}
+     */
     const chipStyle = {
       style: {
         fontWeight: "lighter",
@@ -379,6 +521,12 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
       })
       .startWith([])
 
+    /**
+     * Style to make buttons for tsv & json export and plus & min buttons in expanding option bar
+     * @const makeTable/Table/smallBtnStyle
+     * @param {string} bgcolor background color of the button
+     * @type {Object}
+     */
     const smallBtnStyle = (bgcolor) => ({
       style: {
         "margin-bottom": "0px",
@@ -394,6 +542,11 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
 
     // ========================================================================
 
+    /**
+     * Display an empty div on vdom when state.core.input.query is empty or undefined
+     * @const makeTable/Table/initVdom$
+     * @type {Stream}
+     */
     const initVdom$ = emptyState$.mapTo(div())
 
     const loadingVdom$ = request$
@@ -611,7 +764,11 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
       div(".red .white-text", [p("An error occured !!!")])
     )
 
-    // Wrap component vdom with an extra div that handles being dirty
+    /**
+     * Wrap component vdom with an extra div that handles being dirty
+     * @const makeTable/Table/vdom$
+     * @type {Stream}
+     */
     const vdom$ = dirtyWrapperStream(state$, xs.merge(initVdom$, errorVdom$, loadingVdom$.remember(), loadedVdom$) )
 
     // ========================================================================

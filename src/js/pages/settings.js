@@ -35,8 +35,8 @@ export function Settings(sources) {
         },
         {
           field: "pvalue",
-          class: "text",
-          type: ".input-field",
+          class: ".input-field",
+          type: "text",
           title: "p-value",
           props: { type: "text" },
         },
@@ -100,6 +100,14 @@ export function Settings(sources) {
       title: "Combined (binned) plots",
       settings: [
         {
+          field: "displayPlots",
+          type: "select",
+          class: ".switch",
+          title: "Display plots?",
+          options: ["before tables", "after tables", "no"],
+          props: { type: "checkbox" },
+        },
+        {
           field: "bins",
           class: ".range-field",
           type: "range",
@@ -127,6 +135,41 @@ export function Settings(sources) {
             .map((event) => event)
         : sources.DOM.events("input").map((event) => event.target.value)
 
+    function renderField(config, _state) {
+      if (config.type == "checkbox") {
+        return [
+          label(".active", [
+            input({ props: merge(config.props, { checked: _state }) }),
+            span(".lever"),
+          ]),
+        ]
+      }
+      if (config.type == "text" || config.type == "range") {
+        return [input({ props: merge(config.props, { value: _state }) })]
+      }
+      if (config.type == "select") {
+        const options = config.options
+        const selectedOption = (option) =>
+          _state == option
+            ? ".grey.lighten-3.black-text"
+            : ".grey.lighten-3.grey-text.text-lighten-1"
+        const optionButtons = options.map((o) =>
+          div(
+            ".col.selection" + selectedOption(o) + "." + o,
+            { style: { "border-style": "solid", margin: "2px" } },
+            [
+              label(selectedOption(o), [
+                input("", { props: merge(config.props, { value: o }) }, ""),
+                o,
+              ]),
+            ]
+          )
+        )
+        return optionButtons
+      }
+    }
+
+
     const vdom$ = state$.map((state) =>
       li(
         ".collection-item .row",
@@ -143,21 +186,7 @@ export function Settings(sources) {
 
           div(
             ".col .s6 " + config.class,
-
-            config.type == "checkbox"
-              ? // Checkbox form
-                [
-                  label(".active", [
-                    // config.title,
-                    input({ props: merge(config.props, { checked: state }) }),
-                    span(".lever"),
-                  ]),
-                ]
-              : // Range or input
-                [
-                  input({ props: merge(config.props, { value: state }) }),
-                  // label(config.field),
-                ]
+            renderField(config, state)
           ),
         ])
       )

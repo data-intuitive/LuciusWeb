@@ -1,5 +1,5 @@
 export const initSettings = {
-    version: 5.1,
+    version: 5.2,
     deployment: {
       "name": "default",
     },
@@ -58,6 +58,7 @@ export const initSettings = {
     },
     plots: {
         debug: false,
+        displayPlots: 'before tables',
         bins: 40,
         binsX: 20
     },

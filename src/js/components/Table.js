@@ -49,6 +49,7 @@ import { loggerFactory } from "../utils/logger"
 import { convertToCSV } from "../utils/export"
 import delay from "xstream/extra/delay"
 import debounce from "xstream/extra/debounce"
+import pairwise from "xstream/extra/pairwise"
 import { dirtyWrapperStream } from "../utils/ui"
 
 // Granular access to the settings
@@ -207,12 +208,42 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
       .mapTo(-10)
       .startWith(0)
 
-    // Only take the difference of the default value compared to old value
-    // 1. Prevent state changes adding the default value in the accumulator
-    // 2. Needs to be in the accumulator otherwise we can't reduce the amount of lines less than the default setting
-    // 3. By folding & limiting the value here we prevent (hidden) negative numbers that the user would have to increase before seeing changes again
+    /**
+     * Only take the difference of the default value compared to old value
+     * 
+     * Prevent state changes adding the default value in the accumulator.
+     * Needs to have previous and new value and take difference. Simple accumulator with fold would cycle between zero and new value.
+     * 
+     * Desired behaviour
+     *                acc   newInput    output
+     * initial        0     5           5
+     * first update   5     5           0
+     * second update  5     5           0
+     * 
+     * Highlight why .fold((acc, newValue) => newValue - acc, 0) doesn't work:
+     *                acc   newInput    output
+     * initial        0     5           5
+     * first update   5     5           0
+     * second update  0     5           5
+     * 
+     * pairwise gives us previous and new value but need to make sure that if we only receive 1 value we do get an output, so use .startWith(0)
+     * 
+     * @const defaultAmountToDisplay$
+     * @type {Stream}
+     */
     const defaultAmountToDisplay$ = newInput$.map(state => parseInt(state.settings.table.count))
-      .fold((acc, newValue) => newValue - acc, 0)
+      .startWith(0)
+      .compose(pairwise)
+      .map((v) => (v[1] - v[0]))
+    
+    /**
+     * Merge all + and - buttons with default value
+     * Default value needs to be in the accumulator otherwise we can't reduce the amount of lines less than the default setting
+     * By folding & limiting the value here we prevent (hidden) negative numbers that the user would have to increase before seeing changes again
+     * 
+     * @const amountToDisplay
+     * @type {Stream}
+     */
     const amountToDisplay$ = xs
       .merge(defaultAmountToDisplay$, plus5$, min5$, plus10$, min10$)
       .fold((x, y) => max(0, x + y), 0)

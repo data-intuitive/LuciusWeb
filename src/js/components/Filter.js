@@ -14,7 +14,6 @@ import {
 } from "ramda"
 import { FetchFilters } from "./FetchFilters"
 import debounce from 'xstream/extra/debounce'
-import { dirtyUiReducer } from "../utils/ui"
 
 /**
  * @module components/Filter
@@ -193,6 +192,7 @@ function intent(domSource$) {
 
 /**
  * Filters model, control state changes according to actions
+ * set export for unit tests
  * @function model
  * @param {Stream} possibleValues$ object with 'key': 'array of strings'
  * @param {Stream} input$ signature string, used to pass to view for it to check if there is any input at all
@@ -202,13 +202,12 @@ function intent(domSource$) {
  * @param {Stream} state$ readback of full state object used for comparing committed state vs current state, if not identical means ui is dirty
  * @returns {Stream} reducers
  */
-function model(
+export function model(
   possibleValues$,
   input$,
   filterValuesAction$,
   modifier$,
   filterAction$,
-  state$,
 ) {
 
   /**
@@ -222,6 +221,7 @@ function model(
       output: {},
       filter_output: {},
       state: {dose: false, cell: false, trtType: false},
+      dirty: false,
     },
   }))
 
@@ -343,19 +343,33 @@ function model(
   }
 
   /**
-   * Output reducer that only outputs to 'filter_output' when changes happened to the opening or closing of the filter top levels
+   * Output reducer that only outputs the minimized state to 'filter_output' when all top level menus are closed
    * @const model/outputReducer$
    * @type {Reducer}
    */
-  const outputReducer$ = filterAction$.map(_ => (prevState) => ({
+  const outputReducer$ = filterAction$
+    .filter((state) => !state.dose && !state.cell && !state.trtType)
+    .map(_ => (prevState) => ({
       ...prevState,
       core: { ...prevState.core, filter_output: minimizeFilterOutput(prevState) },
     }))
 
-  const minimizedCurrentOutput$ = state$.map((state) => minimizeFilterOutput(state))
+  /**
+   * Dirty state reducer, custom version than in ui.js as more logic is required and otherwise need to loop state$ back into model
+   * Uses value change or opening/closing of the filters and compares current state with committed state
+   * 
+   * @const model/dirtyReducer$
+   * @type {Reducer}
+   */
+  const dirtyReducer$ = xs.merge(filterValuesAction$, filterAction$).map(_ => (prevState) => {
+      const minimizedCurrentOutput = minimizeFilterOutput(prevState)
+      const dirty = !equals(minimizedCurrentOutput, prevState.core.filter_output)
 
-  // Logic and reducer stream that monitors if this component became dirty
-  const dirtyReducer$ = dirtyUiReducer(minimizedCurrentOutput$, state$.map(state => state.core.filter_output))
+      return {
+          ...prevState,
+          core: {...prevState.core, dirty: dirty}
+        }
+    })
 
   return xs.merge(
     defaultReducer$,
@@ -559,11 +573,6 @@ function Filter(sources) {
 
   const filterQuery = FetchFilters(sources)
 
-  // Ghost mode, inject changes via external state updates...
-  // const ghostChanges$ = modifiedState$
-  //   .filter((state) => typeof state.core.ghost !== "undefined")
-  //   .compose(dropRepeats())
-
   const actions = intent(sources.DOM)
 
   const vdom$ = view(state$)
@@ -574,15 +583,10 @@ function Filter(sources) {
       actions.filterValuesAction$,
       actions.modifier$,
       actions.filterAction$,
-      state$,
   )
 
-  const outputTrigger$ =
+  const outputTrigger$ = 
     state$
-      .filter(
-        (state) =>
-        !state.core.state.dose && !state.core.state.cell && !state.core.state.trtType
-      )
       .map(state => state.core.filter_output)
       .compose(dropRepeats(equals))
 

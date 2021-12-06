@@ -430,16 +430,25 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
      */
     const data$ = validResponse$.map((result) => result.body.result.data)
 
-    // Convert to TSV and JSON
+    /**
+     * Stream of table data converted into TSV format
+     * @const makeTable/Table/csvData$
+     * @type {Stream}
+     */
     const csvData$ = data$
       .map((data) => convertToCSV(data))
       .map((csv) => "text/tsv;charset=utf-8," + encodeURIComponent(csv))
+    /**
+     * Stream of table data converted into JSON
+     * @const makeTable/Table/jsonData$
+     * @type {Stream}
+     */
     const jsonData$ = data$.map(
       (json) =>
         "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(json))
     )
 
-    const datas$ = xs.combine(data$, csvData$, jsonData$)
+    //const datas$ = xs.combine(data$, csvData$, jsonData$)
 
     // ========================================================================
 
@@ -468,6 +477,11 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
       },
     }
 
+    /**
+     * Stream of vdom displaying the applied filter filters
+     * @const makeTable/Table/filterDom$
+     * @type {Stream}
+     */
     const filterDom$ = modifiedState$
       .compose(
         dropRepeats((x, y) => equals(x.core.input.filter, y.core.input.filter))
@@ -549,6 +563,11 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
      */
     const initVdom$ = emptyState$.mapTo(div())
 
+    /**
+     * Placeholder while a request is under way
+     * @const makeTable/Table/loadingVdom$
+     * @type {Stream}
+     */
     const loadingVdom$ = request$
       .compose(sampleCombine(filterDom$, modifiedState$))
       .map(([r, filterText, state]) =>
@@ -575,6 +594,11 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
       )
       .remember()
 
+    /**
+     * Full vdom content once request is received
+     * @const makeTable/Table/loadedVdom$
+     * @type {Stream}
+     */
     const loadedVdom$ = xs
       .combine(
         tableContent.DOM,
@@ -760,6 +784,11 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
         ])
       )
 
+    /**
+     * Display error message when an invalid response is received
+     * @const makeTable/Table/errorVdom$
+     * @type {Stream}
+     */
     const errorVdom$ = invalidResponse$.mapTo(
       div(".red .white-text", [p("An error occured !!!")])
     )
@@ -773,7 +802,11 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
 
     // ========================================================================
 
-    // Default Reducer
+    /**
+     * Default Reducer
+     * @const makeTable/Table/defaultReducer$
+     * @type {Reducer}
+     */
     const defaultReducer$ = xs
       .of(function defaultReducer(prevState) {
         if (typeof prevState === "undefined") {
@@ -783,27 +816,43 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
         }
       })
 
-    // Add input to state
+    /**
+     * Add input to state
+     * @const makeTable/Table/inputReducer$
+     * @type {Reducer}
+     */
     const inputReducer$ = input$
       .map((i) => (prevState) =>
         // inputReducer
         ({ ...prevState, core: { ...prevState.core, input: i } })
       )
 
-    // Add request body to state
+    /**
+     * Add request body to state
+     * @const makeTable/Table/requestReducer$
+     * @type {Reducer}
+     */
     const requestReducer$ = request$.map((req) => (prevState) => ({
       ...prevState,
       core: { ...prevState.core, request: req },
     }))
 
-    // Data reducer
+    /**
+     * Add reply data to state
+     * @const makeTable/Table/dataReducer$
+     * @type {Reducer}
+     */
     const dataReducer$ = data$
       .map((newData) => (prevState) => ({
         ...prevState,
         core: { ...prevState.core, data: newData },
       }))
 
-    // Reducer for opening and closing option drawer
+    /**
+     * Reducer for opening and closing option drawer
+     * @const makeTable/Table/switchReducer$
+     * @type {Reducer}
+     */
     const switchReducer$ = sources.DOM.select(".switch")
       .events("click")
       .fold((x, y) => !x, false)

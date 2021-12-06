@@ -88,15 +88,15 @@ function intent(domSource$) {
     )
     .remember()
 
-  const showProtocolUI$ = domSource$
-    .select(".protocol")
+  const showCellUI$ = domSource$
+    .select(".cell")
     .events("click")
     .fold((x, _) => ({ cell: !x.cell }), { cell: false })
     .startWith({ cell: false })
 
-  const showProtocol$ = xs
+  const showCell$ = xs
     .merge(
-      showProtocolUI$
+      showCellUI$
       // showAnyGhost$
     )
     .remember()
@@ -115,7 +115,7 @@ function intent(domSource$) {
     .remember()
 
   const filterAction$ = xs
-    .combine(showDose$, showProtocol$, showType$)
+    .combine(showDose$, showCell$, showType$)
     .map(mergeAll)
 
   // Toggles for filter options
@@ -135,8 +135,8 @@ function intent(domSource$) {
     .map((ev) => ev.ownerTarget.id)
     .map((value) => ({ dose: value }))
 
-  const protocolToggled$ = domSource$
-    .select(".protocol-options")
+  const cellToggled$ = domSource$
+    .select(".cell-options")
     .events("click")
     .map(function (ev) {
       ev.preventDefault()
@@ -178,7 +178,7 @@ function intent(domSource$) {
 
   const action$ = xs.merge(
     doseToggled$,
-    protocolToggled$,
+    cellToggled$,
     typeToggled$,
     // toggledGhost$
   )
@@ -196,9 +196,9 @@ function intent(domSource$) {
  * @function model
  * @param {Stream} possibleValues$ object with 'key': 'array of strings'
  * @param {Stream} input$ signature string, used to pass to view for it to check if there is any input at all
- * @param {Stream} filterValuesAction$ object where key is filter group (top level; dose, protocol, type) and value is which option is being clicked/modified
+ * @param {Stream} filterValuesAction$ object where key is filter group (top level; dose, cell, type) and value is which option is being clicked/modified
  * @param {Stream} modifier$ boolean of modifier key being pressed or not
- * @param {Stream} filterAction$ object where key is filter group (top level; dose, protocol, type) and value is boolean of the group being clicked open or not
+ * @param {Stream} filterAction$ object where key is filter group (top level; dose, cell, type) and value is boolean of the group being clicked open or not
  * @param {Stream} state$ readback of full state object used for comparing committed state vs current state, if not identical means ui is dirty
  * @returns {Stream} reducers
  */
@@ -459,21 +459,21 @@ function view(state$) {
             ),
           ]),
         ])
-      : div(".protocol .col .s10 .offset-s1", [""])
+      : div(".cell .col .s10 .offset-s1", [""])
 
 
   const loadedVdom$ = modifiedState$.map((state) => {
     const possibleDoses = state.settings.filter.values.dose || [ "Populating filter dialog...", ]
-    const possibleProtocols = state.settings.filter.values.cell || [ "Populating filter dialog...", ]
+    const possibleCells = state.settings.filter.values.cell || [ "Populating filter dialog...", ]
     const possibleTypes = state.settings.filter.values.trtType || [ "Populating filter dialog...", ]
 
     const selectedDoses =
       state.core.output.dose == undefined
         ? possibleDoses
         : state.core.output.dose
-    const selectedProtocols =
+    const selectedCells =
       state.core.output.cell == undefined
-        ? possibleProtocols
+        ? possibleCells
         : state.core.output.cell
     const selectedTypes =
       state.core.output.trtType == undefined
@@ -501,18 +501,18 @@ function view(state$) {
         ),
       ]),
       div(".col .s12", [
-        div(".chip .protocol .col .s12", [
-          span(".protocol .blue-grey-text", [
-            noFilter(selectedProtocols, possibleProtocols)
-              ? "No Protocol Filter"
-              : "Protocols: " + selectedProtocols.join(", "),
+        div(".chip .cell .col .s12", [
+          span(".cell .blue-grey-text", [
+            noFilter(selectedCells, possibleCells)
+              ? "No Cell Filter"
+              : "Cells: " + selectedCells.join(", "),
           ]),
         ]),
         togglableFilter(
-          "protocol",
+          "cell",
           state.core.state.cell,
-          possibleProtocols,
-          selectedProtocols
+          possibleCells,
+          selectedCells
         ),
       ]),
       div(".col .s12", [

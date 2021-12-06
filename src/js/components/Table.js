@@ -187,6 +187,11 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
       // state$.map(state => state.core.input).compose(dropRepeats(equals))
     )
 
+    // TODO: modifiedState$, newInput$ and inputReducer$ should be reworked together
+    // modifiedState$ triggers on input changes from inputReducer$
+    // newInput adds input to state and then also triggers on input changes, but sets the input value itself instead of using inputReducer
+    // The code would be clearer if either the input stream is kept separate and just use state, or input is added to state and is then used together
+
     /**
      * Provides a stream that only updates when state.core.input is not empty and changes occurred
      * @const makeTable/Table/modifierState$

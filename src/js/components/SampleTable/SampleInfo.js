@@ -111,7 +111,7 @@ export function SampleInfo(sources) {
    * Uses materialize.css grid features to display basic sample data in a row
    * Depending on the width of the screen the content is either in one single line
    * or details get spread into multiple lines
-   * @function row
+   * @function SampleInfo/row
    * @param {object} sample the data to be displayed
    * @param {object} props semi-static settings for ie. sourire url or background colors
    * @param {style} blur component style to contain blur settings
@@ -298,7 +298,7 @@ export function SampleInfo(sources) {
 
   /**
    * Constant lambda function to create a data row details for a sample
-   * @function rowDetails
+   * @function SampleInfo/rowDetails
    * @param {object} sample the data to be displayed
    * @param {object} props static settings for ie. sourire url or background colors
    * @param {style} blur component style to contain blur settings

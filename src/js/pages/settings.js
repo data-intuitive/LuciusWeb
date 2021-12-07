@@ -209,10 +209,28 @@ export function Settings(sources) {
     const title = settingsGroupObj.title
 
     const components$ = xs
-      .of(settingsArray)
-      .map((settings) =>
+      .combine(xs.of(settingsArray), sources.onion.state$)
+      .map(([settings, state]) =>
         settings.map((setting) =>
-          isolate(makeSetting(setting), setting.field)(sources)
+          {
+            if (setting.field in state)
+              return isolate(makeSetting(setting), setting.field)(sources)
+            else
+              return {
+                DOM: xs.of(
+                  li(".collection-item .row",
+                    div(".valign-wrapper", [
+                      span(".col .l6 .s12 .truncate", [
+                        span(".flow-text", setting.title),
+                      ]),
+            
+                      div(".col .s6 .red-text", ["Invalid value in config"]),
+                    ])
+                  )),
+                onion: xs.empty()
+                }
+
+          }
         )
       )
       .remember()

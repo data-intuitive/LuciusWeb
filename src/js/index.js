@@ -24,8 +24,6 @@ import { initSettings } from './configuration.js'
 import initDeployments from '../../deployments.json'
 import { loggerFactory } from './utils/logger'
 
-import { navbarModule } from "../../navbar.js";
-
 export default function Index(sources) {
   const {router} = sources;
 
@@ -96,7 +94,7 @@ export default function Index(sources) {
                     div({ style: { width: '140px' } }, logoSVG),
                     // span('.gradient', 'ComPass')
                 ),
-                a('.sidenav-trigger', { props: { href: '#' },  attrs: {'data-target': 'mobile-demo' }}, i('.material-icons', 'menu')),
+                a('.sidenav-trigger', { props: { href: '#' },  attrs: {'data-target': 'mobile-sidenav' }}, i('.material-icons', 'menu')),
                 ul('.left .hide-on-med-and-down', [
                     makeLink('/compound', span(['Compound', ' ', compoundSVG]), '.orange-text'),
                     // makeLink('/target', span(['Target', ' ', targetSVG]), '.red-text'),
@@ -108,7 +106,7 @@ export default function Index(sources) {
                 ])
             ])
         ]),
-        ul(".sidenav", {props: {id: 'mobile-demo'}}, [
+        ul(".sidenav", {props: {id: 'mobile-sidenav'}}, [
             makeLink('/compound', span(['Compound', ' ', compoundSVG]), '.orange-text'),
             // makeLink('/target', span(['Target', ' ', targetSVG]), '.red-text'),
             makeLink('/genetic', span(['Genetic', ' ', targetSVG]), '.red-text'),
@@ -118,6 +116,17 @@ export default function Index(sources) {
             makeLink('/correlation', span('.grey-text .text-darken-3','', ["v", VERSION]), ''),
         ])
     ]));
+
+    const sidenav$ = xs.of(
+        ul(".sidenav", {props: {id: 'mobile-sidenav'}}, [
+            makeLink('/compound', span(['Compound', ' ', compoundSVG]), '.orange-text'),
+            // makeLink('/target', span(['Target', ' ', targetSVG]), '.red-text'),
+            makeLink('/genetic', span(['Genetic', ' ', targetSVG]), '.red-text'),
+            makeLink('/disease', span(['Disease', ' ', diseaseSVG]), '.pink-text'),
+            makeLink('/settings', span(['Settings', ' ', settingsSVG]), '.grey-text'),
+            // makeLink('/admin', span(['Admin']), '.blue-text'),
+            makeLink('/correlation', span('.grey-text .text-darken-3','', ["v", VERSION]), ''),
+    ]))
 
     // We combine with state in order to read the customizations
     // This works because the defaultReducer runs before anything else
@@ -247,6 +256,7 @@ export default function Index(sources) {
         popup: page$.map(prop('popup')).filter(Boolean).flatten(),
         modal: page$.map(prop('modal')).filter(Boolean).flatten(),
         ac: page$.map(prop('ac')).filter(Boolean).flatten(),
+        sidenav: sidenav$,
         storage: page$.map(prop('storage')).filter(Boolean).flatten(),
         deployments: page$.map(prop('deployments')).filter(Boolean).flatten()
     }

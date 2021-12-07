@@ -12,7 +12,7 @@ function dirtyUiStream(output$, current$) {
         .map(([output, current]) => !equals(output, current))
         .compose(debounce(10))
         .compose(dropRepeats(equals))
-        //.startWith(false)
+        .startWith(false)
 }
 
 // Reducer dedicated to outputting the dirty state of a component into the component onion

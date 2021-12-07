@@ -340,7 +340,8 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
      * @const makeTable/Table/defaultAmountToDisplay$
      * @type {Stream}
      */
-    const defaultAmountToDisplay$ = newInput$.map(state => parseInt(state.settings.table.count))
+    const defaultAmountToDisplay$ = state$.map(state => parseInt(state.settings.table.count))
+      .compose(dropRepeats(equals))
       .startWith(0)
       .compose(pairwise)
       .map((v) => (v[1] - v[0]))

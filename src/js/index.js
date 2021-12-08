@@ -141,7 +141,12 @@ export default function Index(sources) {
                       ])
                   ]),
                   div('.footer-copyright .row', { style: { margin: '0px' } }, [
-                      div('.col .s12 .right-align', ['© 2020 By Data intuitive']),
+                      div('.col .s12 .right-align', [
+                          p({ style: { margin: '0px' } }, [
+                              'Open-source code can be found on ', 
+                              a({props: { href: 'https://github.com/data-intuitive/LuciusWeb' }}, 'GitHub')
+                            ]),
+                      ]),
                   ])
               ])
             )

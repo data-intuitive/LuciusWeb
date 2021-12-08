@@ -140,7 +140,7 @@ export default function Index(sources) {
                           ]),
                       ])
                   ]),
-                  div('.footer-copyright .row', { style: { margin: '0px' } }, [
+                  div('.row', { style: { margin: '0px' } }, [
                       div('.col .s12 .right-align', [
                           p({ style: { margin: '0px' } }, [
                               'Open-source code can be found on ', 

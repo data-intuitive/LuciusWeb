@@ -28,7 +28,7 @@ export const titleCase = (phrase) =>
 /**
  * Take the absolute value of a gene in a very basic way.
  */
-export const absGene = (signedGene) => signedGene.replace('-', '').trim()
+export const absGene = (signedGene) => signedGene?.replace('-', '').trim()
 
 /**
  * For later use: Array extensions

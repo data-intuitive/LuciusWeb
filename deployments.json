@@ -58,7 +58,7 @@
       "geneAnnotations": {
         "url": "http://localhost:8082/gene/symbol/"
       },
-      "compoundAnnotations": {
+      "treatmentAnnotations": {
         "url": "http://localhost:8082/ca/"
       }
     }
@@ -132,7 +132,7 @@
       "geneAnnotations": {
         "url": "https://compass.data-intuitive.app/gene/symbol/"
       },
-      "compoundAnnotations": {
+      "treatmentAnnotations": {
         "url": "http://localhost:8082/ca/"
       }
     }
@@ -176,7 +176,7 @@
       "geneAnnotations": {
         "url": "http://localhost:8082/gene/symbol/"
       },
-      "compoundAnnotations": {
+      "treatmentAnnotations": {
         "url": "http://localhost:8082/drugbank/"
       }
     }

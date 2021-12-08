@@ -118,8 +118,8 @@ export function AdminSettings(sources) {
       ],
     },
     {
-      group: "compoundAnnotations",
-      title: "Compound Annotation Settings",
+      group: "treatmentAnnotations",
+      title: "Treatment Annotation Settings",
       settings: [
         {
           field: "version",
@@ -139,7 +139,7 @@ export function AdminSettings(sources) {
           field: "url",
           class: ".input-field",
           type: "text",
-          title: "URL for Compound Annotations",
+          title: "URL for Treatment Annotations",
           props: {},
         },
       ],

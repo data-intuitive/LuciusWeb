@@ -1,5 +1,5 @@
 export const initSettings = {
-    version: 5.2,
+    version: 5.3,
     deployment: {
       "name": "default",
     },
@@ -68,7 +68,7 @@ export const initSettings = {
     geneAnnotations: {
         debug: false
     },
-    compoundAnnotations: {
+    treatmentAnnotations: {
         debug: false,
         version: 'v1',
     }

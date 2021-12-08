@@ -68,7 +68,7 @@ export const initSettings = {
     geneAnnotations: {
         debug: false
     },
-    compoundAnnotations: {
+    treatmentAnnotations: {
         debug: false,
         version: 'v1',
     }

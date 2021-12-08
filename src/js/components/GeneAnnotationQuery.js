@@ -31,32 +31,43 @@ function GeneAnnotationQuery(sources, id = ".genePopup") {
     const geneResponse$ = sources.HTTP
         .select('gene')
         .map((response$) =>
-            response$.replaceError(() => xs.of({ body: {} }))
+            response$.replaceError(() => xs.of({ body: {symbol: 'NA'} }))
         )
         .flatten()
         .map(r => r.body)
 
-    const DOM$ = geneResponse$.map(annotation =>
-        div('#modal-' + absGene(annotation.symbol) + '.modal.bottom-sheet.grey.darken-4.grey-text', [
-            div('.col.s12.modal-content', [
-                div('.grey-text.col.l6.s12',  [
-                    h4('.grey-text.text-lighten-2', [titleCase(annotation.name)]),
-                    p([b('.grey-text.text-lighten-1', "Protein: "), annotation.protein]), 
-                    p([b('.grey-text.text-lighten-1', "EntrezID: "), annotation.entrezid]),
-                    p([b('.grey-text.text-lighten-1', "ProbesetID: "), annotation.probesetID]),
-                    p([b('.grey-text.text-lighten-1', "Ensembl: "),annotation.ensembl]),
-                    p([b('.grey-text.text-lighten-1', "Synonyms: "), annotation.synonyms]),
-                    p([b('.grey-text.text-lighten-1', "Link: "), a({ props: { href: annotation.uniprot, target: "_blank" } }, annotation.uniprot)]),
-                ]),
-                div('.col .l6.s12', [
-                    // h4('.grey-text.text-darken-2', 'Target Information'),
-                    p([b('.grey-text.text-lighten-1', 'Function: '), annotation.function]),
-                    p([b('.grey-text.text-lighten-1', 'Involved in: '), (annotation.involved != null) ? annotation.involved : "N/A"]),
-                    p([b('.grey-text.text-lighten-1', 'Remarks: '), (annotation.remarks != null) ? annotation.remarks : "N/A"])
+    const DOM$ = geneResponse$.map(annotation => {
+        const isAvailable = (annotation.symbol != "NA")
+        if (isAvailable) {
+            return div('#modal-' + absGene(annotation.symbol) + '.modal.bottom-sheet.grey.darken-4.grey-text', [
+                    div('.col.s12.modal-content', [
+                        div('.grey-text.col.l6.s12',  [
+                            h4('.grey-text.text-lighten-2', [titleCase(annotation.name)]),
+                            p([b('.grey-text.text-lighten-1', "Protein: "), annotation.protein]), 
+                            p([b('.grey-text.text-lighten-1', "EntrezID: "), annotation.entrezid]),
+                            p([b('.grey-text.text-lighten-1', "ProbesetID: "), annotation.probesetID]),
+                            p([b('.grey-text.text-lighten-1', "Ensembl: "),annotation.ensembl]),
+                            p([b('.grey-text.text-lighten-1', "Synonyms: "), annotation.synonyms]),
+                            p([b('.grey-text.text-lighten-1', "Link: "), a({ props: { href: annotation.uniprot, target: "_blank" } }, annotation.uniprot)]),
+                        ]),
+                        div('.col .l6.s12', [
+                            // h4('.grey-text.text-darken-2', 'Target Information'),
+                            p([b('.grey-text.text-lighten-1', 'Function: '), annotation.function]),
+                            p([b('.grey-text.text-lighten-1', 'Involved in: '), (annotation.involved != null) ? annotation.involved : "N/A"]),
+                            p([b('.grey-text.text-lighten-1', 'Remarks: '), (annotation.remarks != null) ? annotation.remarks : "N/A"])
+                        ])
+                    ])
                 ])
-            ])
-        ])
-    ).startWith(div())
+        } else {
+            return div('#modal-' + absGene(annotation.symbol) + '.modal.bottom-sheet.grey.darken-4.grey-text.row', [
+                    div('.col.s12.modal-content', [
+                        div('.grey-text.col.l12.s12',  [
+                            h4('.grey-text.text-lighten-2', [ titleCase('No annotations available for this gene') ]),
+                        ]),
+                    ])
+                ])
+            }
+    }).startWith(div())
 
     const openModal$ = geneResponse$
         .map(annotation => ({ el: '#modal-' + annotation.symbol, state: 'open' }))

@@ -203,6 +203,23 @@ export function Settings(sources) {
     }
   }
 
+  function safelyMakeSetting(setting, state, sources)
+  {
+    if (setting.field in state)
+      return isolate(makeSetting(setting), setting.field)(sources)
+    else
+      return {
+        DOM: xs.of(
+          li(".collection-item .row",
+            div(".valign-wrapper", [
+              span(".col .l6 .s12 .truncate .flow-text", [setting.title]),
+              span(".col .s6 .red-text", ["No value '" + setting.field + "' in configuration"]),
+            ])
+          )),
+        onion: xs.empty()
+        }
+  }
+
   const makeSettingsGroup = (settingsGroupObj) => (sources) => {
     const group$ = sources.onion.state$
     const settingsArray = settingsGroupObj.settings
@@ -212,25 +229,7 @@ export function Settings(sources) {
       .combine(xs.of(settingsArray), sources.onion.state$)
       .map(([settings, state]) =>
         settings.map((setting) =>
-          {
-            if (setting.field in state)
-              return isolate(makeSetting(setting), setting.field)(sources)
-            else
-              return {
-                DOM: xs.of(
-                  li(".collection-item .row",
-                    div(".valign-wrapper", [
-                      span(".col .l6 .s12 .truncate", [
-                        span(".flow-text", setting.title),
-                      ]),
-            
-                      div(".col .s6 .red-text", ["Invalid value in config"]),
-                    ])
-                  )),
-                onion: xs.empty()
-                }
-
-          }
+            safelyMakeSetting(setting, state, sources)
         )
       )
       .remember()
@@ -254,14 +253,33 @@ export function Settings(sources) {
     }
   }
 
+  function safelyMakeSettingsGroup(group, state, sources)
+  {
+    if (group.group in state)
+      return isolate(makeSettingsGroup(group), group.group)(sources)
+    else
+      return {
+        DOM: xs.of(
+          ul(
+            ".collection .with-header",
+            [
+              li(".collection-header .grey .lighten-2", [h4(group.title)]), 
+              span(".col .s6 .red-text", ["No value '" + group.group + "' in configuration"]),
+            ]
+          )),
+        onion: xs.empty()
+        }
+  }
+
   const makeSettings = (settingsObj) => (sources) => {
     const settings$ = sources.onion.state$
 
     const groups$ = xs
-      .of(settingsObj)
-      .map((groups) =>
+      .combine(xs.of(settingsObj), sources.onion.state$)
+      .map(([groups, state]) =>
         groups.map((group) =>
-          isolate(makeSettingsGroup(group), group.group)(sources)
+          //isolate(makeSettingsGroup(group), group.group)(sources)
+          safelyMakeSettingsGroup(group, state, sources)
         )
       )
       .remember()

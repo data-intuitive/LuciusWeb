@@ -2,64 +2,35 @@ import * as M from 'materialize-css'
 
 function makeSidenavDriver() {
 
-    // Start standard materialize code
-    //  document.addEventListener('DOMContentLoaded', function() {
-    //      var elems = document.querySelectorAll('.sidenav');
-    //      console.log("elems:")
-    //      console.log(elems)
-    //      var instances = M.Sidenav.init(elems);
-    //  });
-    // Or with jQuery
-    // $(document).ready(function(){
-    //     $('.sidenav').sidenav();
-    // });
-    // End standard materialize code
-    
-    // var elem = undefined
-    // var modal = undefined
-
-    // M.AutoInit()
+    var sidenav = undefined
 
     function sidenavDriver(in$) {
 
-        document.addEventListener('DOMContentLoaded', function() {
-            var elems = document.querySelectorAll('.sidenav');
-            console.log("elems:")
-            console.log(elems)
-            var instances = M.Sidenav.init(elems);
-        });
+        // document.addEventListener('DOMContentLoaded', function() {
+        //     var elems = document.querySelectorAll('.sidenav');
+        //     var instances = M.Sidenav.init(elems);
+        // });
 
         in$.addListener({
-            next: (s) => {
-                console.log("----next")
-                console.log(s)
-                //M.Sidenav.init(s)
+            next: (nav) => {
+                if (nav.state == 'open') {
+                    if (sidenav == undefined) {
+                        var elems = document.querySelectorAll(nav.element)
+                        sidenav = M.Sidenav.init(elems)
+                    }
+                    // Once initialized the code handles opening & closing itself when the user clicked the hamburger icon
+                    // Calling open when the menu is already open is handled correctly so no hard calling it again
+                    sidenav[0].open()
+                }
+                else if (nav.state == 'close') {
+                    if (sidenav != undefined && sidenav.length > 0)
+                        sidenav[0].close()
+                }
             },
             error: (e) => {
-                console.log("----error")
                 console.error(e)
             }
         })
-
-        // in$.addListener({
-        //     next: (modalInfo) => {
-        //         const elem = document.querySelector(modalInfo.el)
-        //         if (elem == undefined) {
-        //             console.error('Undefined element passed to ModalDriver')
-        //         } else {
-        //             if (modalInfo.state != 'close') {
-        //                 modal = M.Modal.init(elem)
-        //                 modal.open()
-        //             } else {
-        //                 modal = M.Modal.getInstance(elem)
-        //                 modal.close()
-        //             }
-        //         }
-        //    },
-        //    error: (m) => {
-        //         console.error(m)
-        //     }
-        // })
 
     }
 

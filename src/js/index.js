@@ -117,16 +117,20 @@ export default function Index(sources) {
         ])
     ]));
 
-    const sidenav$ = xs.of(
-        ul(".sidenav", {props: {id: 'mobile-sidenav'}}, [
-            makeLink('/compound', span(['Compound', ' ', compoundSVG]), '.orange-text'),
-            // makeLink('/target', span(['Target', ' ', targetSVG]), '.red-text'),
-            makeLink('/genetic', span(['Genetic', ' ', targetSVG]), '.red-text'),
-            makeLink('/disease', span(['Disease', ' ', diseaseSVG]), '.pink-text'),
-            makeLink('/settings', span(['Settings', ' ', settingsSVG]), '.grey-text'),
-            // makeLink('/admin', span(['Admin']), '.blue-text'),
-            makeLink('/correlation', span('.grey-text .text-darken-3','', ["v", VERSION]), ''),
-    ]))
+    // const sidenav$ = xs.of(
+    //     ul(".sidenav", {props: {id: 'mobile-sidenav'}}, [
+    //         makeLink('/compound', span(['Compound', ' ', compoundSVG]), '.orange-text'),
+    //         // makeLink('/target', span(['Target', ' ', targetSVG]), '.red-text'),
+    //         makeLink('/genetic', span(['Genetic', ' ', targetSVG]), '.red-text'),
+    //         makeLink('/disease', span(['Disease', ' ', diseaseSVG]), '.pink-text'),
+    //         makeLink('/settings', span(['Settings', ' ', settingsSVG]), '.grey-text'),
+    //         // makeLink('/admin', span(['Admin']), '.blue-text'),
+    //         makeLink('/correlation', span('.grey-text .text-darken-3','', ["v", VERSION]), ''),
+    // ]))
+
+    const sidenavTrigger$ = sources.DOM.select('.sidenav-trigger').events('click')
+    const sidenavEvent$ = sidenavTrigger$
+        .map((trigger) => ({element: '.sidenav', state: 'open'}))
 
     // We combine with state in order to read the customizations
     // This works because the defaultReducer runs before anything else
@@ -256,7 +260,7 @@ export default function Index(sources) {
         popup: page$.map(prop('popup')).filter(Boolean).flatten(),
         modal: page$.map(prop('modal')).filter(Boolean).flatten(),
         ac: page$.map(prop('ac')).filter(Boolean).flatten(),
-        sidenav: sidenav$,
+        sidenav: sidenavEvent$,
         storage: page$.map(prop('storage')).filter(Boolean).flatten(),
         deployments: page$.map(prop('deployments')).filter(Boolean).flatten()
     }

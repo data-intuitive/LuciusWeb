@@ -203,12 +203,9 @@ export function Settings(sources) {
     }
   }
 
-  function safelyMakeSetting(setting, state, sources)
-  {
-    if (setting.field in state)
-      return isolate(makeSetting(setting), setting.field)(sources)
-    else
-      return {
+  const safelyMakeSetting$ = (setting, sources) => {
+
+    const badVdom = {
         DOM: xs.of(
           li(".collection-item .row",
             div(".valign-wrapper", [
@@ -217,7 +214,16 @@ export function Settings(sources) {
             ])
           )),
         onion: xs.empty()
-        }
+      }
+
+    const vdom$ = sources.onion.state$
+      .map((state) => (
+          (setting.field in state) ?
+            isolate(makeSetting(setting), setting.field)(sources) :
+            badVdom
+        )
+    )
+    return vdom$
   }
 
   const makeSettingsGroup = (settingsGroupObj) => (sources) => {
@@ -225,13 +231,13 @@ export function Settings(sources) {
     const settingsArray = settingsGroupObj.settings
     const title = settingsGroupObj.title
 
-    const components$ = xs
-      .combine(xs.of(settingsArray), sources.onion.state$)
-      .map(([settings, state]) =>
+    const components$ = xs.of(settingsArray)
+      .map((settings) =>
         settings.map((setting) =>
-            safelyMakeSetting(setting, state, sources)
+            safelyMakeSetting$(setting, sources)
         )
       )
+      .compose(mix(xs.combine))
       .remember()
 
     const vdom$ = components$
@@ -253,12 +259,8 @@ export function Settings(sources) {
     }
   }
 
-  function safelyMakeSettingsGroup(group, state, sources)
-  {
-    if (group.group in state)
-      return isolate(makeSettingsGroup(group), group.group)(sources)
-    else
-      return {
+  const safelyMakeSettingsGroup$ = (group, sources) => {
+    const badVdom = {
         DOM: xs.of(
           ul(
             ".collection .with-header",
@@ -268,7 +270,16 @@ export function Settings(sources) {
             ]
           )),
         onion: xs.empty()
-        }
+      }
+
+    const vdom$ = sources.onion.state$
+      .map((state) => (
+        (group.group in state) ?
+          isolate(makeSettingsGroup(group), group.group)(sources) :
+          badVdom
+      )
+    )
+    return vdom$
   }
 
   const makeSettings = (settingsObj) => (sources) => {
@@ -278,10 +289,10 @@ export function Settings(sources) {
       .combine(xs.of(settingsObj), sources.onion.state$)
       .map(([groups, state]) =>
         groups.map((group) =>
-          //isolate(makeSettingsGroup(group), group.group)(sources)
-          safelyMakeSettingsGroup(group, state, sources)
+          safelyMakeSettingsGroup$(group, sources)
         )
       )
+      .compose(mix(xs.combine))
       .remember()
 
     const vdom$ = groups$

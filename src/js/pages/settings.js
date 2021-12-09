@@ -205,7 +205,7 @@ export function Settings(sources) {
 
   const safelyMakeSetting$ = (setting, sources) => {
 
-    const badVdom = {
+    const missingFieldVdom = {
         DOM: xs.of(
           li(".collection-item .row",
             div(".valign-wrapper", [
@@ -220,7 +220,7 @@ export function Settings(sources) {
       .map((state) => (
           (setting.field in state) ?
             isolate(makeSetting(setting), setting.field)(sources) :
-            badVdom
+            missingFieldVdom
         )
     )
     return vdom$
@@ -260,7 +260,7 @@ export function Settings(sources) {
   }
 
   const safelyMakeSettingsGroup$ = (group, sources) => {
-    const badVdom = {
+    const missingGroupVdom = {
         DOM: xs.of(
           ul(
             ".collection .with-header",
@@ -276,7 +276,7 @@ export function Settings(sources) {
       .map((state) => (
         (group.group in state) ?
           isolate(makeSettingsGroup(group), group.group)(sources) :
-          badVdom
+          missingGroupVdom
       )
     )
     return vdom$

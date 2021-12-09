@@ -200,7 +200,8 @@ export default function Index(sources) {
                 return true
             })
 
-            return present.every(a => a)
+            // return/check if all booleans in the array are true
+            return R.all(R.identity)(present)
         }
 
         if (typeof prevState === 'undefined') {

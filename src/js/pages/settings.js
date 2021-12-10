@@ -420,6 +420,11 @@ export function Settings(sources) {
         onion: xs.empty()
       }
 
+    /**
+     * Stream of either isolated MakeSettingsGroup in case group is found in state$ or static vdom in case group is missing in state$
+     * @const Settings/safelyMakeSettingsGroup$/vdom$
+     * @type {Stream(Object)}
+     */
     const vdom$ = sources.onion.state$
       .map((state) => (
         (group.group in state) ?

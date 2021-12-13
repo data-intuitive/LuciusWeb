@@ -124,8 +124,8 @@ export default function Index(sources) {
     const footer$ = state$
           .map(state =>
               footer('.page-footer .grey .darken-4 .grey-text', [
-                  div('.row', { style: { margin: '0px' } }, [
-                      div('.col .s12', { style: { margin: '0px' } }, [
+                  div('.valign-wrapper .row', { style: { margin: '0px' } }, [
+                      div('.col .s8', { style: { margin: '0px' } }, [
                           p({ style: { margin: '0px' } }, [
                               'Please use ',
                               a({ props: { href: '/statistics' } },
@@ -138,11 +138,14 @@ export default function Index(sources) {
                               'ComPass does not make any claims. ',
                               'In case of issues, please include the contents of ', a({ props: { href: '/debug' } }, 'this page'), ' in your bug report'
                           ]),
-                      ])
+                      ]),
+                      div('.col .s4 .right-align', { style: {height: '100%', alignSelf: 'flex-end'} }, [
+                        p({ style: { margin: '0px' } }, [
+                            'Open-source code can be found on ', 
+                            a({props: { href: 'https://github.com/data-intuitive/LuciusWeb' }}, 'GitHub')
+                          ]),
+                      ]),
                   ]),
-                  div('.footer-copyright .row', { style: { margin: '0px' } }, [
-                      div('.col .s12 .right-align', ['© 2020 By Data intuitive']),
-                  ])
               ])
             )
 

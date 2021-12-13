@@ -267,18 +267,29 @@ export function Settings(sources) {
 
   const Settings = makeSettings(settingsConfig)(sources)
 
+  const buttons$ = settings$
+    .map((state) => 
+      state.config.showAdminButton ?
+        div([
+          button(".reset .col .s4 .offset-s1 .l2 .offset-l3 .btn .grey", "Reset to Default"),
+          button(
+            ".admin .col .s4 .l2 .offset-s1 .offset-l2 .btn .grey .lighten-2 .grey-text",
+            "Go to Admin Settings"
+            )
+        ]) :
+        div([
+          button(".reset .col .s4 .offset-s4 .btn .grey", "Reset to Default"),
+        ])
+      )
+
   const vdom$ = xs
-    .combine(settings$, Settings.DOM)
-    .map(([_, topTableEntries]) =>
+    .combine(settings$, Settings.DOM, buttons$)
+    .map(([_, dom, buttons]) =>
       div(".row .grey .lighten-3", { style: { margin: "0px 0px 0px 0px" } }, [
         div(".row .s12", [""]),
-        topTableEntries,
+        dom,
         div(".row .s12", [""]),
-        button(".reset .col .s2 .offset-s3 .btn .grey", "Reset to Default"),
-        button(
-          ".admin .col .s2 .offset-s2 .btn .grey .lighten-2 .grey-text",
-          "Go to Admin Settings"
-        ),
+        buttons,
         div(".row .s12", [""]),
       ])
     )

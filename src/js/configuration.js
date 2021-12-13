@@ -1,5 +1,5 @@
 export const initSettings = {
-    version: 5.3,
+    version: 5.4,
     deployment: {
       "name": "default",
     },
@@ -71,5 +71,8 @@ export const initSettings = {
     treatmentAnnotations: {
         debug: false,
         version: 'v1',
+    },
+    config: {
+        showAdminButton: false,
     }
 };

@@ -222,6 +222,19 @@ export function AdminSettings(sources) {
         },
       ],
     },
+    {
+      group: "config",
+      title: "Configuration Settings",
+      settings: [
+        {
+          field: "showAdminButton",
+          type: "checkbox",
+          class: ".switch",
+          title: "Show Admin button?",
+          props: { type: "checkbox" },
+        }
+      ],
+    },
   ])
 
   // Depending on the type of config settings, render the appropriate vdom representation

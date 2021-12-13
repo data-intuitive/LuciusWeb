@@ -435,8 +435,23 @@ export function Settings(sources) {
     return vdom$
   }
 
+  /**
+   * Go over all groups and fields and create UI
+   * @const Settings/makeSettings
+   * @param {Array} settingsObj top level object array containing group and field information
+   * @returns Object with
+   *            - onion: reducers to update the field values to the newly set values
+   *            - DOM: vdom stream of ul and sub-elements
+   */
   const makeSettings = (settingsObj) => (sources) => {
 
+    /**
+     * Convert groups to vdom and reducer objects
+     * Do this safely instead of just calling isolate(group, group.group) directly
+     * If the group is not present in the sources state onion, things go bad and we end up with a blank page
+     * @const Settings/makeSettings/groups$
+     * @type {MemoryStream}
+     */
     const groups$ = xs.of(settingsObj)
       .map((groups) =>
         groups.map((group) =>
@@ -446,12 +461,22 @@ export function Settings(sources) {
       .compose(mix(xs.combine))
       .remember()
 
+    /**
+     * Stream of group vdom div
+     * @const Settings/makeSettings/vdom$
+     * @type {MemoryStream}
+     */
     const vdom$ = groups$
       .compose(pick("DOM"))
       .compose(mix(xs.combine))
       .map((vdoms) => div(".col .l8 .offset-l2 .s12", vdoms))
       .remember()
 
+    /**
+     * Steam of reducers
+     * @const Settings/makeSettings/reducer$
+     * @type {MemoryStream}
+     */
     const reducer$ = groups$
       .compose(pick("onion"))
       .compose(mix(xs.merge))
@@ -463,14 +488,24 @@ export function Settings(sources) {
     }
   }
 
+/**
+ * SettingsConfig object converted to vdom object and reducers streams
+ * @const Settings/Settings
+ * @type {Object}
+ */
   const Settings = makeSettings(settingsConfig)(sources)
 
+  /**
+   * Full page layout for settings
+   * @const Settings/vdom$
+   * @type {MemoryStream}
+   */
   const vdom$ = xs
     .combine(settings$, Settings.DOM)
-    .map(([_, topTableEntries]) =>
+    .map(([_, dom]) =>
       div(".row .grey .lighten-3", { style: { margin: "0px 0px 0px 0px" } }, [
         div(".row .s12", [""]),
-        topTableEntries,
+        dom,
         div(".row .s12", [""]),
         button(".reset .col .s2 .offset-s3 .btn .grey", "Reset to Default"),
         button(
@@ -482,20 +517,47 @@ export function Settings(sources) {
     )
     .remember()
 
-  // When the reset button is pressed, we remove the ComPass key from the local storage
-  // and reload the page. The `defaultReducer$` in `index.js` handles taking care of
-  // the deployment scenario.
+  
+  /**
+   * Listener stream for reset button presses
+   * When the reset button is pressed, we remove the ComPass key from the local storage
+   * and reload the page. The `defaultReducer$` in `index.js` handles taking care of
+   * the deployment scenario.
+   * @const Settings/reset$
+   * @type {MemoryStream}
+   */
   const reset$ = sources.DOM.select(".reset").events("click").remember()
+  
+  /**
+   * @const Settings/resetStorage$
+   * @type {Stream}
+   */
   // Reset the storage by removing the ComPass key
   const resetStorage$ = reset$.mapTo({ action: "removeItem", key: "ComPass" })
 
+  /**
+   * Listener stream for admin button presses
+   * Sends router to the /settings page
+   * @const Settings/admin$
+   * @type {MemoryStream}
+   */
   const admin$ = sources.DOM.select(".admin").events("click").remember()
 
-  // The router does not reload the same page, so use the browser functionality for that...
+  /**
+   * The router does not reload the same page, so use the browser functionality for that...
+   * @const Settings/resetRouter$
+   * @type {MemoryStream}
+   */
   const resetRouter$ = reset$
     .map((_) => location.reload())
     .mapTo("/settings")
     .remember()
+  
+  /**
+   * Trigger router to load the /admin page
+   * @const Settings/adminRouter$
+   * @type {MemoryStream}
+   */
   const adminRouter$ = admin$.mapTo("/admin").remember()
 
   // This is an effect and should be moved to a driver...

@@ -185,6 +185,28 @@ export default function Index(sources) {
         const updatedSettings = merge(initSettings, { deployment : updatedDeployment})
         // Do the same with the administrative settings
         const distributedAdminSettings = mergeDeepRight(updatedSettings, updatedSettings.deployment.services)
+
+        /**
+         * Recursively check if all members of obj are present in value
+         * Does not check for equalitiy, just the value being present
+         * Completely ignores the required functionality for arrays
+         */
+        const allPresent = (obj, value) => {
+            const keys = Object.keys(obj)
+            const valueKeys = Object.keys(value)
+            
+            const present = keys.map((key) => {
+                if (!R.contains(key, valueKeys))
+                    return false
+                if (typeof obj[key] === "object")
+                    return allPresent(obj[key], value[key])
+                return true
+            })
+
+            // return/check if all booleans in the array are true
+            return R.all(R.identity)(present)
+        }
+
         if (typeof prevState === 'undefined') {
             // No pre-existing state information, use default settings
             return ({
@@ -192,8 +214,16 @@ export default function Index(sources) {
             })
         } else {
             // Pre-existing state information.
-            // If default settings are newer, use those.
-            return (prevState.settings.version == initSettings.version) ?
+            // Safety check on old information
+            const sameVersionInSettings = prevState.settings.version == initSettings.version
+            const allPresentInSettings = allPresent(initSettings, prevState?.settings)
+            
+            if (!sameVersionInSettings)
+                console.log("Stored settings version doesn't match application settings version. Resetting settings to default values.")
+            if (!allPresentInSettings)
+                console.log("Stored settings don't match application settings structure. Resetting settings to default values.")
+            // If stored settings are different version or are invalid, use default settings.
+            return (sameVersionInSettings && allPresentInSettings) ?
                 ({ settings: prevState.settings }) :
                 ({ settings: distributedAdminSettings })
         }

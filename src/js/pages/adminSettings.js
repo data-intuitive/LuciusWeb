@@ -232,6 +232,13 @@ export function AdminSettings(sources) {
           class: ".switch",
           title: "Show Admin button?",
           props: { type: "checkbox" },
+        },
+        {
+          field: "logoUrl",
+          class: ".input-field",
+          type: "text",
+          title: "URL for logo image",
+          props: {},
         }
       ],
     },

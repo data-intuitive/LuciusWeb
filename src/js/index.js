@@ -1,6 +1,6 @@
 import xs from 'xstream'
 
-import { div, nav, a, h3, p, ul, li, h1, h2, i, footer, header, main, svg, g, path, span } from '@cycle/dom'
+import { div, nav, a, h3, p, ul, li, h1, h2, i, footer, header, main, svg, g, path, span, img } from '@cycle/dom'
 import { merge, prop, mergeDeepRight } from 'ramda'
 import * as R from 'ramda'
 
@@ -89,35 +89,64 @@ export default function Index(sources) {
         ])
     ])
 
-    const nav$ = xs.of(header([
-        nav('#navigation .grey .darken-4', [
-            div('.nav-wrapper', [
-                a('.brand-logo .right .grey-text', { props: { href: "/" } },
-                    div({ style: { width: '140px' } }, logoSVG),
-                    // span('.gradient', 'ComPass')
-                ),
-                a('.sidenav-trigger', { props: { href: '#' },  attrs: {'data-target': 'mobile-demo' }}, i('.material-icons', 'menu')),
-                ul('.left .hide-on-med-and-down', [
-                    makeLink('/compound', span(['Compound', ' ', compoundSVG]), '.orange-text'),
-                    // makeLink('/target', span(['Target', ' ', targetSVG]), '.red-text'),
-                    makeLink('/genetic', span(['Genetic', ' ', targetSVG]), '.red-text'),
-                    makeLink('/disease', span(['Disease', ' ', diseaseSVG]), '.pink-text'),
-                    makeLink('/settings', span(['Settings', ' ', settingsSVG]), '.grey-text'),
-                    // makeLink('/admin', span(['Admin']), '.blue-text'),
-                    makeLink('/correlation', span('.grey-text .text-darken-3','', ["v", VERSION]), ''),
+    const nav$ = state$.map((state) => {
+
+        const leftLogo = 
+            state.settings.config.logoUrl ?
+                a('.left .grey-text .hide-on-med-and-down', { props: { href: '/' }, style: {margin: '5px'} },
+                    img(".logo_img .left", { props: { alt: 'logo', src: state.settings.config.logoUrl}, style: {height: '40px'}}),
+                )
+                :
+                span()
+
+        const centerLogo = 
+            state.settings.config.logoUrl ?
+                div('.brand-logo .center', [
+                    a('.grey-text .hide-on-large-only', { props: { href: '/' } },
+                        img(".logo_img", { props: { alt: 'logo', src: state.settings.config.logoUrl}, 
+                            style: {height: '40px'}
+                        }),
+                    ),
                 ])
+                :
+                div()
+
+        return header({ style: {display: 'flex'} },[
+            nav('#navigation .grey .darken-4', [
+                div('.nav-wrapper .valign-wrapper', [
+                    a('.brand-logo .right .grey-text', { props: { href: "/" } },
+                        div({ style: { width: '140px' } }, logoSVG),
+                        // span('.gradient', 'ComPass')
+                    ),
+                    leftLogo,
+                    a('.sidenav-trigger', { props: { href: '#' },  attrs: {'data-target': 'mobile-demo' }}, i('.material-icons', 'menu')),
+                    ul('.left .hide-on-med-and-down', [
+                        makeLink('/compound', span(['Compound', ' ', compoundSVG]), '.orange-text'),
+                        // makeLink('/target', span(['Target', ' ', targetSVG]), '.red-text'),
+                        makeLink('/genetic', span(['Genetic', ' ', targetSVG]), '.red-text'),
+                        makeLink('/disease', span(['Disease', ' ', diseaseSVG]), '.pink-text'),
+                        makeLink('/settings', span(['Settings', ' ', settingsSVG]), '.grey-text'),
+                        // makeLink('/admin', span(['Admin']), '.blue-text'),
+                        makeLink('/correlation', span('.grey-text .text-darken-3','', ["v", VERSION]), ''),
+                    ]),
+                    centerLogo,
+                ]),
+            ]),
+            ul(".sidenav", {props: {id: 'mobile-demo'}}, [
+                makeLink('/compound', span(['Compound', ' ', compoundSVG]), '.orange-text'),
+                // makeLink('/target', span(['Target', ' ', targetSVG]), '.red-text'),
+                makeLink('/genetic', span(['Genetic', ' ', targetSVG]), '.red-text'),
+                makeLink('/disease', span(['Disease', ' ', diseaseSVG]), '.pink-text'),
+                makeLink('/settings', span(['Settings', ' ', settingsSVG]), '.grey-text'),
+                // makeLink('/admin', span(['Admin']), '.blue-text'),
+                makeLink('/correlation', span('.grey-text .text-darken-3','', ["v", VERSION]), ''),
             ])
-        ]),
-        ul(".sidenav", {props: {id: 'mobile-demo'}}, [
-            makeLink('/compound', span(['Compound', ' ', compoundSVG]), '.orange-text'),
-            // makeLink('/target', span(['Target', ' ', targetSVG]), '.red-text'),
-            makeLink('/genetic', span(['Genetic', ' ', targetSVG]), '.red-text'),
-            makeLink('/disease', span(['Disease', ' ', diseaseSVG]), '.pink-text'),
-            makeLink('/settings', span(['Settings', ' ', settingsSVG]), '.grey-text'),
-            // makeLink('/admin', span(['Admin']), '.blue-text'),
-            makeLink('/correlation', span('.grey-text .text-darken-3','', ["v", VERSION]), ''),
         ])
-    ]));
+    })
+
+    
+    
+    
 
     // We combine with state in order to read the customizations
     // This works because the defaultReducer runs before anything else
@@ -141,7 +170,7 @@ export default function Index(sources) {
                       ]),
                       div('.col .s4 .right-align', { style: {height: '100%', alignSelf: 'flex-end'} }, [
                         p({ style: { margin: '0px' } }, [
-                            'Open-source code can be found on ', 
+                            'Open-source code can be found on ',
                             a({props: { href: 'https://github.com/data-intuitive/LuciusWeb' }}, 'GitHub')
                           ]),
                       ]),

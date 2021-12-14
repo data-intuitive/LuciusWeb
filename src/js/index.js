@@ -299,7 +299,7 @@ export const logoSVG = svg({ id: 'logo', attrs: { viewBox: "159 26 1060 460" } }
         svg.path({ attrs: { d: 'M 389 256 L 159 256 L 334 303 Z' } }),
         svg.path({ attrs: { d: 'M 389 256 L 389 486 L 436 311 Z' } }),
         svg.path({ attrs: { d: 'M 389 256 L 619 256 L 444 209 Z' } }),
-        svg.text({ attrs: { 'font-family': "Calibri", 'font-size': "160", 'font-weight': "bold", x: "450", y: "398" } }, 'COMPASS'),
+        svg.text({ attrs: { 'font-family': 'Garamond, serif', 'font-size': "160", 'font-weight': "bold", x: "450", y: "398" } }, 'COMPASS'),
         svg.rect({ attrs: { x: "466", y: "240.5", width: "800", height: "15.5" } }),
         // svg.text({ attrs: { 'font-family': "Calibri", 'font-size': "40", 'font-weight': "bold", x: "497", y: "450" } }, 'COMPUTATIONAL SCIENCES'),
         // svg.path({ attrs: { d: "M 1111.1316 329.63885 C 1111.7629 340.6366 1119.8291 350.53146 1131.0461 350.7098 C 1142.2632 350.8882 1154.6805 342.4446 1153.2188 331.05904 C 1151.7572 319.67348 1142.7102 319.24054 1132.1177 316.17612 C 1121.5253 313.11165 1130.3999 308.0055 1130.3999 308.0055 C 1130.3999 308.0055 1134.739 305.7016 1139.3956 304.96687 C 1144.0522 304.23215 1147.434 306.17886 1149.1073 306.1567 C 1150.7806 306.13453 1150.2077 300.1209 1149.0792 298.99964 C 1147.9508 297.87838 1138.8401 295.20424 1130.1026 299.3452 C 1121.365 303.48615 1118.0291 308.5461 1118.0291 308.5461 C 1118.0291 308.5461 1110.5002 318.6411 1111.1316 329.63885 Z" } }),
@@ -323,7 +323,7 @@ const homeSVG = svg({ attrs: { 'vertical-align': 'baseline', height: '30pt', wid
         }),
         svg.text([
             svg.textPath({ attrs: { 'xlink:href': "#target", startOffset: "80%" } }, [
-                svg.tspan({ attrs: { 'font-family': "Roboto", 'font-size': "60", 'text-anchor': "middle", 'letter-spacing': 15, 'font-weight': "bold", fill: "#ebebeb", dy: "-20" } }, "TARGET")
+                svg.tspan({ attrs: { 'font-family': '"Roboto", Arial, Helvetica, sans-serif', 'font-size': "60", 'text-anchor': "middle", 'letter-spacing': 15, 'font-weight': "bold", fill: "#ebebeb", dy: "-20" } }, "TARGET")
             ])
         ]),
         svg.path({
@@ -348,7 +348,7 @@ const homeSVG = svg({ attrs: { 'vertical-align': 'baseline', height: '30pt', wid
         }),
         svg.text([
             svg.textPath({ attrs: { 'xlink:href': "#disease", startOffset: "80%" } }, [
-                svg.tspan({ attrs: { 'font-family': "Roboto", 'font-size': "60", 'text-anchor': "middle", 'letter-spacing': 15, 'font-weight': "bold", fill: "#ebebeb", dy: "-20" } }, "DISEASE")
+                svg.tspan({ attrs: { 'font-family': '"Roboto", Arial, Helvetica, sans-serif', 'font-size': "60", 'text-anchor': "middle", 'letter-spacing': 15, 'font-weight': "bold", fill: "#ebebeb", dy: "-20" } }, "DISEASE")
             ])
         ]),
         svg.path({
@@ -373,7 +373,7 @@ const homeSVG = svg({ attrs: { 'vertical-align': 'baseline', height: '30pt', wid
         }),
         svg.text([
             svg.textPath({ attrs: { 'xlink:href': "#compound", startOffset: "29%" } }, [
-                svg.tspan({ attrs: { 'font-family': "Roboto", 'font-size': "60", 'text-anchor': "middle", 'letter-spacing': 15, 'font-weight': "bold", fill: "#ebebeb", dy: "-20" } }, "COMPOUND")
+                svg.tspan({ attrs: { 'font-family': '"Roboto", Arial, Helvetica, sans-serif', 'font-size': "60", 'text-anchor': "middle", 'letter-spacing': 15, 'font-weight': "bold", fill: "#ebebeb", dy: "-20" } }, "COMPOUND")
             ])
         ]),
         svg.path({
@@ -392,7 +392,7 @@ const homeSVG = svg({ attrs: { 'vertical-align': 'baseline', height: '30pt', wid
         svg.path({ attrs: { d: "M 1506.0454 251.9644 L 1506.0454 -.035595944 C 1645.2211 -.035595944 1758.0454 112.78865 1758.0454 251.9644 C 1758.0454 296.19964 1746.4014 339.65556 1724.2838 377.9644 Z", fill: "#e92363", 'fill-opacity': ".5" } }),
         svg.path({ attrs: { d: "M 1506.0454 251.9644 L 1506.0454 -.035595944 C 1645.2211 -.035595944 1758.0454 112.78865 1758.0454 251.9644 C 1758.0454 296.19964 1746.4014 339.65556 1724.2838 377.9644 Z", stroke: "white", 'stroke-linecap': "round", 'stroke-linejoin': "round", 'stroke-width': "6", 'fill-opacity': '0' } }),
         svg.text({ attrs: { transform: "translate(1529.807 150.726)", fill: "white" } }, [
-            svg.tspan({ attrs: { 'font-family': "Roboto", 'font-size': "60", 'font-weight': "bold", fill: "white", x: ".18359375", y: "56", textLength: "198.63281" } }, 'PHENO')
+            svg.tspan({ attrs: { 'font-family': '"Roboto", Arial, Helvetica, sans-serif', 'font-size': "60", 'font-weight': "bold", fill: "white", x: ".18359375", y: "56", textLength: "198.63281" } }, 'PHENO')
         ]),
 
         svg.path({ attrs: { d: "M 1506.1296 251.9644 L 1724.368 377.9644 C 1654.78 498.49415 1500.6593 539.7907 1380.1296 470.2028 C 1341.8207 448.0852 1310.0088 416.27324 1287.8912 377.9644 Z", fill: "#fe9801", 'fill-opacity': ".5" } }),
@@ -404,12 +404,12 @@ const homeSVG = svg({ attrs: { 'vertical-align': 'baseline', height: '30pt', wid
         svg.path({ attrs: { d: "M 1506.0454 251.9644 L 1287.807 377.9644 C 1218.2191 257.43466 1259.5156 103.31388 1380.0454 33.726002 C 1418.3542 11.608383 1461.8101 -.035595944 1506.0454 -.035595944 Z", stroke: "white", 'stroke-linecap': "round", 'stroke-linejoin': "round", 'stroke-width': "6", 'fill-opacity': '0' } }),
 
         svg.text({ attrs: { transform: "translate(1309.807 150.726)", fill: "white" } }, [
-            svg.tspan({ attrs: { 'font-family': "Roboto", 'font-size': "60", 'font-weight': "bold", fill: "white", x: ".29589844", y: "56", textLength: "158.4082" } }, 'GENO')
+            svg.tspan({ attrs: { 'font-family': '"Roboto", Arial, Helvetica, sans-serif', 'font-size': "60", 'font-weight': "bold", fill: "white", x: ".29589844", y: "56", textLength: "158.4082" } }, 'GENO')
         ]),
 
 
         svg.text({ attrs: { transform: "translate(1406.807 358.726)", fill: "white" } }, [
-            svg.tspan({ attrs: { 'font-family': "Roboto", 'font-size': "60", 'font-weight': "bold", fill: "white", x: ".3076172", y: "56", textLength: "209.38477" } }, 'CHEMO')
+            svg.tspan({ attrs: { 'font-family': '"Roboto", Arial, Helvetica, sans-serif', 'font-size': "60", 'font-weight': "bold", fill: "white", x: ".3076172", y: "56", textLength: "209.38477" } }, 'CHEMO')
         ]),
 
 

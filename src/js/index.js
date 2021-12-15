@@ -142,17 +142,6 @@ export default function Index(sources) {
         ])
     })
 
-    // const sidenav$ = xs.of(
-    //     ul(".sidenav", {props: {id: 'mobile-sidenav'}}, [
-    //         makeLink('/compound', span(['Compound', ' ', compoundSVG]), '.orange-text'),
-    //         // makeLink('/target', span(['Target', ' ', targetSVG]), '.red-text'),
-    //         makeLink('/genetic', span(['Genetic', ' ', targetSVG]), '.red-text'),
-    //         makeLink('/disease', span(['Disease', ' ', diseaseSVG]), '.pink-text'),
-    //         makeLink('/settings', span(['Settings', ' ', settingsSVG]), '.grey-text'),
-    //         // makeLink('/admin', span(['Admin']), '.blue-text'),
-    //         makeLink('/correlation', span('.grey-text .text-darken-3','', ["v", VERSION]), ''),
-    // ]))
-
     const sidenavTrigger$ = sources.DOM.select('.sidenav-trigger').events('click')
     const sidenavEvent$ = sidenavTrigger$
         .map((trigger) => ({element: '.sidenav', state: 'open'}))

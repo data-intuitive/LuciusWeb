@@ -18,7 +18,7 @@ import xs from "xstream"
 import dropRepeats from "xstream/extra/dropRepeats"
 import debounce from 'xstream/extra/debounce'
 import { loggerFactory } from "../utils/logger"
-import { CompoundAnnotation } from "../components/CompoundAnnotation"
+import { TreatmentAnnotation } from "./TreatmentAnnotation"
 import { safeModelToUi } from "../modelTranslations"
 import { dirtyUiReducer, dirtyWrapperStream } from "../utils/ui"
 
@@ -44,13 +44,13 @@ const sampleSelectionLens = {
 }
 
 /**
- * Based on a (list of) compound(s), get the samples that correspond to it and allow users to select them.
+ * Based on a (list of) treatment(s), get the samples that correspond to it and allow users to select them.
  *
- * input: compound(s) (string)
+ * input: treatment(s) (string)
  * output: list of samples (array)
  */
 function SampleSelection(sources) {
-  const compoundAnnotations = CompoundAnnotation(sources)
+  const treatmentAnnotations = TreatmentAnnotation(sources)
 
   const logger = loggerFactory(
     "sampleSelection",
@@ -63,7 +63,7 @@ function SampleSelection(sources) {
   const input$ = sources.input
   // .startWith("BRD-K28907958") // REMOVE ME !!!
 
-  // When the component should not be shown, including empty signature
+  // When the treatment should not be shown, including empty signature
   const isEmptyState = (state) => {
     if (typeof state.core === "undefined") {
       return true
@@ -149,7 +149,7 @@ function SampleSelection(sources) {
           span([""]),
         ]),
       ]),
-      td(".compoundPopup" + selectedClass(entry.use), blurStyle, entry.trt_id),
+      td(".treatmentPopup" + selectedClass(entry.use), blurStyle, entry.trt_id),
       td(
         selectedClass(entry.use),
         blurStyle,
@@ -227,7 +227,7 @@ function SampleSelection(sources) {
     .remember()
 
   const loadedVdom$ = xs
-    .combine(modifiedState$, compoundAnnotations.DOM)
+    .combine(modifiedState$, treatmentAnnotations.DOM)
     .map(([state, annotation]) => makeTable(state, annotation, false))
 
   // Wrap component vdom with an extra div that handles being dirty
@@ -336,7 +336,7 @@ function SampleSelection(sources) {
   return {
     log: xs.merge(logger(state$, "state$")),
     DOM: vdom$,
-    HTTP: xs.merge(request$, compoundAnnotations.HTTP),
+    HTTP: xs.merge(request$, treatmentAnnotations.HTTP),
     onion: xs.merge(
       defaultReducer$,
       inputReducer$,
@@ -346,7 +346,7 @@ function SampleSelection(sources) {
       dirtyReducer$,
     ),
     output: sampleSelection$,
-    modal: compoundAnnotations.modal,
+    modal: treatmentAnnotations.modal,
   }
 }
 

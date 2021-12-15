@@ -58,8 +58,11 @@
       "geneAnnotations": {
         "url": "http://localhost:8082/gene/symbol/"
       },
-      "compoundAnnotations": {
+      "treatmentAnnotations": {
         "url": "http://localhost:8082/ca/"
+      },
+      "config": {
+        "logoUrl": "https://www.data-intuitive.com/images/logo_white.png"
       }
     }
   },
@@ -132,8 +135,11 @@
       "geneAnnotations": {
         "url": "https://compass.data-intuitive.app/gene/symbol/"
       },
-      "compoundAnnotations": {
+      "treatmentAnnotations": {
         "url": "http://localhost:8082/ca/"
+      },
+      "config": {
+        "logoUrl": ""
       }
     }
   },
@@ -176,8 +182,11 @@
       "geneAnnotations": {
         "url": "http://localhost:8082/gene/symbol/"
       },
-      "compoundAnnotations": {
+      "treatmentAnnotations": {
         "url": "http://localhost:8082/drugbank/"
+      },
+      "config": {
+        "logoUrl": ""
       }
     }
   }

@@ -66,7 +66,7 @@ export default function GenericTreatmentWorkflow(sources) {
         api: state.settings.api,
         common: state.settings.common,
         geneAnnotations: state.settings.geneAnnotations,
-        compoundAnnotations: state.settings.compoundAnnotations,
+        treatmentAnnotations: state.settings.treatmentAnnotations,
         treatmentLike: workflowTreatmentType,
       },
       ui: (state.ui ?? {} ).form ?? {},

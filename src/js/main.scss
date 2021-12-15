@@ -60,6 +60,14 @@ nav ul li.active span {
     padding-bottom: 0.2em;
 }
 
+nav a.brand-logo svg{
+    vertical-align: middle;
+}
+
+nav img.logo_img {
+    vertical-align: middle;
+}
+
 /* home svg styling and hover */
 
 a:hover #border {

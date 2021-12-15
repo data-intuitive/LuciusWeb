@@ -6,25 +6,26 @@ function makeSidenavDriver() {
 
     function sidenavDriver(in$) {
 
-        // document.addEventListener('DOMContentLoaded', function() {
-        //     var elems = document.querySelectorAll('.sidenav');
-        //     var instances = M.Sidenav.init(elems);
-        // });
-
         in$.addListener({
             next: (nav) => {
                 if (nav.state == 'open') {
+
                     if (sidenav == undefined) {
-                        var elems = document.querySelectorAll(nav.element)
-                        sidenav = M.Sidenav.init(elems)
+                        const elem = document.querySelector(nav.element)
+                        sidenav = M.Sidenav.init(elem)
+                        // We handle opening of the sidenav ourselves.
+                        // Unless also implemented, this removes swipe-closing support though, which is one option to close the sidenav on mobile.
+                        // Opening sidenav creates an overlay which gets an on-click listener, which is used to close the sidenav
+                        // This is not removed by this call.
+                        sidenav._removeEventHandlers()
                     }
-                    // Once initialized the code handles opening & closing itself when the user clicked the hamburger icon
-                    // Calling open when the menu is already open is handled correctly so no hard calling it again
-                    sidenav[0].open()
+
+                    sidenav.open()
                 }
                 else if (nav.state == 'close') {
-                    if (sidenav != undefined && sidenav.length > 0)
-                        sidenav[0].close()
+                    // can be used to e.g. add a button in the sidenav that closes the sidenav
+                    if (sidenav != undefined)
+                        sidenav.close()
                 }
             },
             error: (e) => {

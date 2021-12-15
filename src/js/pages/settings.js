@@ -172,12 +172,7 @@ export function Settings(sources) {
           button(".reset .col .s4 .offset-s4 .btn .grey", "Reset to Default"),
         ])
       )
-  
-  /**
-   * Full page layout for settings
-   * @const Settings/vdom$
-   * @type {MemoryStream}
-   */
+
   const vdom$ = xs
     .combine(settings$, Settings.DOM, buttons$)
     .map(([_, dom, buttons]) =>

@@ -74,5 +74,6 @@ export const initSettings = {
     },
     config: {
         showAdminButton: false,
+        // logoUrl: 'https://www.data-intuitive.com/images/logo_white.png',
     }
 };

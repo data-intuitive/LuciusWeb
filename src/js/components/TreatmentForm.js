@@ -48,7 +48,7 @@ function TreatmentForm(sources) {
 
   const defaultReducer$ = xs.of((prevState) => {
     // treatmentForm -- default Reducer
-    return { ...prevState, form: {}, sampleSelection: {}, signature: {} }
+    return { ...prevState, check: {}, sampleSelection: {}, signature: {} }
   })
 
   return {

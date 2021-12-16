@@ -86,19 +86,19 @@ function Statistics(sources) {
             div('.col .s4 .center-align', [p(data.informative.total)])
           ]),
           div('.row', [
-            div('.col .s4', [p(['# unique compounds'])]),
-            div('.col .s4', [p('', { style : { fontSize : 'small' }}, extracts(data.compounds.sample))]),
-            div('.col .s4 .center-align', [p(data.compounds.total)])
+            div('.col .s4', [p(['# unique treatments'])]),
+            div('.col .s4', [p('', { style : { fontSize : 'small' }}, extracts(data.treatments.sample))]),
+            div('.col .s4 .center-align', [p(data.treatments.total)])
           ]),
           div('.row', [
-            div('.col .s4', [p(['# concentrations'])]),
-            div('.col .s4', [p('', { style : { fontSize : 'small' }}, extracts(data.concentrations.sample))]),
-            div('.col .s4 .center-align', [p(data.concentrations.total)])
+            div('.col .s4', [p(['# doses'])]),
+            div('.col .s4', [p('', { style : { fontSize : 'small' }}, extracts(data.doses.sample))]),
+            div('.col .s4 .center-align', [p(data.doses.total)])
           ]),
           div('.row', [
-            div('.col .s4', [p(['# protocols'])]),
-            div('.col .s4', [p('', { style : { fontSize : 'small' }}, extracts(data.protocols.sample))]),
-            div('.col .s4 .center-align', [p(data.protocols.total)])
+            div('.col .s4', [p(['# cells'])]),
+            div('.col .s4', [p('', { style : { fontSize : 'small' }}, extracts(data.cells.sample))]),
+            div('.col .s4 .center-align', [p(data.cells.total)])
           ]),
           div('.row', [
             div('.col .s4', [p(['# types'])]),

@@ -75,6 +75,10 @@ a:hover #border {
     fill-opacity: 0.5;
 }
 
+div #corrplot {
+    height: 100%
+}
+
 @media print {
     @page {
         margin: 40pt 0pt 40pt 0pt

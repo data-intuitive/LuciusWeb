@@ -51,29 +51,29 @@ function CorrelationForm(sources) {
             const query2 = state.form.query2
             return div(
                 [
-                    div('.row .blue .darken-3 .white-text', { style: { margin: '0px', padding: '20px 10px 10px 10px' } }, [
+                    div('.row .WF-header .white-text', { style: { margin: '0px', padding: '20px 10px 10px 10px' } }, [
                         // label('Query: '),
                         div('.Default1 .waves-effect .col .s1 .center-align', [
-                            i('.large  .center-align .material-icons .blue-text', { style: { fontSize: '45px', fontColor: 'gray' } }, 'search'),
+                            i('.large  .center-align .material-icons', { style: { fontSize: '45px', fontColor: 'gray' } }, 'search'),
                         ]),
                         input('.Query1 .col s10 .white-text', { style: { fontSize: '20px' }, props: { type: 'text', value: query1 }, value: query1 }),
                     ]),
                     div([
-                        (!validated1 || query1 == '') ? div('.blue.lighten-3',[checkdom1]) : div()
+                        (!validated1 || query1 == '') ? div('.validation',[checkdom1]) : div()
                     ]),
-                    div('.row .blue .darken-3 .white-text', { style: { margin: '0px', padding: '20px 10px 10px 10px' } }, [
+                    div('.row .WF-header .white-text', { style: { margin: '0px', padding: '20px 10px 10px 10px' } }, [
                         div('.Default2 .waves-effect .col .s1 .center-align', [
-                            i('.large  .center-align .material-icons .blue-text', { style: { fontSize: '45px', fontColor: 'gray' } }, 'search'),
+                            i('.large  .center-align .material-icons', { style: { fontSize: '45px', fontColor: 'gray' } }, 'search'),
                         ]),
                         input('.Query2 .col s10 .white-text', { style: { fontSize: '20px' }, props: { type: 'text', value: query2 }, value: query2 }),
                         (validated1 && validated2)
                             ? div('.SignatureCheck2 .waves-effect .col .s1 .center-align', [
-                                i('.large .material-icons', { style: { fontSize: '45px', fontColor: 'grey' } }, ['play_arrow'])])
+                                i('.large .material-icons .validated', { style: { fontSize: '45px', fontColor: 'grey' } }, ['play_arrow'])])
                             : div('.SignatureCheck2 .col .s1 .center-align', [
-                                i('.large .material-icons .blue-text', { style: { fontSize: '45px', fontColor: 'grey' } }, 'play_arrow')])
+                                i('.large .material-icons', { style: { fontSize: '45px', fontColor: 'grey' } }, 'play_arrow')])
                     ]),
                     div([
-                        (!validated2 || query2 == '') ? div('.blue.lighten-3', [checkdom2]) : div()
+                        (!validated2 || query2 == '') ? div('.validation', [checkdom2]) : div()
                     ])
                 ])
         });

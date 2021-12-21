@@ -20,8 +20,9 @@ const checkLens = {
 
 const treatmentLikeFilter = {
   COMPOUND : "compound",
-  GENETIC : "genetic",
-  COMPOUND_AND_GENETIC : "compound genetic"
+  LIGAND   : "ligand",
+  GENETIC  : "genetic",
+  ALL : "compound ligand genetic"
 }
 
 /**

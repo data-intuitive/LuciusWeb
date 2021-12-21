@@ -7,6 +7,7 @@ import * as R from 'ramda'
 // Workflows
 import DiseaseWorkflow from './pages/disease'
 import CompoundWorkflow from './pages/compound'
+import LigandWorkflow from './pages/ligand'
 import GeneticWorkflow from './pages/genetic'
 import GenericTreatmentWorkflow from './pages/genericTreatment'
 import TargetWorkflow from './pages/target'
@@ -43,6 +44,7 @@ export default function Index(sources) {
     '/compound': CompoundWorkflow,
     '/target': TargetWorkflow,
     '/genetic': GeneticWorkflow,
+    '/ligand': LigandWorkflow,
     '/generic': GenericTreatmentWorkflow,
     '/statistics': StatisticsWorkflow,
     '/settings': IsolatedSettings,
@@ -124,6 +126,7 @@ export default function Index(sources) {
                         makeLink('/compound', span(['Compound', ' ', compoundSVG]), '.orange-text'),
                         // makeLink('/target', span(['Target', ' ', targetSVG]), '.red-text'),
                         makeLink('/genetic', span(['Genetic', ' ', targetSVG]), '.red-text'),
+                        makeLink('/ligand', span(['Ligand', ' ', ]), '.purple-text'),
                         makeLink('/disease', span(['Disease', ' ', diseaseSVG]), '.pink-text'),
                         makeLink('/settings', span(['Settings', ' ', settingsSVG]), '.grey-text'),
                         // makeLink('/admin', span(['Admin']), '.blue-text'),
@@ -136,6 +139,7 @@ export default function Index(sources) {
                 makeLink('/compound', span(['Compound', ' ', compoundSVG]), '.orange-text'),
                 // makeLink('/target', span(['Target', ' ', targetSVG]), '.red-text'),
                 makeLink('/genetic', span(['Genetic', ' ', targetSVG]), '.red-text'),
+                makeLink('/ligand', span(['Ligand', ' ', ]), '.purple-text'),
                 makeLink('/disease', span(['Disease', ' ', diseaseSVG]), '.pink-text'),
                 makeLink('/settings', span(['Settings', ' ', settingsSVG]), '.grey-text'),
                 // makeLink('/admin', span(['Admin']), '.blue-text'),

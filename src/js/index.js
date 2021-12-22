@@ -24,8 +24,6 @@ import { initSettings } from './configuration.js'
 import initDeployments from '../../deployments.json'
 import { loggerFactory } from './utils/logger'
 
-import { navbarModule } from "../../navbar.js";
-
 export default function Index(sources) {
   const {router} = sources;
 
@@ -144,9 +142,9 @@ export default function Index(sources) {
         ])
     })
 
-    
-    
-    
+    const sidenavTrigger$ = sources.DOM.select('.sidenav-trigger').events('click')
+    const sidenavEvent$ = sidenavTrigger$
+        .map((trigger) => ({element: '.sidenav', state: 'open'}))
 
     // We combine with state in order to read the customizations
     // This works because the defaultReducer runs before anything else
@@ -309,6 +307,7 @@ export default function Index(sources) {
         popup: page$.map(prop('popup')).filter(Boolean).flatten(),
         modal: page$.map(prop('modal')).filter(Boolean).flatten(),
         ac: page$.map(prop('ac')).filter(Boolean).flatten(),
+        sidenav: sidenavEvent$,
         storage: page$.map(prop('storage')).filter(Boolean).flatten(),
         deployments: page$.map(prop('deployments')).filter(Boolean).flatten()
     }

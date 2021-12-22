@@ -20,11 +20,43 @@ main {
 .genetic {
     @extend .red;
     @extend .lighten-5;
+
+    .WF-header {
+        @extend .red;
+        @extend .darken-4;
+    
+        i {
+            @extend .red-text;
+        }
+    }
 }
 
 .compound {
     @extend .orange;
     @extend .lighten-5;
+
+    .WF-header {
+        @extend .orange;
+        @extend .darken-4;
+    
+        i {
+            @extend .orange-text;
+        }
+    }
+}
+
+.ligand {
+    @extend .purple;
+    @extend .lighten-5;
+
+    .WF-header {
+        @extend .purple;
+        @extend .darken-4;
+
+        i {
+            @extend .purple-text;
+        }
+    }
 }
 
 .ligand {
@@ -35,6 +67,20 @@ main {
 .disease {
     @extend .pink;
     @extend .lighten-5;
+
+    .WF-header {
+        @extend .pink;
+        @extend .darken-4;
+    
+        i {
+            @extend .pink-text;
+        }
+    }
+
+    .validation {
+        @extend .pink;
+        @extend .lighten-5;
+    }
 }
 
 .target {
@@ -45,11 +91,39 @@ main {
 .correlation {
     @extend .blue;
     @extend .lighten-5;
+
+    .WF-header {
+        @extend .blue;
+        @extend .darken-3;
+
+        i {
+            @extend .blue-text;
+        }
+    }
+
+    .validation {
+        @extend .blue;
+        @extend .lighten-3;
+    }
 }
 
 .generic {
     @extend .green;
     @extend .lighten-5;
+
+    .WF-header {
+        @extend .green;
+        @extend .darken-4;
+    
+        i {
+            @extend .green-text;
+        }
+    }
+}
+
+// general style for query 'go' button is that when it is validated that it becomes white
+.WF-header i.validated {
+    @extend .white-text;
 }
 
 img.trt_img {

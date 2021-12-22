@@ -238,6 +238,13 @@ export function AdminSettings(sources) {
           type: "text",
           title: "URL for logo image",
           props: {},
+        },
+        {
+          field: "normalStatisticsResponseTime",
+          class: ".input-field",
+          type: "text",
+          title: "Max normal time for statistics query",
+          props: { type: "text" },
         }
       ],
     },

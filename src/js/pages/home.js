@@ -47,6 +47,7 @@ function Home(sources) {
                         makeLink('/compound', span({ style: { fontSize: "2rem" } }, ['Compound', ' ', compoundSVG]), '.orange-text .left'),
                         // makeLink('/target', span(['Target', ' ', targetSVG]), '.red-text'),
                         makeLink('/genetic', span({ style: { fontSize: "2rem" } }, ['Genetic', ' ', targetSVG]), '.red-text .left'),
+                        makeLink('/ligand', span({ style: { fontSize: "2rem" } }, ['Ligand', ' ', ligandSVG]), '.purple-text .left'),
                         //makeLink('/generic', span({ style: { fontSize: "2rem" } }, ['Ligand', ' ', ligandSVG]), '.purple-text .left'),
                         makeLink('/disease', span({ style: { fontSize: "2rem" } }, ['Disease', ' ', diseaseSVG]), '.pink-text .left'),
                         makeLink('/correlation', span({ style: { fontSize: "2rem" } }, ['Correlation', ' ', correlationSVG]), '.blue-text .left'),

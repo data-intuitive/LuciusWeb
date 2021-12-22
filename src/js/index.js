@@ -27,8 +27,6 @@ import { loggerFactory } from './utils/logger'
 
 import { compoundSVG, targetSVG, ligandSVG, diseaseSVG, correlationSVG, settingsSVG } from './svg'
 
-import { navbarModule } from "../../navbar.js";
-
 export default function Index(sources) {
   const {router} = sources;
 

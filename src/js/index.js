@@ -1,7 +1,7 @@
 import xs from 'xstream'
 
 import { div, nav, a, h3, p, ul, li, h1, h2, i, footer, header, main, svg, g, path, span, img } from '@cycle/dom'
-import { merge, prop, mergeDeepRight } from 'ramda'
+import { merge, prop, mergeDeepLeft, mergeDeepRight } from 'ramda'
 import * as R from 'ramda'
 
 // Workflows
@@ -265,8 +265,8 @@ export default function Index(sources) {
         const updatedDeployment = mergeDeepRight(prevState.settings.deployment, desiredDeployment)
         // Merge the updated deployment with the settings, by key.
         const updatedSettings = merge(prevState.settings, { deployment : updatedDeployment})
-        // Do the same with the administrative settings
-        const distributedAdminSettings = mergeDeepRight(updatedSettings, updatedSettings.deployment.services)
+        // Do the same with the administrative settings, keep value in settings if exist - only add from deployments if value is missing
+        const distributedAdminSettings = mergeDeepLeft(updatedSettings, updatedSettings.deployment.services)
         return ({...prevState, settings: distributedAdminSettings })
       })
 

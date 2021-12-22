@@ -82,7 +82,7 @@ export function SampleInfo(sources) {
       span(
         ".col .s8",
         { style: { overflow: "hidden", "text-overflow": "ellipsis" } },
-        value.length != 0 ? value : ""
+        value?.length != 0 ? value : ""
       ),
     ]
   }
@@ -90,7 +90,7 @@ export function SampleInfo(sources) {
   function entrySmall(key, value) {
     return [
       span(".col .s4 .m2", { style: { fontWeight: "lighter" } }, key),
-      span(".col .s8 .m4", value.length != 0 ? value : ""),
+      span(".col .s8 .m4", value?.length != 0 ? value : ""),
     ]
   }
 
@@ -315,8 +315,8 @@ export function SampleInfo(sources) {
         p(".col .s12 .grey-text", hStyle, "Sample Info:"),
         p(pStyle, entry("Sample ID: ", sample.id)),
         p(pStyle, entry("Cell: ", sample.cell)),
-        p(pStyle, entry("Dose: ", sample.dose)),
-        p(pStyle, entry("Time: ", sample.time)),
+        p(pStyle, entry("Dose: ", sample.dose !== "N/A" ? sample.dose + " " + (sample?.dose_unit ?? "?") : sample.dose)),
+        p(pStyle, entry("Time: ", sample.time !== "N/A" ? sample.time + " " + (sample?.time_unit ?? "?") : sample.time)),
         p(pStyle, entry("Year: ", sample.year)),
         p(pStyle, entry("Plate: ", sample.plate)),
       ]

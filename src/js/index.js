@@ -1,12 +1,13 @@
 import xs from 'xstream'
 
 import { div, nav, a, h3, p, ul, li, h1, h2, i, footer, header, main, svg, g, path, span, img } from '@cycle/dom'
-import { merge, prop, mergeDeepRight } from 'ramda'
+import { merge, prop, mergeDeepLeft, mergeDeepRight } from 'ramda'
 import * as R from 'ramda'
 
 // Workflows
 import DiseaseWorkflow from './pages/disease'
 import CompoundWorkflow from './pages/compound'
+import LigandWorkflow from './pages/ligand'
 import GeneticWorkflow from './pages/genetic'
 import GenericTreatmentWorkflow from './pages/genericTreatment'
 import TargetWorkflow from './pages/target'
@@ -45,6 +46,7 @@ export default function Index(sources) {
     '/compound': CompoundWorkflow,
     '/target': TargetWorkflow,
     '/genetic': GeneticWorkflow,
+    '/ligand': LigandWorkflow,
     '/generic': GenericTreatmentWorkflow,
     '/statistics': StatisticsWorkflow,
     '/settings': IsolatedSettings,
@@ -103,7 +105,7 @@ export default function Index(sources) {
                         makeLink('/compound', span(['Compound', ' ', compoundSVG]), '.orange-text'),
                         // makeLink('/target', span(['Target', ' ', targetSVG]), '.red-text'),
                         makeLink('/genetic', span(['Genetic', ' ', targetSVG]), '.red-text'),
-                        //makeLink('/generic', span(['Ligand', ' ', ligandSVG]), '.purple-text'),
+                        makeLink('/ligand', span(['Ligand', ' ', ]), '.purple-text'),
                         makeLink('/disease', span(['Disease', ' ', diseaseSVG]), '.pink-text'),
                         makeLink('/correlation', span(['Correlation', ' ', correlationSVG]), '.blue-text'),
                         makeLink('/settings', span(['Settings', ' ', settingsSVG]), '.grey-text'),
@@ -117,7 +119,7 @@ export default function Index(sources) {
                 makeLink('/compound', span(['Compound', ' ', compoundSVG]), '.orange-text'),
                 // makeLink('/target', span(['Target', ' ', targetSVG]), '.red-text'),
                 makeLink('/genetic', span(['Genetic', ' ', targetSVG]), '.red-text'),
-                //makeLink('/generic', span(['Ligand', ' ', ligandSVG]), '.purple-text'),
+                makeLink('/ligand', span(['Ligand', ' ', ]), '.purple-text'),
                 makeLink('/disease', span(['Disease', ' ', diseaseSVG]), '.pink-text'),
                 makeLink('/correlation', span(['Correlation', ' ', correlationSVG]), '.blue-text'),
                 makeLink('/settings', span(['Settings', ' ', settingsSVG]), '.grey-text'),
@@ -127,9 +129,9 @@ export default function Index(sources) {
         ])
     })
 
-    
-    
-    
+    const sidenavTrigger$ = sources.DOM.select('.sidenav-trigger').events('click')
+    const sidenavEvent$ = sidenavTrigger$
+        .map((trigger) => ({element: '.sidenav', state: 'open'}))
 
     // We combine with state in order to read the customizations
     // This works because the defaultReducer runs before anything else
@@ -250,8 +252,8 @@ export default function Index(sources) {
         const updatedDeployment = mergeDeepRight(prevState.settings.deployment, desiredDeployment)
         // Merge the updated deployment with the settings, by key.
         const updatedSettings = merge(prevState.settings, { deployment : updatedDeployment})
-        // Do the same with the administrative settings
-        const distributedAdminSettings = mergeDeepRight(updatedSettings, updatedSettings.deployment.services)
+        // Do the same with the administrative settings, keep value in settings if exist - only add from deployments if value is missing
+        const distributedAdminSettings = mergeDeepLeft(updatedSettings, updatedSettings.deployment.services)
         return ({...prevState, settings: distributedAdminSettings })
       })
 
@@ -292,6 +294,7 @@ export default function Index(sources) {
         popup: page$.map(prop('popup')).filter(Boolean).flatten(),
         modal: page$.map(prop('modal')).filter(Boolean).flatten(),
         ac: page$.map(prop('ac')).filter(Boolean).flatten(),
+        sidenav: sidenavEvent$,
         storage: page$.map(prop('storage')).filter(Boolean).flatten(),
         deployments: page$.map(prop('deployments')).filter(Boolean).flatten()
     }

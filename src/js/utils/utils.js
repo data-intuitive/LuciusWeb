@@ -1,5 +1,5 @@
 import dropRepeats from 'xstream/extra/dropRepeats'
-import { prop } from 'ramda'
+import { prop, equals } from 'ramda'
 
 // Size stream, make it dependent on the size of container which is managed by CSS.
 // TODO: Make it update immediately, currently only updates on new query
@@ -16,6 +16,23 @@ export function widthStream(domSource$, el) {
             }
         })
         .compose(dropRepeats())
+        .remember()
+        // .debug(log)
+}
+
+export function widthHeightStream(domSource$, el) {
+    return domSource$
+        .select(el)
+        .elements()
+        .map(elements => elements[0])
+        .map(container => {
+            if (container != undefined) {
+                return [container.offsetWidth, container.offsetHeight]
+            } else {
+                return [100, 100]
+            }
+        })
+        .compose(dropRepeats(equals))
         .remember()
         // .debug(log)
 }

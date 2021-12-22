@@ -159,16 +159,18 @@ function SampleSelection(sources) {
       ),
       td(
         ".left-align" + selectedClass(entry.use),
-        entry.id.length > 30 ? entry.id.substring(0, 40) + "..." : entry.id
+        entry.id.length > 40 ? entry.id.substring(0, 40) + "..." : entry.id
       ),
       td(selectedClass(entry.use), entry.cell),
-      td(
-        selectedClass(entry.use),
-        entry.dose.length > 6 ? entry.dose.substring(0, 6) + "..." : entry.dose
+      td(selectedClass(entry.use),
+          ((_) => {
+            const dose = entry.dose !== "N/A" ? entry.dose + " " + entry.dose_unit : entry.dose
+            return dose.length > 6 ? dose.substring(0, 6) + "..." : dose
+          })()
       ),
       // td(selectedClass(entry.use), entry.batch),
       // td(selectedClass(entry.use), entry.year),
-      td(selectedClass(entry.use), entry.time),
+      td(selectedClass(entry.use), entry.time !== "N/A" ? entry.time + " " + entry.time_unit : entry.time),
       td(selectedClass(entry.use), entry.significantGenes),
     ])
     const header = tr([

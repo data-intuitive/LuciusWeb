@@ -27,6 +27,11 @@ main {
     @extend .lighten-5;
 }
 
+.ligand {
+    @extend .purple;
+    @extend .lighten-5;
+}
+
 .disease {
     @extend .pink;
     @extend .lighten-5;
@@ -75,6 +80,10 @@ a:hover #border {
     fill-opacity: 0.5;
 }
 
+div #corrplot {
+    height: 100%
+}
+
 @media print {
     @page {
         margin: 40pt 0pt 40pt 0pt
@@ -82,7 +91,10 @@ a:hover #border {
     /* no background color for printing */
     .compound,
     .disease,
+    .ligand,
     .genetic,
+    .generic,
+    .correlation,
     .target {
         background-color: white !important
     }

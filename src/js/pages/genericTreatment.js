@@ -30,7 +30,7 @@ export default function GenericTreatmentWorkflow(sources) {
   const workflow = (sources??{}).workflow ?? {}
   const workflowWelcomeText = workflow.welcomeText ?? "This is the generic treatment workflow template"
   const workflowMainDivClass = workflow.mainDivClass ?? ".row .generic"
-  const workflowTreatmentType = workflow.treatmentType ?? treatmentLikeFilter.COMPOUND_AND_GENETIC
+  const workflowTreatmentType = workflow.treatmentType ?? treatmentLikeFilter.ALL
   const workflowLoggerName = workflow.loggerName ?? "generic"
   const workflowGhostModeScenarioSelector = workflow.ghostModeScenarioSelector ?? ((state) => state.settings.common.ghost.genetic)
 

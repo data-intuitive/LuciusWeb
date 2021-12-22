@@ -27,6 +27,11 @@ main {
     @extend .lighten-5;
 }
 
+.ligand {
+    @extend .purple;
+    @extend .lighten-5;
+}
+
 .disease {
     @extend .pink;
     @extend .lighten-5;
@@ -86,7 +91,10 @@ div #corrplot {
     /* no background color for printing */
     .compound,
     .disease,
+    .ligand,
     .genetic,
+    .generic,
+    .correlation,
     .target {
         background-color: white !important
     }

@@ -16,6 +16,7 @@
         "example": {
           "compound": "BRD-K93645900",
           "signature": "-WRONG HSPA1A DNAJB1 DDIT4 -TSEN2",
+          "ligand": "ANGPT1",
           "genetic": "PARP2",
           "target": "MELK"
         },
@@ -25,6 +26,12 @@
             "index": 0,
             "sample": ["A375_6H_BRD_K93645900_10"],
             "signature": "-CRCP"
+          },
+          "ligand": {
+            "treatment": "ANGPT1",
+            "index": 0,
+            "sample": ["HCC515_4H_CMAP_CYT_SRP3007_50"],
+            "signature": "FBXO11 SLC35 F5BAG4 RIF1"
           },
           "genetic": {
             "treatment": "PARP2",

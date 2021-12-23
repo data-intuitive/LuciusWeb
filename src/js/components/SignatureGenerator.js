@@ -50,7 +50,7 @@ function model(newInput$, request$, data$, showMore$) {
         core: { 
             ...prevState.core, 
             showMore: showMore, 
-            showLimit: (showMore ? -1 : 100) 
+            showLimit: (showMore ? 0 : 100) 
         }
     }))
 
@@ -133,7 +133,7 @@ function view(state$, request$, response$, geneAnnotationQuery) {
              * @const view/validVdom$/showLimit
              * @type {Number}
              */
-            const showLimit = state.core.showLimit != 0 ? state.core.showLimit : undefined
+            const showLimit = state.core.showLimit > 0 ? state.core.showLimit : undefined
 
             /**
              * Display div with a button when the signature is long, otherwise show empty div
@@ -142,7 +142,7 @@ function view(state$, request$, response$, geneAnnotationQuery) {
              */
             const showMoreButton = (showMore || arr.length > showLimit) ?
                 div('.row',
-                    button(".showMore .col .s4 .offset-s4 .btn .orange .darken-2", showMore ? 
+                    button(".showMore .col .s5 .offset-s7 .m4 .offset-m8 .l3 .offset-l9 .btn-small .orange .lighten-1", showMore ? 
                         "Show less" : 
                         "Show " + (arr.length - showLimit) + " more")
                 ) :
@@ -152,7 +152,15 @@ function view(state$, request$, response$, geneAnnotationQuery) {
                 div('.card-content .orange-text .text-darken-4', [
                     span('.card-title', 'Signature:'),
                     div('.row', { style: { fontSize: "16px", fontStyle: 'bold' } },
-                        arr.slice(0, showLimit).map(gene => showGene(gene))),
+                        // genes to be shown, if needed limited amount
+                        arr.slice(0, showLimit).map(gene => showGene(gene))
+                        .concat(
+                            /// ... -> Show more
+                            showLimit !== undefined ?
+                                div('.showMore.col.orange.lighten-4', geneStyle, [ '...' ]) :
+                                div()
+                        )
+                    ),
                     showMoreButton,
                     annotation
                 ])

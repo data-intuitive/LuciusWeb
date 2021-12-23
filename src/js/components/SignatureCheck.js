@@ -79,14 +79,20 @@ function SignatureCheck(sources) {
   const makeTable = (data) => {
     // let visible = visible1 //state.ux.checkSignatureVisible;
     let rows = data.map(entry => [ 
-      (entry.inL1000) ? td([i('.small .material-icons', 'done')] ) : td('.red .lighten-4 .red-text .text-darken-4', [i('.small .material-icons', 'mode_edit')] ),
-      (entry.inL1000) ? td(entry.query) : td('.red .lighten-4 .red-text .text-darken-4', entry.query),
-      (entry.inL1000) ? td(entry.symbol) : td('.red .lighten-4 .red-text .text-darken-4', entry.symbol)
+      (entry.found) ? td([i('.small .material-icons', 'done')] ) : td('.red .lighten-4 .red-text .text-darken-4', [i('.small .material-icons', 'mode_edit')] ),
+      (entry.found) ? td(entry.query) : td('.red .lighten-4 .red-text .text-darken-4', entry.query),
+      (entry.found) ? td(entry.symbol) : td('.red .lighten-4 .red-text .text-darken-4', entry.symbol),
+      (entry.found) ? td(entry.dataType === '1-1' ? 'L1000' : 
+                          entry.dataType === '0-1' ? 'BING' :
+                            entry.dataType === '0-0' ? 'AIG' : 
+                              'unknown') : 
+                      td('.red .lighten-4 .red-text .text-darken-4', 'N/A'),
     ]);
     const header = tr([
-      th('In L1000?'),
+      th('Found?'),
       th('Input'),
-      th('Symbol')
+      th('Symbol'),
+      th('Gene space')
     ]);
 
     let body = [];
@@ -114,7 +120,7 @@ function SignatureCheck(sources) {
   const collapseUpdate$ = domSource$.select('.collapseUpdate').events('click');
   const collapseUpdateReducer$ = collapseUpdate$.compose(sampleCombine(data$))
     .map(([collapse, data]) => prevState => {
-      return ({...prevState, query : data.map(x => (x.inL1000) ? x.symbol : '').join(" ").replace(/\s\s+/g, ' ').trim()});
+      return ({...prevState, query : data.map(x => (x.found) ? x.symbol : '').join(" ").replace(/\s\s+/g, ' ').trim()});
     });
 
   // The result of this component is an event when valid

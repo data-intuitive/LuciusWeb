@@ -82,11 +82,7 @@ function SignatureCheck(sources) {
       (entry.found) ? td([i('.small .material-icons', 'done')] ) : td('.red .lighten-4 .red-text .text-darken-4', [i('.small .material-icons', 'mode_edit')] ),
       (entry.found) ? td(entry.query) : td('.red .lighten-4 .red-text .text-darken-4', entry.query),
       (entry.found) ? td(entry.symbol) : td('.red .lighten-4 .red-text .text-darken-4', entry.symbol),
-      (entry.found) ? td(entry.dataType === '1-1' ? 'L1000' : 
-                          entry.dataType === '0-1' ? 'BING' :
-                            entry.dataType === '0-0' ? 'AIG' : 
-                              'unknown') : 
-                      td('.red .lighten-4 .red-text .text-darken-4', 'N/A'),
+      (entry.found) ? td(entry.dataType) : td('.red .lighten-4 .red-text .text-darken-4', 'N/A'),
     ]);
     const header = tr([
       th('Found?'),

@@ -12,6 +12,7 @@ import {
   thead,
   tbody,
   p,
+  i,
 } from "@cycle/dom"
 import { clone, equals, merge } from "ramda"
 import xs from "xstream"
@@ -173,17 +174,24 @@ function SampleSelection(sources) {
       td(selectedClass(entry.use), entry.time !== "N/A" ? entry.time + " " + entry.time_unit : entry.time),
       td(selectedClass(entry.use), entry.significantGenes),
     ])
+
+    const sortableHeaderEntry = (id, text, currentSortId, SortDirection) =>
+    {
+      if (id === currentSortId)
+        return th(".sortable", {props: {id: id}}, [text, i(".material-icons", SortDirection ? "arrow_upward" : "arrow_downward")])
+      else
+        return th(".sortable", {props: {id: id}}, text)
+    }
+
     const header = tr([
-      th("Use?"),
-      th(safeModelToUi("id", state.settings.common.modelTranslations)),
-      th("Name"),
-      th("Sample"),
-      th("Cell"),
-      th("Dose"),
-      // th("Batch"),
-      // th("Year"),
-      th("Time"),
-      th("Sign. Genes"),
+      sortableHeaderEntry("use", "Use?", state.core.sort, state.core.direction),
+      sortableHeaderEntry("id", safeModelToUi("id", state.settings.common.modelTranslations), state.core.sort, state.core.direction),
+      sortableHeaderEntry("name", "Name", state.core.sort, state.core.direction),
+      sortableHeaderEntry("sample", "Sample", state.core.sort, state.core.direction),
+      sortableHeaderEntry("cell", "Cell", state.core.sort, state.core.direction),
+      sortableHeaderEntry("dose", "Dose", state.core.sort, state.core.direction),
+      sortableHeaderEntry("time", "Time", state.core.sort, state.core.direction),
+      sortableHeaderEntry("signGenes", "Sign. Genes", state.core.sort, state.core.direction),
     ])
 
     let body = []
@@ -267,6 +275,11 @@ function SampleSelection(sources) {
 
   const a$ = xs.merge(aDown$, aUp$).compose(dropRepeats(equals)).startWith(false)
 
+  const sortClick$ = sources.DOM.select(".sortable")
+  .events("click")
+  .map((ev) => ev.ownerTarget.id)
+  .startWith("")
+
   const selectReducer$ = useClick$
     .compose(sampleCombine(a$))
     .map(([id, a]) => (prevState) => {
@@ -320,6 +333,15 @@ function SampleSelection(sources) {
     core: { ...prevState.core, request: req },
   }))
 
+  const sortReducer$ = sortClick$.map((sort) => (prevState) => ({
+    ...prevState,
+    core: {
+      ...prevState.core,
+      sort: sort,
+      direction: (sort != prevState.core.sort ? false : !prevState.core.direction)
+    }
+  }))
+
   const sampleSelection$ = xs
     .merge(
       sources.DOM.select(".doSelect").events("click"),
@@ -345,6 +367,7 @@ function SampleSelection(sources) {
       requestReducer$,
       dataReducer$,
       selectReducer$,
+      sortReducer$,
       dirtyReducer$,
     ),
     output: sampleSelection$,

@@ -88,9 +88,13 @@ function view(state$, request$, response$, geneAnnotationQuery) {
                     (() => {
                         const amountOfGenes = s.split(" ").length
                         if (amount == 1)
-                            return "These are the " + amountOfGenes + " significant genes from the selected sample."
+                            return amountOfGenes == 1 ?
+                                "This is the " + amountOfGenes + " significant gene from the selected sample." :
+                                "These are the " + amountOfGenes + " significant genes from the selected sample."
                         else if (amount > 1)
-                            return "The intersection of the significant genes from the selected samples resulted in " + amountOfGenes + " genes."
+                            return amountOfGenes == 1 ?
+                                "The intersection of the significant genes from the selected samples resulted in " + amountOfGenes + " gene." :
+                                "The intersection of the significant genes from the selected samples resulted in " + amountOfGenes + " genes."
                         else
                             return "No samples were selected and yet a valid signature was generated. Please create a bug report!"
                     })()

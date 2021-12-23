@@ -142,9 +142,10 @@ function view(state$, request$, response$, geneAnnotationQuery) {
              */
             const showMoreButton = (showMore || arr.length > showLimit) ?
                 div('.row',
-                    button(".showMore .col .s5 .offset-s7 .m4 .offset-m8 .l3 .offset-l9 .btn-small .orange .lighten-1", showMore ? 
-                        "Show less" : 
-                        "Show " + (arr.length - showLimit) + " more")
+                    div(".showMore .btn-flat .orange-text .text-darken-4 .right",
+                        { style: { textDecoration: "underline"} },
+                        showMore ? "Show less" : 
+                            "Show " + (arr.length - showLimit) + " more")
                 ) :
                 div()
 

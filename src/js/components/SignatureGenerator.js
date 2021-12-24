@@ -33,7 +33,7 @@ function model(newInput$, request$, data$) {
         // Initialization
         const defaultReducer$ = xs.of(prevState => ({ ...prevState, core: { input: '' } }))
         // Add input to state
-        const inputReducer$ = newInput$.map(i => prevState => ({ ...prevState, core: { ...prevState.core, input: i } }))
+        const inputReducer$ = newInput$.map(i => prevState => ({ ...prevState, core: { ...prevState.core, input: i.core.input } }))
         // Add request body to state
         const requestReducer$ = request$.map(req => prevState => ({ ...prevState, core: { ...prevState.core, request: req } }))
         // Add data from API to state, update output key when relevant
@@ -60,6 +60,8 @@ function view(state$, request$, response$, geneAnnotationQuery) {
         .map(r => r.body.result.join(" "))
         .filter(s => s == '')
 
+    const amountOfInputs$ = state$.map((state) => (state.core?.input?.length)).compose(dropRepeats(equals)).remember()
+
     const signature$ = xs.merge(validSignature$, invalidSignature$).remember()
 
     const geneStyle = {
@@ -75,22 +77,46 @@ function view(state$, request$, response$, geneAnnotationQuery) {
         thisGene
     ])
 
-    const validVdom$ = xs.combine(validSignature$, geneAnnotationQuery.DOM)
-        .map(([s, annotation]) => div('.card .orange .lighten-3', [
+    const validVdom$ = xs.combine(validSignature$, geneAnnotationQuery.DOM, amountOfInputs$)
+        .map(([s, annotation, amount]) => div('.card .orange .lighten-3', [
             div('.card-content .orange-text .text-darken-4', [
                 span('.card-title', 'Signature:'),
                 div('.row', { style: { fontSize: "16px", fontStyle: 'bold' } },
                     s.split(" ").map(gene => showGene(gene))),
-                annotation
+                annotation,
+                p( { style: { fontSize: "16px" } }, 
+                    (() => {
+                        const amountOfGenes = s.split(" ").length
+                        if (amount == 1)
+                            return amountOfGenes == 1 ?
+                                "This is the 1 significant gene from the selected sample." :
+                                "These are the " + amountOfGenes + " significant genes from the selected sample."
+                        else if (amount > 1)
+                            return amountOfGenes == 1 ?
+                                "The intersection of the significant genes from the selected samples resulted in 1 gene." :
+                                "The intersection of the significant genes from the selected samples resulted in " + amountOfGenes + " genes."
+                        else
+                            return "No samples were selected and yet a valid signature was generated. Please create a bug report!"
+                    })()
+                ),
             ])
         ]))
         .startWith(div('.card .orange .lighten-3', []))
 
-    const invalidVdom$ = invalidSignature$
-        .map(_ => div('.card .orange .lighten-3', [
+    const invalidVdom$ = xs.combine(invalidSignature$, amountOfInputs$)
+        .map(([_, amount]) => div('.card .orange .lighten-3', [
             div('.card-content .red-text .text-darken-1', [
                 div('.row', { style: { fontSize: "16px", fontStyle: 'bold' } }, [
-                    p('.center', { style: { fontSize: "26px" } }, "The resulting signature is empty, please check the sample selection!")
+                    p('.center', { style: { fontSize: "26px" } }, 
+                        (() => {
+                            if (amount == 1)
+                                return "The selected sample didn't return any significant genes from which to create a signature!"
+                            else if (amount > 1)
+                                return "The resulting signature is empty as there is no intersection of significant genes in the selected samples!"
+                            else
+                                return "No samples were selected from which to create a signature!"
+                        })()
+                    )
                 ])
             ])
         ]))
@@ -98,14 +124,14 @@ function view(state$, request$, response$, geneAnnotationQuery) {
 
     const loadingVdom$ = request$.compose(sampleCombine(state$))
         .mapTo(
-        div('.card .orange .lighten-3', [
-            div('.card-content .orange-text .text-darken-4', [
-            span('.card-title', 'Signature:'),
-            div('.progress.orange.lighten-3.yellow-text', { style: { margin: '2px 0px 2px 0px'} }, [
-                div('.indeterminate', {style : { "background-color" : 'orange' }})
-            ])
-            ])
-        ]))
+            div('.card .orange .lighten-3', [
+                div('.card-content .orange-text .text-darken-4', [
+                span('.card-title', 'Signature:'),
+                div('.progress.orange.lighten-3.yellow-text', { style: { margin: '2px 0px 2px 0px'} }, [
+                    div('.indeterminate', {style : { "background-color" : 'orange' }})
+                ])
+                ])
+            ]))
         .startWith(div('.card .orange .lighten-3', []))
         .remember()
 

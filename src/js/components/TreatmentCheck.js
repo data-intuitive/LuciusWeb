@@ -20,8 +20,9 @@ const checkLens = {
 
 const treatmentLikeFilter = {
   COMPOUND : "compound",
-  GENETIC : "genetic",
-  COMPOUND_AND_GENETIC : "compound genetic"
+  LIGAND   : "ligand",
+  GENETIC  : "genetic",
+  ALL : "compound ligand genetic"
 }
 
 /**
@@ -125,12 +126,12 @@ function TreatmentCheck(sources) {
     const validated = state.core.validated
     return div([
       div(
-        ".row .genetic .darken-4 .white-text",
+        ".row .WF-header .white-text",
         { style: { padding: "20px 10px 10px 10px" } },
         [
           div(".Default .waves-effect .col .s1 .center-align", [
             i(
-              ".large  .center-align .material-icons .orange-text",
+              ".large  .center-align .material-icons",
               { style: { fontSize: "45px", fontColor: "gray" } },
               "search"
             ),
@@ -152,14 +153,14 @@ function TreatmentCheck(sources) {
           validated
             ? div(".treatmentCheck .waves-effect .col .s1 .center-align", [
                 i(
-                  ".large .material-icons",
+                  ".large .material-icons .validated",
                   { style: { fontSize: "45px", fontColor: "grey" } },
                   ["play_arrow"]
                 ),
               ])
             : div(".treatmentCheck .col .s1 .center-align", [
                 i(
-                  ".large .material-icons .orange-text",
+                  ".large .material-icons",
                   { style: { fontSize: "45px", fontColor: "grey" } },
                   "play_arrow"
                 ),

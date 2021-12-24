@@ -101,21 +101,21 @@ function view(state$, signatureCheckDom$) {
       const query = state.form.query
       return div(
         [
-          div('.row  .pink .darken-4 .white-text', { style: { padding: '20px 10px 10px 10px' } }, [
+          div('.row .WF-header .white-text', { style: { padding: '20px 10px 10px 10px' } }, [
             // label('Query: '),
             div('.Default .waves-effect .col .s1 .center-align', [
-              i('.large  .center-align .material-icons .pink-text', { style: { fontSize: '45px', fontColor: 'gray' } }, 'search'),
+              i('.large  .center-align .material-icons', { style: { fontSize: '45px', fontColor: 'gray' } }, 'search'),
             ]),
             input('.Query .col s10 .white-text', { style: { fontSize: '20px' }, props: { type: 'text', value: query }, value: query }),
             (validated)
             ? div('.SignatureCheck .waves-effect .col .s1 .center-align', [
-              i('.large .material-icons', { style: { fontSize: '45px', fontColor: 'grey' } }, ['play_arrow'])])
+              i('.large .material-icons .validated', { style: { fontSize: '45px', fontColor: 'grey' } }, ['play_arrow'])])
             : div('.SignatureCheck .col .s1 .center-align', [
-              i('.large .material-icons .pink-text', { style: { fontSize: '45px', fontColor: 'grey' } }, 'play_arrow')])
+              i('.large .material-icons', { style: { fontSize: '45px', fontColor: 'grey' } }, 'play_arrow')])
             // ])
           ]),
           div([
-            (!validated || query == '') ? div([checkdom]) : div()
+            (!validated || query == '') ? div(".validation", [checkdom]) : div()
           ])
         ])
     })

@@ -7,8 +7,13 @@ import isolate from "@cycle/isolate"
 import * as R from "ramda"
 import debounce from "xstream/extra/debounce"
 import dropRepeats from "xstream/extra/dropRepeats"
+import pairwise from "xstream/extra/pairwise"
 
 import { SettingsEditor } from "../components/SettingsEditor"
+
+/**
+ * @module pages/adminSettings
+ */
 
 export function IsolatedAdminSettings(sources) {
   return isolate(AdminSettings, "settings")(sources)
@@ -233,6 +238,13 @@ export function AdminSettings(sources) {
           type: "text",
           title: "URL for logo image",
           props: {},
+        },
+        {
+          field: "normalStatisticsResponseTime",
+          class: ".input-field",
+          type: "text",
+          title: "Max normal time for statistics query",
+          props: { type: "text" },
         }
       ],
     },
@@ -265,20 +277,42 @@ export function AdminSettings(sources) {
     .mapTo("/admin")
     .remember()
 
-  // Deployment needs to be tackled globally, does not work in _isolation_
-  const deploymentUpdated$ = settings$.compose(
-    dropRepeats((x, y) => x.deployment.name == y.deployment.name)
-  )
+  /**
+   * Update deployment settings but only if it was changed
+   * DropRepeats would 'let through' the initial value
+   * 
+   * Deployment needs to be tackled globally, does not work in _isolation_
+   * @const AdminSettings/deploymentUpdate$
+   * @type {Stream}
+   */
+  const deploymentUpdated$ = settings$
+    .compose(pairwise)
+    .filter(([a, b]) => !R.equals(a.deployment.name, b.deployment.name))
+    .map(([_, b]) => b)
+  
+  /**
+   * Settings update when deployment name is not set
+   * @const AdminSettings/deploymentMissing$
+   * @type {Stream}
+   */
+  const deploymentMissing$ = settings$
+    .filter((settings) => settings.deployment.name === undefined)
 
-  // Just like in index.js:
-  // - fetch the appropriate deployment from deployments.js
-  // - overwrite the relevant entries (endpoints) of the various settings with the correct one
-  //
+  /**
+   * When deployment is changed or missing, fetch the appropriate deployment from deployments.js
+   * overwrite the relevant entries (endpoints) of the various settings with the correct one
+   * 
+   * @const AdminSettings/deploymentReducer$
+   * @type {Reducer}
+   */
   // TODOs:
   // - align this with index.js
   // - restructure deployments.js to an array of deployments rather than a hashmap
   const deploymentReducer$ = xs
-    .combine(deploymentUpdated$, sources.deployments)
+    .combine(
+      xs.merge(deploymentUpdated$, deploymentMissing$),
+      sources.deployments
+    )
     .map(([settings, deployments]) => (prevState) => {
       const desiredDeploymentName = settings.deployment.name
       const desiredDeployment = R.head(

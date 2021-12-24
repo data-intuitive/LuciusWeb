@@ -110,6 +110,7 @@ export const scenario = config =>
               filter: {
                 input: config.signature,
                 output: { trtType: [ "trt_cp" ] },
+                filter_output: { trtType: [ "trt_cp" ] },
                 ghost: { expand: false }
               },
               headTable: { input: { query: config.signature } },

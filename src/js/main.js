@@ -23,6 +23,7 @@ import { preventDefaultDriver } from './drivers/preventDefaultDriver';
 import switchPath from 'switch-path'
 import { makeModalDriver } from './drivers/makeModalDriver'
 import { makeAutocompleteDriver } from './drivers/makeAutocompleteDriver';
+import { makeSidenavDriver } from './drivers/makeSidenavDriver';
 import './main.scss'
 
 import fromEvent from 'xstream/extra/fromEvent'
@@ -44,6 +45,7 @@ const drivers = {
     log: logDriver,
     modal: makeModalDriver(),
     ac: makeAutocompleteDriver(),
+    sidenav: makeSidenavDriver(),
     deployments: () => xs.fromPromise(fetch('/deployments.json').then(m => m.json()))
 };
 

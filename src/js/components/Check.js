@@ -114,14 +114,16 @@ function Check(sources) {
     const responseMetric$ = jobs$
         .map(jobs => differenceWithStatisticsResponses(jobs, LATENCY_FACTOR))
 
+    const maxNormalTime$ = state$.map((state) => state.settings.config.normalStatisticsResponseTime)
+
     // When the performance metric is higher than 1, we show the user a message.
-    const delay$ = responseMetric$
-        .filter(metric => metric > 1)
+    const delay$ = xs.combine(responseMetric$, maxNormalTime$)
+        .filter(([metric, max]) => metric > max)
         .mapTo({ text: 'The cluster seems to be slower than expected.\n Please have patience or try again in 5"...', duration: 15000 })
 
-    const loadedVdom$ = responseMetric$
-        .map(metric =>
-            (metric < 1) ?
+    const loadedVdom$ = xs.combine(responseMetric$, maxNormalTime$)
+        .map(([metric, max]) =>
+            (metric < max) ?
             i('.material-icons .green-text .medium', 'done') :
             i('.material-icons .red-text .medium', 'done')
         )

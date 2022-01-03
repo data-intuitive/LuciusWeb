@@ -175,23 +175,58 @@ function SampleSelection(sources) {
       td(selectedClass(entry.use), entry.significantGenes),
     ])
 
-    const sortableHeaderEntry = (id, text, currentSortId, SortDirection) =>
+    const sortableHeaderEntry = (id, text, state) =>
     {
-      if (id === currentSortId)
-        return th(".sortable", {props: {id: id}}, [text, i(".material-icons", SortDirection ? "arrow_upward" : "arrow_downward")])
-      else
-        return th(".sortable", {props: {id: id}}, text)
+      const currentSortId = state.core.sort
+      const sortDirection = state.core.direction
+      const hover = state.core.sortHover === id
+      
+      return th(
+          button(
+          ".btn-flat .sortable",
+          {
+            style: {
+              "margin-bottom": "0px",
+              "margin-top": "0px",
+              "vertical-align": "middle",
+            },
+            props: {
+              id: id,
+            }
+          },
+          [
+            span(
+              {
+                style: {
+                  "vertical-align": "top",
+                  fontSize: "1em",
+                  fontWeight: "bold",
+                  textTransform: "none",
+                },
+              },
+              text
+            ),
+            
+            i(".material-icons", 
+              id === currentSortId ?
+                sortDirection ? "arrow_upward" : "arrow_downward" :
+                hover ? "sort" : ""
+            )
+
+          ]
+        )
+      )
     }
 
     const header = tr([
-      sortableHeaderEntry("use", "Use?", state.core.sort, state.core.direction),
-      sortableHeaderEntry("id", safeModelToUi("id", state.settings.common.modelTranslations), state.core.sort, state.core.direction),
-      sortableHeaderEntry("name", "Name", state.core.sort, state.core.direction),
-      sortableHeaderEntry("sample", "Sample", state.core.sort, state.core.direction),
-      sortableHeaderEntry("cell", "Cell", state.core.sort, state.core.direction),
-      sortableHeaderEntry("dose", "Dose", state.core.sort, state.core.direction),
-      sortableHeaderEntry("time", "Time", state.core.sort, state.core.direction),
-      sortableHeaderEntry("signGenes", "Sign. Genes", state.core.sort, state.core.direction),
+      sortableHeaderEntry("use", "Use?", state),
+      sortableHeaderEntry("id", safeModelToUi("id", state.settings.common.modelTranslations), state),
+      sortableHeaderEntry("name", "Name", state),
+      sortableHeaderEntry("sample", "Sample", state),
+      sortableHeaderEntry("cell", "Cell", state),
+      sortableHeaderEntry("dose", "Dose", state),
+      sortableHeaderEntry("time", "Time", state),
+      sortableHeaderEntry("signGenes", "Sign. Genes", state),
     ])
 
     let body = []
@@ -280,6 +315,15 @@ function SampleSelection(sources) {
   .map((ev) => ev.ownerTarget.id)
   .startWith("")
 
+  const sortHover$ = sources.DOM.select(".sortable")
+  .events("mouseenter")
+  .map((ev) => ev.ownerTarget.id)
+  .startWith("")
+
+  const sortLeave$ = sources.DOM.select(".sortable")
+  .events("mouseleave")
+  .mapTo("")
+
   const selectReducer$ = useClick$
     .compose(sampleCombine(a$))
     .map(([id, a]) => (prevState) => {
@@ -342,6 +386,16 @@ function SampleSelection(sources) {
     }
   }))
 
+  const hoverReducer$ = xs.merge(sortHover$, sortLeave$)
+    .map((hover) => (prevState) => ({
+      ...prevState,
+      core: {
+        ...prevState.core,
+        sortHover: hover,
+      }
+    }))
+
+
   const sampleSelection$ = xs
     .merge(
       sources.DOM.select(".doSelect").events("click"),
@@ -368,6 +422,7 @@ function SampleSelection(sources) {
       dataReducer$,
       selectReducer$,
       sortReducer$,
+      hoverReducer$,
       dirtyReducer$,
     ),
     output: sampleSelection$,

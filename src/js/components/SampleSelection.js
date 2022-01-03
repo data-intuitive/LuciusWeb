@@ -14,7 +14,7 @@ import {
   p,
   i,
 } from "@cycle/dom"
-import { clone, equals, merge } from "ramda"
+import { clone, equals, merge, sortWith, prop, ascend, descend } from "ramda"
 import xs from "xstream"
 import dropRepeats from "xstream/extra/dropRepeats"
 import debounce from 'xstream/extra/debounce'
@@ -139,7 +139,18 @@ function SampleSelection(sources) {
       : {}
     const selectedClass = (selected) =>
       selected ? ".black-text" : ".grey-text .text-lighten-2"
-    let rows = data.map((entry) => [
+
+    const dataSortAscend = sortWith([
+      ascend(prop(state.core.sort)),
+    ]);
+    const dataSortDescend = sortWith([
+      descend(prop(state.core.sort)),
+    ]);
+    const sortedData = state.core.sort !== "" ?
+      state.core.direction ? dataSortDescend(data) : dataSortAscend(data) :
+      data
+
+    let rows = sortedData.map((entry) => [
       td(".selection", { props: { id: entry.id } }, [
         label("", { props: { id: entry.id } }, [
           input(
@@ -220,13 +231,13 @@ function SampleSelection(sources) {
 
     const header = tr([
       sortableHeaderEntry("use", "Use?", state),
-      sortableHeaderEntry("id", safeModelToUi("id", state.settings.common.modelTranslations), state),
-      sortableHeaderEntry("name", "Name", state),
-      sortableHeaderEntry("sample", "Sample", state),
+      sortableHeaderEntry("trt_id", safeModelToUi("id", state.settings.common.modelTranslations), state),
+      sortableHeaderEntry("trt_name", "Name", state),
+      sortableHeaderEntry("id", "Sample", state),
       sortableHeaderEntry("cell", "Cell", state),
       sortableHeaderEntry("dose", "Dose", state),
       sortableHeaderEntry("time", "Time", state),
-      sortableHeaderEntry("signGenes", "Sign. Genes", state),
+      sortableHeaderEntry("significantGenes", "Sign. Genes", state),
     ])
 
     let body = []

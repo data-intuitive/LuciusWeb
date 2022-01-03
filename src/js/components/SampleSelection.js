@@ -191,10 +191,16 @@ function SampleSelection(sources) {
       const currentSortId = state.core.sort
       const sortDirection = state.core.direction
       const hover = state.core.sortHover === id
+      const loaded = state.core.data.length > 0
+
+      const icon = 
+        id === currentSortId ?
+          sortDirection ? "arrow_upward" : "arrow_downward" :
+          hover ? "sort" : ""
       
       return th(
           button(
-          ".btn-flat .sortable",
+          ".btn-flat" + (loaded ? " .sortable" : ""),
           {
             style: {
               "margin-bottom": "0px",
@@ -217,13 +223,7 @@ function SampleSelection(sources) {
               },
               text
             ),
-            
-            i(".material-icons", 
-              id === currentSortId ?
-                sortDirection ? "arrow_upward" : "arrow_downward" :
-                hover ? "sort" : ""
-            )
-
+            i(".material-icons", icon)
           ]
         )
       )

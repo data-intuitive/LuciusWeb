@@ -193,7 +193,7 @@ function SampleSelection(sources) {
       const hover = state.core.sortHover === id
       const loaded = state.core.data.length > 0
 
-      const icon = 
+      const sortIcon = 
         id === currentSortId ?
           sortDirection ? "arrow_upward" : "arrow_downward" :
           hover ? "sort" : ""
@@ -203,6 +203,7 @@ function SampleSelection(sources) {
           ".btn-flat" + (loaded ? " .sortable" : ""),
           {
             style: {
+              whiteSpace: "nowrap",
               "margin-bottom": "0px",
               "margin-top": "0px",
               "vertical-align": "middle",
@@ -219,11 +220,12 @@ function SampleSelection(sources) {
                   fontSize: "1em",
                   fontWeight: "bold",
                   textTransform: "none",
+                  paddingLeft: "1.5em",
                 },
               },
               text
             ),
-            i(".material-icons", icon)
+            i(".material-icons", {style: {width: "1.5em"}}, sortIcon)
           ]
         )
       )

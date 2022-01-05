@@ -17,113 +17,60 @@ main {
 
 @import 'materialize-css/sass/components/color-variables';
 @import 'materialize-css/sass/components/color-classes';
-.genetic {
-    @extend .red;
-    @extend .lighten-5;
+
+@mixin pagestyle($color) {
+    background-color: color($color, "lighten-5");
 
     .WF-header {
-        @extend .red;
-        @extend .darken-4;
+        background-color: color($color, "darken-4");
     
         i {
-            @extend .red-text;
+            color: color($color, "base");
+            &.validated {
+                color:white;
+            }
         }
     }
+
+    .validation {
+        background-color: color($color, "lighten-5");
+    }
+}
+
+.genetic {
+    @include pagestyle($color: "red");
 }
 
 .compound {
-    @extend .orange;
-    @extend .lighten-5;
-
-    .WF-header {
-        @extend .orange;
-        @extend .darken-4;
-    
-        i {
-            @extend .orange-text;
-        }
-    }
+    @include pagestyle($color: "orange");
 }
 
 .ligand {
-    @extend .purple;
-    @extend .lighten-5;
-
-    .WF-header {
-        @extend .purple;
-        @extend .darken-4;
-
-        i {
-            @extend .purple-text;
-        }
-    }
-}
-
-.ligand {
-    @extend .purple;
-    @extend .lighten-5;
+    @include pagestyle($color: "purple");
 }
 
 .disease {
-    @extend .pink;
-    @extend .lighten-5;
-
-    .WF-header {
-        @extend .pink;
-        @extend .darken-4;
-    
-        i {
-            @extend .pink-text;
-        }
-    }
-
-    .validation {
-        @extend .pink;
-        @extend .lighten-5;
-    }
+    @include pagestyle($color: "pink");
 }
 
 .target {
-    @extend .red;
-    @extend .lighten-5;
+    @include pagestyle($color: "red")
 }
 
 .correlation {
-    @extend .blue;
-    @extend .lighten-5;
+    @include pagestyle($color: "blue");
 
     .WF-header {
-        @extend .blue;
-        @extend .darken-3;
-
-        i {
-            @extend .blue-text;
-        }
+        background-color: color("blue", "darken-3");
     }
 
     .validation {
-        @extend .blue;
-        @extend .lighten-3;
+        background-color: color("blue", "lighten-3");
     }
 }
 
 .generic {
-    @extend .green;
-    @extend .lighten-5;
-
-    .WF-header {
-        @extend .green;
-        @extend .darken-4;
-    
-        i {
-            @extend .green-text;
-        }
-    }
-}
-
-// general style for query 'go' button is that when it is validated that it becomes white
-.WF-header i.validated {
-    @extend .white-text;
+    @include pagestyle($color: "green");
 }
 
 img.trt_img {

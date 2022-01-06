@@ -1,7 +1,10 @@
+$color-text: black;
+
 /* Colors for workflows, to be overriden when printed */
 
 html {
     font-family: 'Roboto';
+    color: $color-text;
 }
 
 body {
@@ -18,6 +21,8 @@ main {
 @import 'materialize-css/sass/components/color-variables';
 @import 'materialize-css/sass/components/color-classes';
 
+
+/* Styling of pages */
 @mixin pagestyle($color) {
     background-color: color($color, "lighten-5");
 
@@ -31,9 +36,11 @@ main {
             }
         }
     }
-
     .validation {
         background-color: color($color, "lighten-5");
+    }
+    a.home-menu {
+        color: color($color, "base")
     }
 }
 
@@ -71,6 +78,43 @@ main {
 
 .generic {
     @include pagestyle($color: "green");
+}
+
+.settings {
+    a.home-menu {
+        color: color("grey", "base")
+    }
+}
+
+/* Styling of components */
+
+li.home-menu div {
+    float: left !important;
+    background-color: transparent;
+    a {
+        background-color: black;
+        padding-left:10px;
+        text-align: left;
+        margin-right: 10px;
+        margin-bottom: 5px;
+        display: inline-block;
+        width: 14rem;
+        height: 3rem;
+    }
+    
+}
+
+.sampleSelection {
+    th {
+        color: $color-text;
+    }
+    td.sampleSelected {
+        color: $color-text;
+    }
+
+    td.sampleDeselected{
+        color: color("grey", "lighten-2")
+    }
 }
 
 img.trt_img {

@@ -23,8 +23,24 @@ function Home(sources) {
         .map(state => merge(state.settings.form, state.settings.api))
     const CheckSink = Check(merge(sources, { props: checkProps$ }))
 
-    const makeLink = (path, label, options) => {
-        return li([a(options, { props: { href: path } }, label)])
+    const makeLink = (path, label, selector, text) => {
+        return li(".home-menu",
+                div(selector,
+                    [
+                        a(".home-menu", { props: { href: path } }, label),
+                        span(text)
+                    ]
+                )
+            )
+    }
+
+    const menuText = {
+        compound: "option 1",
+        genetic: "option 2",
+        ligand: "option 3",
+        disease: "option 4",
+        correlation: "option 5",
+        settings: "option 6"
     }
 
     const vdom$ = xs.combine(CheckSink.DOM)
@@ -44,15 +60,12 @@ function Home(sources) {
                 div('.row', []),
                 div('.col .l6 .m8 .s10 offset-l3 .offset-m2 .offset-s1 .center-align', appear, [
                     ul('.left', [
-                        makeLink('/compound', span({ style: { fontSize: "2rem" } }, ['Compound', ' ', compoundSVG]), '.orange-text .left'),
-                        // makeLink('/target', span(['Target', ' ', targetSVG]), '.red-text'),
-                        makeLink('/genetic', span({ style: { fontSize: "2rem" } }, ['Genetic', ' ', targetSVG]), '.red-text .left'),
-                        makeLink('/ligand', span({ style: { fontSize: "2rem" } }, ['Ligand', ' ', ligandSVG]), '.purple-text .left'),
-                        //makeLink('/generic', span({ style: { fontSize: "2rem" } }, ['Ligand', ' ', ligandSVG]), '.purple-text .left'),
-                        makeLink('/disease', span({ style: { fontSize: "2rem" } }, ['Disease', ' ', diseaseSVG]), '.pink-text .left'),
-                        makeLink('/correlation', span({ style: { fontSize: "2rem" } }, ['Correlation', ' ', correlationSVG]), '.blue-text .left'),
-                        makeLink('/settings', span({ style: { fontSize: "2rem" } }, ['Settings', ' ', settingsSVG]), '.grey-text .left'),
-                        // makeLink('/admin', span(['Admin']), '.blue-text'),
+                        makeLink('/compound', span({ style: { fontSize: "2rem" } }, ['Compound', ' ', compoundSVG]), '.compound', menuText.compound),
+                        makeLink('/genetic', span({ style: { fontSize: "2rem" } }, ['Genetic', ' ', targetSVG]), '.genetic', menuText.genetic),
+                        makeLink('/ligand', span({ style: { fontSize: "2rem" } }, ['Ligand', ' ', ligandSVG]), '.ligand', menuText.ligand),
+                        makeLink('/disease', span({ style: { fontSize: "2rem" } }, ['Disease', ' ', diseaseSVG]), '.disease', menuText.disease),
+                        makeLink('/correlation', span({ style: { fontSize: "2rem" } }, ['Correlation', ' ', correlationSVG]), '.correlation', menuText.correlation),
+                        makeLink('/settings', span({ style: { fontSize: "2rem" } }, ['Settings', ' ', settingsSVG]), '.settings', menuText.settings),
                     ]),
                 ]),
                 div('.row', []),

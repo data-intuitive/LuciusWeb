@@ -20,7 +20,7 @@ import debounce from 'xstream/extra/debounce'
 import { loggerFactory } from "../utils/logger"
 import { TreatmentAnnotation } from "./TreatmentAnnotation"
 import { safeModelToUi } from "../modelTranslations"
-import { dirtyUiReducer, dirtyWrapperStream } from "../utils/ui"
+import { dirtyUiReducer, dirtyWrapperStream, busyUiReducer } from "../utils/ui"
 
 const emptyData = {
   body: {
@@ -230,6 +230,7 @@ function SampleSelection(sources) {
 
   const loadedVdom$ = xs
     .combine(modifiedState$, treatmentAnnotations.DOM)
+    .filter(([state, _]) => state.core.busy == false)
     .map(([state, annotation]) => makeTable(state, annotation, false))
 
   // Wrap component vdom with an extra div that handles being dirty
@@ -332,6 +333,9 @@ function SampleSelection(sources) {
     .compose(sampleCombine(state$))
     .map(([ev, state]) => state.core.output)
 
+  // Logic and reducer stream that monitors if this component is busy
+  const busyReducer$ = busyUiReducer(newInput$, data$)
+
   // Logic and reducer stream that monitors if this component became dirty
   const dirtyReducer$ = dirtyUiReducer(sampleSelection$, state$.map(state => state.core.output))
 
@@ -345,6 +349,7 @@ function SampleSelection(sources) {
       requestReducer$,
       dataReducer$,
       selectReducer$,
+      busyReducer$,
       dirtyReducer$,
     ),
     output: sampleSelection$,

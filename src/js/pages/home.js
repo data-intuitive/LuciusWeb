@@ -23,24 +23,15 @@ function Home(sources) {
         .map(state => merge(state.settings.form, state.settings.api))
     const CheckSink = Check(merge(sources, { props: checkProps$ }))
 
-    const makeLink = (path, label, selector, text) => {
+    const makeLink = (path, label, selector) => {
         return li(".home-menu",
                 div(selector,
                     [
                         a(".home-menu", { props: { href: path } }, label),
-                        span(text)
+                        span(".extraText")
                     ]
                 )
             )
-    }
-
-    const menuText = {
-        compound: "option 1",
-        genetic: "option 2",
-        ligand: "option 3",
-        disease: "option 4",
-        correlation: "option 5",
-        settings: "option 6"
     }
 
     const vdom$ = xs.combine(CheckSink.DOM)
@@ -60,12 +51,12 @@ function Home(sources) {
                 div('.row', []),
                 div('.col .l6 .m8 .s10 offset-l3 .offset-m2 .offset-s1 .center-align', appear, [
                     ul('.left', [
-                        makeLink('/compound', span({ style: { fontSize: "2rem" } }, ['Compound', ' ', compoundSVG]), '.compound', menuText.compound),
-                        makeLink('/genetic', span({ style: { fontSize: "2rem" } }, ['Genetic', ' ', targetSVG]), '.genetic', menuText.genetic),
-                        makeLink('/ligand', span({ style: { fontSize: "2rem" } }, ['Ligand', ' ', ligandSVG]), '.ligand', menuText.ligand),
-                        makeLink('/disease', span({ style: { fontSize: "2rem" } }, ['Disease', ' ', diseaseSVG]), '.disease', menuText.disease),
-                        makeLink('/correlation', span({ style: { fontSize: "2rem" } }, ['Correlation', ' ', correlationSVG]), '.correlation', menuText.correlation),
-                        makeLink('/settings', span({ style: { fontSize: "2rem" } }, ['Settings', ' ', settingsSVG]), '.settings', menuText.settings),
+                        makeLink('/compound', span({ style: { fontSize: "2rem" } }, ['Compound', ' ', compoundSVG]), '.compound'),
+                        makeLink('/genetic', span({ style: { fontSize: "2rem" } }, ['Genetic', ' ', targetSVG]), '.genetic'),
+                        makeLink('/ligand', span({ style: { fontSize: "2rem" } }, ['Ligand', ' ', ligandSVG]), '.ligand'),
+                        makeLink('/disease', span({ style: { fontSize: "2rem" } }, ['Disease', ' ', diseaseSVG]), '.disease'),
+                        makeLink('/correlation', span({ style: { fontSize: "2rem" } }, ['Correlation', ' ', correlationSVG]), '.correlation'),
+                        makeLink('/settings', span({ style: { fontSize: "2rem" } }, ['Settings', ' ', settingsSVG]), '.settings'),
                     ]),
                 ]),
                 div('.row', []),

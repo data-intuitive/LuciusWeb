@@ -145,33 +145,33 @@ export default function Index(sources) {
             makeLink(
               "/compound",
               span(["Compound", " ", compoundSVG]),
-              ".orange-text"
+              ".compound"
             ),
             // makeLink('/target', span(['Target', ' ', targetSVG]), '.red-text'),
             makeLink(
               "/genetic",
               span(["Genetic", " ", targetSVG]),
-              ".red-text"
+              ".genetic"
             ),
             makeLink(
               "/ligand",
               span(["Ligand", " ", ligandSVG]),
-              ".purple-text"
+              ".ligand"
             ),
             makeLink(
               "/disease",
               span(["Disease", " ", diseaseSVG]),
-              ".pink-text"
+              ".disease"
             ),
             makeLink(
               "/correlation",
               span(["Correlation", " ", correlationSVG]),
-              ".blue-text"
+              ".correlation"
             ),
             makeLink(
               "/settings",
               span(["Settings", " ", settingsSVG]),
-              ".grey-text"
+              ".settings"
             ),
             // makeLink('/admin', span(['Admin']), '.blue-text'),
             li(span(".grey-text .text-darken-3", "", ["v", VERSION])),
@@ -183,21 +183,21 @@ export default function Index(sources) {
         makeLink(
           "/compound",
           span(["Compound", " ", compoundSVG]),
-          ".orange-text"
+          ".compound"
         ),
-        // makeLink('/target', span(['Target', ' ', targetSVG]), '.red-text'),
-        makeLink("/genetic", span(["Genetic", " ", targetSVG]), ".red-text"),
-        makeLink("/ligand", span(["Ligand", " ", ligandSVG]), ".purple-text"),
-        makeLink("/disease", span(["Disease", " ", diseaseSVG]), ".pink-text"),
+        // makeLink('/target', span(['Target', ' ', targetSVG]), '.target'),
+        makeLink("/genetic", span(["Genetic", " ", targetSVG]), ".genetic"),
+        makeLink("/ligand", span(["Ligand", " ", ligandSVG]), ".ligand"),
+        makeLink("/disease", span(["Disease", " ", diseaseSVG]), ".disease"),
         makeLink(
           "/correlation",
           span(["Correlation", " ", correlationSVG]),
-          ".blue-text"
+          ".correlation"
         ),
         makeLink(
           "/settings",
           span(["Settings", " ", settingsSVG]),
-          ".grey-text"
+          ".settings"
         ),
         // makeLink('/admin', span(['Admin']), '.blue-text'),
         li(

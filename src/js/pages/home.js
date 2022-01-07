@@ -4,7 +4,6 @@ import { merge, prop, equals } from 'ramda';
 
 import { Check } from '../components/Check'
 import dropRepeats from 'xstream/extra/dropRepeats'
-import { logoSVG } from '../index'
 import { compoundSVG, targetSVG, ligandSVG, diseaseSVG, correlationSVG, settingsSVG } from '../svg'
 
 const appear = {

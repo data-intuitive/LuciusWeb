@@ -86,15 +86,6 @@ export default function Index(sources) {
     "*": Home,
   })(sources)
 
-  const makeLink = (path, label, options) => {
-    const currentPage = window.location.href
-    const highlight = currentPage.endsWith(path)
-
-    return li(highlight ? ".active" : "", [
-      a(options, { props: { href: path } }, label),
-    ])
-  }
-
   // TODO: Add a visual reference for ghost mode
   // const ghost$ = state$
   //     .filter(state => state.common.ghost)
@@ -103,6 +94,14 @@ export default function Index(sources) {
   //     .startWith(span())
 
   const nav$ = state$.map((state) => {
+    const makeLink = (path, label, options) => {
+      const highlight = state.routerInformation.pathname === path
+
+      return li(highlight ? ".active" : "", [
+        a(options, { props: { href: path } }, label),
+      ])
+    }
+
     const leftLogo = state.settings.config.logoUrl
       ? a(
           ".left .grey-text .hide-on-med-and-down",
@@ -263,10 +262,20 @@ export default function Index(sources) {
 
   const view$ = page$.map(prop("DOM")).flatten().remember()
 
+  const pageName$ = state$.map((state) => {
+      const pageName = state.routerInformation.pathname.substr(1)
+      if (pageName == "")
+        return ".homePage"
+      else
+        return "." + pageName + "Page"
+    })
+    .compose(dropRepeats())
+
   const vdom$ = xs
-    .combine(nav$, view$, footer$)
-    .map(([navDom, viewDom, footerDom]) =>
+    .combine(pageName$, nav$, view$, footer$)
+    .map(([pageName, navDom, viewDom, footerDom]) =>
       div(
+        pageName,
         {
           style: {
             display: "flex",
@@ -385,6 +394,13 @@ export default function Index(sources) {
     }
   )
 
+  const routerReducer$ = router.history$.map((router) => (prevState) => {
+    return {
+      ...prevState,
+      routerInformation: router,
+    }
+  })
+
   // Capture link targets and send to router driver
   const router$ = sources.DOM.select("a")
     .events("click")
@@ -403,12 +419,14 @@ export default function Index(sources) {
       // logger(page$, 'page$', '>> ', ' > ', ''),
       logger(state$, "state$"),
       logger(history$, "history$"),
+      logger(router.history$, "router_history$"),
       // logger(prevent$, 'prevent$'),
       page$.map(prop("log")).filter(Boolean).flatten()
     ),
     onion: xs.merge(
       defaultReducer$.debug("defaultReducer"),
       deploymentsReducer$.debug("deplRed"),
+      routerReducer$,
       page$.map(prop("onion")).filter(Boolean).flatten()
     ),
     DOM: vdom$,

@@ -13,7 +13,8 @@ body {
     flex-direction: column;
     height: 100%;
 }
-body {
+
+div.homePage {
     background-size: 25%;
     background-position-y: 64px;
     // TODO convert svg to base64: https://stackoverflow.com/a/21626701

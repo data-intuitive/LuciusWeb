@@ -82,6 +82,15 @@ main div.correlation {
 
 
 /* Styling of components */
+nav .extraTitle {
+    display: none;
+    // &:after {
+    //     color: grey;
+    //     font-weight: bold;
+    //     content: "COMPASS";
+    // }
+}
+
 li.home-menu div {
     float: left !important;
     background-color: transparent;

@@ -137,6 +137,11 @@ export default function Index(sources) {
           ),
           leftLogo,
           a(
+            ".extraTitle",
+            { props: { href: "/" }, style: { margin: "5px" } },
+            ""
+          ),
+          a(
             ".sidenav-trigger",
             { props: { href: "#" }, attrs: { "data-target": "mobile-demo" } },
             i(".material-icons", "menu")

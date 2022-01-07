@@ -36,8 +36,8 @@ function Home(sources) {
 
     const vdom$ = xs.combine(CheckSink.DOM)
         .map(([check]) => div([
-            div({ style: { 'z-index': -1, height: '100%', overflow: 'hidden', position: 'absolute', opacity: 0.08, 'text-align': 'center', width: '100%' } },
-                Array(60).fill().map(_ => div({ style: { width: '25%', display: 'inline-block' } }, [logoSVG]))),
+            // div({ style: { 'z-index': -1, height: '100%', overflow: 'hidden', position: 'absolute', opacity: 0.08, 'text-align': 'center', width: '100%' } },
+            //     Array(60).fill().map(_ => div({ style: { width: '25%', display: 'inline-block' } }, [logoSVG]))),
             div('.row .transparent', [
                 h2('.col .l6 .m8 .s10 offset-l3 .offset-m2 .offset-s1', { style: { 'vertical-align': 'top' } }, [
                     'Welcome to ComPass',

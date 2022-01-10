@@ -28,6 +28,21 @@ main {
     flex: 1 0 auto;
 }
 
+// helper to signal which svgs need 'fill' set
+$svg-fill: (
+    ligand: 'yes',
+    correlation: 'yes',
+);
+
+@mixin WF-svg($page, $color) {
+    svg {
+        stroke: $color;
+        @if map-has-key($svg-fill, $page) {
+            fill: $color;
+        }
+    }
+}
+
 /* Styling of pages/workflows */
 @mixin page-WF-style($page) {
     $color-name: map-get($colors-WF, $page);
@@ -38,9 +53,11 @@ main {
     }
     nav a.#{$page} {
         color: $base-color;
+        @include WF-svg($page, $base-color);
     }
     ul.sidenav a.#{$page} {
         color: $base-color;
+        @include WF-svg($page, $base-color);
     }
     main div.#{$page} {
         background-color: color($color-name, "lighten-5");
@@ -60,6 +77,7 @@ main {
         }
         a.home-menu {
             color: $base-color;
+            @include WF-svg($page, $base-color);
         }
     }
 }

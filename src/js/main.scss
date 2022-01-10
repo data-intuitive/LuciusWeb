@@ -1,5 +1,4 @@
-$color-text: black;
-
+@import 'variables';
 @import 'compass_svg';
 
 /* Colors for workflows, to be overriden when printed */
@@ -31,54 +30,49 @@ main {
 
 
 /* Styling of pages/workflows */
-@mixin page-WF-style($page, $color) {
+@mixin page-WF-style($page) {
+    $color-name: map-get($colors-WF, $page);
+    $has-color-specific: map-has-key($colors-WF, #{$page}+"-specific");
+    $base-color: color($color-name, "base");
+    @if $has-color-specific {
+        $base-color: map-get($colors-WF, #{$page}+"-specific");
+    }
     nav a.#{$page} {
-        color: color($color, "base");
+        color: $base-color;
     }
     ul.sidenav a.#{$page} {
-        color: color($color, "base");
+        color: $base-color;
     }
     main div.#{$page} {
-        background-color: color($color, "lighten-5");
+        background-color: color($color-name, "lighten-5");
 
         .WF-header {
-            background-color: color($color, "darken-4");
+            background-color: color($color-name, "darken-4");
         
             i {
-                color: color($color, "base");
+                color: $base-color;
                 &.validated {
                     color:white;
                 }
             }
         }
         .validation {
-            background-color: color($color, "lighten-5");
+            background-color: color($color-name, "lighten-5");
         }
         a.home-menu {
-            color: color($color, "base")
+            color: $base-color;
         }
     }
 }
 
-@include page-WF-style("compound", "orange" );
-@include page-WF-style("genetic", "red");
-@include page-WF-style("ligand", "purple");
-@include page-WF-style("disease", "pink");
-@include page-WF-style("target", "red");
-@include page-WF-style("correlation", "blue");
-@include page-WF-style("generic", "green");
-@include page-WF-style("settings", "grey");
-
-/* Override some colors for correlation */
-main div.correlation {
-    .WF-header {
-        background-color: color("blue", "darken-3");
-    }
-
-    .validation {
-        background-color: color("blue", "lighten-3");
-    }
-}
+@include page-WF-style("compound");
+@include page-WF-style("genetic");
+@include page-WF-style("ligand");
+@include page-WF-style("disease");
+@include page-WF-style("target");
+@include page-WF-style("correlation");
+@include page-WF-style("generic");
+@include page-WF-style("settings");
 
 /* Styling of components */
 nav .extraTitle {
@@ -207,3 +201,5 @@ div #corrplot {
         font-size: 9pt
     }
 }
+
+@import 'main_custom';

@@ -135,7 +135,10 @@ function view(state$, request$, response$, geneAnnotationQuery) {
              * @const view/validVdom$/showLimit
              * @type {Number}
              */
-            const showLimit = state.core.showLimit > 0 ? state.core.showLimit : undefined
+            const showLimit =
+              state.core.showLimit > 0 && state.core.showLimit < arr.length
+                ? state.core.showLimit
+                : undefined
 
             /**
              * Display div with a button when the signature is long, otherwise show empty div

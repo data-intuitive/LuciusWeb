@@ -27,7 +27,9 @@ function Home(sources) {
                 div(selector,
                     [
                         a(".home-menu", { props: { href: path } }, label),
-                        span(".extraText")
+                        span(".extraText",
+                            span(".tooltiptext")
+                        )
                     ]
                 )
             )

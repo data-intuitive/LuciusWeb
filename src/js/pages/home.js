@@ -23,7 +23,7 @@ function Home(sources) {
     const CheckSink = Check(merge(sources, { props: checkProps$ }))
 
     const makeLink = (path, label, selector) => {
-        return li(".home-menu",
+        return li(".home-menu .row",
                 div(selector,
                     [
                         a(".home-menu", { props: { href: path } }, label),

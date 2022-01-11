@@ -104,6 +104,13 @@ function SampleSelection(sources) {
     dropRepeats((x, y) => equals(x.core, y.core))
   )
 
+  // State without data erased, to be used for the loading vdom as we don't want to display old data
+  const loadingState$ = state$
+    .map((state) => ({
+      ...state,
+      core: { ...state.core, data: []}
+    }))
+
   const request$ = newInput$.map((state) => {
     return {
       url:
@@ -211,7 +218,7 @@ function SampleSelection(sources) {
   const initVdom$ = emptyState$.mapTo(div())
 
   const loadingVdom$ = request$
-    .compose(sampleCombine(state$))
+    .compose(sampleCombine(loadingState$))
     .map(([_, state]) =>
       // Use the same makeTable function, pass a initialization=true parameter and a body DOM with preloading
       makeTable(

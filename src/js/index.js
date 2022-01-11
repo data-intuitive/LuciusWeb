@@ -179,7 +179,7 @@ export default function Index(sources) {
               ".settings"
             ),
             // makeLink('/admin', span(['Admin']), '.blue-text'),
-            li(span(".grey-text .text-darken-3", "", ["v", VERSION])),
+            li(span(".version", "", ["v", VERSION])),
           ]),
           centerLogo,
         ]),

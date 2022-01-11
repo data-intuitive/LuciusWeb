@@ -40,13 +40,13 @@ function Home(sources) {
             // div({ style: { 'z-index': -1, height: '100%', overflow: 'hidden', position: 'absolute', opacity: 0.08, 'text-align': 'center', width: '100%' } },
             //     Array(60).fill().map(_ => div({ style: { width: '25%', display: 'inline-block' } }, [logoSVG]))),
             div('.row .transparent', [
-                h2('.col .l6 .m8 .s10 offset-l3 .offset-m2 .offset-s1', { style: { 'vertical-align': 'top' } }, [
-                    'Welcome to ComPass',
+                h2('.title .col .l6 .m8 .s10 offset-l3 .offset-m2 .offset-s1', { style: { 'vertical-align': 'top' } }, [
+                    span('.main', 'Welcome to ComPass'),
                     // div({ style: { display: 'inline-block', width: '200px', 'vertical-align': '-40%' } }, [logoSVG]),
-                    ' ',
-                    check
+                    span('.spacer',' '),
+                    span('.check', check),
                 ]),
-                p('.col .l6 .m8 .s10 offset-l3 .offset-m2 .offset-s1  .flow-text', [
+                p('.introduction .col .l6 .m8 .s10 offset-l3 .offset-m2 .offset-s1  .flow-text', [
                     'This application is the interface with L1000 data.'
                 ]),
                 div('.row', []),
@@ -61,7 +61,7 @@ function Home(sources) {
                     ]),
                 ]),
                 div('.row', []),
-                p('.col .l6 .m8 .s10 offset-l3 .offset-m2 .offset-s1  .flow-text', [
+                p('.afterword .col .l6 .m8 .s10 offset-l3 .offset-m2 .offset-s1  .flow-text', [
                     'You can click on one of the workflows above to start it.',
                     ' Alternatively, you can initiate ghost mode in the settings.'
                 ]),

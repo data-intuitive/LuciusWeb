@@ -39,6 +39,8 @@ $svg-fill: (
         stroke: $color;
         @if map-has-key($svg-fill, $page) {
             fill: $color;
+        } @else {
+            fill: $color-header-background;
         }
     }
 }

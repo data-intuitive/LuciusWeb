@@ -130,6 +130,11 @@ export default function Index(sources) {
       nav("#navigation", [
         div(".nav-wrapper .valign-wrapper", [
           a(
+            ".sidenav-trigger",
+            { props: { href: "#" }, attrs: { "data-target": "mobile-demo" } },
+            i(".material-icons", "menu")
+          ),
+          a(
             ".brand-logo .right .grey-text",
             { props: { href: "/" } },
             div({ style: { width: "140px" } }, logoSVG)
@@ -140,11 +145,6 @@ export default function Index(sources) {
             ".extraTitle",
             { props: { href: "/" }, style: { margin: "5px" } },
             ""
-          ),
-          a(
-            ".sidenav-trigger",
-            { props: { href: "#" }, attrs: { "data-target": "mobile-demo" } },
-            i(".material-icons", "menu")
           ),
           ul(".left .hide-on-med-and-down", [
             makeLink(

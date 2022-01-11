@@ -92,13 +92,31 @@ $svg-fill: (
 @include page-WF-style("settings");
 
 /* Styling of components */
-nav .extraTitle {
-    display: none;
-    // &:after {
-    //     color: grey;
-    //     font-weight: bold;
-    //     content: "COMPASS";
-    // }
+nav {
+    background-color: $color-header-background;
+
+    .extraTitle {
+        display: none;
+        // &:after {
+        //     color: grey;
+        //     font-weight: bold;
+        //     content: "COMPASS";
+        // }
+    }
+
+    ul li.active span {
+        border-bottom-width: medium;
+        border-bottom-style: solid;
+        padding-bottom: 0.2em;
+    }
+
+    a.brand-logo svg{
+        vertical-align: middle;
+    }
+
+    img.logo_img {
+        vertical-align: middle;
+    }
 }
 
 li.home-menu div {
@@ -156,18 +174,9 @@ img.trt_img {
     width: fill-available;
 }
 
-nav ul li.active span {
-    border-bottom-width: medium;
-    border-bottom-style: solid;
-    padding-bottom: 0.2em;
-}
-
-nav a.brand-logo svg{
-    vertical-align: middle;
-}
-
-nav img.logo_img {
-    vertical-align: middle;
+.page-footer {
+    background-color: $color-footer-background;
+    color: $color-footer-text;
 }
 
 /* home svg styling and hover */

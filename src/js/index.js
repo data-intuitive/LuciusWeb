@@ -127,7 +127,7 @@ export default function Index(sources) {
       : div()
 
     return header({ style: { display: "flex" } }, [
-      nav("#navigation .grey .darken-4", [
+      nav("#navigation", [
         div(".nav-wrapper .valign-wrapper", [
           a(
             ".brand-logo .right .grey-text",
@@ -224,7 +224,7 @@ export default function Index(sources) {
   // We combine with state in order to read the customizations
   // This works because the defaultReducer runs before anything else
   const footer$ = state$.map((state) =>
-    footer(".page-footer .grey .darken-4 .grey-text", [
+    footer(".page-footer", [
       div(".valign-wrapper .row", { style: { margin: "0px" } }, [
         div(".col .s8", { style: { margin: "0px" } }, [
           p({ style: { margin: "0px" } }, [

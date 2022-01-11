@@ -78,12 +78,26 @@ function SignatureCheck(sources) {
   // Helper function for rendering the table, based on the state
   const makeTable = (data) => {
     // let visible = visible1 //state.ux.checkSignatureVisible;
-    let rows = data.map(entry => [ 
-      (entry.found) ? td([i('.small .material-icons', 'done')] ) : td('.red .lighten-4 .red-text .text-darken-4', [i('.small .material-icons', 'mode_edit')] ),
-      (entry.found) ? td(entry.query) : td('.red .lighten-4 .red-text .text-darken-4', entry.query),
-      (entry.found) ? td(entry.symbol) : td('.red .lighten-4 .red-text .text-darken-4', entry.symbol),
-      (entry.found) ? td(entry.dataType) : td('.red .lighten-4 .red-text .text-darken-4', 'N/A'),
-    ]);
+
+    const entryToRow = (entry) => {
+      const e =
+        entry.hasOwnProperty("found") && entry.hasOwnProperty("dataType")
+          ? entry
+          : {
+              ...entry,
+              found: entry.inL1000,
+              dataType: entry.inL1000 ? "found" : "",
+            }
+
+      return [ 
+        (e.found) ? td([i('.small .material-icons', 'done')] ) : td('.red .lighten-4 .red-text .text-darken-4', [i('.small .material-icons', 'mode_edit')] ),
+        (e.found) ? td(e.query) : td('.red .lighten-4 .red-text .text-darken-4', e.query),
+        (e.found) ? td(e.symbol) : td('.red .lighten-4 .red-text .text-darken-4', e.symbol),
+        (e.found) ? td(e.dataType) : td('.red .lighten-4 .red-text .text-darken-4', 'N/A'),
+      ]
+    }
+
+    let rows = data.map(entry => entryToRow(entry));
     const header = tr([
       th('Found?'),
       th('Input'),

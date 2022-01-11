@@ -105,6 +105,7 @@ export default function GenericTreatmentWorkflow(sources) {
   .map(state => 
     prevState => {
       const dirtyCheck = state.form.check.dirty
+      const busySampleSelection = state.form.sampleSelection.busy
       const dirtySampleSelection = state.form.sampleSelection.dirty
       const busySignature = state.form.signature.busy
       const dirtyFilter = state.filter.dirty
@@ -112,11 +113,11 @@ export default function GenericTreatmentWorkflow(sources) {
         ui: {
           form: {
             sampleSelection: {dirty: dirtyCheck },
-            signature: {dirty: dirtyCheck || dirtySampleSelection },
+            signature: {dirty: dirtyCheck || busySampleSelection || dirtySampleSelection },
           },
-          headTable: {dirty: dirtyCheck || dirtySampleSelection || busySignature || dirtyFilter },
-          tailTable: {dirty: dirtyCheck || dirtySampleSelection || busySignature || dirtyFilter },
-          plots:     {dirty: dirtyCheck || dirtySampleSelection || busySignature || dirtyFilter },
+          headTable: {dirty: dirtyCheck || busySampleSelection || dirtySampleSelection || busySignature || dirtyFilter },
+          tailTable: {dirty: dirtyCheck || busySampleSelection || dirtySampleSelection || busySignature || dirtyFilter },
+          plots:     {dirty: dirtyCheck || busySampleSelection || dirtySampleSelection || busySignature || dirtyFilter },
         },
       })
     }

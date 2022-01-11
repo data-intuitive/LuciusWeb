@@ -149,37 +149,37 @@ export default function Index(sources) {
           ul(".left .hide-on-med-and-down", [
             makeLink(
               "/compound",
-              span(["Compound", " ", compoundSVG]),
+              div([span(["Compound", " "]), compoundSVG]),
               ".compound"
             ),
             // makeLink('/target', span(['Target', ' ', targetSVG]), '.red-text'),
             makeLink(
               "/genetic",
-              span(["Genetic", " ", targetSVG]),
+              div([span(["Genetic", " "]), targetSVG]),
               ".genetic"
             ),
             makeLink(
               "/ligand",
-              span(["Ligand", " ", ligandSVG]),
+              div([span(["Ligand", " "]), ligandSVG]),
               ".ligand"
             ),
             makeLink(
               "/disease",
-              span(["Disease", " ", diseaseSVG]),
+              div([span(["Disease", " "]), diseaseSVG]),
               ".disease"
             ),
             makeLink(
               "/correlation",
-              span(["Correlation", " ", correlationSVG]),
+              div([span(["Correlation", " "]), correlationSVG]),
               ".correlation"
             ),
             makeLink(
               "/settings",
-              span(["Settings", " ", settingsSVG]),
+              div([span(["Settings", " "]), settingsSVG]),
               ".settings"
             ),
             // makeLink('/admin', span(['Admin']), '.blue-text'),
-            li(span(".version", "", ["v", VERSION])),
+            li(div(span(".version", "", ["v", VERSION]))),
           ]),
           centerLogo,
         ]),
@@ -187,29 +187,40 @@ export default function Index(sources) {
       ul(".sidenav", { props: { id: "mobile-demo" } }, [
         makeLink(
           "/compound",
-          span(["Compound", " ", compoundSVG]),
+          div([span(["Compound", " "]), compoundSVG]),
           ".compound"
         ),
         // makeLink('/target', span(['Target', ' ', targetSVG]), '.target'),
-        makeLink("/genetic", span(["Genetic", " ", targetSVG]), ".genetic"),
-        makeLink("/ligand", span(["Ligand", " ", ligandSVG]), ".ligand"),
-        makeLink("/disease", span(["Disease", " ", diseaseSVG]), ".disease"),
+        makeLink(
+          "/genetic",
+          div([span(["Genetic", " "]), targetSVG]),
+          ".genetic"
+        ),
+        makeLink(
+          "/ligand",
+          div([span(["Ligand", " "]), ligandSVG]),
+          ".ligand"
+        ),
+        makeLink(
+          "/disease",
+          div([span(["Disease", " "]), diseaseSVG]),
+          ".disease"
+        ),
         makeLink(
           "/correlation",
-          span(["Correlation", " ", correlationSVG]),
+          div([span(["Correlation", " "]), correlationSVG]),
           ".correlation"
         ),
         makeLink(
           "/settings",
-          span(["Settings", " ", settingsSVG]),
+          div([span(["Settings", " "]), settingsSVG]),
           ".settings"
         ),
         // makeLink('/admin', span(['Admin']), '.blue-text'),
         li(
-          span(".grey-text .text-darken-3", { style: { padding: "0 32px" } }, [
-            "v",
-            VERSION,
-          ])
+          div(
+            span(".version", { style: { padding: "0 32px" } }, ["v", VERSION])
+          )
         ),
       ]),
     ])

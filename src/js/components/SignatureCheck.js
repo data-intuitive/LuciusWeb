@@ -130,7 +130,7 @@ function SignatureCheck(sources) {
   const collapseUpdate$ = domSource$.select('.collapseUpdate').events('click');
   const collapseUpdateReducer$ = collapseUpdate$.compose(sampleCombine(data$))
     .map(([collapse, data]) => prevState => {
-      return ({...prevState, query : data.map(x => (x.found) ? x.symbol : '').join(" ").replace(/\s\s+/g, ' ').trim()});
+      return ({...prevState, query : data.map(x => (x.found ?? x.inL1000) ? x.symbol : '').join(" ").replace(/\s\s+/g, ' ').trim()});
     });
 
   // The result of this component is an event when valid

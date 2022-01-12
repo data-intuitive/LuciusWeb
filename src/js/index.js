@@ -179,7 +179,6 @@ export default function Index(sources) {
               ".settings"
             ),
             // makeLink('/admin', span(['Admin']), '.blue-text'),
-            li(div(span(".version", "", ["v", VERSION]))),
           ]),
           centerLogo,
         ]),
@@ -217,11 +216,6 @@ export default function Index(sources) {
           ".settings"
         ),
         // makeLink('/admin', span(['Admin']), '.blue-text'),
-        li(
-          div(
-            span(".version", { style: { padding: "0 32px" } }, ["v", VERSION])
-          )
-        ),
       ]),
     ])
   })
@@ -253,6 +247,10 @@ export default function Index(sources) {
             "In case of issues, please include the contents of ",
             a({ props: { href: "/debug" } }, "this page"),
             " in your bug report",
+          ]),
+          p({ style: { margin: "0px" } }, [
+            span(".versionText", "v"),
+            span(".versionNumber", VERSION),
           ]),
         ]),
         div(

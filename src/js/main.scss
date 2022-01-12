@@ -22,6 +22,9 @@ div.homePage {
     background-position-y: 64px;
     // TODO convert svg to base64: https://stackoverflow.com/a/21626701
     background-image: $compass_background_svg;
+    main li.home-menu span {
+        font-size: 2rem;
+    }
   }
 
 main {

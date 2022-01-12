@@ -52,12 +52,12 @@ function Home(sources) {
                 div('.row', []),
                 div('.col .l6 .m8 .s10 offset-l3 .offset-m2 .offset-s1 .center-align', appear, [
                     ul('.left', [
-                        makeLink('/compound', span({ style: { fontSize: "2rem" } }, ['Compound', ' ', compoundSVG]), '.compound'),
-                        makeLink('/genetic', span({ style: { fontSize: "2rem" } }, ['Genetic', ' ', targetSVG]), '.genetic'),
-                        makeLink('/ligand', span({ style: { fontSize: "2rem" } }, ['Ligand', ' ', ligandSVG]), '.ligand'),
-                        makeLink('/disease', span({ style: { fontSize: "2rem" } }, ['Disease', ' ', diseaseSVG]), '.disease'),
-                        makeLink('/correlation', span({ style: { fontSize: "2rem" } }, ['Correlation', ' ', correlationSVG]), '.correlation'),
-                        makeLink('/settings', span({ style: { fontSize: "2rem" } }, ['Settings', ' ', settingsSVG]), '.settings'),
+                        makeLink('/compound', span(['Compound', ' ', compoundSVG]), '.compound'),
+                        makeLink('/genetic', span(['Genetic', ' ', targetSVG]), '.genetic'),
+                        makeLink('/ligand', span(['Ligand', ' ', ligandSVG]), '.ligand'),
+                        makeLink('/disease', span(['Disease', ' ', diseaseSVG]), '.disease'),
+                        makeLink('/correlation', span(['Correlation', ' ', correlationSVG]), '.correlation'),
+                        makeLink('/settings', span(['Settings', ' ', settingsSVG]), '.settings'),
                     ]),
                 ]),
                 div('.row', []),

@@ -102,11 +102,12 @@ nav {
 
     .extraTitle {
         display: none;
-        // &:after {
-        //     color: grey;
-        //     font-weight: bold;
-        //     content: "COMPASS";
-        // }
+    }
+
+    /* Left logo */
+    a.brand-logo.left-logo {
+        position: initial;
+        margin: 5px;
     }
 
     ul li.active span {
@@ -131,36 +132,6 @@ nav {
 li.home-menu div {
     float: left !important;
     background-color: transparent;
-    // a {
-    //     background-color: black;
-    //     padding-left:10px;
-    //     text-align: left;
-    //     margin-bottom: 5px;
-    //     display: inline-block;
-    //     width: 14rem;
-    //     height: 3rem;
-    // }
-    // span.extraText {
-    //     margin-left: 10px;
-    // }
-    // &.compound span.extraText:after {
-    //     content: 'Compound extra text';
-    // }
-    // &.genetic span.extraText:after {
-    //     content: 'Genetic extra text';
-    // }
-    // &.ligand span.extraText:after {
-    //     content: 'Ligand extra text';
-    // }
-    // &.disease span.extraText:after {
-    //     content: 'Disease extra text';
-    // }
-    // &.correlation span.extraText:after {
-    //     content: 'Correlation extra text';
-    // }
-    // &.settings span.extraText:after {
-    //     content: 'Settings extra text';
-    // }
 }
 
 .sampleSelection {

@@ -104,8 +104,8 @@ export default function Index(sources) {
 
     const leftLogo = state.settings.config.logoUrl
       ? a(
-          ".left .grey-text .hide-on-med-and-down",
-          { props: { href: "/" }, style: { margin: "5px" } },
+          ".left .brand-logo .left-logo .hide-on-med-and-down",
+          { props: { href: "/" } },
           img(".logo_img .left", {
             props: { alt: "logo", src: state.settings.config.logoUrl },
             style: { height: "40px" },
@@ -114,9 +114,9 @@ export default function Index(sources) {
       : span()
 
     const centerLogo = state.settings.config.logoUrl
-      ? div(".brand-logo .center", [
+      ? div(".brand-logo .center-logo .center", [
           a(
-            ".grey-text .hide-on-large-only",
+            ".hide-on-large-only",
             { props: { href: "/" } },
             img(".logo_img", {
               props: { alt: "logo", src: state.settings.config.logoUrl },

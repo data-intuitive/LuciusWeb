@@ -91,7 +91,10 @@ function Check(sources) {
      */
     const initVdom$ = xs.periodic(200)
         .map(i => i % 4)
-        .map(i => span(".grey-text .testing", ".".repeat(i)))
+        .map(i => [
+            span(".grey-text .testing", ".".repeat(i)), 
+            span(".grey-text .text-lighten-4 .testing2", ".".repeat(3-i))
+        ])
         .endWhen(validResponseJobs$)
 
     /**

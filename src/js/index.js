@@ -131,7 +131,7 @@ export default function Index(sources) {
         div(".nav-wrapper .valign-wrapper", [
           a(
             ".sidenav-trigger",
-            { props: { href: "#" }, attrs: { "data-target": "mobile-demo" } },
+            { props: { href: "#" }, attrs: { "data-target": "mobile-navbar" } },
             i(".material-icons", "menu")
           ),
           a(
@@ -183,7 +183,7 @@ export default function Index(sources) {
           centerLogo,
         ]),
       ]),
-      ul(".sidenav", { props: { id: "mobile-demo" } }, [
+      ul(".sidenav", { props: { id: "mobile-navbar" } }, [
         makeLink(
           "/compound",
           div([span(["Compound", " "]), compoundSVG]),

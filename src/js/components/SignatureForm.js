@@ -13,7 +13,7 @@ import { dirtyUiReducer } from '../utils/ui'
 // Granular access to global state and parts of settings
 const formLens = {
   get: (state) => ({
-    form: state.form,
+    core: state.form,
     settings: {
       form: state.settings.form,
       api: state.settings.api,
@@ -21,7 +21,7 @@ const formLens = {
     },
     ui: state.ui?.form ?? {},
   }),
-  set: (state, childState) => ({ ...state, form: childState.form }),
+  set: (state, childState) => ({ ...state, form: {...childState.core } }),
 }
 
 function model(newQuery$, state$, sources, signatureCheckSink, actions$) {
@@ -33,8 +33,8 @@ function model(newQuery$, state$, sources, signatureCheckSink, actions$) {
     .compose(sampleCombine(state$))
     .map(([_, state]) => prevState => {
       let newState = clone(prevState)
-      newState.form.query = state.settings.common.example.signature //'ENSG00000012048 -WRONG HSPA1A DNAJB1 DDIT4 -TSEN2'
-      newState.form.validated = false
+      newState.core.query = state.settings.common.example.signature //'ENSG00000012048 -WRONG HSPA1A DNAJB1 DDIT4 -TSEN2'
+      newState.core.validated = false
       return newState
     })
 
@@ -44,7 +44,7 @@ function model(newQuery$, state$, sources, signatureCheckSink, actions$) {
     if (typeof prevState === 'undefined') {
       // Settings are handled higher up, but in case we use this component standalone, ...
       return {
-        form: {
+        core: {
           query: '',
           validated: false
         },
@@ -53,7 +53,7 @@ function model(newQuery$, state$, sources, signatureCheckSink, actions$) {
     } else {
       return ({
         ...prevState,
-        form: {
+        core: {
           query: '',
           validated: false
         },
@@ -65,7 +65,7 @@ function model(newQuery$, state$, sources, signatureCheckSink, actions$) {
   const queryReducer$ = newQuery$.map(query => prevState => {
     // Signatureform -- queryReducer
     let newState = clone(prevState)
-    newState.form.query = query
+    newState.core.query = query
     return newState
   })
 
@@ -73,7 +73,7 @@ function model(newQuery$, state$, sources, signatureCheckSink, actions$) {
   const invalidateReducer$ = newQuery$.map(_ => prevState => {
     // Signatureform -- invalidateReducer
     let newState = clone(prevState)
-    newState.form.validated = false
+    newState.core.validated = false
     return newState
   })
 
@@ -82,7 +82,7 @@ function model(newQuery$, state$, sources, signatureCheckSink, actions$) {
     .map(_ => prevState => {
       // Signatureform -- validateReducer
       let newState = clone(prevState)
-      newState.form.validated = true
+      newState.core.validated = true
       return newState
     })
 
@@ -94,14 +94,14 @@ function model(newQuery$, state$, sources, signatureCheckSink, actions$) {
   const query$ = xs.merge(
     actions$.update$,
     // Ghost mode
-    sources.onion.state$.map(state => state.form.ghost).filter(ghost => ghost).compose(dropRepeats())
+    sources.onion.state$.map(state => state.core.ghost).filter(ghost => ghost).compose(dropRepeats())
     )
     .compose(sampleCombine(state$))
-    .map(([_, state]) => state.form.query)
+    .map(([_, state]) => state.core.query)
     .remember()
 
   const dirtyUiReducer$ = dirtyUiReducer(query$, newQuery$)
-  
+
   return [
     xs.merge(
         defaultReducer$,
@@ -119,12 +119,12 @@ function model(newQuery$, state$, sources, signatureCheckSink, actions$) {
 function view(state$, signatureCheckDom$) {
 
   // Valid query?
-  const validated$ = state$.map(state => state.form.validated)
+  const validated$ = state$.map(state => state.core.validated)
 
   var result$ = xs.combine(state$, signatureCheckDom$, validated$)
   .map(
     ([state, checkdom, validated]) => {
-      const query = state.form.query
+      const query = state.core.query
       return div(
         [
           div('.row .WF-header .white-text', { style: { padding: '20px 10px 10px 10px' } }, [
@@ -177,7 +177,7 @@ function SignatureForm(sources) {
   const newQuery$ = xs.merge(
     domSource$.select('.Query').events('input').map(ev => ev.target.value),
     // Ghost
-    state$.map(state => state.form.query).compose(dropRepeats())
+    state$.map(state => state.core.query).compose(dropRepeats())
   )
 
   const actions$ = intent(domSource$)

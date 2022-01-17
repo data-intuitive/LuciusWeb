@@ -24,18 +24,18 @@ const stateTemplate = {
 }
 
 const checkLens = { 
-  get: state => ({query: state.form.query, settings: state.settings}),
-  set: (state, childState) => ({...state, form : {...state.form, query: childState.query}})
+  get: state => ({query: state.core.query, settings: state.settings}),
+  set: (state, childState) => ({...state, core : {...state.core, query: childState.query}})
 };
 
 const checkLens1 = { 
-  get: state => ({query: state.form.query1, settings: state.settings}),
-  set: (state, childState) => ({...state, form : {...state.form, query1: childState.query}})
+  get: state => ({query: state.core.query1, settings: state.settings}),
+  set: (state, childState) => ({...state, core : {...state.core, query1: childState.query}})
 };
 
 const checkLens2 = { 
-  get: state => ({query: state.form.query2, settings: state.settings}),
-  set: (state, childState) => ({...state, form : {...state.form, query2: childState.query}})
+  get: state => ({query: state.core.query2, settings: state.settings}),
+  set: (state, childState) => ({...state, core : {...state.core, query2: childState.query}})
 };
 
 function SignatureCheck(sources) {

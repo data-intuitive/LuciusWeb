@@ -80,17 +80,9 @@ function DiseaseWorkflow(sources) {
    .map(state => 
      prevState => {
        const dirtyForm = state.form.dirty
-      //  const dirtyCheck = state.form.check.dirty
-      //  const busySampleSelection = state.form.sampleSelection.busy
-      //  const dirtySampleSelection = state.form.sampleSelection.dirty
-      //  const busySignature = state.form.signature.busy
        const dirtyFilter = state.filter.dirty
        return ({...prevState,
          ui: {
-          //  form: {
-          //    sampleSelection: {dirty: dirtyCheck },
-          //    signature: {dirty: dirtyCheck || busySampleSelection || dirtySampleSelection },
-          //  },
            headTable: {dirty: dirtyForm || dirtyFilter },
            tailTable: {dirty: dirtyForm || dirtyFilter },
            plots:     {dirty: dirtyForm || dirtyFilter },

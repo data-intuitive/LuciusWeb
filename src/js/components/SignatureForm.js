@@ -100,6 +100,7 @@ function model(newQuery$, state$, sources, signatureCheckSink, actions$) {
     .map(([_, state]) => state.core.query)
     .remember()
 
+  // Compare current query with committed query output to see if this component is currently in a dirty state
   const dirtyUiReducer$ = dirtyUiReducer(query$, newQuery$)
 
   return [

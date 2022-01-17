@@ -68,6 +68,36 @@ function DiseaseWorkflow(sources) {
     }
   })
 
+  /**
+   * UI dirty logic, checks SignatureForm and Filter components if they are dirty or busy
+   * If components are dirty/busy, enable UI dirty overlay in subsequent components.
+   * 
+   * Use dropRepeats else the stream gets in an infinite loop
+   * @const uiReducer$
+   * @type {Reducer}
+   */
+   const uiReducer$ = state$.compose(dropRepeats(equals))
+   .map(state => 
+     prevState => {
+      //  const dirtyCheck = state.form.check.dirty
+      //  const busySampleSelection = state.form.sampleSelection.busy
+      //  const dirtySampleSelection = state.form.sampleSelection.dirty
+      //  const busySignature = state.form.signature.busy
+       const dirtyFilter = state.filter.dirty
+       return ({...prevState,
+         ui: {
+          //  form: {
+          //    sampleSelection: {dirty: dirtyCheck },
+          //    signature: {dirty: dirtyCheck || busySampleSelection || dirtySampleSelection },
+          //  },
+           headTable: {dirty: /*dirtyCheck || busySampleSelection || dirtySampleSelection || busySignature || */dirtyFilter },
+           tailTable: {dirty: /*dirtyCheck || busySampleSelection || dirtySampleSelection || busySignature || */dirtyFilter },
+           plots:     {dirty: /*dirtyCheck || busySampleSelection || dirtySampleSelection || busySignature || */dirtyFilter },
+         },
+       })
+     }
+   )
+
   // Filter Form
   const filterForm = isolate(Filter, { onion: filterLens })({
     ...sources,
@@ -231,7 +261,8 @@ function DiseaseWorkflow(sources) {
       binnedPlots.onion,
       headTable.onion,
       tailTable.onion,
-      scenarioReducer$
+      scenarioReducer$,
+      uiReducer$,
     ),
     vega: xs.merge(binnedPlots.vega),
     HTTP: xs.merge(

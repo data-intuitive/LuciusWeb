@@ -69,7 +69,7 @@ export default function GenericTreatmentWorkflow(sources) {
         treatmentAnnotations: state.settings.treatmentAnnotations,
         treatmentLike: workflowTreatmentType,
       },
-      ui: (state.ui ?? {} ).form ?? {},
+      ui: state.ui?.form ?? {},
     }),
     set: (state, childState) => ({ ...state, form: childState.form }),
   }

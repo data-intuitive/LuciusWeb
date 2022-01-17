@@ -11,8 +11,16 @@ import { loggerFactory } from '../utils/logger'
 
 // Granular access to global state and parts of settings
 const formLens = {
-  get: state => ({ form: state.form, settings: { form: state.settings.form, api: state.settings.api, common: state.settings.common } }),
-  set: (state, childState) => ({ ...state, form: childState.form })
+  get: (state) => ({
+    form: state.form,
+    settings: {
+      form: state.settings.form,
+      api: state.settings.api,
+      common: state.settings.common,
+    },
+    ui: state.ui?.form ?? {},
+  }),
+  set: (state, childState) => ({ ...state, form: childState.form }),
 }
 
 function model(newQuery$, state$, sources, signatureCheckSink) {

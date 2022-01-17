@@ -79,6 +79,7 @@ function DiseaseWorkflow(sources) {
    const uiReducer$ = state$.compose(dropRepeats(equals))
    .map(state => 
      prevState => {
+       const dirtyForm = state.form.dirty
       //  const dirtyCheck = state.form.check.dirty
       //  const busySampleSelection = state.form.sampleSelection.busy
       //  const dirtySampleSelection = state.form.sampleSelection.dirty
@@ -90,9 +91,9 @@ function DiseaseWorkflow(sources) {
           //    sampleSelection: {dirty: dirtyCheck },
           //    signature: {dirty: dirtyCheck || busySampleSelection || dirtySampleSelection },
           //  },
-           headTable: {dirty: /*dirtyCheck || busySampleSelection || dirtySampleSelection || busySignature || */dirtyFilter },
-           tailTable: {dirty: /*dirtyCheck || busySampleSelection || dirtySampleSelection || busySignature || */dirtyFilter },
-           plots:     {dirty: /*dirtyCheck || busySampleSelection || dirtySampleSelection || busySignature || */dirtyFilter },
+           headTable: {dirty: dirtyForm || dirtyFilter },
+           tailTable: {dirty: dirtyForm || dirtyFilter },
+           plots:     {dirty: dirtyForm || dirtyFilter },
          },
        })
      }

@@ -8,6 +8,7 @@ import { ENTER_KEYCODE } from '../utils/keycodes.js'
 import { SignatureCheck, checkLens } from '../components/SignatureCheck'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import { loggerFactory } from '../utils/logger'
+import { dirtyUiReducer } from '../utils/ui'
 
 // Granular access to global state and parts of settings
 const formLens = {
@@ -23,7 +24,7 @@ const formLens = {
   set: (state, childState) => ({ ...state, form: childState.form }),
 }
 
-function model(newQuery$, state$, sources, signatureCheckSink) {
+function model(newQuery$, state$, sources, signatureCheckSink, actions$) {
   
   // Set a default signature for demo purposes
   const setDefault$ = sources.DOM.select('.Default').events('click')
@@ -88,14 +89,31 @@ function model(newQuery$, state$, sources, signatureCheckSink) {
   // When update is clicked, update the query. Onionify does the rest
   const childReducer$ = signatureCheckSink.onion
 
-  return xs.merge(
-    defaultReducer$,
-    setDefaultReducer$,
-    queryReducer$,
-    invalidateReducer$,
-    childReducer$,
-    validateReducer$,
-  )
+  // When GO clicked or enter -> send updated 'value' to sink
+  // Maybe catch when no valid query?
+  const query$ = xs.merge(
+    actions$.update$,
+    // Ghost mode
+    sources.onion.state$.map(state => state.form.ghost).filter(ghost => ghost).compose(dropRepeats())
+    )
+    .compose(sampleCombine(state$))
+    .map(([_, state]) => state.form.query)
+    .remember()
+
+  const dirtyUiReducer$ = dirtyUiReducer(query$, newQuery$)
+  
+  return [
+    xs.merge(
+        defaultReducer$,
+        setDefaultReducer$,
+        queryReducer$,
+        invalidateReducer$,
+        childReducer$,
+        validateReducer$,
+        dirtyUiReducer$,
+      ),
+    query$
+  ]
 }
 
 function view(state$, signatureCheckDom$) {
@@ -162,22 +180,11 @@ function SignatureForm(sources) {
     state$.map(state => state.form.query).compose(dropRepeats())
   )
 
-  const reducers$ = model(newQuery$, state$, sources, signatureCheckSink)
-
-  const vdom$ = view(state$, signatureCheckDom$)
-
   const actions$ = intent(domSource$)
 
-  // When GO clicked or enter -> send updated 'value' to sink
-  // Maybe catch when no valid query?
-  const query$ = xs.merge(
-    actions$.update$,
-    // Ghost mode
-    sources.onion.state$.map(state => state.form.ghost).filter(ghost => ghost).compose(dropRepeats())
-    )
-    .compose(sampleCombine(state$))
-    .map(([_, state]) => state.form.query)
-    .remember()
+  const [reducers$, query$] = model(newQuery$, state$, sources, signatureCheckSink, actions$)
+
+  const vdom$ = view(state$, signatureCheckDom$)
 
   return {
     log: xs.merge(

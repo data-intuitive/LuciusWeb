@@ -276,7 +276,7 @@ export default function GenericTreatmentWorkflow(sources) {
           div(".row", [displayPlots === "before tables" ? plots : div()]),
           div(".col .s12", [headTable]),
           div(".row", []),
-          div(".col .s12", [tailTable]),
+          div(".col .s12", {props: {id: "tailTable"}}, [tailTable]),
           div(".row", []),
           div(".row", [displayPlots === "after tables" ? plots : div()]),
         ]),
@@ -292,7 +292,7 @@ export default function GenericTreatmentWorkflow(sources) {
       headTable.log,
       tailTable.log
     ),
-    DOM: vdom$.startWith(div()),
+    DOM: vdom$,//.startWith(div()),
     onion: xs.merge(
       defaultReducer$,
       TreatmentFormSink.onion,

@@ -57,6 +57,10 @@ import {
 
 export default function Index(sources) {
   const { router } = sources
+  console.log("sources:")
+  console.log(sources)
+  console.log("router:")
+  console.log(router)
 
   const logger = loggerFactory(
     "index",
@@ -84,7 +88,7 @@ export default function Index(sources) {
     "/debug": Debug,
     "/admin": IsolatedAdminSettings,
     "*": Home,
-  })(sources)
+  })(sources).debug("page$")
 
   const makeLink = (path, label, options) => {
     const currentPage = window.location.href
@@ -398,6 +402,27 @@ export default function Index(sources) {
 
   const history$ = sources.onion.state$.fold((acc, x) => acc.concat([x]), [{}])
 
+  const historyDriver$ = xs.periodic(30000).map(i => ({
+      type: 'replace',
+      hash: "tailTable"+i,
+      //pathname: "/genetic",
+      // search: "",
+      // state: undefined,
+    })
+    // '/genetic#tailTable'
+    )
+
+  // PushHistoryInput(
+  //   type: 'push'
+  //   pathname?: Pathname;
+  //   search?: Search;
+  //   state?: any;
+  //   hash?: Hash;
+  //   key?: LocationKey;
+  // )
+
+  // const historyDriver$ = xs.periodic(1000).map(i => '/genetic')
+
   return {
     log: xs.merge(
       // logger(page$, 'page$', '>> ', ' > ', ''),
@@ -432,6 +457,7 @@ export default function Index(sources) {
       .filter(Boolean)
       .flatten()
       .debug("deployments"),
+    history: historyDriver$,
   }
 }
 

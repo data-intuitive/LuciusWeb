@@ -144,7 +144,7 @@ function SampleSelection(sources) {
         }
       : {}
     const selectedClass = (selected) =>
-      selected ? ".black-text" : ".grey-text .text-lighten-2"
+      selected ? ".sampleSelected" : ".sampleDeselected"
     let rows = data.map((entry) => [
       td(".selection", { props: { id: entry.id } }, [
         label("", { props: { id: entry.id } }, [
@@ -197,7 +197,7 @@ function SampleSelection(sources) {
     rows.map((row) => body.push(tr(row)))
     const tableContent = [thead([header]), tbody(body)]
 
-    return div([
+    return div(".sampleSelection",[
       div(".row", [
         div(".col .s10 .offset-s1 .l10 .offset-l1", [
           table(".striped .centered", tableContent),

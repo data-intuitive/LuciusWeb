@@ -1,7 +1,13 @@
-/* Colors for workflows, to be overriden when printed */
+@import 'materialize-css/sass/components/color-variables';
+@import 'materialize-css/sass/components/color-classes';
 
+@import 'variables';
+@import 'compass_svg';
+
+/* Colors for workflows, to be overriden when printed */
 html {
     font-family: 'Roboto';
+    color: $color-text;
 }
 
 body {
@@ -11,119 +17,149 @@ body {
     height: 100%;
 }
 
+div.homePage {
+    background-size: 25%;
+    background-position-y: 64px;
+    // TODO convert svg to base64: https://stackoverflow.com/a/21626701
+    background-image: $compass_background_svg;
+    main li.home-menu span {
+        font-size: 2rem;
+    }
+  }
+
 main {
     flex: 1 0 auto;
 }
 
-@import 'materialize-css/sass/components/color-variables';
-@import 'materialize-css/sass/components/color-classes';
-.genetic {
-    @extend .red;
-    @extend .lighten-5;
+// helper to signal which svgs need 'fill' set
+$svg-fill: (
+    ligand: 'yes',
+    correlation: 'yes',
+);
 
-    .WF-header {
-        @extend .red;
-        @extend .darken-4;
-    
-        i {
-            @extend .red-text;
+@mixin WF-svg($page, $color) {
+    svg {
+        stroke: $color;
+        @if map-has-key($svg-fill, $page) {
+            fill: $color;
+        } @else {
+            fill: $color-header-background;
         }
     }
 }
 
-.compound {
-    @extend .orange;
-    @extend .lighten-5;
+/* Styling of pages/workflows */
+@mixin page-WF-style($page) {
+    $color-name: map-get($colors-WF, $page);
+    $has-color-specific: map-has-key($colors-WF, #{$page}+"-specific");
+    $base-color: color($color-name, "base");
+    @if $has-color-specific {
+        $base-color: map-get($colors-WF, #{$page}+"-specific");
+    }
+    nav a.#{$page} {
+        color: $base-color;
+        @include WF-svg($page, $base-color);
+    }
+    ul.sidenav a.#{$page} {
+        color: $base-color;
+        @include WF-svg($page, $base-color);
+    }
+    main div.#{$page} {
+        background-color: color($color-name, "lighten-5");
 
-    .WF-header {
-        @extend .orange;
-        @extend .darken-4;
-    
-        i {
-            @extend .orange-text;
+        .WF-header {
+            background-color: color($color-name, "darken-4");
+        
+            i {
+                color: $base-color;
+                &.validated {
+                    color:white;
+                }
+            }
+        }
+        .validation {
+            background-color: color($color-name, "lighten-5");
+        }
+        a.home-menu {
+            color: $base-color;
+            @include WF-svg($page, $base-color);
         }
     }
 }
 
-.ligand {
-    @extend .purple;
-    @extend .lighten-5;
+@include page-WF-style("compound");
+@include page-WF-style("genetic");
+@include page-WF-style("ligand");
+@include page-WF-style("disease");
+@include page-WF-style("target");
+@include page-WF-style("correlation");
+@include page-WF-style("generic");
+@include page-WF-style("settings");
 
-    .WF-header {
-        @extend .purple;
-        @extend .darken-4;
+/* Styling of components */
+nav {
+    background-color: $color-header-background;
 
-        i {
-            @extend .purple-text;
-        }
+    .extraTitle {
+        display: none;
+    }
+
+    /* Left logo */
+    a.brand-logo.left-logo {
+        position: initial;
+        margin: 5px;
+    }
+
+    ul li.active span {
+        border-bottom-width: medium;
+        border-bottom-style: solid;
+        padding-bottom: 0.2em;
+    }
+
+    a.brand-logo svg{
+        vertical-align: middle;
+    }
+
+    img.logo_img {
+        vertical-align: middle;
+    }
+
+    span.version {
+        color: color('grey', 'darken-3');
     }
 }
 
-.ligand {
-    @extend .purple;
-    @extend .lighten-5;
+li.home-menu div {
+    float: left !important;
+    background-color: transparent;
 }
 
-.disease {
-    @extend .pink;
-    @extend .lighten-5;
-
-    .WF-header {
-        @extend .pink;
-        @extend .darken-4;
-    
-        i {
-            @extend .pink-text;
-        }
+.sampleSelection {
+    th {
+        color: $color-text;
+    }
+    td.sampleSelected {
+        color: $color-text;
     }
 
-    .validation {
-        @extend .pink;
-        @extend .lighten-5;
+    td.sampleDeselected{
+        color: color("grey", "lighten-2")
     }
 }
 
-.target {
-    @extend .red;
-    @extend .lighten-5;
-}
-
-.correlation {
-    @extend .blue;
-    @extend .lighten-5;
-
-    .WF-header {
-        @extend .blue;
-        @extend .darken-3;
-
-        i {
-            @extend .blue-text;
-        }
+li.sampleInfo {
+    .entryKey {
+        color: color('grey', 'darken-1');
     }
-
-    .validation {
-        @extend .blue;
-        @extend .lighten-3;
+    .sampleHeader {
+        color: color('grey', 'base');
     }
-}
-
-.generic {
-    @extend .green;
-    @extend .lighten-5;
-
-    .WF-header {
-        @extend .green;
-        @extend .darken-4;
-    
-        i {
-            @extend .green-text;
-        }
+    .treatmentHeader {
+        color: color('grey', 'base');
     }
-}
-
-// general style for query 'go' button is that when it is validated that it becomes white
-.WF-header i.validated {
-    @extend .white-text;
+    .filterHeader {
+        color: color('grey', 'base');
+    }
 }
 
 img.trt_img {
@@ -133,18 +169,9 @@ img.trt_img {
     width: fill-available;
 }
 
-nav ul li.active span {
-    border-bottom-width: medium;
-    border-bottom-style: solid;
-    padding-bottom: 0.2em;
-}
-
-nav a.brand-logo svg{
-    vertical-align: middle;
-}
-
-nav img.logo_img {
-    vertical-align: middle;
+.page-footer {
+    background-color: $color-footer-background;
+    color: $color-footer-text;
 }
 
 /* home svg styling and hover */
@@ -195,3 +222,5 @@ div #corrplot {
         font-size: 9pt
     }
 }
+
+@import 'main_custom';

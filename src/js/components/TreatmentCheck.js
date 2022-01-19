@@ -14,6 +14,7 @@ const checkLens = {
     core: typeof state.form !== "undefined" ? state.form.check : {},
     settings: state.settings,
     search: state.params?.treatment,
+    searchAutoRun: state.params?.autorun,
   }),
   set: (state, childState) => ({
     ...state,
@@ -57,21 +58,21 @@ function TreatmentCheck(sources) {
     .filter((search) => search !== undefined)
     .compose(dropRepeats(equals))
     .compose(delay(100)) // add delay so newInput$ can see a difference later
-    .debug("search$")
 
   const searchTyper$ = search$
-  .map(
-    (search) => {
+    .map((search) => {
       const l = search.length
-      const range = Array(l).fill().map((_, index) => index + 1)
-      // const texts = range.map(i => search.substr(0, i))
-      // console.log(texts)
+      const range = Array(l)
+        .fill()
+        .map((_, index) => index + 1)
 
-      return xs.fromArray(range.map(i => xs.of(search.substr(0, i)).compose(delay(500 * i)))).compose(flattenConcurrently)
-      //return xs.fromArray(texts)
-    }
-  )
-  .flatten()
+      return xs
+        .fromArray(
+          range.map((i) => xs.of(search.substr(0, i)).compose(delay(100 * i)))
+        )
+        .compose(flattenConcurrently)
+    })
+    .flatten()
 
   const input$ = xs.merge(
     sources.DOM.select(".treatmentQuery")
@@ -85,7 +86,7 @@ function TreatmentCheck(sources) {
       .compose(dropRepeats()),
     // searchTyper$,
     search$
-  ).debug("input$")
+  )
 
   // When the component should not be shown, including empty signature
   const isEmptyState = (state) => {
@@ -102,13 +103,13 @@ function TreatmentCheck(sources) {
 
   const emptyState$ = state$
     .filter((state) => isEmptyState(state))
-    .compose(dropRepeats(equals)).debug("emptyState$")
+    .compose(dropRepeats(equals))
 
   // When the state is cycled because of an internal update
   const modifiedState$ = state$
     .filter((state) => !isEmptyState(state))
     .compose(dropRepeats((x, y) => equals(x, y)))
-    .remember().debug("modifiedState$")
+    .remember()
 
   // An update to the input$, join it with state$
   const newInput$ = xs
@@ -118,12 +119,11 @@ function TreatmentCheck(sources) {
       core: { ...state.core, input: newinput },
     }))
     .compose(dropRepeats((x, y) => equals(x.core.input, y.core.input)))
-    .debug("newInput$")
 
   const triggerRequest$ = newInput$
     .filter((state) => state.core.input.length >= 1)
     .filter((state) => state.core.showSuggestions)
-    .compose(debounce(200)).debug("triggerRequest$")
+    .compose(debounce(200))
     
   const request$ = triggerRequest$.map((state) => {
     return {
@@ -138,11 +138,11 @@ function TreatmentCheck(sources) {
       },
       category: "treatments",
     }
-  }).debug("request$")
+  })
 
   const response$ = sources.HTTP.select("treatments")
     .map((response$) => response$.replaceError(() => xs.of([])))
-    .flatten().debug("response$")
+    .flatten()
 
   const data$ = response$.map((res) => res.body.result.data).remember()
 
@@ -318,9 +318,20 @@ function TreatmentCheck(sources) {
   // GO!!!
   const run$ = sources.DOM.select(".treatmentCheck").events("click")
 
+  // Auto start query
+  // TODO fix conditions when query is changed later & then reverted back to original query
+  const searchAutoRun$ = state$
+    .filter(
+      (state) => state.searchAutoRun == "" || state.searchAutoRun == "yes"
+    )
+    .filter((state) => state.search == state.core.input)
+    .filter((state) => state.core.validated == true)
+    .compose(dropRepeats(equals))
+
   const query$ = xs
     .merge(
       run$,
+      searchAutoRun$,
       // Ghost mode
       sources.onion.state$
         .map((state) => state.core.ghostoutput)

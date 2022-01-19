@@ -108,25 +108,40 @@ function view(state$, request$, response$, geneAnnotationQuery) {
         thisGene
     ])
 
+    /** 
+     * Split off signature display limits from full state
+     * Needed to prevent lots of vdom updates whenever state changes without vdom changes
+     * Otherwise would e.g. cause ~ 6-10 validVdom updates while loadingVdom should be displayed
+     * @const view/signatureLimits$
+     * @type {Stream}
+     */
+    const signatureLimit$ = state$.map((state) => ({
+        showMore: state.core.showMore,
+        showLimit: state.core.showLimit
+    }))
+    .compose(dropRepeats(equals))
+
     /**
      * Vdom to be displayed when the signature is received and valid
      * @const view/validVdom$
      * @type {Stream}
      */
-    const validVdom$ = xs.combine(validSignature$, geneAnnotationQuery.DOM, state$, amountOfInputs$)
-        .map(([s, annotation, state, amount]) => {
+    const validVdom$ = xs.combine(validSignature$, geneAnnotationQuery.DOM, signatureLimit$, amountOfInputs$)
+        .map(([s, annotation, signatureLimit, amount]) => {
             /**
              * Signature split into an array
              * @const view/validVdom$/arr
              * @type {Array}
              */
             const arr = s.split(" ")
+
             /**
              * Show full signature or not
              * @const view/validVdom$/showMore
              * @type {Boolean}
              */
-            const showMore = state.core.showMore
+            const showMore = signatureLimit.showMore
+
             /**
              * Signature size limit
              * If set to 0 in the settings it means there is no limit,
@@ -136,8 +151,9 @@ function view(state$, request$, response$, geneAnnotationQuery) {
              * @type {Number}
              */
             const showLimit =
-              state.core.showLimit > 0 && state.core.showLimit < arr.length
-                ? state.core.showLimit
+              signatureLimit.showLimit > 0 &&
+              signatureLimit.showLimit < arr.length
+                ? signatureLimit.showLimit
                 : undefined
 
             /**

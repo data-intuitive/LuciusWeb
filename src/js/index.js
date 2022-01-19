@@ -64,7 +64,7 @@ export default function Index(sources) {
     "settings.common.debug"
   )
 
-  const state$ = sources.onion.state$.debug("state")
+  const state$ = sources.onion.state$
 
   const page$ = router.routedComponent({
     "/": Home,

@@ -413,9 +413,24 @@ export default function Index(sources) {
   )
 
   const routerReducer$ = router.history$.map((router) => (prevState) => {
+
+    function paramsToObject(entries) {
+      const result = {}
+      for(const [key, value] of entries) { // each 'entry' is a [key, value] tupple
+        result[key] = value
+      }
+      return result
+    }
+
+    const params = new URLSearchParams(router.search)
+    const paramsObject = paramsToObject(params)
+
     return {
       ...prevState,
-      routerInformation: router,
+      routerInformation: {
+        ...router,
+        params: paramsObject,
+        }
     }
   })
 
@@ -432,15 +447,16 @@ export default function Index(sources) {
 
   const history$ = sources.onion.state$.fold((acc, x) => acc.concat([x]), [{}])
 
-  const historyDriver$ = xs.periodic(30000).map(i => ({
-      type: 'replace',
-      hash: "tailTable"+i,
-      //pathname: "/genetic",
-      // search: "",
-      // state: undefined,
-    })
-    // '/genetic#tailTable'
-    )
+  const historyDriver$ = xs.empty()
+  // const historyDriver$ = xs.periodic(30000).map(i => ({
+  //     type: 'replace',
+  //     hash: "tailTable"+i,
+  //     //pathname: "/genetic",
+  //     // search: "",
+  //     // state: undefined,
+  //   })
+  //   // '/genetic#tailTable'
+  //   )
 
   // PushHistoryInput(
   //   type: 'push'

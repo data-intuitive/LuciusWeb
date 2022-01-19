@@ -41,7 +41,7 @@ export default function GenericTreatmentWorkflow(sources) {
     "settings.common.debug"
   )
 
-  const state$ = sources.onion.state$
+  const state$ = sources.onion.state$.debug("state$")
 
   // Scenario for ghost mode
   const scenarios$ = sources.onion.state$
@@ -71,6 +71,7 @@ export default function GenericTreatmentWorkflow(sources) {
         treatmentLike: workflowTreatmentType,
       },
       ui: state.ui?.form ?? {},
+      params: state.routerInformation.params,
     }),
     set: (state, childState) => ({ ...state, form: childState.form }),
   }

@@ -4,6 +4,8 @@ import { prop, equals, mergeAll } from "ramda"
 import xs from "xstream"
 import dropRepeats from "xstream/extra/dropRepeats"
 import debounce from "xstream/extra/debounce"
+import delay from "xstream/extra/delay"
+import flattenConcurrently from "xstream/extra/flattenConcurrently"
 import { loggerFactory } from "../utils/logger"
 import { dirtyUiReducer } from "../utils/ui"
 
@@ -11,6 +13,7 @@ const checkLens = {
   get: (state) => ({
     core: typeof state.form !== "undefined" ? state.form.check : {},
     settings: state.settings,
+    search: state.params?.treatment,
   }),
   set: (state, childState) => ({
     ...state,
@@ -49,6 +52,27 @@ function TreatmentCheck(sources) {
 
   const acInput$ = sources.ac
 
+  const search$ = state$
+    .map((state) => state.search)
+    .filter((search) => search !== undefined)
+    .compose(dropRepeats(equals))
+    .compose(delay(100)) // add delay so newInput$ can see a difference later
+    .debug("search$")
+
+  const searchTyper$ = search$
+  .map(
+    (search) => {
+      const l = search.length
+      const range = Array(l).fill().map((_, index) => index + 1)
+      // const texts = range.map(i => search.substr(0, i))
+      // console.log(texts)
+
+      return xs.fromArray(range.map(i => xs.of(search.substr(0, i)).compose(delay(500 * i)))).compose(flattenConcurrently)
+      //return xs.fromArray(texts)
+    }
+  )
+  .flatten()
+
   const input$ = xs.merge(
     sources.DOM.select(".treatmentQuery")
       .events("input")
@@ -58,8 +82,10 @@ function TreatmentCheck(sources) {
     state$
       .filter((state) => typeof state.core.ghostinput !== "undefined")
       .map((state) => state.core.input)
-      .compose(dropRepeats())
-  )
+      .compose(dropRepeats()),
+    // searchTyper$,
+    search$
+  ).debug("input$")
 
   // When the component should not be shown, including empty signature
   const isEmptyState = (state) => {
@@ -76,13 +102,13 @@ function TreatmentCheck(sources) {
 
   const emptyState$ = state$
     .filter((state) => isEmptyState(state))
-    .compose(dropRepeats(equals))
+    .compose(dropRepeats(equals)).debug("emptyState$")
 
   // When the state is cycled because of an internal update
   const modifiedState$ = state$
     .filter((state) => !isEmptyState(state))
     .compose(dropRepeats((x, y) => equals(x, y)))
-    .remember()
+    .remember().debug("modifiedState$")
 
   // An update to the input$, join it with state$
   const newInput$ = xs
@@ -92,11 +118,12 @@ function TreatmentCheck(sources) {
       core: { ...state.core, input: newinput },
     }))
     .compose(dropRepeats((x, y) => equals(x.core.input, y.core.input)))
+    .debug("newInput$")
 
   const triggerRequest$ = newInput$
     .filter((state) => state.core.input.length >= 1)
     .filter((state) => state.core.showSuggestions)
-    .compose(debounce(200))
+    .compose(debounce(200)).debug("triggerRequest$")
     
   const request$ = triggerRequest$.map((state) => {
     return {
@@ -111,11 +138,11 @@ function TreatmentCheck(sources) {
       },
       category: "treatments",
     }
-  })
+  }).debug("request$")
 
   const response$ = sources.HTTP.select("treatments")
     .map((response$) => response$.replaceError(() => xs.of([])))
-    .flatten()
+    .flatten().debug("response$")
 
   const data$ = response$.map((res) => res.body.result.data).remember()
 

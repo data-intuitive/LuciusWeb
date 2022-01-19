@@ -75,12 +75,12 @@ export function SampleInfo(sources) {
   function entry(key, value) {
     return [
       span(
-        ".col .s4 .grey-text.text-darken-1",
+        ".col .s4 .entryKey",
         { style: { fontWeight: "lighter", whiteSpace: "nowrap"} },
         key
       ),
       span(
-        ".col .s8",
+        ".col .s8 .entryValue",
         { style: { overflow: "hidden", "text-overflow": "ellipsis" } },
         value?.length != 0 ? value : ""
       ),
@@ -312,7 +312,7 @@ export function SampleInfo(sources) {
 
     const samplePart =
       [
-        p(".col .s12 .grey-text", hStyle, "Sample Info:"),
+        p(".col .s12 .sampleHeader", hStyle, "Sample Info:"),
         p(pStyle, entry("Sample ID: ", sample.id)),
         p(pStyle, entry("Cell: ", sample.cell)),
         p(pStyle, entry("Dose: ", sample.dose !== "N/A" ? sample.dose + " " + (sample?.dose_unit ?? "?") : sample.dose)),
@@ -323,7 +323,7 @@ export function SampleInfo(sources) {
 
     const treatmentPart =
       [
-        p(".col .s12 .grey-text", hStyle, "Treatment Info:"),
+        p(".col .s12 .treatmentHeader", hStyle, "Treatment Info:"),
         p(pStylewBlur, entry("Name: ", sample.trt_name)),
         p(
           pStylewBlur,
@@ -378,7 +378,7 @@ export function SampleInfo(sources) {
         div(
           ".col .s12 .l12",
           { style: { margin: "15px 0px 0px 0px" } },
-          [p(".col .s12.grey-text", hStyle, "Filter Info:")].concat(
+          [p(".col .s12 .filterHeader", hStyle, "Filter Info:")].concat(
             _filters.map((x) => p(pStyle, entrySmall(x.key, x.value)))
           )
         ),
@@ -395,7 +395,7 @@ export function SampleInfo(sources) {
         div(
           ".row",
           { style: { margin: "15px 0px 0px 0px" } },
-          [p(".col .s12.grey-text", hStyle, "Filter Info:")].concat(
+          [p(".col .s12.filterHeader", hStyle, "Filter Info:")].concat(
             _filters.map((x) => p(pStyle, entrySmall(x.key, x.value)))
           )
         ),
@@ -412,7 +412,7 @@ export function SampleInfo(sources) {
         div(
           ".row",
           { style: { margin: "15px 0px 0px 0px" } },
-          [p(".col .s12.grey-text", hStyle, "Filter Info:")].concat(
+          [p(".col .s12 .filterHeader", hStyle, "Filter Info:")].concat(
             _filters.map((x) => p(pStyle, entrySmall(x.key, x.value)))
           )
         ),
@@ -429,7 +429,7 @@ export function SampleInfo(sources) {
         div(
           ".row",
           { style: { margin: "15px 0px 0px 0px" } },
-          [p(".col .s12.grey-text", hStyle, "Filter Info:")].concat(
+          [p(".col .s12 .filterHeader", hStyle, "Filter Info:")].concat(
             _filters.map((x) => p(pStyle, entrySmall(x.key, x.value)))
           )
         ),
@@ -445,7 +445,7 @@ export function SampleInfo(sources) {
           div(
             ".col .s12 .l12",
             { style: { margin: "15px 0px 0px 0px" } },
-            [p(".col .s12.grey-text", hStyle, "Filter Info:")].concat(
+            [p(".col .s12 .filterHeader", hStyle, "Filter Info:")].concat(
               _filters.map((x) => p(pStyle, entrySmall(x.key, x.value)))
             )
           ),
@@ -465,7 +465,7 @@ export function SampleInfo(sources) {
       const thisRowDetail = rowDetail(sample, updtProps, blur)
 
       return li(
-        ".collection-item .zoom",
+        ".collection-item .zoom .sampleInfo",
         { style: { "background-color": bgcolor } },
         [
           thisRow[sample.trt] ? thisRow[sample.trt] : thisRow["_default"],

@@ -17,6 +17,7 @@ import { scenario } from "../scenarios/treatmentScenario"
 import { runScenario } from "../utils/scenario"
 
 import dropRepeats from "xstream/extra/dropRepeats"
+import debounce from "xstream/extra/debounce"
 import { equals } from "ramda"
 
 
@@ -69,7 +70,7 @@ export default function GenericTreatmentWorkflow(sources) {
         treatmentAnnotations: state.settings.treatmentAnnotations,
         treatmentLike: workflowTreatmentType,
       },
-      ui: (state.ui ?? {} ).form ?? {},
+      ui: state.ui?.form ?? {},
     }),
     set: (state, childState) => ({ ...state, form: childState.form }),
   }
@@ -93,6 +94,16 @@ export default function GenericTreatmentWorkflow(sources) {
     }
   })
 
+  const dirtyBusyStates$ = state$.map((state) => ({
+    dirtyCheck: state.form.check.dirty,
+    busySampleSelection: state.form.sampleSelection.busy,
+    dirtySampleSelection: state.form.sampleSelection.dirty,
+    busySignature: state.form.signature.busy,
+    dirtyFilter: state.filter.dirty,
+  }))
+  .compose(dropRepeats(equals))
+  .compose(debounce(10))
+
   /**
    * UI dirty logic, checks TreatmentCheck, SampleSelection, SignatureGenerator and Filter components if they are dirty or busy
    * If components are dirty/busy, enable UI dirty overlay in subsequent components.
@@ -101,23 +112,18 @@ export default function GenericTreatmentWorkflow(sources) {
    * @const uiReducer$
    * @type {Reducer}
    */
-  const uiReducer$ = state$.compose(dropRepeats(equals))
+  const uiReducer$ = dirtyBusyStates$
   .map(state => 
     prevState => {
-      const dirtyCheck = state.form.check.dirty
-      const busySampleSelection = state.form.sampleSelection.busy
-      const dirtySampleSelection = state.form.sampleSelection.dirty
-      const busySignature = state.form.signature.busy
-      const dirtyFilter = state.filter.dirty
       return ({...prevState,
         ui: {
           form: {
-            sampleSelection: {dirty: dirtyCheck },
-            signature: {dirty: dirtyCheck || busySampleSelection || dirtySampleSelection },
+            sampleSelection: {dirty: state.dirtyCheck },
+            signature: {dirty: state.dirtyCheck || state.busySampleSelection || state.dirtySampleSelection },
           },
-          headTable: {dirty: dirtyCheck || busySampleSelection || dirtySampleSelection || busySignature || dirtyFilter },
-          tailTable: {dirty: dirtyCheck || busySampleSelection || dirtySampleSelection || busySignature || dirtyFilter },
-          plots:     {dirty: dirtyCheck || busySampleSelection || dirtySampleSelection || busySignature || dirtyFilter },
+          headTable: {dirty: state.dirtyCheck || state.busySampleSelection || state.dirtySampleSelection || state.busySignature || state.dirtyFilter },
+          tailTable: {dirty: state.dirtyCheck || state.busySampleSelection || state.dirtySampleSelection || state.busySignature || state.dirtyFilter },
+          plots:     {dirty: state.dirtyCheck || state.busySampleSelection || state.dirtySampleSelection || state.busySignature || state.dirtyFilter },
         },
       })
     }

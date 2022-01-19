@@ -294,6 +294,27 @@ function TreatmentCheck(sources) {
       }
     })
 
+  /**
+   * When there is new input and is validated by the API, validate the output
+   * auto complete only works when there are more than 1 option
+   * @const TreatmentCheck/fullInputValidationReducer$
+   * @type {Reducer}
+   */
+  const fullInputValidationReducer$ = data$.compose(sampleCombine(input$))
+    .filter(([data, input]) => data.length == 1 &&
+      data[0].trtId == input
+    )
+    .map(([data, input]) => (prevState) => ({
+      ...prevState,
+      core: {
+        ...prevState.core,
+        input: input,
+        showSuggestions: false,
+        validated: true,
+        output: input,
+      },
+    }))
+
   // GO!!!
   const run$ = sources.DOM.select(".treatmentCheck").events("click")
 
@@ -327,6 +348,7 @@ function TreatmentCheck(sources) {
       requestReducer$,
       setDefaultReducer$,
       autocompleteReducer$,
+      fullInputValidationReducer$,
       dirtyReducer$,
     ),
     output: query$,

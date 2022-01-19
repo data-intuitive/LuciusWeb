@@ -68,6 +68,29 @@ function DiseaseWorkflow(sources) {
     }
   })
 
+  /**
+   * UI dirty logic, checks SignatureForm and Filter components if they are dirty or busy
+   * If components are dirty/busy, enable UI dirty overlay in subsequent components.
+   * 
+   * Use dropRepeats else the stream gets in an infinite loop
+   * @const uiReducer$
+   * @type {Reducer}
+   */
+   const uiReducer$ = state$.compose(dropRepeats(equals))
+   .map(state => 
+     prevState => {
+       const dirtyForm = state.form.dirty
+       const dirtyFilter = state.filter.dirty
+       return ({...prevState,
+         ui: {
+           headTable: {dirty: dirtyForm || dirtyFilter },
+           tailTable: {dirty: dirtyForm || dirtyFilter },
+           plots:     {dirty: dirtyForm || dirtyFilter },
+         },
+       })
+     }
+   )
+
   // Filter Form
   const filterForm = isolate(Filter, { onion: filterLens })({
     ...sources,
@@ -231,7 +254,8 @@ function DiseaseWorkflow(sources) {
       binnedPlots.onion,
       headTable.onion,
       tailTable.onion,
-      scenarioReducer$
+      scenarioReducer$,
+      uiReducer$,
     ),
     vega: xs.merge(binnedPlots.vega),
     HTTP: xs.merge(

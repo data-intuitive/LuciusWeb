@@ -327,11 +327,13 @@ function TreatmentCheck(sources) {
     .filter((state) => state.search == state.core.input)
     .filter((state) => state.core.validated == true)
     .compose(dropRepeats(equals))
+  
+  const singleSearchAutoRun$ = searchAutoRun$.endWhen(searchAutoRun$.compose(delay(100)))
 
   const query$ = xs
     .merge(
       run$,
-      searchAutoRun$,
+      singleSearchAutoRun$,
       // Ghost mode
       sources.onion.state$
         .map((state) => state.core.ghostoutput)

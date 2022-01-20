@@ -319,21 +319,20 @@ function TreatmentCheck(sources) {
   const run$ = sources.DOM.select(".treatmentCheck").events("click")
 
   // Auto start query
-  // TODO fix conditions when query is changed later & then reverted back to original query
+  // Only run once, even if query is changed and then reverted to original value
   const searchAutoRun$ = state$
     .filter(
       (state) => state.searchAutoRun == "" || state.searchAutoRun == "yes"
     )
     .filter((state) => state.search == state.core.input)
     .filter((state) => state.core.validated == true)
+    .mapTo(true)
     .compose(dropRepeats(equals))
-  
-  const singleSearchAutoRun$ = searchAutoRun$.endWhen(searchAutoRun$.compose(delay(100)))
 
   const query$ = xs
     .merge(
       run$,
-      singleSearchAutoRun$,
+      searchAutoRun$,
       // Ghost mode
       sources.onion.state$
         .map((state) => state.core.ghostoutput)

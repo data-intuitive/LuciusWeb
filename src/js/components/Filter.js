@@ -382,7 +382,7 @@ export function model(
         trtType: matchedTypes,
       }
     })
-    .filter((output) => (output.dose != undefined || output.cell != undefined || trtType != undefined)) // Only set filter if filter values are set
+    .filter((output) => (output.dose != undefined || output.cell != undefined || output.trtType != undefined)) // Only set filter if filter values are set
     .compose(dropRepeats(equals)) // only do this once. Changes in the WF should not be overwritten
     .map((output) => (prevState) => {
       const filter_output = minimizeFilterOutput({

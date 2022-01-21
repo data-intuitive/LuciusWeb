@@ -19,6 +19,10 @@ const checkLens = {
   set: (state, childState) => ({
     ...state,
     form: { ...state.form, check: childState.core },
+    pageState: {
+      ...state.pageState,
+      treatment: childState.core.input,
+    }
   }),
 }
 

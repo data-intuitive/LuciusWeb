@@ -43,6 +43,15 @@ export const filterLens = {
       ...state.settings,
       filter: childState.settings.filter,
     },
+    routerInformation: {
+      ...state.routerInformation,
+      pageState: {
+        ...state.routerInformation.pageState,
+        dose: childState.core.filter_output?.dose,
+        cell: childState.core.filter_output?.cell,
+        trtType: childState.core.filter_output?.trtType,
+      }
+    }
   }),
 }
 

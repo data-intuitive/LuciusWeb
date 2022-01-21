@@ -73,7 +73,17 @@ export default function GenericTreatmentWorkflow(sources) {
       ui: state.ui?.form ?? {},
       params: state.routerInformation.params,
     }),
-    set: (state, childState) => ({ ...state, form: childState.form }),
+    set: (state, childState) => ({
+      ...state, 
+      form: childState.form,
+      routerInformation: {
+        ...state.routerInformation,
+        pageState: {
+          ...state.routerInformation.pageState,
+          ...childState.pageState,
+        }
+      }
+      }),
   }
 
   /**

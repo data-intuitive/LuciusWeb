@@ -22,7 +22,7 @@ import {
   span,
   img,
 } from "@cycle/dom"
-import { merge, prop, mergeDeepLeft, mergeDeepRight } from "ramda"
+import { merge, prop, mergeDeepLeft, mergeDeepRight, equals, pickBy, identity } from "ramda"
 import * as R from "ramda"
 
 // Workflows
@@ -430,8 +430,25 @@ export default function Index(sources) {
       routerInformation: {
         ...router,
         params: paramsObject,
+        pageState: {}
         }
     }
+  })
+
+  const pageStateReducer$ = state$.map((state) => state.routerInformation.pageState).compose(dropRepeats(equals))
+  .map((state) => (prevState) => {
+    // Don't output fields with undefined values
+    const filteredState = pickBy(identity, state)
+    const url = new URLSearchParams(filteredState)
+
+    return {
+      ...prevState,
+      routerInformation: {
+        ...prevState.routerInformation,
+        pageStateURL: prevState.routerInformation.pathname + "?" + url.toString(),
+      }
+    }
+
   })
 
   // Capture link targets and send to router driver
@@ -482,6 +499,7 @@ export default function Index(sources) {
       defaultReducer$.debug("defaultReducer"),
       deploymentsReducer$.debug("deplRed"),
       routerReducer$,
+      pageStateReducer$,
       page$.map(prop("onion")).filter(Boolean).flatten()
     ),
     DOM: vdom$,

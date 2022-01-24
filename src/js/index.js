@@ -445,7 +445,7 @@ export default function Index(sources) {
       ...prevState,
       routerInformation: {
         ...prevState.routerInformation,
-        pageStateURL: prevState.routerInformation.pathname + "?" + url.toString(),
+        pageStateURL: location.protocol + "//" + location.host + prevState.routerInformation.pathname + "?" + url.toString(),
       }
     }
 

@@ -284,8 +284,9 @@ export default function GenericTreatmentWorkflow(sources) {
       headTable.DOM,
       tailTable.DOM,
       displayPlots$,
+      state$.map((state) => state.routerInformation.pageStateURL)
     )
-    .map(([formDOM, filter, plots, headTable, tailTable, displayPlots]) =>
+    .map(([formDOM, filter, plots, headTable, tailTable, displayPlots, url]) =>
       div(workflowMainDivClass /* something like ".row .genetic" */ , { style: { margin: "0px 0px 0px 0px" } }, [
         formDOM,
         div(".col .s10 .offset-s1", pageStyle, [
@@ -297,6 +298,7 @@ export default function GenericTreatmentWorkflow(sources) {
           div(".row", []),
           div(".row", [displayPlots === "after tables" ? plots : div()]),
         ]),
+        div(".col .s10 .offset-s1 .blue.lighten-3", {style: {wordWrap: "break-word"}},url)
       ])
     )
 

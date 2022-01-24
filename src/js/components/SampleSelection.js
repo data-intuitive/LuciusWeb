@@ -44,7 +44,7 @@ const sampleSelectionLens = {
     form: { ...state.form, sampleSelection: childState.core},
     pageState: {
       ...state.pageState,
-      samples: childState.core.output,
+      samples: childState.core.output?.join(),
     }
   }),
 }

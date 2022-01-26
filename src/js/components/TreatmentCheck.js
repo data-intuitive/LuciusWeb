@@ -227,7 +227,7 @@ function TreatmentCheck(sources) {
 
   // Feed the autocomplete driver
   const ac$ = data$
-    .filter((data) => data.length > 1)
+    .filter((data) => data.length >= 1)
     .map((data) => ({
       el: ".treatmentQuery",
       data: data,

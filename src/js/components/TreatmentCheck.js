@@ -226,9 +226,9 @@ function TreatmentCheck(sources) {
   }))
 
   // Feed the autocomplete driver
-  const ac$ = data$
-    .filter((data) => data.length >= 1)
-    .map((data) => ({
+  const ac$ = data$.compose(sampleCombine(input$))
+    .filter(([data, input]) => ((data.length > 1) || ((data.length == 1) && (data[0].trtId != input))))
+    .map(([data, _]) => ({
       el: ".treatmentQuery",
       data: data,
       render: function (data) {

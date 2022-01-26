@@ -227,10 +227,9 @@ function TreatmentCheck(sources) {
 
   // Feed the autocomplete driver
   const ac$ = data$.compose(sampleCombine(input$))
-    .filter(([data, input]) => ((data.length > 1) || ((data.length == 1) && (data[0].trtId != input))))
-    .map(([data, _]) => ({
+    .map(([data, input]) => ({
       el: ".treatmentQuery",
-      data: data,
+      data: (data.length == 1 && data[0].trtId == input) ? [] : data,
       render: function (data) {
         return mergeAll(
           data.map((d) => ({ [d.trtId + " - " + d.trtName + " (" + d.count + ")"]: null }))

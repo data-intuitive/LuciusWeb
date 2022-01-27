@@ -299,9 +299,11 @@ export default function GenericTreatmentWorkflow(sources) {
           div(".row", []),
           div(".row", [displayPlots === "after tables" ? plots : div()]),
         ]),
-        div(".col .s10 .offset-s1 .blue.lighten-3", {style: {wordWrap: "break-word"}},url),
-        div([
-          button(".clipboard .col .s4 .offset-s4 .btn .grey", "Copy to clipboard"),
+        div(".col .s10 .offset-s1", [
+          div(".col .s12 .blue.lighten-3", {style: {wordWrap: "break-word"}}, url),
+          div([ 
+            button(".clipboard .col .s4 .offset-s4 .btn .grey", "Copy to clipboard"),
+          ])
         ])
       ])
     )

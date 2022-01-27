@@ -1,4 +1,4 @@
-import { div } from "@cycle/dom"
+import { div, button } from "@cycle/dom"
 import xs from "xstream"
 import isolate from "@cycle/isolate"
 import { TreatmentForm, treatmentLikeFilter } from "../components/TreatmentForm"
@@ -18,6 +18,7 @@ import { runScenario } from "../utils/scenario"
 
 import dropRepeats from "xstream/extra/dropRepeats"
 import debounce from "xstream/extra/debounce"
+import sampleCombine from "xstream/extra/sampleCombine"
 import { equals } from "ramda"
 
 
@@ -298,9 +299,18 @@ export default function GenericTreatmentWorkflow(sources) {
           div(".row", []),
           div(".row", [displayPlots === "after tables" ? plots : div()]),
         ]),
-        div(".col .s10 .offset-s1 .blue.lighten-3", {style: {wordWrap: "break-word"}},url)
+        div(".col .s10 .offset-s1 .blue.lighten-3", {style: {wordWrap: "break-word"}},url),
+        div([
+          button(".clipboard .col .s4 .offset-s4 .btn .grey", "Copy to clipboard"),
+        ])
       ])
     )
+
+  const clipboardTrigger$ = sources.DOM.select(".clipboard").events("click").remember()
+  const clipboard$ = clipboardTrigger$
+    .compose(sampleCombine(state$.map((state) => state.routerInformation.pageStateURL)))
+    .map(([_, url]) => url)
+    .remember()
 
   return {
     log: xs.merge(
@@ -333,5 +343,6 @@ export default function GenericTreatmentWorkflow(sources) {
     popup: scenarioPopup$,
     modal: xs.merge(TreatmentFormSink.modal),
     ac: TreatmentFormSink.ac,
+    clipboard: clipboard$,
   }
 }

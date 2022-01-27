@@ -524,6 +524,7 @@ export default function Index(sources) {
       .flatten()
       .debug("deployments"),
     history: historyDriver$,
+    clipboard: page$.map(prop("clipboard")).filter(Boolean).flatten(),
   }
 }
 

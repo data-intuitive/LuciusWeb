@@ -24,6 +24,7 @@ import switchPath from 'switch-path'
 import { makeModalDriver } from './drivers/makeModalDriver'
 import { makeAutocompleteDriver } from './drivers/makeAutocompleteDriver';
 import { makeSidenavDriver } from './drivers/makeSidenavDriver';
+import { clipboardDriver } from './drivers/clipboardDriver';
 import './main.scss'
 
 import fromEvent from 'xstream/extra/fromEvent'
@@ -46,6 +47,7 @@ const drivers = {
     modal: makeModalDriver(),
     ac: makeAutocompleteDriver(),
     sidenav: makeSidenavDriver(),
+    clipboard: clipboardDriver,
     deployments: () => xs.fromPromise(fetch('/deployments.json').then(m => m.json()))
 };
 

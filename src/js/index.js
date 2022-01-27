@@ -496,8 +496,8 @@ export default function Index(sources) {
       page$.map(prop("log")).filter(Boolean).flatten()
     ),
     onion: xs.merge(
-      defaultReducer$.debug("defaultReducer"),
-      deploymentsReducer$.debug("deplRed"),
+      defaultReducer$,
+      deploymentsReducer$,
       routerReducer$,
       pageStateReducer$,
       page$.map(prop("onion")).filter(Boolean).flatten()

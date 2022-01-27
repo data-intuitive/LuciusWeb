@@ -19,7 +19,10 @@ function makeFloatingActionButtonDriver() {
                     if (fab == undefined) {
 
                         const elem = document.querySelector(ev.element)
-                        var fab = M.FloatingActionButton.init(elem, ev.options);
+                        if (elem == undefined)
+                            console.warn("fabDriver couldn't find element")
+                        else
+                            fab = M.FloatingActionButton.init(elem, ev.options);
                     }
                     fab.close()
                 }
@@ -28,7 +31,7 @@ function makeFloatingActionButtonDriver() {
                     if (fab == undefined) {
 
                         const elem = document.querySelector(ev.element)
-                        var fab = M.FloatingActionButton.init(elems, ev.options);
+                        fab = M.FloatingActionButton.init(elem, ev.options);
 
 
                         // We handle opening of the sidenav ourselves.

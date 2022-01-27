@@ -14,27 +14,15 @@ function model() {
 function view(state$) {
 
     // const placeholder = div(".red.lighten-4 .green-text.darken-4", "Exporter placeholder")
-    const placeholder = div(".fixed-action-button", [
-        a(".btn-floating .btn-large .red", i(".large .material-icons", "mode_edit")),
+    const placeholder = div(".fixed-action-btn", [
+        a(".btn-floating .btn-large .red", i(".large .material-icons", "share")),
         ul([
-            li(a(".btn-floating .red", i(".material-icons", "insert_chart"))),
-            li(a(".btn-floating .yellow.darken-1", i(".material-icons", "format_quote"))),
-            li(a(".btn-floating .green", i(".material-icons", "publish"))),
-            li(a(".btn-floating .blue", i(".material-icons", "attach_file"))),
+            li(a(".btn-floating .red", i(".material-icons", "link"))),
+            li(a(".btn-floating .yellow.darken-1", i(".material-icons", "content_copy"))),
+            li(a(".btn-floating .green", i(".material-icons", "picture_as_pdf"))),
+            li(a(".btn-floating .blue", i(".material-icons", "open_with"))),
         ])
     ])
-
-//     <div class="fixed-action-btn">
-//   <a class="btn-floating btn-large red">
-//     <i class="large material-icons">mode_edit</i>
-//   </a>
-//   <ul>
-//     <li><a class="btn-floating red"><i class="material-icons">insert_chart</i></a></li>
-//     <li><a class="btn-floating yellow darken-1"><i class="material-icons">format_quote</i></a></li>
-//     <li><a class="btn-floating green"><i class="material-icons">publish</i></a></li>
-//     <li><a class="btn-floating blue"><i class="material-icons">attach_file</i></a></li>
-//   </ul>
-// </div>
 
     return xs.of(placeholder)
 }
@@ -60,9 +48,9 @@ function Exporter(sources) {
 
   const fabInit$ = xs.of({
       state: "init",
-      element: ".fixed-action-button",
+      element: ".fixed-action-btn",
       options: {
-          direction: "left",
+          direction: "top",
         //   hoverEnabled: false,
       }
   }).compose(delay(1000)).remember()

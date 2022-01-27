@@ -11,6 +11,7 @@ import {
   SampleTable,
   sampleTableLens,
 } from "../components/SampleTable/SampleTable"
+import { Exporter } from "../components/Exporter"
 
 // Support for ghost mode
 import { scenario } from "../scenarios/treatmentScenario"
@@ -250,6 +251,8 @@ export default function GenericTreatmentWorkflow(sources) {
       .remember(),
   })
 
+  const exporter = Exporter(sources)
+
   /**
    * Style object used in div capsulating filter, displayPlots and tables
    * @const pageStyle
@@ -273,8 +276,9 @@ export default function GenericTreatmentWorkflow(sources) {
       headTable.DOM,
       tailTable.DOM,
       displayPlots$,
+      exporter.DOM,
     )
-    .map(([formDOM, filter, plots, headTable, tailTable, displayPlots]) =>
+    .map(([formDOM, filter, plots, headTable, tailTable, displayPlots, exporter]) =>
       div(workflowMainDivClass /* something like ".row .genetic" */ , { style: { margin: "0px 0px 0px 0px" } }, [
         formDOM,
         div(".col .s10 .offset-s1", pageStyle, [
@@ -286,6 +290,7 @@ export default function GenericTreatmentWorkflow(sources) {
           div(".row", []),
           div(".row", [displayPlots === "after tables" ? plots : div()]),
         ]),
+        exporter,
       ])
     )
 
@@ -296,7 +301,8 @@ export default function GenericTreatmentWorkflow(sources) {
       filterForm.log,
       binnedPlots.log,
       headTable.log,
-      tailTable.log
+      tailTable.log,
+      exporter.log,
     ),
     DOM: vdom$.startWith(div()),
     onion: xs.merge(
@@ -306,6 +312,7 @@ export default function GenericTreatmentWorkflow(sources) {
       filterForm.onion,
       headTable.onion,
       tailTable.onion,
+      exporter.onion,
       scenarioReducer$,
       uiReducer$,
     ),
@@ -320,5 +327,6 @@ export default function GenericTreatmentWorkflow(sources) {
     popup: scenarioPopup$,
     modal: xs.merge(TreatmentFormSink.modal),
     ac: TreatmentFormSink.ac,
+    fab: exporter.fab,
   }
 }

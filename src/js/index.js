@@ -458,6 +458,7 @@ export default function Index(sources) {
     modal: page$.map(prop("modal")).filter(Boolean).flatten(),
     ac: page$.map(prop("ac")).filter(Boolean).flatten(),
     sidenav: sidenavEvent$,
+    fab: page$.map(prop("fab")).filter(Boolean).flatten(),
     storage: page$.map(prop("storage")).filter(Boolean).flatten(),
     deployments: page$
       .map(prop("deployments"))

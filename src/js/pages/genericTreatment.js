@@ -325,7 +325,7 @@ export default function GenericTreatmentWorkflow(sources) {
     ),
     vega: binnedPlots.vega,
     popup: scenarioPopup$,
-    modal: xs.merge(TreatmentFormSink.modal),
+    modal: xs.merge(TreatmentFormSink.modal, exporter.modal),
     ac: TreatmentFormSink.ac,
     fab: exporter.fab,
   }

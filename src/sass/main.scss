@@ -178,14 +178,7 @@ div.fixed-action-btn {
     bottom: 120px;
 }
 
-// fab usually uses a, so add styling for span
-.fixed-action-btn {
-    ul {
-        span.btn-floating {
-          opacity: 0;
-        }
-      }
-}
+@import 'exporter';
 
 /* home svg styling and hover */
 

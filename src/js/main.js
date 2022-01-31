@@ -25,7 +25,7 @@ import { makeModalDriver } from './drivers/makeModalDriver'
 import { makeAutocompleteDriver } from './drivers/makeAutocompleteDriver';
 import { makeSidenavDriver } from './drivers/makeSidenavDriver';
 import { makeFloatingActionButtonDriver } from './drivers/makeFloatingActionButtonDriver';
-import './main.scss'
+import '../sass/main.scss'
 
 import fromEvent from 'xstream/extra/fromEvent'
 import xs from 'xstream'

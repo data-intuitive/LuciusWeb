@@ -18,15 +18,15 @@ function model() {
     return xs.empty()
 }
 
-function view(state$, modalTrigger$) {
+function view(state$) {
 
     const fab = div(".fixed-action-btn", [
-        span(".btn-floating .btn-large .red", i(".large .material-icons", "share")),
+        span(".btn-floating .btn-large", i(".large .material-icons", "share")),
         ul([
-            li(span(".btn-floating .red", i(".material-icons", "link"))),
-            li(span(".btn-floating .yellow.darken-1", i(".material-icons", "content_copy"))),
-            li(span(".btn-floating .green", i(".material-icons", "picture_as_pdf"))),
-            li(span(".btn-floating .blue .modal-open-btn", i(".material-icons", "open_with"))),
+            li(span(".btn-floating .export-link", i(".material-icons", "link"))),
+            li(span(".btn-floating .export-copy", i(".material-icons", "content_copy"))),
+            li(span(".btn-floating .export-pdf", i(".material-icons", "picture_as_pdf"))),
+            li(span(".btn-floating .modal-open-btn", i(".material-icons", "open_with"))),
         ])
     ])
 
@@ -49,7 +49,7 @@ function view(state$, modalTrigger$) {
               //
           ]),
           div('.modal-footer', [
-              button('.export-close .col .s8 .offset-s2 .btn .blue-grey', 'Close')
+              button('.export-close .col .s8 .offset-s2 .btn', 'Close')
           ])
       ])])).startWith(div())
 
@@ -77,7 +77,7 @@ function Exporter(sources) {
 
   const actions = intent(sources.DOM)
 
-  const vdom$ = view(state$, actions.modalTrigger$)
+  const vdom$ = view(state$)
 
   const reducers$ = model()
 

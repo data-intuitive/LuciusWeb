@@ -1,5 +1,5 @@
 import xs from "xstream"
-import { div, a, i, ul, li, p, input, button, span } from "@cycle/dom"
+import { div, i, ul, li, p, input, button, span } from "@cycle/dom"
 import { loggerFactory } from "../utils/logger"
 import delay from "xstream/extra/delay"
 
@@ -45,28 +45,52 @@ function view(state$) {
         ])
     ])
 
-    const modal$ = state$.map(state => div([
-      div('#modal-exporter.modal', [
-          div('.modal-content', [
-              //
-              div('.col .s12 .m6', [
-                  p('.col .s12', ['Value for ', ' : ', 3, ' (doubling period ', ')']),
-                  input('.mu .col .s12', { props: { type: 'range', min: 0, max: 30, step: 0.1, value: 3 }}),
+    const modal$ = state$
+      .map((state) =>
+        div([
+          div("#modal-exporter.modal", [
+            div(".modal-content", [
+              div(".row", 
+                p(".col .s12", "Export to clipboard or file")
+              ),
+              div(".row", [
+                span(".col .s4", "Create link to this page's state"),
+                span(".btn .col .s1 .offset-s1", i(".material-icons", "content_copy")),
+                span(".btn .col .s1 .offset-s1", i(".material-icons", "file_download")),
               ]),
-              div('.col  .s12 .m6', [
-                  p('.col .s12', ['Value for ', ' : ', 4]),
-                  input('.sigma .col .s12', { props: { type: 'range', min: 0, max: 5, step: 0.1, value: 4 }}),
+              div(".row", [
+                span(".col .s4", "Copy signature"),
+                span(".btn .col .s1 .offset-s1", i(".material-icons", "content_copy")),
+                span(".btn .col .s1 .offset-s1", i(".material-icons", "file_download")),
               ]),
-              div('.col .s12 .m6', [
-                  p('.col .s12 ', ['Size of population: ', 10]),
-                  input('.size .col .s12', { props: { type: 'range', min: 1, max: 500, step: 1 , value: 10 }}),
-              ])
-              //
+              div(".row", [
+                span(".col .s4", "Copy binned plots"),
+                span(".btn .col .s1 .offset-s1", i(".material-icons", "content_copy")),
+                span(".btn .col .s1 .offset-s1", i(".material-icons", "file_download")),
+              ]),
+              div(".row", [
+                span(".col .s4", "Copy top table"),
+                span(".btn .col .s1 .offset-s1", i(".material-icons", "content_copy")),
+                span(".btn .col .s1 .offset-s1", i(".material-icons", "file_download")),
+              ]),
+              div(".row", [
+                span(".col .s4", "Copy bottom table"),
+                span(".btn .col .s1 .offset-s1", i(".material-icons", "content_copy")),
+                span(".btn .col .s1 .offset-s1", i(".material-icons", "file_download")),
+              ]),
+              div(".row", [
+                span(".col .s4", "Export report"),
+                // span(".btn .col .s1 .offset-s1", i(".material-icons", "content_copy")),
+                span(".btn .col .s1 .offset-s3 .disabled", i(".material-icons", "file_download")),
+              ]),
+            ]),
+            div(".modal-footer", [
+              button(".export-close .col .s8 .push-s2 .btn", "Close"),
+            ]),
           ]),
-          div('.modal-footer', [
-              button('.export-close .col .s8 .offset-s2 .btn', 'Close')
-          ])
-      ])])).startWith(div())
+        ])
+      )
+      .startWith(div())
 
     const vdom$ = xs.combine(
       xs.of(fab),

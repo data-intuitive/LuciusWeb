@@ -1,5 +1,5 @@
 import xs from "xstream"
-import { div, a, i, ul, li, p, input, button } from "@cycle/dom"
+import { div, a, i, ul, li, p, input, button, span } from "@cycle/dom"
 import { loggerFactory } from "../utils/logger"
 import delay from "xstream/extra/delay"
 
@@ -21,20 +21,16 @@ function model() {
 function view(state$, modalTrigger$) {
 
     const fab = div(".fixed-action-btn", [
-        a(".btn-floating .btn-large .red", i(".large .material-icons", "share")),
+        span(".btn-floating .btn-large .red", i(".large .material-icons", "share")),
         ul([
-            li(a(".btn-floating .red", i(".material-icons", "link"))),
-            li(a(".btn-floating .yellow.darken-1", i(".material-icons", "content_copy"))),
-            li(a(".btn-floating .green", i(".material-icons", "picture_as_pdf"))),
-            li(a(".btn-floating .blue .modal-open-btn", i(".material-icons", "open_with"))),
+            li(span(".btn-floating .red", i(".material-icons", "link"))),
+            li(span(".btn-floating .yellow.darken-1", i(".material-icons", "content_copy"))),
+            li(span(".btn-floating .green", i(".material-icons", "picture_as_pdf"))),
+            li(span(".btn-floating .blue .modal-open-btn", i(".material-icons", "open_with"))),
         ])
     ])
 
-    // const modal = div("#modal-exporter.modal","Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")
-
-    const modal$ = //modalTrigger$.mapTo(modal).startWith(div())
-
-    state$.map(state => div([
+    const modal$ = state$.map(state => div([
       div('#modal-exporter.modal', [
           div('.modal-content', [
               //
@@ -97,9 +93,9 @@ function Exporter(sources) {
 
 
   const openModal$ = actions.modalTrigger$
-    .map(_ => ({ el: '#modal-exporter', state: 'open' })).debug("openModal$")
+    .map(_ => ({ el: '#modal-exporter', state: 'open' }))
   const closeModal$ = actions.modalCloseTrigger$
-    .map(_ => ({ el: '#modal-exporter', state: 'close' })).debug("closeModal$")
+    .map(_ => ({ el: '#modal-exporter', state: 'close' }))
 
 
   return {

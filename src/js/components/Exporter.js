@@ -35,18 +35,23 @@ function model(actions) {
 
 function view(state$) {
 
-    const fab = div(".fixed-action-btn", [
-        span(".btn-floating .btn-large", i(".large .material-icons", "share")),
-        ul([
-            li(span(".btn-floating .export-link", i(".material-icons", "link"))),
-            li(span(".btn-floating .export-signature", i(".material-icons", "content_copy"))),
-            li(span(".btn-floating .export-pdf", i(".material-icons", "picture_as_pdf"))),
-            li(span(".btn-floating .modal-open-btn", i(".material-icons", "open_with"))),
-        ])
-    ])
+    const signaturePresent$ = state$.map((state) => state.form.signature.output != undefined && state.form.signature.output != "")
 
-    const modal$ = state$
-      .map((state) =>
+    const fab$ = signaturePresent$
+      .map((signature) =>
+        div(".fixed-action-btn", [
+            span(".btn-floating .btn-large", i(".large .material-icons", "share")),
+            ul([
+                li(span(".btn-floating .export-link", i(".material-icons", "link"))),
+                li(span(".btn-floating .export-signature"/* + (signature ? "" : " .disabled")*/, i(".material-icons", "content_copy"))),
+                li(span(".btn-floating .export-pdf", i(".material-icons", "picture_as_pdf"))),
+                li(span(".btn-floating .modal-open-btn", i(".material-icons", "open_with"))),
+            ])
+        ]))
+        .startWith(div())
+
+    const modal$ = signaturePresent$
+      .map((signature) =>
         div([
           div("#modal-exporter.modal", [
             div(".modal-content", [
@@ -60,8 +65,8 @@ function view(state$) {
               ]),
               div(".row", [
                 span(".col .s4", "Copy signature"),
-                span(".btn .col .s1 .offset-s1", i(".material-icons", "content_copy")),
-                span(".btn .col .s1 .offset-s1", i(".material-icons", "file_download")),
+                span(".btn .col .s1 .offset-s1" + (signature ? "" : " .disabled"), i(".material-icons", "content_copy")),
+                span(".btn .col .s1 .offset-s1" + (signature ? "" : " .disabled"), i(".material-icons", "file_download")),
               ]),
               div(".row", [
                 span(".col .s4", "Copy binned plots"),
@@ -93,7 +98,7 @@ function view(state$) {
       .startWith(div())
 
     const vdom$ = xs.combine(
-      xs.of(fab),
+      fab$,
       modal$
     )
     .map(([fab, modal]) => (div([fab, modal])))

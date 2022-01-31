@@ -4,18 +4,33 @@ import { loggerFactory } from "../utils/logger"
 import delay from "xstream/extra/delay"
 
 function intent(domSource$) {
+  const exportLinkTrigger$ = domSource$.select(".export-link").events("click")
+  const exportSignatureTrigger$ = domSource$.select(".export-signature").events("click")
+  const exportPdfTrigger$ = domSource$.select(".export-pdf").events("click")
+
   const modalTrigger$ = domSource$.select(".modal-open-btn").events("click")
   const modalCloseTrigger$ = domSource$.select(".export-close").events("click")
 
   return {
+    exportLinkTrigger$: exportLinkTrigger$,
+    exportSignatureTrigger$: exportSignatureTrigger$,
+    exportPdfTrigger$: exportPdfTrigger$,
     modalTrigger$: modalTrigger$,
     modalCloseTrigger$: modalCloseTrigger$,
   }
 }
 
-function model() {
+function model(actions) {
   
-    return xs.empty()
+  const openModal$ = actions.modalTrigger$
+    .map(_ => ({ el: '#modal-exporter', state: 'open' }))
+  const closeModal$ = actions.modalCloseTrigger$
+    .map(_ => ({ el: '#modal-exporter', state: 'close' }))
+
+  return {
+    reducers$: xs.empty(),
+    modal$: xs.merge(openModal$, closeModal$),
+  }
 }
 
 function view(state$) {
@@ -24,7 +39,7 @@ function view(state$) {
         span(".btn-floating .btn-large", i(".large .material-icons", "share")),
         ul([
             li(span(".btn-floating .export-link", i(".material-icons", "link"))),
-            li(span(".btn-floating .export-copy", i(".material-icons", "content_copy"))),
+            li(span(".btn-floating .export-signature", i(".material-icons", "content_copy"))),
             li(span(".btn-floating .export-pdf", i(".material-icons", "picture_as_pdf"))),
             li(span(".btn-floating .modal-open-btn", i(".material-icons", "open_with"))),
         ])
@@ -79,7 +94,7 @@ function Exporter(sources) {
 
   const vdom$ = view(state$)
 
-  const reducers$ = model()
+  const model_ = model(actions)
 
   const fabInit$ = xs.of({
       state: "init",
@@ -90,20 +105,12 @@ function Exporter(sources) {
       }
   }).compose(delay(1000)).remember()
 
-
-
-  const openModal$ = actions.modalTrigger$
-    .map(_ => ({ el: '#modal-exporter', state: 'open' }))
-  const closeModal$ = actions.modalCloseTrigger$
-    .map(_ => ({ el: '#modal-exporter', state: 'close' }))
-
-
   return {
     log: xs.merge(logger(state$, "state$")),
     DOM: vdom$,
-    onion: reducers$,
+    onion: model_.reducers$,
     fab: fabInit$,
-    modal: xs.merge(openModal$, closeModal$)
+    modal: model_.modal$,
   }
 }
 

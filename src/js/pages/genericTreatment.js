@@ -289,9 +289,8 @@ export default function GenericTreatmentWorkflow(sources) {
       tailTable.DOM,
       displayPlots$,
       exporter.DOM,
-      state$.map((state) => state.routerInformation.pageStateURL)
     )
-    .map(([formDOM, filter, plots, headTable, tailTable, displayPlots, exporter, url]) =>
+    .map(([formDOM, filter, plots, headTable, tailTable, displayPlots, exporter]) =>
       div(workflowMainDivClass /* something like ".row .genetic" */ , { style: { margin: "0px 0px 0px 0px" } }, [
         formDOM,
         div(".col .s10 .offset-s1", pageStyle, [
@@ -303,21 +302,9 @@ export default function GenericTreatmentWorkflow(sources) {
           div(".row", []),
           div(".row", [displayPlots === "after tables" ? plots : div()]),
         ]),
-        div(".col .s10 .offset-s1", [
-          div(".col .s12 .blue.lighten-3", {style: {wordWrap: "break-word"}}, url),
-          div([ 
-            button(".clipboard .col .s4 .offset-s4 .btn .grey", "Copy to clipboard"),
-          ])
-        ]),
         exporter,
       ])
     )
-
-  const clipboardTrigger$ = sources.DOM.select(".clipboard").events("click").remember()
-  const clipboard$ = clipboardTrigger$
-    .compose(sampleCombine(state$.map((state) => state.routerInformation.pageStateURL)))
-    .map(([_, url]) => url)
-    .remember()
 
   return {
     log: xs.merge(
@@ -353,6 +340,6 @@ export default function GenericTreatmentWorkflow(sources) {
     modal: xs.merge(TreatmentFormSink.modal, exporter.modal),
     ac: TreatmentFormSink.ac,
     fab: exporter.fab,
-    clipboard: clipboard$,
+    clipboard: exporter.clipboard,
   }
 }

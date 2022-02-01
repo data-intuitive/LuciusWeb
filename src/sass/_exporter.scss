@@ -1,0 +1,40 @@
+// style copy from materialize but add usage of 'span' instead of 'a'
+.fixed-action-btn {
+    ul {
+        span.btn-floating {
+          opacity: 0;
+        }
+      }
+}
+
+// own styling
+.fixed-action-btn {
+    > span.btn-floating {
+        background-color: color('red', 'base');
+    }
+    > ul {
+        span.export-link {
+            background-color: color('red', 'base')
+        }
+        span.export-signature {
+            background-color: color('yellow', 'darken-1')
+        }
+        span.export-pdf {
+            background-color: color('green', 'base')
+        }
+        span.modal-open-btn {
+            background-color: color('blue', 'base')
+        }
+    }
+
+}
+
+div #modal-exporter {
+    // background-color: green;
+
+    div.modal-footer {
+        > button.export-close{
+            background-color: color('blue-grey', 'base')
+        }
+    }
+}

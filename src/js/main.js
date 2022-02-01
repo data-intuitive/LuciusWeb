@@ -24,8 +24,9 @@ import switchPath from 'switch-path'
 import { makeModalDriver } from './drivers/makeModalDriver'
 import { makeAutocompleteDriver } from './drivers/makeAutocompleteDriver';
 import { makeSidenavDriver } from './drivers/makeSidenavDriver';
+import { makeFloatingActionButtonDriver } from './drivers/makeFloatingActionButtonDriver';
 import { clipboardDriver } from './drivers/clipboardDriver';
-import './main.scss'
+import '../sass/main.scss'
 
 import fromEvent from 'xstream/extra/fromEvent'
 import xs from 'xstream'
@@ -47,6 +48,7 @@ const drivers = {
     modal: makeModalDriver(),
     ac: makeAutocompleteDriver(),
     sidenav: makeSidenavDriver(),
+    fab: makeFloatingActionButtonDriver(),
     clipboard: clipboardDriver,
     deployments: () => xs.fromPromise(fetch('/deployments.json').then(m => m.json()))
 };

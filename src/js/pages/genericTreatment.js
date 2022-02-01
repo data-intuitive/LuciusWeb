@@ -11,6 +11,7 @@ import {
   SampleTable,
   sampleTableLens,
 } from "../components/SampleTable/SampleTable"
+import { Exporter } from "../components/Exporter"
 
 // Support for ghost mode
 import { scenario } from "../scenarios/treatmentScenario"
@@ -262,6 +263,8 @@ export default function GenericTreatmentWorkflow(sources) {
       .remember(),
   })
 
+  const exporter = Exporter(sources)
+
   /**
    * Style object used in div capsulating filter, displayPlots and tables
    * @const pageStyle
@@ -285,9 +288,10 @@ export default function GenericTreatmentWorkflow(sources) {
       headTable.DOM,
       tailTable.DOM,
       displayPlots$,
+      exporter.DOM,
       state$.map((state) => state.routerInformation.pageStateURL)
     )
-    .map(([formDOM, filter, plots, headTable, tailTable, displayPlots, url]) =>
+    .map(([formDOM, filter, plots, headTable, tailTable, displayPlots, exporter, url]) =>
       div(workflowMainDivClass /* something like ".row .genetic" */ , { style: { margin: "0px 0px 0px 0px" } }, [
         formDOM,
         div(".col .s10 .offset-s1", pageStyle, [
@@ -304,7 +308,8 @@ export default function GenericTreatmentWorkflow(sources) {
           div([ 
             button(".clipboard .col .s4 .offset-s4 .btn .grey", "Copy to clipboard"),
           ])
-        ])
+        ]),
+        exporter,
       ])
     )
 
@@ -321,7 +326,8 @@ export default function GenericTreatmentWorkflow(sources) {
       filterForm.log,
       binnedPlots.log,
       headTable.log,
-      tailTable.log
+      tailTable.log,
+      exporter.log,
     ),
     DOM: vdom$,//.startWith(div()),
     onion: xs.merge(
@@ -331,6 +337,7 @@ export default function GenericTreatmentWorkflow(sources) {
       filterForm.onion,
       headTable.onion,
       tailTable.onion,
+      exporter.onion,
       scenarioReducer$,
       uiReducer$,
     ),
@@ -343,8 +350,9 @@ export default function GenericTreatmentWorkflow(sources) {
     ),
     vega: binnedPlots.vega,
     popup: scenarioPopup$,
-    modal: xs.merge(TreatmentFormSink.modal),
+    modal: xs.merge(TreatmentFormSink.modal, exporter.modal),
     ac: TreatmentFormSink.ac,
+    fab: exporter.fab,
     clipboard: clipboard$,
   }
 }

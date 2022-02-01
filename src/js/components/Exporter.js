@@ -1,5 +1,5 @@
 import xs from "xstream"
-import { div, i, ul, li, p, input, button, span } from "@cycle/dom"
+import { div, i, ul, li, p, input, button, span, a } from "@cycle/dom"
 import { loggerFactory } from "../utils/logger"
 import delay from "xstream/extra/delay"
 import sampleCombine from "xstream/extra/sampleCombine"
@@ -33,7 +33,7 @@ function model(actions, state$) {
     .map(([_, url]) => url)
     .remember()
 
-    const clipboardSignature$ = actions.exportSignatureTrigger$
+  const clipboardSignature$ = actions.exportSignatureTrigger$
     .compose(sampleCombine(state$.map((state) => state.form.signature.output)))
     .map(([_, signature]) => signature)
     .remember()
@@ -62,17 +62,24 @@ function view(state$) {
         ]))
         .startWith(div())
 
+    const url$ = state$.map((state) => state.routerInformation.pageStateURL)
+    const signature$ = state$.map((state) => state.form.signature.output)
+
     const modal$ = xs
       .combine(
         signaturePresent$,
-        state$.map((state) => state.routerInformation.pageStateURL),
+        url$,
+        signature$,
       )
-      .map(([signature, url]) => {
-        const signatureAvailable = signature ? "" : " .disabled"
+      .map(([signaturePresent, url, signature]) => {
+        const signatureAvailable = signaturePresent ? "" : " .disabled"
         const plotsAvailable = " .disabled"
         const topTableAvailable = " .disabled"
         const bottomTableAvailable = " .disabled"
         const reportAvailable = " .disabled"
+
+        const urlFile = "text/plain;charset=utf-8," + url
+        const signatureFile = "text/plain;charset=utf-8," + signature
 
         return div([
           div("#modal-exporter.modal", [
@@ -83,12 +90,30 @@ function view(state$) {
               div(".row", [
                 span(".col .s6 .push-s1", "Create link to this page's state"),
                 span(".btn .col .s1 .offset-s1 .export-clipboard-link", i(".material-icons", "content_copy")),
-                span(".btn .col .s1 .offset-s1 export-file-link", i(".material-icons", "file_download")),
+                // span(".btn .col .s1 .offset-s1 .export-file-link", i(".material-icons", "file_download")),
+                a(".btn .col .s1 .offset-s1",
+                  {
+                    props: {
+                      href: "data:" + urlFile,
+                      download: "url.txt",
+                    },
+                  },
+                  i(".material-icons", "file_download"),
+                ),
               ]),
               div(".row", [
                 span(".col .s6 .push-s1", "Copy signature"),
                 span(".btn .col .s1 .offset-s1 .export-clipboard-signature" + signatureAvailable, i(".material-icons", "content_copy")),
-                span(".btn .col .s1 .offset-s1 .export-file-signature" + signatureAvailable, i(".material-icons", "file_download")),
+                // span(".btn .col .s1 .offset-s1 .export-file-signature" + signatureAvailable, i(".material-icons", "file_download")),
+                a(".btn .col .s1 .offset-s1" + signatureAvailable,
+                  {
+                    props: {
+                      href: "data:" + signatureFile,
+                      download: "signature.txt",
+                    },
+                  },
+                  i(".material-icons", "file_download"),
+                ),
               ]),
               div(".row", [
                 span(".col .s6 .push-s1", "Copy binned plots"),

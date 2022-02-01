@@ -8,7 +8,9 @@ import { convertToCSV } from "../utils/export"
 function intent(domSource$) {
   const exportLinkTrigger$ = domSource$.select(".export-clipboard-link").events("click")
   const exportSignatureTrigger$ = domSource$.select(".export-clipboard-signature").events("click")
-  // const exportPdfTrigger$ = domSource$.select(".export-pdf").events("click")
+  const exportPlotsTrigger$ = domSource$.select(".export-clipboard-plots").events("click")
+  const exportHeadTableTrigger$ = domSource$.select(".export-clipboard-headTable").events("click")
+  const exportTailTableTrigger$ = domSource$.select(".export-clipboard-tailTable").events("click")
 
   const modalTrigger$ = domSource$.select(".modal-open-btn").events("click")
   const modalCloseTrigger$ = domSource$.select(".export-close").events("click")
@@ -16,7 +18,9 @@ function intent(domSource$) {
   return {
     exportLinkTrigger$: exportLinkTrigger$,
     exportSignatureTrigger$: exportSignatureTrigger$,
-    // exportPdfTrigger$: exportPdfTrigger$,
+    exportPlotsTrigger$: exportPlotsTrigger$,
+    exportHeadTableTrigger$: exportHeadTableTrigger$,
+    exportTailTableTrigger$: exportTailTableTrigger$,
     modalTrigger$: modalTrigger$,
     modalCloseTrigger$: modalCloseTrigger$,
   }
@@ -29,16 +33,6 @@ function model(actions, state$) {
   const closeModal$ = actions.modalCloseTrigger$
     .map(_ => ({ el: '#modal-exporter', state: 'close' }))
   
-  const clipboardLink$ = actions.exportLinkTrigger$
-    .compose(sampleCombine(state$.map((state) => state.routerInformation.pageStateURL)))
-    .map(([_, url]) => url)
-    .remember()
-
-  const clipboardSignature$ = actions.exportSignatureTrigger$
-    .compose(sampleCombine(state$.map((state) => state.form.signature.output)))
-    .map(([_, signature]) => signature)
-    .remember()
-
   function notEmpty(data) {
     return data != undefined && data != ""
   }
@@ -61,11 +55,37 @@ function model(actions, state$) {
     .filter((data) => notEmpty(data))
     .map((data) => convertToCSV(data))
     .startWith("")
+
+  const clipboardLink$ = actions.exportLinkTrigger$
+    .compose(sampleCombine(url$))
+    .map(([_, url]) => url)
+    .remember()
+
+  const clipboardSignature$ = actions.exportSignatureTrigger$
+    .compose(sampleCombine(signature$))
+    .map(([_, signature]) => signature)
+    .remember()
+
+  const clipboardPlots$ = actions.exportPlotsTrigger$
+    .compose(sampleCombine(plots$))
+    .map(([_, plots]) => "data:image/png;base64,"+plots)
+    .remember().debug("clipboardPlots$")
+
+    const clipboardHeadTable$ = actions.exportHeadTableTrigger$
+    .compose(sampleCombine(headTableCsv$))
+    .map(([_, table]) => table)
+    .remember()
+
+    const clipboardTailTable$ = actions.exportTailTableTrigger$
+    .compose(sampleCombine(tailTableCsv$))
+    .map(([_, table]) => table)
+    .remember()
+
   
   return {
     reducers$: xs.empty(),
     modal$: xs.merge(openModal$, closeModal$),
-    clipboard$: xs.merge(clipboardLink$, clipboardSignature$),
+    clipboard$: xs.merge(clipboardLink$, clipboardSignature$, clipboardPlots$, clipboardHeadTable$, clipboardTailTable$),
     dataPresent: {
       signaturePresent$: signaturePresent$,
       plotsPresent$: plotsPresent$,
@@ -172,8 +192,8 @@ function view(state$, dataPresent, exportData) {
               ]),
               div(".row", [
                 span(".col .s6 .push-s1", "Copy top table"),
-                span(".btn .col .s1 .offset-s1 .export-clipboard-toptable" + headTableAvailable, i(".material-icons", "content_copy")),
-                // span(".btn .col .s1 .offset-s1 .export-file-toptable" + headTableAvailable, i(".material-icons", "file_download")),
+                span(".btn .col .s1 .offset-s1 .export-clipboard-headTable" + headTableAvailable, i(".material-icons", "content_copy")),
+                // span(".btn .col .s1 .offset-s1 .export-file-headTable" + headTableAvailable, i(".material-icons", "file_download")),
                 a(".btn .col .s1 .offset-s1" + headTableAvailable,
                   {
                     props: {
@@ -186,8 +206,8 @@ function view(state$, dataPresent, exportData) {
               ]),
               div(".row", [
                 span(".col .s6 .push-s1", "Copy bottom table"),
-                span(".btn .col .s1 .offset-s1 .export-clipboard-bottomtable" + tailTableAvailable, i(".material-icons", "content_copy")),
-                // span(".btn .col .s1 .offset-s1 .export-file-bottomtable" + bottomTableAvailable, i(".material-icons", "file_download")),
+                span(".btn .col .s1 .offset-s1 .export-clipboard-tailTable" + tailTableAvailable, i(".material-icons", "content_copy")),
+                // span(".btn .col .s1 .offset-s1 .export-file-tailTable" + bottomTableAvailable, i(".material-icons", "file_download")),
                 a(".btn .col .s1 .offset-s1" + tailTableAvailable,
                   {
                     props: {

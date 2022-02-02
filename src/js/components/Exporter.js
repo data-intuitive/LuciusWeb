@@ -48,7 +48,11 @@ function model(actions, state$, vega$) {
 
   const url$ = state$.map((state) => state.routerInformation.pageStateURL).startWith("")
   const signature$ = state$.map((state) => state.form.signature.output).startWith("")
-  const plots$ = vega$.map((vega) => xs.fromPromise(vega.view.toImageURL('png'))).flatten()
+  const similarityPlot$ = vega$
+    .filter(vega => vega.el == '#simplot')
+    .map((vega) => xs.fromPromise(vega.view.toImageURL('png')))
+    .flatten()
+    .startWith("")
 
   const headTableCsv$ = state$.map((state) => state.headTable.data)
     .filter((data) => notEmptyOrUndefined(data))
@@ -70,22 +74,18 @@ function model(actions, state$, vega$) {
     .map(([_, signature]) => signature)
     .remember()
 
-  // not yet functional, uses static content
   const clipboardPlots$ = actions.exportPlotsTrigger$
-    .compose(sampleCombine(plots$))
+    .compose(sampleCombine(similarityPlot$))
     .map(([_, data]) => {
       // input data is "data:image/png;base64,abcdef0123456789..."
       const parts = data.split(';base64,');
       const imageType = parts[0].split(':')[1];
       const decodedData = window.atob(parts[1]);
       const uInt8Array = new Uint8Array(decodedData.length);
-    
       for (let i = 0; i < decodedData.length; i++) {
         uInt8Array[i] = decodedData.charCodeAt(i);
       }
-
       const blob = new Blob([uInt8Array], { type: imageType })
-
       return {
         type: imageType,
         data: blob,
@@ -104,20 +104,17 @@ function model(actions, state$, vega$) {
     .remember()
 
   const testAction$ = actions.testTrigger$
-    .compose(sampleCombine(plots$))
+    .compose(sampleCombine(similarityPlot$))
     .map(([_, data]) => {
       // input data is "data:image/png;base64,abcdef0123456789..."
       const parts = data.split(';base64,');
       const imageType = parts[0].split(':')[1];
       const decodedData = window.atob(parts[1]);
       const uInt8Array = new Uint8Array(decodedData.length);
-    
       for (let i = 0; i < decodedData.length; i++) {
         uInt8Array[i] = decodedData.charCodeAt(i);
       }
-
       const blob = new Blob([uInt8Array], { type: imageType })
-
       return {
         type: imageType,
         data: blob,
@@ -138,7 +135,7 @@ function model(actions, state$, vega$) {
     exportData: {
       url$: url$,
       signature$: signature$,
-      plots$: plots$,
+      similarityPlot$: similarityPlot$,
       headTableCsv$: headTableCsv$,
       tailTableCsv$: tailTableCsv$,
     }
@@ -169,11 +166,11 @@ function view(state$, dataPresent, exportData) {
         dataPresent.tailTablePresent$,
         exportData.url$,
         exportData.signature$,
-        exportData.plots$,
+        exportData.similarityPlot$,
         exportData.headTableCsv$,
         exportData.tailTableCsv$,
       )
-      .map(([signaturePresent, plotsPresent, headTablePresent, tailTablePresent, url, signature, plots, headTableCsv, tailTableCsv]) => {
+      .map(([signaturePresent, plotsPresent, headTablePresent, tailTablePresent, url, signature, similarityPlot, headTableCsv, tailTableCsv]) => {
         const signatureAvailable = signaturePresent ? "" : " .disabled"
         const plotsAvailable = plotsPresent ? "" : " .disabled"
         const headTableAvailable = headTablePresent ? "" : " .disabled"
@@ -182,7 +179,7 @@ function view(state$, dataPresent, exportData) {
 
         const urlFile = "data:text/plain;charset=utf-8," + url
         const signatureFile = "data:text/plain;charset=utf-8," + signature
-        const plotsFile = plots
+        const plotsFile = similarityPlot
         const headTableCsvFile = "data:text/tsv;charset=utf-8," + encodeURIComponent(headTableCsv)
         const tailTableCsvFile = "data:text/tsv;charset=utf-8," + encodeURIComponent(tailTableCsv)
 

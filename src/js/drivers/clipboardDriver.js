@@ -8,16 +8,25 @@ function clipboardDriver(stream$) {
           new ClipboardItem({
               [message.type]: message.data
           })
-        ]);
+        ])
+        .then(
+          function() {
+            /* clipboard successfully set */
+          }, function() {
+            /* clipboard write failed */
+            console.warn("Writing to clipboard failed")
+          });
       }
       else {
         console.log("text that should be placed in clipboard: " + message)
-        navigator.clipboard.writeText(message).then(function() {
+        navigator.clipboard.writeText(message)
+        .then(
+          function() {
             /* clipboard successfully set */
-        }, function() {
+          }, function() {
             /* clipboard write failed */
             console.warn("Writing to clipboard failed")
-        });
+          });
       }
     },
     error: e => console.error(e),

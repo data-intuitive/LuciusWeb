@@ -16,6 +16,8 @@ function intent(domSource$) {
   const modalTrigger$ = domSource$.select(".modal-open-btn").events("click")
   const modalCloseTrigger$ = domSource$.select(".export-close").events("click")
 
+  const testTrigger$ = domSource$.select(".test-btn").events("click")
+
   return {
     exportLinkTrigger$: exportLinkTrigger$,
     exportSignatureTrigger$: exportSignatureTrigger$,
@@ -24,10 +26,11 @@ function intent(domSource$) {
     exportTailTableTrigger$: exportTailTableTrigger$,
     modalTrigger$: modalTrigger$,
     modalCloseTrigger$: modalCloseTrigger$,
+    testTrigger$: testTrigger$,
   }
 }
 
-function model(actions, state$) {
+function model(actions, state$, vega$) {
   
   const openModal$ = actions.modalTrigger$
     .map(_ => ({ el: '#modal-exporter', state: 'open' }))
@@ -69,22 +72,30 @@ function model(actions, state$) {
 
   // not yet functional, uses static content
   const clipboardPlots$ = actions.exportPlotsTrigger$
-    .compose(sampleCombine(plots$))
-    .map(([_, plots]) => {
-
-      const byteCharacters = atob(plots);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
+    .compose(sampleCombine(vega$))
+    .map(([_, vega]) => {
+      return xs.fromPromise(vega.view.toImageURL('png'))
+    })
+    .flatten()
+    .map((data) => {
+      // input data is "data:image/png;base64,abcdef0123456789..."
+      const parts = data.split(';base64,');
+      const imageType = parts[0].split(':')[1];
+      const decodedData = window.atob(parts[1]);
+      const uInt8Array = new Uint8Array(decodedData.length);
+    
+      for (let i = 0; i < decodedData.length; i++) {
+        uInt8Array[i] = decodedData.charCodeAt(i);
       }
-      const byteArray = new Uint8Array(byteNumbers);
+
+      const blob = new Blob([uInt8Array], { type: imageType })
 
       return {
-        type: "image/png",
-        data: new Blob([byteArray], {type: 'image/png'}),
+        type: imageType,
+        data: blob,
       }
     })
-    .remember().debug("clipboardPlots$")
+    .remember()
 
   const clipboardHeadTable$ = actions.exportHeadTableTrigger$
     .compose(sampleCombine(headTableCsv$))
@@ -96,11 +107,36 @@ function model(actions, state$) {
     .map(([_, table]) => table)
     .remember()
 
-  
+  const testAction$ = actions.testTrigger$
+    .compose(sampleCombine(vega$))
+    .map(([_, vega]) => {
+      return xs.fromPromise(vega.view.toImageURL('png'))
+    })
+    .flatten()
+    .map((data) => {
+      // input data is "data:image/png;base64,abcdef0123456789..."
+      const parts = data.split(';base64,');
+      const imageType = parts[0].split(':')[1];
+      const decodedData = window.atob(parts[1]);
+      const uInt8Array = new Uint8Array(decodedData.length);
+    
+      for (let i = 0; i < decodedData.length; i++) {
+        uInt8Array[i] = decodedData.charCodeAt(i);
+      }
+
+      const blob = new Blob([uInt8Array], { type: imageType })
+
+      return {
+        type: imageType,
+        data: blob,
+      }
+    })
+    .remember()
+
   return {
     reducers$: xs.empty(),
     modal$: xs.merge(openModal$, closeModal$),
-    clipboard$: xs.merge(clipboardLink$, clipboardSignature$, clipboardPlots$, clipboardHeadTable$, clipboardTailTable$),
+    clipboard$: xs.merge(clipboardLink$, clipboardSignature$, clipboardPlots$, clipboardHeadTable$, clipboardTailTable$, testAction$),
     dataPresent: {
       signaturePresent$: signaturePresent$,
       plotsPresent$: plotsPresent$,
@@ -128,6 +164,7 @@ function view(state$, dataPresent, exportData) {
                 li(span(".btn-floating .export-clipboard-signature", i(".material-icons", "content_copy"))),
                 // li(span(".btn-floating .export-file-report", i(".material-icons", "picture_as_pdf"))),
                 li(span(".btn-floating .modal-open-btn", i(".material-icons", "open_with"))),
+                li(span(".btn-floating .test-btn", i(".material-icons", "star"))),
             ])
         ]))
         .startWith(div())
@@ -272,7 +309,7 @@ function Exporter(sources) {
 
   const actions = intent(sources.DOM)
 
-  const model_ = model(actions, state$)
+  const model_ = model(actions, state$, sources.vega)
 
   const vdom$ = view(state$, model_.dataPresent, model_.exportData)
 

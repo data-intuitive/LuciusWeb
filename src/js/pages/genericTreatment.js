@@ -43,7 +43,7 @@ export default function GenericTreatmentWorkflow(sources) {
     "settings.common.debug"
   )
 
-  const state$ = sources.onion.state$.debug("state$")
+  const state$ = sources.onion.state$
 
   // Scenario for ghost mode
   const scenarios$ = sources.onion.state$

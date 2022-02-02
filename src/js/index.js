@@ -57,10 +57,6 @@ import {
 
 export default function Index(sources) {
   const { router } = sources
-  console.log("sources:")
-  console.log(sources)
-  console.log("router:")
-  console.log(router)
 
   const logger = loggerFactory(
     "index",
@@ -88,7 +84,7 @@ export default function Index(sources) {
     "/debug": Debug,
     "/admin": IsolatedAdminSettings,
     "*": Home,
-  })(sources).debug("page$")
+  })(sources)
 
   // TODO: Add a visual reference for ghost mode
   // const ghost$ = state$

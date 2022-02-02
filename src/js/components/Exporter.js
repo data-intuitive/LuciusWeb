@@ -153,7 +153,7 @@ function view(state$, dataPresent, exportData) {
                 li(span(".btn-floating .export-clipboard-signature", i(".material-icons", "content_copy"))),
                 // li(span(".btn-floating .export-file-report", i(".material-icons", "picture_as_pdf"))),
                 li(span(".btn-floating .modal-open-btn", i(".material-icons", "open_with"))),
-                li(span(".btn-floating .test-btn", i(".material-icons", "star"))),
+                // li(span(".btn-floating .test-btn", i(".material-icons", "star"))),
             ])
         ]))
         .startWith(div())

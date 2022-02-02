@@ -3,7 +3,7 @@ function clipboardDriver(stream$) {
     next: message => {
 
       if (typeof message === 'object') {
-        console.log('object received for clipboard, type: ' + message.type)
+        // console.log('object received for clipboard, type: ' + message.type)
         navigator.clipboard.write([
           new ClipboardItem({
               [message.type]: message.data
@@ -18,7 +18,7 @@ function clipboardDriver(stream$) {
           });
       }
       else {
-        console.log("text that should be placed in clipboard: " + message)
+        // console.log("text that should be placed in clipboard: " + message)
         navigator.clipboard.writeText(message)
         .then(
           function() {

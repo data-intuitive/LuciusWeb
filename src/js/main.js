@@ -53,13 +53,5 @@ const drivers = {
     deployments: () => xs.fromPromise(fetch('/deployments.json').then(m => m.json()))
 };
 
-const customSwitchPath = (sourcePath, routes) => {
-
-    console.log("sourcePath: " + sourcePath)
-    console.log("routes:")
-    console.log(routes)
-    return switchPath(sourcePath, routes)
-}
-
-let StatifiedMain = onionify(storageify(routerify(Index, customSwitchPath, {omitHistory: false}), { key: 'ComPass' }));
+let StatifiedMain = onionify(storageify(routerify(Index, switchPath, {omitHistory: false}), { key: 'ComPass' }));
 run(StatifiedMain, drivers);

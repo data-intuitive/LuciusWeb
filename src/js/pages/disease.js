@@ -15,6 +15,7 @@ import {
   SampleTable,
   sampleTableLens,
 } from "../components/SampleTable/SampleTable"
+import { Exporter } from "../components/Exporter"
 
 // Support for ghost mode
 import { scenario } from "../scenarios/diseaseScenario"
@@ -189,6 +190,8 @@ function DiseaseWorkflow(sources) {
       .remember(),
   })
 
+  const exporter = Exporter(sources)
+
   /**
    * Style object used in div capsulating filter, displayPlots and tables
    * @const pageStyle
@@ -212,6 +215,7 @@ function DiseaseWorkflow(sources) {
       headTable.DOM,
       tailTable.DOM,
       displayPlots$,
+      exporter.DOM,
       // feedback$
     )
     .map(
@@ -221,7 +225,8 @@ function DiseaseWorkflow(sources) {
         plots,
         headTable,
         tailTable,
-	displayPlots,
+	      displayPlots,
+        exporter,
         // feedback
       ]) =>
         div(".row .disease", { style: { margin: "0px 0px 0px 0px" } }, [
@@ -236,6 +241,7 @@ function DiseaseWorkflow(sources) {
             div(".row", []),
             div(".row", [displayPlots === "after tables" ? plots : div()]),
           ]),
+          exporter,
         ])
     )
 
@@ -244,7 +250,8 @@ function DiseaseWorkflow(sources) {
       logger(state$, "state$"),
       binnedPlots.log,
       filterForm.log,
-      signatureForm.log
+      signatureForm.log,
+      exporter.log,
     ),
     DOM: vdom$,
     onion: xs.merge(
@@ -254,6 +261,7 @@ function DiseaseWorkflow(sources) {
       binnedPlots.onion,
       headTable.onion,
       tailTable.onion,
+      exporter.onion,
       scenarioReducer$,
       uiReducer$,
     ),
@@ -266,6 +274,9 @@ function DiseaseWorkflow(sources) {
       tailTable.HTTP
     ),
     popup: scenarioPopup$,
+    modal: exporter.modal,
+    fab: exporter.fab,
+    clipboard: exporter.clipboard,
   }
 }
 

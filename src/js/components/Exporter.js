@@ -1,6 +1,6 @@
 import xs from "xstream"
 import { div, i, ul, li, p, input, button, span, a } from "@cycle/dom"
-import { isEmpty } from "ramda"
+import { isEmpty, mergeLeft } from "ramda"
 import { loggerFactory } from "../utils/logger"
 import delay from "xstream/extra/delay"
 import sampleCombine from "xstream/extra/sampleCombine"
@@ -30,7 +30,7 @@ function intent(domSource$) {
   }
 }
 
-function model(actions, state$, vega$) {
+function model(actions, state$, vega$, config) {
   
   const openModal$ = actions.modalTrigger$
     .map(_ => ({ el: '#modal-exporter', state: 'open' }))
@@ -41,25 +41,25 @@ function model(actions, state$, vega$) {
     return data != undefined && !isEmpty(data)
   }
 
-  const signaturePresent$ = state$.map((state) => notEmptyOrUndefined(state.form.signature.output)).startWith(false)
+  const signaturePresent$ = state$.map((state) => notEmptyOrUndefined(state.form.signature?.output)).startWith(false)
   const plotsPresent$ = state$.map((state) => notEmptyOrUndefined(state.plots.data)).startWith(false)
-  const headTablePresent$ = state$.map((state) => notEmptyOrUndefined(state.headTable.data)).startWith(false)
-  const tailTablePresent$ = state$.map((state) => notEmptyOrUndefined(state.tailTable.data)).startWith(false)
+  const headTablePresent$ = state$.map((state) => notEmptyOrUndefined(state.headTable?.data)).startWith(false)
+  const tailTablePresent$ = state$.map((state) => notEmptyOrUndefined(state.tailTable?.data)).startWith(false)
 
   const url$ = state$.map((state) => state.routerInformation.pageStateURL).startWith("")
-  const signature$ = state$.map((state) => state.form.signature.output).startWith("")
+  const signature$ = state$.map((state) => state.form.signature?.output).startWith("")
   const similarityPlot$ = vega$
-    .filter(vega => vega.el == '#simplot')
+    .filter(vega => vega.el == config.plot)
     .map((vega) => xs.fromPromise(vega.view.toImageURL('png')))
     .flatten()
     .startWith("")
 
-  const headTableCsv$ = state$.map((state) => state.headTable.data)
+  const headTableCsv$ = state$.map((state) => state.headTable?.data)
     .filter((data) => notEmptyOrUndefined(data))
     .map((data) => convertToCSV(data))
     .startWith("")
   
-  const tailTableCsv$ = state$.map((state) => state.tailTable.data)
+  const tailTableCsv$ = state$.map((state) => state.tailTable?.data)
     .filter((data) => notEmptyOrUndefined(data))
     .map((data) => convertToCSV(data))
     .startWith("")
@@ -285,8 +285,7 @@ function view(state$, dataPresent, exportData) {
 
 
 
-function Exporter(sources) {
-
+function Exporter(sources, config) {
 
   const logger = loggerFactory(
     "exporter",
@@ -294,11 +293,16 @@ function Exporter(sources) {
     "settings.common.debug"
   )
 
+  const defaultConfig = {
+    plot: "#simplot",
+  }
+  const fullConfig = mergeLeft(config, defaultConfig)
+
   const state$ = sources.onion.state$
 
   const actions = intent(sources.DOM)
 
-  const model_ = model(actions, state$, sources.vega)
+  const model_ = model(actions, state$, sources.vega, fullConfig)
 
   const vdom$ = view(state$, model_.dataPresent, model_.exportData)
 

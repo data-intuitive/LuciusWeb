@@ -13,6 +13,7 @@ import { initSettings } from '../configuration.js'
 import { Filter, compoundFilterLens } from '../components/Filter'
 import { loggerFactory } from '../utils/logger'
 import { SampleTable, sampleTableLens } from '../components/SampleTable/SampleTable'
+import { Exporter } from "../components/Exporter"
 
 // Support for ghost mode
 import { scenario } from '../scenarios/diseaseScenario'
@@ -76,6 +77,8 @@ function CorrelationWorkflow(sources) {
     // const tailTable = isolate(tailTableContainer, { onion: tailTableLens })
     //     ({...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ query: s, filter: f })).remember() });
 
+    const exporter = Exporter(sources, {plot: "#corrplot"})
+
     const pageStyle = {
         style: {
             fontSize: '14px',
@@ -93,6 +96,7 @@ function CorrelationWorkflow(sources) {
             // headTable.DOM,
             // tailTable.DOM,
             // feedback$
+            exporter.DOM,
         )
         .map(([
                 form,
@@ -101,6 +105,7 @@ function CorrelationWorkflow(sources) {
                 // headTable,
                 // tailTable,
                 // feedback
+                exporter,
             ]) =>
             div('.row .correlation', { style: { margin: '0px 0px 0px 0px' } }, [
                 form,
@@ -112,22 +117,25 @@ function CorrelationWorkflow(sources) {
                     // div('.row', []),
                     // div('.col .s12', [tailTable]),
                     // div('.row', [])
-                ])
+                ]),
+                exporter,
             ])
         );
 
     return {
         log: xs.merge(
             // logger(state$, 'state$'),
+            exporter.log,
         ),
         DOM: vdom$,
         onion: xs.merge(
             defaultReducer$,
             correlationForm.onion,
             // filterForm.onion,
-          correlationPlot.onion,
+            correlationPlot.onion,
             // headTable.onion,
             // tailTable.onion,
+            exporter.onion,
             scenarioReducer$
         ),
         vega: xs.merge(
@@ -139,7 +147,10 @@ function CorrelationWorkflow(sources) {
             // headTable.HTTP,
             // tailTable.HTTP
         ),
-        popup: scenarioPopup$
+        popup: scenarioPopup$,
+        modal: exporter.modal,
+        fab: exporter.fab,
+        clipboard: exporter.clipboard,
     };
 }
 

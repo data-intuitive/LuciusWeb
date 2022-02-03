@@ -35,12 +35,24 @@ const checkLens = {
 };
 
 const checkLens1 = { 
-  get: state => ({query: state.core.query1, settings: state.settings}),
+  get: state => ({
+    query: state.core.query1, 
+    settings: state.settings,
+    search: state.search1,
+    searchAutoRun: state.searchAutoRun,
+    validated: state.core.validated1
+  }),
   set: (state, childState) => ({...state, core : {...state.core, query1: childState.query}})
 };
 
 const checkLens2 = { 
-  get: state => ({query: state.core.query2, settings: state.settings}),
+  get: state => ({
+    query: state.core.query2,
+    settings: state.settings,
+    search: state.search2,
+    searchAutoRun: state.searchAutoRun,
+    validated: state.core.validated2
+  }),
   set: (state, childState) => ({...state, core : {...state.core, query2: childState.query}})
 };
 

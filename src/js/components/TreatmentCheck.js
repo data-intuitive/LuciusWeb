@@ -4,10 +4,9 @@ import { prop, equals, mergeAll } from "ramda"
 import xs from "xstream"
 import dropRepeats from "xstream/extra/dropRepeats"
 import debounce from "xstream/extra/debounce"
-import delay from "xstream/extra/delay"
-import flattenConcurrently from "xstream/extra/flattenConcurrently"
 import { loggerFactory } from "../utils/logger"
 import { dirtyUiReducer } from "../utils/ui"
+import { typer } from "../utils/searchUtils"
 
 const checkLens = {
   get: (state) => ({
@@ -15,6 +14,7 @@ const checkLens = {
     settings: state.settings,
     search: state.params?.treatment,
     searchAutoRun: state.params?.autorun,
+    searchTyper: state.params?.typer,
   }),
   set: (state, childState) => ({
     ...state,
@@ -57,26 +57,8 @@ function TreatmentCheck(sources) {
 
   const acInput$ = sources.ac
 
-  const search$ = state$
-    .map((state) => state.search)
-    .filter((search) => search !== undefined)
-    .compose(dropRepeats(equals))
-    .compose(delay(100)) // add delay so newInput$ can see a difference later
-
-  const searchTyper$ = search$
-    .map((search) => {
-      const l = search.length
-      const range = Array(l)
-        .fill()
-        .map((_, index) => index + 1)
-
-      return xs
-        .fromArray(
-          range.map((i) => xs.of(search.substr(0, i)).compose(delay(100 * i)))
-        )
-        .compose(flattenConcurrently)
-    })
-    .flatten()
+  // Get input from search query, either slowly typed or in one go
+  const typer$ = typer(state$, "search", "searchTyper")
 
   const input$ = xs.merge(
     sources.DOM.select(".treatmentQuery")
@@ -88,8 +70,7 @@ function TreatmentCheck(sources) {
       .filter((state) => typeof state.core.ghostinput !== "undefined")
       .map((state) => state.core.input)
       .compose(dropRepeats()),
-    // searchTyper$,
-    search$
+    typer$,
   )
 
   // When the component should not be shown, including empty signature

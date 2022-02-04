@@ -150,7 +150,7 @@ function view(state$, dataPresent, exportData, config) {
             span(".btn-floating .btn-large", i(".large .material-icons", "share")),
             ul([
                 li(span(".btn-floating .export-clipboard-link", i(".material-icons", "link"))),
-                li(span(".btn-floating .export-clipboard-signature", i(".material-icons", "content_copy"))),
+                li(span(".btn-floating .export-clipboard-signature " + config.fabSignature, i(".material-icons", "content_copy"))),
                 // li(span(".btn-floating .export-file-report", i(".material-icons", "picture_as_pdf"))),
                 li(span(".btn-floating .modal-open-btn", i(".material-icons", "open_with"))),
                 // li(span(".btn-floating .test-btn", i(".material-icons", "star"))),
@@ -232,7 +232,7 @@ function view(state$, dataPresent, exportData, config) {
 
 
 
-function Exporter(sources, config) {
+function Exporter(sources) {
 
   const logger = loggerFactory(
     "exporter",
@@ -241,8 +241,9 @@ function Exporter(sources, config) {
   )
 
   const defaultConfig = {
-    plotId: "#simplot",
-    plotName: "binned similarity"
+    plotId: "#simplot", // id of the div passed to vega
+    plotName: "binned similarity", // part of the text to be displayed for plot copy/download
+    fabSignature: "", // part of FAB class name, set to "", ".hide" or ".disabled"
   }
   const fullConfig = mergeLeft(sources.config, defaultConfig)
 

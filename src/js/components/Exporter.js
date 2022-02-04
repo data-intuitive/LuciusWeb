@@ -171,11 +171,6 @@ function view(state$, dataPresent, exportData, config) {
         exportData.tailTableCsv$,
       )
       .map(([signaturePresent, plotsPresent, headTablePresent, tailTablePresent, url, signature, similarityPlot, headTableCsv, tailTableCsv]) => {
-        const signatureAvailable = signaturePresent ? "" : " .disabled"
-        const plotsAvailable = plotsPresent ? "" : " .disabled"
-        const headTableAvailable = headTablePresent ? "" : " .disabled"
-        const tailTableAvailable = tailTablePresent ? "" : " .disabled"
-        const reportAvailable = " .disabled"
 
         const urlFile = "data:text/plain;charset=utf-8," + url
         const signatureFile = "data:text/plain;charset=utf-8," + signature
@@ -183,86 +178,38 @@ function view(state$, dataPresent, exportData, config) {
         const headTableCsvFile = "data:text/tsv;charset=utf-8," + encodeURIComponent(headTableCsv)
         const tailTableCsvFile = "data:text/tsv;charset=utf-8," + encodeURIComponent(tailTableCsv)
 
+        const addExportDiv = (text, clipboardId, fileData, fileName, available) => {
+          const availableText = available ? "" : " .disabled"
+
+          return div(".row", [
+            span(".col .s6 .push-s1", text),
+            span(".btn .col .s1 .offset-s1 " + clipboardId + availableText, i(".material-icons", "content_copy")),
+            a(".btn .col .s1 .offset-s1" + availableText,
+              {
+                props: {
+                  href: fileData,
+                  download: fileName,
+                },
+              },
+              i(".material-icons", "file_download"),
+            ),
+          ])
+        }
+
         return div([
           div("#modal-exporter.modal", [
             div(".modal-content", [
               div(".row .title", 
                 p(".col .s12", "Export to clipboard or file")
               ),
-              div(".row", [
-                span(".col .s6 .push-s1", "Create link to this page's state"),
-                span(".btn .col .s1 .offset-s1 .export-clipboard-link", i(".material-icons", "content_copy")),
-                // span(".btn .col .s1 .offset-s1 .export-file-link", i(".material-icons", "file_download")),
-                a(".btn .col .s1 .offset-s1",
-                  {
-                    props: {
-                      href: urlFile,
-                      download: "url.txt",
-                    },
-                  },
-                  i(".material-icons", "file_download"),
-                ),
-              ]),
-              div(".row", [
-                span(".col .s6 .push-s1", "Copy signature"),
-                span(".btn .col .s1 .offset-s1 .export-clipboard-signature" + signatureAvailable, i(".material-icons", "content_copy")),
-                // span(".btn .col .s1 .offset-s1 .export-file-signature" + signatureAvailable, i(".material-icons", "file_download")),
-                a(".btn .col .s1 .offset-s1" + signatureAvailable,
-                  {
-                    props: {
-                      href: signatureFile,
-                      download: "signature.txt",
-                    },
-                  },
-                  i(".material-icons", "file_download"),
-                ),
-              ]),
-              div(".row", [
-                span(".col .s6 .push-s1", "Copy " + config.plotName + " plot"),
-                span(".btn .col .s1 .offset-s1 .export-clipboard-plots" + plotsAvailable, i(".material-icons", "content_copy")),
-                // span(".btn .col .s1 .offset-s1 .export-file-plots" + plotsAvailable, i(".material-icons", "file_download")),
-                a(".btn .col .s1 .offset-s1" + plotsAvailable,
-                  {
-                    props: {
-                      href: plotsFile,
-                      download: "plot.png",
-                    },
-                  },
-                  i(".material-icons", "file_download"),
-                ),
-              ]),
-              div(".row", [
-                span(".col .s6 .push-s1", "Copy top table"),
-                span(".btn .col .s1 .offset-s1 .export-clipboard-headTable" + headTableAvailable, i(".material-icons", "content_copy")),
-                // span(".btn .col .s1 .offset-s1 .export-file-headTable" + headTableAvailable, i(".material-icons", "file_download")),
-                a(".btn .col .s1 .offset-s1" + headTableAvailable,
-                  {
-                    props: {
-                      href: headTableCsvFile,
-                      download: "table.tsv",
-                    },
-                  },
-                  i(".material-icons", "file_download"),
-                ),
-              ]),
-              div(".row", [
-                span(".col .s6 .push-s1", "Copy bottom table"),
-                span(".btn .col .s1 .offset-s1 .export-clipboard-tailTable" + tailTableAvailable, i(".material-icons", "content_copy")),
-                // span(".btn .col .s1 .offset-s1 .export-file-tailTable" + bottomTableAvailable, i(".material-icons", "file_download")),
-                a(".btn .col .s1 .offset-s1" + tailTableAvailable,
-                  {
-                    props: {
-                      href: tailTableCsvFile,
-                      download: "table.tsv",
-                    },
-                  },
-                  i(".material-icons", "file_download"),
-                ),
-              ]),
+              addExportDiv("Create link to this page's state", ".export-clipboard-link", urlFile, "url.txt", true),
+              addExportDiv("Copy signature", ".export-clipboard-signature", signatureFile, "signature.txt", signaturePresent),
+              addExportDiv("Copy " + config.plotName + " plot", ".export-clipboard-plots", plotsFile, "plot.png", plotsPresent),
+              addExportDiv("Copy top table", ".export-clipboard-headTable", headTableCsvFile, "table.tsv", headTablePresent),
+              addExportDiv("Copy bottom table", ".export-clipboard-tailTable", tailTableCsvFile, "table.tsv", tailTablePresent),
               div(".row", [
                 span(".col .s6 .push-s1", "Export report"),
-                // span(".btn .col .s1 .offset-s1", i(".material-icons", "content_copy")),
-                span(".btn .col .s1 .offset-s3 .export-file-report" + reportAvailable, i(".material-icons", "file_download")),
+                span(".btn .col .s1 .offset-s3 .export-file-report .disabled", i(".material-icons", "file_download")),
               ]),
             ]),
             div(".modal-footer", [

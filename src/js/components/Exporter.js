@@ -6,6 +6,16 @@ import delay from "xstream/extra/delay"
 import sampleCombine from "xstream/extra/sampleCombine"
 import { convertToCSV } from "../utils/export"
 
+/**
+ * @module components/Exporter
+ */
+
+/**
+ * Get triggers from button presses in the DOM
+ * @function intent
+ * @param {*} domSource$ 
+ * @returns object containing trigger streams
+ */
 function intent(domSource$) {
   const exportLinkTrigger$ = domSource$.select(".export-clipboard-link").events("click")
   const exportSignatureTrigger$ = domSource$.select(".export-clipboard-signature").events("click")
@@ -30,6 +40,23 @@ function intent(domSource$) {
   }
 }
 
+/**
+ * collect data to be made available for copy/download
+ * trigger modal to be opened or closed
+ * send data to clipboard when triggered
+ * 
+ * @function model
+ * @param {Object} actions object of trigger streams
+ * @param {Stream} state$ full state
+ * @param {Stream} vega$ stream of vega objects, to be filtered 
+ * @param {Object} config configuration object passed from workflow
+ * @returns Object with 
+ *            * reducers$ placeholder for reducers
+ *            * modal$ data to be sent to the modal driver
+ *            * clipboard$ data to be sent to the clipboard driver
+ *            * dataPresent Object with booleans for what data is available
+ *            * exportData Object with data
+ */
 function model(actions, state$, vega$, config) {
   
   const openModal$ = actions.modalTrigger$
@@ -142,6 +169,14 @@ function model(actions, state$, vega$, config) {
   }
 }
 
+/**
+ * @function view
+ * @param {Stream} state$ full state
+ * @param {Object} dataPresent object with booleans of what data is available
+ * @param {Object} exportData object with available data
+ * @param {Object} config configuration object passed from workflow
+ * @returns Vdom div object with nested children for FAB and modal
+ */
 function view(state$, dataPresent, exportData, config) {
 
     const fab$ = dataPresent.signaturePresent$

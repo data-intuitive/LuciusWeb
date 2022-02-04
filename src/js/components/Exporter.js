@@ -49,7 +49,7 @@ function model(actions, state$, vega$, config) {
   const url$ = state$.map((state) => state.routerInformation.pageStateURL).startWith("")
   const signature$ = state$.map((state) => state.form.signature?.output).startWith("")
   const similarityPlot$ = vega$
-    .filter(vega => vega.el == config.plot)
+    .filter(vega => vega.el == config.plotId)
     .map((vega) => xs.fromPromise(vega.view.toImageURL('png')))
     .flatten()
     .startWith("")
@@ -142,7 +142,7 @@ function model(actions, state$, vega$, config) {
   }
 }
 
-function view(state$, dataPresent, exportData) {
+function view(state$, dataPresent, exportData, config) {
 
     const fab$ = dataPresent.signaturePresent$
       .map((signature) =>
@@ -218,7 +218,7 @@ function view(state$, dataPresent, exportData) {
                 ),
               ]),
               div(".row", [
-                span(".col .s6 .push-s1", "Copy binned plots"),
+                span(".col .s6 .push-s1", "Copy " + config.plotName + " plot"),
                 span(".btn .col .s1 .offset-s1 .export-clipboard-plots" + plotsAvailable, i(".material-icons", "content_copy")),
                 // span(".btn .col .s1 .offset-s1 .export-file-plots" + plotsAvailable, i(".material-icons", "file_download")),
                 a(".btn .col .s1 .offset-s1" + plotsAvailable,
@@ -294,9 +294,10 @@ function Exporter(sources, config) {
   )
 
   const defaultConfig = {
-    plot: "#simplot",
+    plotId: "#simplot",
+    plotName: "binned similarity"
   }
-  const fullConfig = mergeLeft(config, defaultConfig)
+  const fullConfig = mergeLeft(sources.config, defaultConfig)
 
   const state$ = sources.onion.state$
 
@@ -304,7 +305,7 @@ function Exporter(sources, config) {
 
   const model_ = model(actions, state$, sources.vega, fullConfig)
 
-  const vdom$ = view(state$, model_.dataPresent, model_.exportData)
+  const vdom$ = view(state$, model_.dataPresent, model_.exportData, fullConfig)
 
   const fabInit$ = xs.of({
       state: "init",

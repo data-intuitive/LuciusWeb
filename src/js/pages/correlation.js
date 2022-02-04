@@ -77,7 +77,13 @@ function CorrelationWorkflow(sources) {
     // const tailTable = isolate(tailTableContainer, { onion: tailTableLens })
     //     ({...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ query: s, filter: f })).remember() });
 
-    const exporter = Exporter(sources, {plot: "#corrplot"})
+    const exporter = Exporter({
+        ...sources, 
+        config: {
+            plotId: "#corrplot",
+            plotName: "correlation"
+        }
+    })
 
     const pageStyle = {
         style: {

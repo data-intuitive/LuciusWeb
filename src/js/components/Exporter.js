@@ -75,7 +75,8 @@ function model(actions, state$, vega$, config) {
 
   const url$ = state$.map((state) => state.routerInformation.pageStateURL).startWith("")
   const signature$ = state$.map((state) => state.form.signature?.output).startWith("")
-  const similarityPlot$ = vega$
+  // result already contains 'data:image/png;base64,'
+  const plotFile$ = vega$
     .filter(vega => vega.el == config.plotId)
     .map((vega) => xs.fromPromise(vega.view.toImageURL('png')))
     .flatten()
@@ -91,6 +92,11 @@ function model(actions, state$, vega$, config) {
     .map((data) => convertToCSV(data))
     .startWith("")
 
+  const urlFile$ = url$.map(url => "data:text/plain;charset=utf-8," + url)
+  const signatureFile$ = signature$.map(signature => "data:text/plain;charset=utf-8," + signature)
+  const headTableCsvFile$ = headTableCsv$.map(headTableCsv => "data:text/tsv;charset=utf-8," + encodeURIComponent(headTableCsv))
+  const tailTableCsvFile$ = tailTableCsv$.map(tailTableCsv => "data:text/tsv;charset=utf-8," + encodeURIComponent(tailTableCsv))
+
   const clipboardLink$ = actions.exportLinkTrigger$
     .compose(sampleCombine(url$))
     .map(([_, url]) => url)
@@ -102,7 +108,7 @@ function model(actions, state$, vega$, config) {
     .remember()
 
   const clipboardPlots$ = actions.exportPlotsTrigger$
-    .compose(sampleCombine(similarityPlot$))
+    .compose(sampleCombine(plotFile$))
     .map(([_, data]) => {
       // input data is "data:image/png;base64,abcdef0123456789..."
       const parts = data.split(';base64,');
@@ -131,7 +137,7 @@ function model(actions, state$, vega$, config) {
     .remember()
 
   const testAction$ = actions.testTrigger$
-    .compose(sampleCombine(similarityPlot$))
+    .compose(sampleCombine(plotFile$))
     .map(([_, data]) => {
       // input data is "data:image/png;base64,abcdef0123456789..."
       const parts = data.split(';base64,');
@@ -161,10 +167,11 @@ function model(actions, state$, vega$, config) {
     },
     exportData: {
       url$: url$,
-      signature$: signature$,
-      similarityPlot$: similarityPlot$,
-      headTableCsv$: headTableCsv$,
-      tailTableCsv$: tailTableCsv$,
+      urlFile$: urlFile$,
+      signatureFile$: signatureFile$,
+      plotFile$: plotFile$,
+      headTableCsvFile$: headTableCsvFile$,
+      tailTableCsvFile$: tailTableCsvFile$,
     }
   }
 }
@@ -200,19 +207,24 @@ function view(state$, dataPresent, exportData, config) {
         dataPresent.headTablePresent$,
         dataPresent.tailTablePresent$,
         exportData.url$,
-        exportData.signature$,
-        exportData.similarityPlot$,
-        exportData.headTableCsv$,
-        exportData.tailTableCsv$,
+        exportData.urlFile$,
+        exportData.signatureFile$,
+        exportData.plotFile$,
+        exportData.headTableCsvFile$,
+        exportData.tailTableCsvFile$,
       )
-      .map(([signaturePresent, plotsPresent, headTablePresent, tailTablePresent, url, signature, similarityPlot, headTableCsv, tailTableCsv]) => {
-
-        const urlFile = "data:text/plain;charset=utf-8," + url
-        const signatureFile = "data:text/plain;charset=utf-8," + signature
-        const plotsFile = similarityPlot
-        const headTableCsvFile = "data:text/tsv;charset=utf-8," + encodeURIComponent(headTableCsv)
-        const tailTableCsvFile = "data:text/tsv;charset=utf-8," + encodeURIComponent(tailTableCsv)
-
+      .map(([
+        signaturePresent,
+        plotsPresent,
+        headTablePresent,
+        tailTablePresent,
+        url,
+        urlFile,
+        signatureFile,
+        plotFile,
+        headTableCsvFile,
+        tailTableCsvFile
+      ]) => {
         const addExportDiv = (text, clipboardId, fileData, fileName, available) => {
           const availableText = available ? "" : " .disabled"
 
@@ -239,7 +251,7 @@ function view(state$, dataPresent, exportData, config) {
               ),
               addExportDiv("Create link to this page's state", ".export-clipboard-link", urlFile, "url.txt", true),
               addExportDiv("Copy signature", ".export-clipboard-signature", signatureFile, "signature.txt", signaturePresent),
-              addExportDiv("Copy " + config.plotName + " plot", ".export-clipboard-plots", plotsFile, "plot.png", plotsPresent),
+              addExportDiv("Copy " + config.plotName + " plot", ".export-clipboard-plots", plotFile, "plot.png", plotsPresent),
               addExportDiv("Copy top table", ".export-clipboard-headTable", headTableCsvFile, "table.tsv", headTablePresent),
               addExportDiv("Copy bottom table", ".export-clipboard-tailTable", tailTableCsvFile, "table.tsv", tailTablePresent),
               div(".row", [

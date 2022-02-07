@@ -231,7 +231,7 @@ function view(state$, dataPresent, exportData, config) {
           return div(".row", [
             span(".col .s6 .push-s1", text),
             span(".btn .col .s1 .offset-s1 .waves-effect .waves-light " + clipboardId + availableText, i(".material-icons", "content_copy")),
-            a(".btn .col .s1 .offset-s1 .waves-effect .waves-light " + availableText,
+            a(".btn .col .s1 .offset-s1 .waves-effect .waves-light .paddingfix " + availableText,
               {
                 props: {
                   href: fileData,
@@ -239,7 +239,7 @@ function view(state$, dataPresent, exportData, config) {
                 },
               },
               i(".material-icons", "file_download"),
-            ),
+            )
           ])
         }
 

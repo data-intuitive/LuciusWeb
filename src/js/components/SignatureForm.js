@@ -8,14 +8,23 @@ import { ENTER_KEYCODE } from '../utils/keycodes.js'
 import { SignatureCheck, checkLens } from '../components/SignatureCheck'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import { loggerFactory } from '../utils/logger'
+import { dirtyUiReducer } from '../utils/ui'
 
 // Granular access to global state and parts of settings
 const formLens = {
-  get: state => ({ form: state.form, settings: { form: state.settings.form, api: state.settings.api, common: state.settings.common } }),
-  set: (state, childState) => ({ ...state, form: childState.form })
+  get: (state) => ({
+    core: state.form,
+    settings: {
+      form: state.settings.form,
+      api: state.settings.api,
+      common: state.settings.common,
+    },
+    ui: state.ui?.form ?? {},
+  }),
+  set: (state, childState) => ({ ...state, form: {...childState.core } }),
 }
 
-function model(newQuery$, state$, sources, signatureCheckSink) {
+function model(newQuery$, state$, sources, signatureCheckSink, actions$) {
   
   // Set a default signature for demo purposes
   const setDefault$ = sources.DOM.select('.Default').events('click')
@@ -24,8 +33,8 @@ function model(newQuery$, state$, sources, signatureCheckSink) {
     .compose(sampleCombine(state$))
     .map(([_, state]) => prevState => {
       let newState = clone(prevState)
-      newState.form.query = state.settings.common.example.signature //'ENSG00000012048 -WRONG HSPA1A DNAJB1 DDIT4 -TSEN2'
-      newState.form.validated = false
+      newState.core.query = state.settings.common.example.signature //'ENSG00000012048 -WRONG HSPA1A DNAJB1 DDIT4 -TSEN2'
+      newState.core.validated = false
       return newState
     })
 
@@ -35,7 +44,7 @@ function model(newQuery$, state$, sources, signatureCheckSink) {
     if (typeof prevState === 'undefined') {
       // Settings are handled higher up, but in case we use this component standalone, ...
       return {
-        form: {
+        core: {
           query: '',
           validated: false
         },
@@ -44,7 +53,7 @@ function model(newQuery$, state$, sources, signatureCheckSink) {
     } else {
       return ({
         ...prevState,
-        form: {
+        core: {
           query: '',
           validated: false
         },
@@ -56,7 +65,7 @@ function model(newQuery$, state$, sources, signatureCheckSink) {
   const queryReducer$ = newQuery$.map(query => prevState => {
     // Signatureform -- queryReducer
     let newState = clone(prevState)
-    newState.form.query = query
+    newState.core.query = query
     return newState
   })
 
@@ -64,7 +73,7 @@ function model(newQuery$, state$, sources, signatureCheckSink) {
   const invalidateReducer$ = newQuery$.map(_ => prevState => {
     // Signatureform -- invalidateReducer
     let newState = clone(prevState)
-    newState.form.validated = false
+    newState.core.validated = false
     return newState
   })
 
@@ -73,32 +82,50 @@ function model(newQuery$, state$, sources, signatureCheckSink) {
     .map(_ => prevState => {
       // Signatureform -- validateReducer
       let newState = clone(prevState)
-      newState.form.validated = true
+      newState.core.validated = true
       return newState
     })
 
   // When update is clicked, update the query. Onionify does the rest
   const childReducer$ = signatureCheckSink.onion
 
-  return xs.merge(
-    defaultReducer$,
-    setDefaultReducer$,
-    queryReducer$,
-    invalidateReducer$,
-    childReducer$,
-    validateReducer$,
-  )
+  // When GO clicked or enter -> send updated 'value' to sink
+  // Maybe catch when no valid query?
+  const query$ = xs.merge(
+    actions$.update$,
+    // Ghost mode
+    sources.onion.state$.map(state => state.core.ghost).filter(ghost => ghost).compose(dropRepeats())
+    )
+    .compose(sampleCombine(state$))
+    .map(([_, state]) => state.core.query)
+    .remember()
+
+  // Compare current query with committed query output to see if this component is currently in a dirty state
+  const dirtyUiReducer$ = dirtyUiReducer(query$, newQuery$)
+
+  return [
+    xs.merge(
+        defaultReducer$,
+        setDefaultReducer$,
+        queryReducer$,
+        invalidateReducer$,
+        childReducer$,
+        validateReducer$,
+        dirtyUiReducer$,
+      ),
+    query$
+  ]
 }
 
 function view(state$, signatureCheckDom$) {
 
   // Valid query?
-  const validated$ = state$.map(state => state.form.validated)
+  const validated$ = state$.map(state => state.core.validated)
 
   var result$ = xs.combine(state$, signatureCheckDom$, validated$)
   .map(
     ([state, checkdom, validated]) => {
-      const query = state.form.query
+      const query = state.core.query
       return div(
         [
           div('.row .WF-header .white-text', { style: { padding: '20px 10px 10px 10px' } }, [
@@ -151,25 +178,14 @@ function SignatureForm(sources) {
   const newQuery$ = xs.merge(
     domSource$.select('.Query').events('input').map(ev => ev.target.value),
     // Ghost
-    state$.map(state => state.form.query).compose(dropRepeats())
+    state$.map(state => state.core.query).compose(dropRepeats())
   )
-
-  const reducers$ = model(newQuery$, state$, sources, signatureCheckSink)
-
-  const vdom$ = view(state$, signatureCheckDom$)
 
   const actions$ = intent(domSource$)
 
-  // When GO clicked or enter -> send updated 'value' to sink
-  // Maybe catch when no valid query?
-  const query$ = xs.merge(
-    actions$.update$,
-    // Ghost mode
-    sources.onion.state$.map(state => state.form.ghost).filter(ghost => ghost).compose(dropRepeats())
-    )
-    .compose(sampleCombine(state$))
-    .map(([_, state]) => state.form.query)
-    .remember()
+  const [reducers$, query$] = model(newQuery$, state$, sources, signatureCheckSink, actions$)
+
+  const vdom$ = view(state$, signatureCheckDom$)
 
   return {
     log: xs.merge(

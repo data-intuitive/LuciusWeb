@@ -91,7 +91,10 @@ function Check(sources) {
      */
     const initVdom$ = xs.periodic(200)
         .map(i => i % 4)
-        .map(i => span(".grey-text", ".".repeat(i)))
+        .map(i => [
+            span(".grey-text .testing", ".".repeat(i)), 
+            span(".grey-text .text-lighten-4 .testing2", ".".repeat(3-i))
+        ])
         .endWhen(validResponseJobs$)
 
     /**
@@ -124,11 +127,11 @@ function Check(sources) {
     const loadedVdom$ = xs.combine(responseMetric$, maxNormalTime$)
         .map(([metric, max]) =>
             (metric < max) ?
-            i('.material-icons .green-text .medium', 'done') :
-            i('.material-icons .red-text .medium', 'done')
+            i('.material-icons .green-text .medium .result-good', 'done') :
+            i('.material-icons .red-text .medium .result-busy', 'done')
         )
 
-    const errorVdom$ = invalidResponse$.mapTo(i('.material-icons .red-text .medium', 'trending_down'))
+    const errorVdom$ = invalidResponse$.mapTo(i('.material-icons .red-text .medium .result-down', 'trending_down'))
 
     const vdom$ = xs.merge(
         initVdom$,

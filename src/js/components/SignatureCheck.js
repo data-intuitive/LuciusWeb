@@ -24,18 +24,18 @@ const stateTemplate = {
 }
 
 const checkLens = { 
-  get: state => ({query: state.form.query, settings: state.settings}),
-  set: (state, childState) => ({...state, form : {...state.form, query: childState.query}})
+  get: state => ({query: state.core.query, settings: state.settings}),
+  set: (state, childState) => ({...state, core : {...state.core, query: childState.query}})
 };
 
 const checkLens1 = { 
-  get: state => ({query: state.form.query1, settings: state.settings}),
-  set: (state, childState) => ({...state, form : {...state.form, query1: childState.query}})
+  get: state => ({query: state.core.query1, settings: state.settings}),
+  set: (state, childState) => ({...state, core : {...state.core, query1: childState.query}})
 };
 
 const checkLens2 = { 
-  get: state => ({query: state.form.query2, settings: state.settings}),
-  set: (state, childState) => ({...state, form : {...state.form, query2: childState.query}})
+  get: state => ({query: state.core.query2, settings: state.settings}),
+  set: (state, childState) => ({...state, core : {...state.core, query2: childState.query}})
 };
 
 function SignatureCheck(sources) {
@@ -78,15 +78,31 @@ function SignatureCheck(sources) {
   // Helper function for rendering the table, based on the state
   const makeTable = (data) => {
     // let visible = visible1 //state.ux.checkSignatureVisible;
-    let rows = data.map(entry => [ 
-      (entry.inL1000) ? td([i('.small .material-icons', 'done')] ) : td('.red .lighten-4 .red-text .text-darken-4', [i('.small .material-icons', 'mode_edit')] ),
-      (entry.inL1000) ? td(entry.query) : td('.red .lighten-4 .red-text .text-darken-4', entry.query),
-      (entry.inL1000) ? td(entry.symbol) : td('.red .lighten-4 .red-text .text-darken-4', entry.symbol)
-    ]);
+
+    const entryToRow = (entry) => {
+      const e =
+        entry.hasOwnProperty("found") && entry.hasOwnProperty("dataType")
+          ? entry
+          : {
+              ...entry,
+              found: entry.inL1000,
+              dataType: entry.inL1000 ? "found" : "",
+            }
+
+      return [ 
+        (e.found) ? td([i('.small .material-icons', 'done')] ) : td('.red .lighten-4 .red-text .text-darken-4', [i('.small .material-icons', 'mode_edit')] ),
+        (e.found) ? td(e.query) : td('.red .lighten-4 .red-text .text-darken-4', e.query),
+        (e.found) ? td(e.symbol) : td('.red .lighten-4 .red-text .text-darken-4', e.symbol),
+        (e.found) ? td(e.dataType) : td('.red .lighten-4 .red-text .text-darken-4', 'N/A'),
+      ]
+    }
+
+    let rows = data.map(entry => entryToRow(entry));
     const header = tr([
-      th('In L1000?'),
+      th('Found?'),
       th('Input'),
-      th('Symbol')
+      th('Symbol'),
+      th('Gene space')
     ]);
 
     let body = [];
@@ -114,7 +130,7 @@ function SignatureCheck(sources) {
   const collapseUpdate$ = domSource$.select('.collapseUpdate').events('click');
   const collapseUpdateReducer$ = collapseUpdate$.compose(sampleCombine(data$))
     .map(([collapse, data]) => prevState => {
-      return ({...prevState, query : data.map(x => (x.inL1000) ? x.symbol : '').join(" ").replace(/\s\s+/g, ' ').trim()});
+      return ({...prevState, query : data.map(x => (x.found ?? x.inL1000) ? x.symbol : '').join(" ").replace(/\s\s+/g, ' ').trim()});
     });
 
   // The result of this component is an event when valid

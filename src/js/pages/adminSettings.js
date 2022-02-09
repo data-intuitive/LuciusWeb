@@ -1,12 +1,8 @@
-import {
-  div,
-  button,
-} from "@cycle/dom"
+import { div, button } from "@cycle/dom"
 import xs from "xstream"
 import isolate from "@cycle/isolate"
 import * as R from "ramda"
 import debounce from "xstream/extra/debounce"
-import dropRepeats from "xstream/extra/dropRepeats"
 import pairwise from "xstream/extra/pairwise"
 
 import { SettingsEditor } from "../components/SettingsEditor"
@@ -53,6 +49,20 @@ export function AdminSettings(sources) {
           type: "checkbox",
           class: ".switch",
           title: "Debug App?",
+          props: { type: "checkbox" },
+        },
+      ],
+    },
+    {
+      group: "strategy",
+      title: "Strategy Settings",
+      settings: [
+        {
+          field: "deployments",
+          type: "select",
+          class: ".switch",
+          title: "Deployments Strategy",
+          options: ["ours", "theirs"],
           props: { type: "checkbox" },
         },
       ],
@@ -245,12 +255,15 @@ export function AdminSettings(sources) {
           type: "text",
           title: "Max normal time for statistics query",
           props: { type: "text" },
-        }
+        },
       ],
     },
   ])
 
-  const AdminSettings = SettingsEditor({...sources, settings$: settingsConfig$})
+  const AdminSettings = SettingsEditor({
+    ...sources,
+    settings$: settingsConfig$,
+  })
 
   const vdom$ = xs
     .combine(settings$, AdminSettings.DOM)
@@ -280,7 +293,7 @@ export function AdminSettings(sources) {
   /**
    * Update deployment settings but only if it was changed
    * DropRepeats would 'let through' the initial value
-   * 
+   *
    * Deployment needs to be tackled globally, does not work in _isolation_
    * @const AdminSettings/deploymentUpdate$
    * @type {Stream}
@@ -289,19 +302,20 @@ export function AdminSettings(sources) {
     .compose(pairwise)
     .filter(([a, b]) => !R.equals(a.deployment.name, b.deployment.name))
     .map(([_, b]) => b)
-  
+
   /**
    * Settings update when deployment name is not set
    * @const AdminSettings/deploymentMissing$
    * @type {Stream}
    */
-  const deploymentMissing$ = settings$
-    .filter((settings) => settings.deployment.name === undefined)
+  const deploymentMissing$ = settings$.filter(
+    (settings) => settings.deployment.name === undefined
+  )
 
   /**
    * When deployment is changed or missing, fetch the appropriate deployment from deployments.js
    * overwrite the relevant entries (endpoints) of the various settings with the correct one
-   * 
+   *
    * @const AdminSettings/deploymentReducer$
    * @type {Reducer}
    */

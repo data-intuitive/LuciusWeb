@@ -21,7 +21,7 @@ import debounce from 'xstream/extra/debounce'
 import { loggerFactory } from "../utils/logger"
 import { TreatmentAnnotation } from "./TreatmentAnnotation"
 import { safeModelToUi } from "../modelTranslations"
-import { dirtyUiReducer, dirtyWrapperStream } from "../utils/ui"
+import { dirtyUiReducer, dirtyWrapperStream, busyUiReducer } from "../utils/ui"
 
 const emptyData = {
   body: {
@@ -105,6 +105,13 @@ function SampleSelection(sources) {
     dropRepeats((x, y) => equals(x.core, y.core))
   )
 
+  // State without data erased, to be used for the loading vdom as we don't want to display old data
+  const loadingState$ = state$
+    .map((state) => ({
+      ...state,
+      core: { ...state.core, data: []}
+    }))
+
   const request$ = newInput$.map((state) => {
     return {
       url:
@@ -138,7 +145,7 @@ function SampleSelection(sources) {
         }
       : {}
     const selectedClass = (selected) =>
-      selected ? ".black-text" : ".grey-text .text-lighten-2"
+      selected ? ".sampleSelected" : ".sampleDeselected"
 
     const dataSortAscend = sortWith([
       ascend(prop(state.core.sort)),
@@ -177,7 +184,15 @@ function SampleSelection(sources) {
       td(selectedClass(entry.use),
           ((_) => {
             const dose = entry.dose !== "N/A" ? entry.dose + " " + entry.dose_unit : entry.dose
-            return dose.length > 6 ? dose.substring(0, 6) + "..." : dose
+            const maxLength = 7
+            if (dose.length <= maxLength)
+              return dose
+            else if (isNaN(entry.dose) || entry.dose_unit >= 3)
+              return dose.substring(0, maxLength-1) + "..."
+              // adding '...' is quite small on screen (in non-monospaced fonts), so we're ignoring that
+            else
+              return Number(entry.dose).toFixed(maxLength - 3 - entry.dose_unit?.length) + " " + entry.dose_unit
+              // -3 = '0.' and ' '
           })()
       ),
       // td(selectedClass(entry.use), entry.batch),
@@ -246,7 +261,7 @@ function SampleSelection(sources) {
     rows.map((row) => body.push(tr(row)))
     const tableContent = [thead([header]), tbody(body)]
 
-    return div([
+    return div(".sampleSelection",[
       div(".row", [
         div(".col .s10 .offset-s1 .l10 .offset-l1", [
           table(".striped .centered", tableContent),
@@ -267,7 +282,7 @@ function SampleSelection(sources) {
   const initVdom$ = emptyState$.mapTo(div())
 
   const loadingVdom$ = request$
-    .compose(sampleCombine(state$))
+    .compose(sampleCombine(loadingState$))
     .map(([_, state]) =>
       // Use the same makeTable function, pass a initialization=true parameter and a body DOM with preloading
       makeTable(
@@ -286,6 +301,7 @@ function SampleSelection(sources) {
 
   const loadedVdom$ = xs
     .combine(modifiedState$, treatmentAnnotations.DOM)
+    .filter(([state, _]) => state.core.busy == false)
     .map(([state, annotation]) => makeTable(state, annotation, false))
 
   // Wrap component vdom with an extra div that handles being dirty
@@ -421,6 +437,9 @@ function SampleSelection(sources) {
     .compose(sampleCombine(state$))
     .map(([ev, state]) => state.core.output)
 
+  // Logic and reducer stream that monitors if this component is busy
+  const busyReducer$ = busyUiReducer(newInput$, data$)
+
   // Logic and reducer stream that monitors if this component became dirty
   const dirtyReducer$ = dirtyUiReducer(sampleSelection$, state$.map(state => state.core.output))
 
@@ -434,6 +453,7 @@ function SampleSelection(sources) {
       requestReducer$,
       dataReducer$,
       selectReducer$,
+      busyReducer$,
       sortReducer$,
       hoverReducer$,
       dirtyReducer$,

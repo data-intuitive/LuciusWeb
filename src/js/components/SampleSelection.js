@@ -201,7 +201,7 @@ function SampleSelection(sources) {
       td(selectedClass(entry.use), entry.significantGenes),
     ])
 
-    const sortableHeaderEntry = (id, text, state) =>
+    const sortableHeaderEntry = (id, text, state, sortable=true) =>
     {
       const currentSortId = state.core.sort
       const sortDirection = state.core.direction
@@ -215,7 +215,7 @@ function SampleSelection(sources) {
       
       return th(
           button(
-          ".btn-flat" + (loaded ? " .sortable" : ""),
+          ".btn-flat" + (loaded && sortable ? " .sortable" : ""),
           {
             style: {
               whiteSpace: "nowrap",
@@ -247,7 +247,7 @@ function SampleSelection(sources) {
     }
 
     const header = tr([
-      sortableHeaderEntry("use", "Use?", state),
+      sortableHeaderEntry("use", "Use?", state, false),
       sortableHeaderEntry("trt_id", safeModelToUi("id", state.settings.common.modelTranslations), state),
       sortableHeaderEntry("trt_name", "Name", state),
       sortableHeaderEntry("id", "Sample", state),

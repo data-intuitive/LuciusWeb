@@ -262,10 +262,10 @@ function view(state$, dataPresent, exportData, config) {
               addExportDiv("Copy " + config.plotName + " plot", ".export-clipboard-plots", plotFile, "plot.png", plotsPresent),
               addExportDiv("Copy top table", ".export-clipboard-headTable", headTableCsvFile, "table.tsv", headTablePresent),
               addExportDiv("Copy bottom table", ".export-clipboard-tailTable", tailTableCsvFile, "table.tsv", tailTablePresent),
-              div(".row", [
-                span(".col .s6 .push-s1", "Export report"),
-                span(".btn .col .s1 .offset-s3 .export-file-report .disabled", i(".material-icons", "file_download")),
-              ]),
+              // div(".row", [
+              //   span(".col .s6 .push-s1", "Export report"),
+              //   span(".btn .col .s1 .offset-s3 .export-file-report .disabled", i(".material-icons", "file_download")),
+              // ]),
             ]),
             div(".modal-footer", [
               button(".export-close .col .s8 .push-s2 .btn", "Close"),

@@ -1,9 +1,10 @@
 import xs from "xstream"
 import { div, i, ul, li, p, input, button, span, a } from "@cycle/dom"
-import { isEmpty, mergeLeft } from "ramda"
+import { isEmpty, mergeLeft, equals } from "ramda"
 import { loggerFactory } from "../utils/logger"
 import delay from "xstream/extra/delay"
 import sampleCombine from "xstream/extra/sampleCombine"
+import dropRepeats from "xstream/extra/dropRepeats"
 import { convertToCSV } from "../utils/export"
 
 /**
@@ -186,19 +187,18 @@ function model(actions, state$, vega$, config) {
  */
 function view(state$, dataPresent, exportData, config) {
 
-    const fab$ = dataPresent.signaturePresent$
-      .map((signature) =>
+    const fab$ = xs
+      .of(        
         div(".fixed-action-btn", [
-            span(".btn-floating .btn-large", i(".large .material-icons", "share")),
-            ul([
-                li(span(".btn-floating .export-clipboard-link", i(".material-icons", "link"))),
-                li(span(".btn-floating .export-clipboard-signature " + config.fabSignature, i(".material-icons", "content_copy"))),
-                // li(span(".btn-floating .export-file-report", i(".material-icons", "picture_as_pdf"))),
-                li(span(".btn-floating .modal-open-btn", i(".material-icons", "open_with"))),
-                // li(span(".btn-floating .test-btn", i(".material-icons", "star"))),
-            ])
-        ]))
-        .startWith(div())
+          span(".btn-floating .btn-large", i(".large .material-icons", "share")),
+          ul([
+              li(span(".btn-floating .export-clipboard-link", i(".material-icons", "link"))),
+              li(span(".btn-floating .export-clipboard-signature " + config.fabSignature, i(".material-icons", "content_copy"))),
+              // li(span(".btn-floating .export-file-report", i(".material-icons", "picture_as_pdf"))),
+              li(span(".btn-floating .modal-open-btn", i(".material-icons", "open_with"))),
+              // li(span(".btn-floating .test-btn", i(".material-icons", "star"))),
+          ])
+      ]))
 
     const modal$ = xs
       .combine(
@@ -310,14 +310,16 @@ function Exporter(sources) {
 
   const vdom$ = view(state$, model_.dataPresent, model_.exportData, fullConfig)
 
-  const fabInit$ = xs.of({
+  const fabInit$ = vdom$.mapTo({
       state: "init",
       element: ".fixed-action-btn",
       options: {
           direction: "top",
         //   hoverEnabled: false,
       }
-  }).compose(delay(1000)).remember()
+    })
+    .compose(dropRepeats(equals)) // run just once
+    .compose(delay(1)) // let the vdom propagate first and next cycle initialize FAB
 
   return {
     log: xs.merge(logger(state$, "state$")),

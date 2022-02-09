@@ -440,12 +440,17 @@ export default function Index(sources) {
     // Don't output fields with undefined values
     const filteredState = pickBy(identity, state)
     const url = new URLSearchParams(filteredState)
+    const urlString = url.toString()
+
+    const fullUrl = urlString.length > 0
+      ? location.protocol + "//" + location.host + prevState.routerInformation.pathname + "?autorun&" + url.toString()
+      : location.protocol + "//" + location.host + prevState.routerInformation.pathname
 
     return {
       ...prevState,
       routerInformation: {
         ...prevState.routerInformation,
-        pageStateURL: location.protocol + "//" + location.host + prevState.routerInformation.pathname + "?" + url.toString(),
+        pageStateURL: fullUrl,
       }
     }
 

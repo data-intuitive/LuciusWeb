@@ -172,7 +172,15 @@ function SampleSelection(sources) {
       td(selectedClass(entry.use),
           ((_) => {
             const dose = entry.dose !== "N/A" ? entry.dose + " " + entry.dose_unit : entry.dose
-            return dose.length > 6 ? dose.substring(0, 6) + "..." : dose
+            const maxLength = 7
+            if (dose.length <= maxLength)
+              return dose
+            else if (isNaN(entry.dose) || entry.dose_unit >= 3)
+              return dose.substring(0, maxLength-1) + "..."
+              // adding '...' is quite small on screen (in non-monospaced fonts), so we're ignoring that
+            else
+              return Number(entry.dose).toFixed(maxLength - 3 - entry.dose_unit?.length) + " " + entry.dose_unit
+              // -3 = '0.' and ' '
           })()
       ),
       // td(selectedClass(entry.use), entry.batch),

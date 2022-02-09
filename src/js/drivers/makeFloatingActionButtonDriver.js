@@ -26,7 +26,19 @@ function makeFloatingActionButtonDriver() {
                     }
                     fab.close()
                 }
-                if (ev.state == 'open') {
+                else if (ev.state == 'update') {
+                    const currentlyOpen = fab?.isOpen
+                    const elem = document.querySelector(ev.element)
+                    if (elem == undefined)
+                        console.warn("fabDriver couldn't find element")
+                    else {
+                        fab.close()
+                        fab = M.FloatingActionButton.init(elem, ev.options);
+                        if (currentlyOpen && fab != undefined)
+                            fab.open()
+                    }
+                }
+                else if (ev.state == 'open') {
 
                     if (fab == undefined) {
 

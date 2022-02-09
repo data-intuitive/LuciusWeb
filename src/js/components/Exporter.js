@@ -187,18 +187,23 @@ function model(actions, state$, vega$, config) {
  */
 function view(state$, dataPresent, exportData, config) {
 
-    const fab$ = xs
-      .of(        
-        div(".fixed-action-btn", [
+    const fab$ = dataPresent.signaturePresent$
+    .map((present) => {
+      
+      const extraSigClass = config.fabSignature != "update"
+        ? config.fabSignature
+        : present ? "" : ".disabled"
+
+      return div(".fixed-action-btn", [
           span(".btn-floating .btn-large", i(".large .material-icons", "share")),
           ul([
-              li(span(".btn-floating .export-clipboard-link", i(".material-icons", "link"))),
-              li(span(".btn-floating .export-clipboard-signature " + config.fabSignature, i(".material-icons", "content_copy"))),
+              li(span(".btn-floating .export-clipboard-link .waves-effect.waves-light", i(".material-icons", "link"))),
+              li(span(".btn-floating .export-clipboard-signature .waves-effect.waves-light " + extraSigClass, i(".material-icons", "content_copy"))),
               // li(span(".btn-floating .export-file-report", i(".material-icons", "picture_as_pdf"))),
-              li(span(".btn-floating .modal-open-btn", i(".material-icons", "open_with"))),
+              li(span(".btn-floating .modal-open-btn .waves-effect.waves-light", i(".material-icons", "open_with"))),
               // li(span(".btn-floating .test-btn", i(".material-icons", "star"))),
           ])
-      ]))
+      ])})
 
     const modal$ = xs
       .combine(
@@ -298,7 +303,8 @@ function Exporter(sources) {
   const defaultConfig = {
     plotId: "#simplot", // id of the div passed to vega
     plotName: "binned similarity", // part of the text to be displayed for plot copy/download
-    fabSignature: "", // part of FAB class name, set to "", ".hide" or ".disabled"
+    fabSignature: "update", // part of FAB class name, set to "", ".hide" or ".disabled". 
+                            //"update" sets ".disabled" when the signature is not available and updates the FAB when it becomes available
   }
   const fullConfig = mergeLeft(sources.config, defaultConfig)
 
@@ -321,11 +327,24 @@ function Exporter(sources) {
     .compose(dropRepeats(equals)) // run just once
     .compose(delay(1)) // let the vdom propagate first and next cycle initialize FAB
 
+  const fabUpdate$ = model_.dataPresent.signaturePresent$
+    .filter(_ => fullConfig.fabSignature == "update")
+    .compose(dropRepeats(equals))
+    .mapTo({
+      state: "update",
+      element: ".fixed-action-btn",
+      options: {
+          direction: "top",
+        //   hoverEnabled: false,
+      }
+    })
+    .compose(delay(1)) // let the vdom propagate first and next cycle update FAB
+
   return {
     log: xs.merge(logger(state$, "state$")),
     DOM: vdom$,
     onion: model_.reducers$,
-    fab: fabInit$,
+    fab: xs.merge(fabInit$, fabUpdate$),
     modal: model_.modal$,
     clipboard: model_.clipboard$,
   }

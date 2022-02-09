@@ -82,7 +82,7 @@ function CorrelationWorkflow(sources) {
         config: {
             plotId: "#corrplot",
             plotName: "correlation",
-            fabSignature: ".disabled",
+            fabSignature: ".hide",
         }
     })
 

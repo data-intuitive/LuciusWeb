@@ -190,7 +190,10 @@ function DiseaseWorkflow(sources) {
       .remember(),
   })
 
-  const exporter = Exporter(sources)
+  const exporter = Exporter({
+    ...sources,
+    config: { fabSignature: ".hide" }
+  })
 
   /**
    * Style object used in div capsulating filter, displayPlots and tables

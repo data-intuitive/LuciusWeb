@@ -30,7 +30,17 @@
 }
 
 div #modal-exporter {
-    // background-color: green;
+    
+    div.title {
+        font-size: 1.5rem;
+    }
+
+    span.success {
+        background-color: green;
+    }
+    span.failure {
+        background-color: red;
+    }
 
     // clicking *directly* on the a download link makes the router(?) go nuts. make sure we always click the i
     // so to recapitulate, changing the padding fixes the underlying issue. the padding in itself is ok

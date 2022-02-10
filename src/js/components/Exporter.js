@@ -3,6 +3,7 @@ import { div, i, ul, li, p, input, button, span, a } from "@cycle/dom"
 import { isEmpty, mergeLeft, equals } from "ramda"
 import { loggerFactory } from "../utils/logger"
 import delay from "xstream/extra/delay"
+import debounce from "xstream/extra/debounce"
 import sampleCombine from "xstream/extra/sampleCombine"
 import dropRepeats from "xstream/extra/dropRepeats"
 import { convertToCSV } from "../utils/export"
@@ -142,6 +143,7 @@ function model(actions, state$, vega$, config) {
       }
       const blob = new Blob([uInt8Array], { type: imageType })
       return {
+        sender: "plot",
         type: imageType,
         data: blob,
       }
@@ -233,6 +235,12 @@ function view(state$, dataPresent, exportData, config, clipboard) {
           ])
       ])})
 
+    const clipboardResultAutoClear$ = xs
+      .merge(
+        clipboard.results$,
+        clipboard.results$.compose(debounce(2000)).mapTo({})
+      )
+
     const modal$ = xs
       .combine(
         dataPresent.signaturePresent$,
@@ -246,7 +254,7 @@ function view(state$, dataPresent, exportData, config, clipboard) {
         exportData.headTableCsvFile$,
         exportData.tailTableCsvFile$,
         clipboard.copyImagesPermission$,
-        clipboard.results$,
+        clipboardResultAutoClear$,
       )
       .map(([
         signaturePresent,
@@ -265,9 +273,13 @@ function view(state$, dataPresent, exportData, config, clipboard) {
 
         const copyImagesPermission = clipboardPermissions.state == "granted"
 
-        const addExportDiv = (text, clipboardId, fileData, fileName, available, clipboardAllowed=true, downloadAllowed=true) => {
+        const addExportDiv = (identifier, text, clipboardId, fileData, fileName, available, clipboardAllowed=true, downloadAllowed=true) => {
           const availableClipboardText = available && clipboardAllowed ? "" : " .disabled"
           const availableDownloadText = available && downloadAllowed ? "" : " .disabled"
+
+          const clipboardBtnResult = identifier != clipboardResult?.sender 
+            ? ""
+            : clipboardResult.state == "success" ? " .success" : " .failure"
 
           // Styling should prevent the user to click the 'a' directly; this causes the page div#root to be corrupted.
           // Work around is to make the internal 'i' the full size of the 'a' thus "catching" the initial click.
@@ -279,7 +291,7 @@ function view(state$, dataPresent, exportData, config, clipboard) {
           // Workaround is done in '.paddingfix' in the scss.
           return div(".row", [
             span(".col .s6 .push-s1", text),
-            span(".btn .col .s1 .offset-s1 .waves-effect .waves-light " + clipboardId + " " + availableClipboardText, i(".material-icons", "content_copy")),
+            span(".btn .col .s1 .offset-s1 .waves-effect .waves-light " + clipboardId + " " + availableClipboardText + clipboardBtnResult, i(".material-icons", "content_copy")),
             a(".btn .col .s1 .offset-s1 .waves-effect .waves-light .paddingfix " + availableDownloadText,
               {
                 props: {
@@ -297,13 +309,13 @@ function view(state$, dataPresent, exportData, config, clipboard) {
             div(".modal-content", [
               div(".row .title", [
                 p(".col .s12", "Export to clipboard or file"),
-                p(".col .s12", "" + clipboardResult.text),
+                //p(".col .s12", "" + clipboardResult.text),
               ]),
-              addExportDiv("Create link to this page's state", ".export-clipboard-link", urlFile, "url.txt", true),
-              addExportDiv("Copy signature", ".export-clipboard-signature", signatureFile, "signature.txt", signaturePresent),
-              addExportDiv("Copy " + config.plotName + " plot", ".export-clipboard-plots", plotFile, "plot.png", plotsPresent, copyImagesPermission),
-              addExportDiv("Copy top table", ".export-clipboard-headTable", headTableCsvFile, "table.tsv", headTablePresent),
-              addExportDiv("Copy bottom table", ".export-clipboard-tailTable", tailTableCsvFile, "table.tsv", tailTablePresent),
+              addExportDiv("url", "Create link to this page's state", ".export-clipboard-link", urlFile, "url.txt", true),
+              addExportDiv("signature", "Copy signature", ".export-clipboard-signature", signatureFile, "signature.txt", signaturePresent),
+              addExportDiv("plot", "Copy " + config.plotName + " plot", ".export-clipboard-plots", plotFile, "plot.png", plotsPresent, copyImagesPermission),
+              addExportDiv("headTable", "Copy top table", ".export-clipboard-headTable", headTableCsvFile, "table.tsv", headTablePresent),
+              addExportDiv("tailTable", "Copy bottom table", ".export-clipboard-tailTable", tailTableCsvFile, "table.tsv", tailTablePresent),
               // div(".row", [
               //   span(".col .s6 .push-s1", "Export report"),
               //   span(".btn .col .s1 .offset-s3 .export-file-report .disabled", i(".material-icons", "file_download")),
@@ -311,7 +323,7 @@ function view(state$, dataPresent, exportData, config, clipboard) {
             ]),
             div(".modal-footer", [
               button(".export-close .col .s8 .push-s2 .btn", "Close"),
-              div(".col .s12 .blue.lighten-3", {style: {wordWrap: "break-word"}}, url),
+              //div(".col .s12 .blue.lighten-3", {style: {wordWrap: "break-word"}}, url),
             ]),
           ]),
         ])

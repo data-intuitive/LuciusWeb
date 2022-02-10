@@ -66,7 +66,7 @@ function clipboardDriver(stream$) {
 
   return {
     copyImagesPermission$: copyImagesPermission$,
-    results$: results$.debug("clipboard results$"),
+    results$: results$,
   }
 }
 

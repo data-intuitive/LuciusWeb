@@ -183,9 +183,10 @@ function model(actions, state$, vega$, config) {
  * @param {Object} dataPresent object with booleans of what data is available
  * @param {Object} exportData object with available data
  * @param {Object} config configuration object passed from workflow
+ * @param {Object} clipboard state of the clipboard driver which gives us our permissions and results
  * @returns Vdom div object with nested children for FAB and modal
  */
-function view(state$, dataPresent, exportData, config) {
+function view(state$, dataPresent, exportData, config, clipboard) {
 
     const fab$ = dataPresent.signaturePresent$
     .map((present) => {
@@ -217,6 +218,8 @@ function view(state$, dataPresent, exportData, config) {
         exportData.plotFile$,
         exportData.headTableCsvFile$,
         exportData.tailTableCsvFile$,
+        clipboard.copyImagesPermission$,
+        clipboard.results$,
       )
       .map(([
         signaturePresent,
@@ -228,10 +231,16 @@ function view(state$, dataPresent, exportData, config) {
         signatureFile,
         plotFile,
         headTableCsvFile,
-        tailTableCsvFile
+        tailTableCsvFile,
+        clipboardPermissions,
+        clipboardResult,
       ]) => {
-        const addExportDiv = (text, clipboardId, fileData, fileName, available) => {
-          const availableText = available ? "" : " .disabled"
+
+        const copyImagesPermission = clipboardPermissions.state == "granted"
+
+        const addExportDiv = (text, clipboardId, fileData, fileName, available, clipboardAllowed=true, downloadAllowed=true) => {
+          const availableClipboardText = available && clipboardAllowed ? "" : " .disabled"
+          const availableDownloadText = available && downloadAllowed ? "" : " .disabled"
 
           // Styling should prevent the user to click the 'a' directly; this causes the page div#root to be corrupted.
           // Work around is to make the internal 'i' the full size of the 'a' thus "catching" the initial click.
@@ -243,8 +252,8 @@ function view(state$, dataPresent, exportData, config) {
           // Workaround is done in '.paddingfix' in the scss.
           return div(".row", [
             span(".col .s6 .push-s1", text),
-            span(".btn .col .s1 .offset-s1 .waves-effect .waves-light " + clipboardId + availableText, i(".material-icons", "content_copy")),
-            a(".btn .col .s1 .offset-s1 .waves-effect .waves-light .paddingfix " + availableText,
+            span(".btn .col .s1 .offset-s1 .waves-effect .waves-light " + clipboardId + " " + availableClipboardText, i(".material-icons", "content_copy")),
+            a(".btn .col .s1 .offset-s1 .waves-effect .waves-light .paddingfix " + availableDownloadText,
               {
                 props: {
                   href: fileData,
@@ -259,12 +268,13 @@ function view(state$, dataPresent, exportData, config) {
         return div([
           div("#modal-exporter.modal", [
             div(".modal-content", [
-              div(".row .title", 
-                p(".col .s12", "Export to clipboard or file")
-              ),
+              div(".row .title", [
+                p(".col .s12", "Export to clipboard or file"),
+                p(".col .s12", "" + clipboardResult.text),
+              ]),
               addExportDiv("Create link to this page's state", ".export-clipboard-link", urlFile, "url.txt", true),
               addExportDiv("Copy signature", ".export-clipboard-signature", signatureFile, "signature.txt", signaturePresent),
-              addExportDiv("Copy " + config.plotName + " plot", ".export-clipboard-plots", plotFile, "plot.png", plotsPresent),
+              addExportDiv("Copy " + config.plotName + " plot", ".export-clipboard-plots", plotFile, "plot.png", plotsPresent, copyImagesPermission),
               addExportDiv("Copy top table", ".export-clipboard-headTable", headTableCsvFile, "table.tsv", headTablePresent),
               addExportDiv("Copy bottom table", ".export-clipboard-tailTable", tailTableCsvFile, "table.tsv", tailTablePresent),
               // div(".row", [
@@ -314,7 +324,7 @@ function Exporter(sources) {
 
   const model_ = model(actions, state$, sources.vega, fullConfig)
 
-  const vdom$ = view(state$, model_.dataPresent, model_.exportData, fullConfig)
+  const vdom$ = view(state$, model_.dataPresent, model_.exportData, fullConfig, sources.clipboard)
 
   const fabInit$ = vdom$.mapTo({
       state: "init",

@@ -106,12 +106,18 @@ function model(actions, state$, vega$, config) {
 
   const clipboardLinkFab$ = actions.exportLinkTriggerFab$
     .compose(sampleCombine(url$))
-    .map(([_, url]) => url)
+    .map(([_, url]) => ({
+      sender: "url-fab",
+      data: url,
+    }))
     .remember()
 
   const clipboardSignatureFab$ = actions.exportSignatureTriggerFab$
     .compose(sampleCombine(signature$))
-    .map(([_, signature]) => signature)
+    .map(([_, signature]) => ({
+      sender: "signature-fab",
+      data: signature,
+    }))
     .remember()
 
   const clipboardLink$ = actions.exportLinkTrigger$
@@ -240,6 +246,7 @@ function view(state$, dataPresent, exportData, config, clipboard) {
         clipboard.results$,
         clipboard.results$.compose(debounce(2000)).mapTo({})
       )
+      .startWith({})
 
     const modal$ = xs
       .combine(

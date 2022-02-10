@@ -325,7 +325,7 @@ function Exporter(sources) {
       }
     })
     .compose(dropRepeats(equals)) // run just once
-    .compose(delay(1)) // let the vdom propagate first and next cycle initialize FAB
+    .compose(delay(50)) // let the vdom propagate first and next cycle initialize FAB
 
   const fabUpdate$ = model_.dataPresent.signaturePresent$
     .filter(_ => fullConfig.fabSignature == "update")
@@ -338,7 +338,7 @@ function Exporter(sources) {
         //   hoverEnabled: false,
       }
     })
-    .compose(delay(1)) // let the vdom propagate first and next cycle update FAB
+    .compose(delay(50)) // let the vdom propagate first and next cycle update FAB
 
   return {
     log: xs.merge(logger(state$, "state$")),

@@ -18,6 +18,9 @@ import { convertToCSV } from "../utils/export"
  * @returns object containing trigger streams
  */
 function intent(domSource$) {
+  const exportLinkTriggerFab$ = domSource$.select(".export-clipboard-link-fab").events("click")
+  const exportSignatureTriggerFab$ = domSource$.select(".export-clipboard-signature-fab").events("click")
+
   const exportLinkTrigger$ = domSource$.select(".export-clipboard-link").events("click")
   const exportSignatureTrigger$ = domSource$.select(".export-clipboard-signature").events("click")
   const exportPlotsTrigger$ = domSource$.select(".export-clipboard-plots").events("click")
@@ -30,6 +33,8 @@ function intent(domSource$) {
   const testTrigger$ = domSource$.select(".test-btn").events("click")
 
   return {
+    exportLinkTriggerFab$: exportLinkTriggerFab$,
+    exportSignatureTriggerFab$: exportSignatureTriggerFab$,
     exportLinkTrigger$: exportLinkTrigger$,
     exportSignatureTrigger$: exportSignatureTrigger$,
     exportPlotsTrigger$: exportPlotsTrigger$,
@@ -98,14 +103,30 @@ function model(actions, state$, vega$, config) {
   const headTableCsvFile$ = headTableCsv$.map(headTableCsv => "data:text/tsv;charset=utf-8," + encodeURIComponent(headTableCsv))
   const tailTableCsvFile$ = tailTableCsv$.map(tailTableCsv => "data:text/tsv;charset=utf-8," + encodeURIComponent(tailTableCsv))
 
-  const clipboardLink$ = actions.exportLinkTrigger$
+  const clipboardLinkFab$ = actions.exportLinkTriggerFab$
     .compose(sampleCombine(url$))
     .map(([_, url]) => url)
     .remember()
 
-  const clipboardSignature$ = actions.exportSignatureTrigger$
+  const clipboardSignatureFab$ = actions.exportSignatureTriggerFab$
     .compose(sampleCombine(signature$))
     .map(([_, signature]) => signature)
+    .remember()
+
+  const clipboardLink$ = actions.exportLinkTrigger$
+    .compose(sampleCombine(url$))
+    .map(([_, url]) => ({
+      sender: "url",
+      data: url,
+    }))
+    .remember()
+
+  const clipboardSignature$ = actions.exportSignatureTrigger$
+    .compose(sampleCombine(signature$))
+    .map(([_, signature]) => ({
+      sender: "signature",
+      data: signature,
+    }))
     .remember()
 
   const clipboardPlots$ = actions.exportPlotsTrigger$
@@ -129,12 +150,18 @@ function model(actions, state$, vega$, config) {
 
   const clipboardHeadTable$ = actions.exportHeadTableTrigger$
     .compose(sampleCombine(headTableCsv$))
-    .map(([_, table]) => table)
+    .map(([_, table]) => ({
+      sender: "headTable",
+      data: table,
+    }))
     .remember()
 
   const clipboardTailTable$ = actions.exportTailTableTrigger$
     .compose(sampleCombine(tailTableCsv$))
-    .map(([_, table]) => table)
+    .map(([_, table]) => ({
+      sender: "tailTable",
+      data: table,
+    }))
     .remember()
 
   const testAction$ = actions.testTrigger$
@@ -159,7 +186,7 @@ function model(actions, state$, vega$, config) {
   return {
     reducers$: xs.empty(),
     modal$: xs.merge(openModal$, closeModal$),
-    clipboard$: xs.merge(clipboardLink$, clipboardSignature$, clipboardPlots$, clipboardHeadTable$, clipboardTailTable$, testAction$),
+    clipboard$: xs.merge(clipboardLinkFab$, clipboardSignatureFab$, clipboardLink$, clipboardSignature$, clipboardPlots$, clipboardHeadTable$, clipboardTailTable$, testAction$),
     dataPresent: {
       signaturePresent$: signaturePresent$,
       plotsPresent$: plotsPresent$,
@@ -198,8 +225,8 @@ function view(state$, dataPresent, exportData, config, clipboard) {
       return div(".fixed-action-btn", [
           span(".btn-floating .btn-large", i(".large .material-icons", "share")),
           ul([
-              li(span(".btn-floating .export-clipboard-link .waves-effect.waves-light", i(".material-icons", "link"))),
-              li(span(".btn-floating .export-clipboard-signature .waves-effect.waves-light " + extraSigClass, i(".material-icons", "content_copy"))),
+              li(span(".btn-floating .export-clipboard-link-fab .waves-effect.waves-light", i(".material-icons", "link"))),
+              li(span(".btn-floating .export-clipboard-signature-fab .waves-effect.waves-light " + extraSigClass, i(".material-icons", "content_copy"))),
               // li(span(".btn-floating .export-file-report", i(".material-icons", "picture_as_pdf"))),
               li(span(".btn-floating .modal-open-btn .waves-effect.waves-light", i(".material-icons", "open_with"))),
               // li(span(".btn-floating .test-btn", i(".material-icons", "star"))),

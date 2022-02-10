@@ -17,14 +17,14 @@ function clipboardDriver(stream$) {
     console.warn("clipboard " + functionName + " failed")
     results$.shamefullySendNext({
       sender: sender,
-      state: "success",
+      state: "failed",
       text: "clipboard " + functionName + " failed"
     })
   }
 
   stream$.addListener({
     next: message => {
-      if (typeof message === 'object') {
+      if (typeof message === 'object' && message.type != undefined) {
         //console.log('object received for clipboard, type: ' + message.type)
         try {
           navigator.clipboard.write([
@@ -43,10 +43,11 @@ function clipboardDriver(stream$) {
         }
       }
       else {
-        navigator.clipboard.writeText(message)
+        const data = typeof message === 'string' ? message : message.data
+        navigator.clipboard.writeText(data)
         .then(
-          reportSuccessfull("writeText"),
-          reportFailed("writeText")
+          reportSuccessfull("writeText", message.sender),
+          reportFailed("writeText", message.sender)
         )
       }
     },

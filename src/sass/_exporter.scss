@@ -13,10 +13,10 @@
         background-color: color('red', 'base');
     }
     > ul {
-        span.export-clipboard-link {
+        span.export-clipboard-link-fab {
             background-color: color('red', 'base')
         }
-        span.export-clipboard-signature {
+        span.export-clipboard-signature-fab {
             background-color: color('yellow', 'darken-1')
         }
         span.export-pdf {

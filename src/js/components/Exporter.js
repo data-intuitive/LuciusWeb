@@ -223,30 +223,44 @@ function model(actions, state$, vega$, config) {
  */
 function view(state$, dataPresent, exportData, config, clipboard) {
 
-    const fab$ = dataPresent.signaturePresent$
-    .map((present) => {
-      
-      const extraSigClass = config.fabSignature != "update"
-        ? config.fabSignature
-        : present ? "" : ".disabled"
-
-      return div(".fixed-action-btn", [
-          span(".btn-floating .btn-large", i(".large .material-icons", "share")),
-          ul([
-              li(span(".btn-floating .export-clipboard-link-fab .waves-effect.waves-light", i(".material-icons", "link"))),
-              li(span(".btn-floating .export-clipboard-signature-fab .waves-effect.waves-light " + extraSigClass, i(".material-icons", "content_copy"))),
-              // li(span(".btn-floating .export-file-report", i(".material-icons", "picture_as_pdf"))),
-              li(span(".btn-floating .modal-open-btn .waves-effect.waves-light", i(".material-icons", "open_with"))),
-              // li(span(".btn-floating .test-btn", i(".material-icons", "star"))),
-          ])
-      ])})
-
     const clipboardResultAutoClear$ = xs
       .merge(
         clipboard.results$,
         clipboard.results$.compose(debounce(2000)).mapTo({})
       )
       .startWith({})
+
+    const fab$ = xs
+    .combine(
+      dataPresent.signaturePresent$,
+      clipboardResultAutoClear$,
+    )
+    .map(([signaturePresent, clipboardResult]) => {
+      
+      const clipboardUrlBtnResult = "url-fab" != clipboardResult?.sender 
+      ? ""
+      : clipboardResult.state == "success" ? " .success" : " .failure"
+
+      const clipboardSigBtnResult = "signature-fab" != clipboardResult?.sender 
+      ? ""
+      : clipboardResult.state == "success" ? " .success" : " .failure"
+
+
+      const extraSigClass = config.fabSignature != "update"
+        ? config.fabSignature
+        : signaturePresent ? "" : " .disabled"
+
+      return div(".fixed-action-btn", [
+          span(".btn-floating .btn-large", i(".large .material-icons", "share")),
+          ul([
+              li(span(".btn-floating .export-clipboard-link-fab .waves-effect.waves-light",span(".fab-wrap" + clipboardUrlBtnResult, i(".material-icons", "link")))),
+              li(span(".btn-floating .export-clipboard-signature-fab .waves-effect.waves-light" + extraSigClass, span(".fab-wrap" + clipboardSigBtnResult, i(".material-icons", "content_copy")))),
+              // li(span(".btn-floating .export-file-report", i(".material-icons", "picture_as_pdf"))),
+              li(span(".btn-floating .modal-open-btn .waves-effect.waves-light", span(".test3", i(".material-icons", "open_with")))),
+              // li(span(".btn-floating .test-btn", i(".material-icons", "star"))),
+          ])
+      ])})
+
 
     const modal$ = xs
       .combine(

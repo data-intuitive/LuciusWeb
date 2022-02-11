@@ -25,6 +25,26 @@
         span.modal-open-btn {
             background-color: color('blue', 'base')
         }
+
+        span.fab-wrap{
+            display: block;
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background-color: transparent;
+            box-shadow: none;
+            color: #fff;
+            //   line-height: $button-floating-large-size;
+            z-index: 1;
+            
+            &.success{
+                background-color:green;
+            }
+            &.failure{
+                background-color:red;
+            }
+        }
     }
 
 }

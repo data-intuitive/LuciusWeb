@@ -32,7 +32,7 @@ function makeFloatingActionButtonDriver() {
                     if (elem == undefined)
                         console.warn("fabDriver couldn't find element")
                     else {
-                        fab.close()
+                        fab.destroy()
                         fab = M.FloatingActionButton.init(elem, ev.options);
                         if (currentlyOpen && fab != undefined)
                             fab.open()

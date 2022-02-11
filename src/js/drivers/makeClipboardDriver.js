@@ -6,11 +6,13 @@ import flattenConcurrently from "xstream/extra/flattenConcurrently"
  *  - type: data type to set, use '' or undefined if raw text
  *  - data: data blob
  *  - sender: sender id, is added in return value
+ * @param {Boolean} provideOwnSink when set to true, the driver adds a sink to the result output stream so that the clipboard 
+ *                                 functionality still works even if the output stream is not used
  * @returns object with members:
  *  - state: 'success' or 'failure'
  *  - sender: sender id from message object
  */
-function makeClipboardDriver() {
+function makeClipboardDriver(provideOwnSink= false) {
   // Chrome by default allows clipboard write and implements the permissions API call
   // Firefox by default doesn't allow the clipboard write and doesn't implement the permissions API call
   // so we're kind of forced to assume that if the API call fails that we won't have the necessary permissions
@@ -63,6 +65,13 @@ function makeClipboardDriver() {
         },
         stop: () => {},
       })
+
+    if (provideOwnSink) {
+      results$.addListener({
+        next: () => {},
+        error: () => {},
+      })
+    }
 
     return {
       copyImagesPermission$: copyImagesPermission$,

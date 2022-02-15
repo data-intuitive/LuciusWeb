@@ -3,6 +3,7 @@ import { div, i, ul, li, p, input, button, span, a } from "@cycle/dom"
 import { isEmpty, mergeLeft, equals } from "ramda"
 import { loggerFactory } from "../utils/logger"
 import delay from "xstream/extra/delay"
+import debounce from "xstream/extra/debounce"
 import sampleCombine from "xstream/extra/sampleCombine"
 import dropRepeats from "xstream/extra/dropRepeats"
 import { convertToCSV } from "../utils/export"
@@ -18,6 +19,9 @@ import { convertToCSV } from "../utils/export"
  * @returns object containing trigger streams
  */
 function intent(domSource$) {
+  const exportLinkTriggerFab$ = domSource$.select(".export-clipboard-link-fab").events("click")
+  const exportSignatureTriggerFab$ = domSource$.select(".export-clipboard-signature-fab").events("click")
+
   const exportLinkTrigger$ = domSource$.select(".export-clipboard-link").events("click")
   const exportSignatureTrigger$ = domSource$.select(".export-clipboard-signature").events("click")
   const exportPlotsTrigger$ = domSource$.select(".export-clipboard-plots").events("click")
@@ -30,6 +34,8 @@ function intent(domSource$) {
   const testTrigger$ = domSource$.select(".test-btn").events("click")
 
   return {
+    exportLinkTriggerFab$: exportLinkTriggerFab$,
+    exportSignatureTriggerFab$: exportSignatureTriggerFab$,
     exportLinkTrigger$: exportLinkTrigger$,
     exportSignatureTrigger$: exportSignatureTrigger$,
     exportPlotsTrigger$: exportPlotsTrigger$,
@@ -98,14 +104,36 @@ function model(actions, state$, vega$, config) {
   const headTableCsvFile$ = headTableCsv$.map(headTableCsv => "data:text/tsv;charset=utf-8," + encodeURIComponent(headTableCsv))
   const tailTableCsvFile$ = tailTableCsv$.map(tailTableCsv => "data:text/tsv;charset=utf-8," + encodeURIComponent(tailTableCsv))
 
+  const clipboardLinkFab$ = actions.exportLinkTriggerFab$
+    .compose(sampleCombine(url$))
+    .map(([_, url]) => ({
+      sender: "url-fab",
+      data: url,
+    }))
+    .remember()
+
+  const clipboardSignatureFab$ = actions.exportSignatureTriggerFab$
+    .compose(sampleCombine(signature$))
+    .map(([_, signature]) => ({
+      sender: "signature-fab",
+      data: signature,
+    }))
+    .remember()
+
   const clipboardLink$ = actions.exportLinkTrigger$
     .compose(sampleCombine(url$))
-    .map(([_, url]) => url)
+    .map(([_, url]) => ({
+      sender: "url",
+      data: url,
+    }))
     .remember()
 
   const clipboardSignature$ = actions.exportSignatureTrigger$
     .compose(sampleCombine(signature$))
-    .map(([_, signature]) => signature)
+    .map(([_, signature]) => ({
+      sender: "signature",
+      data: signature,
+    }))
     .remember()
 
   const clipboardPlots$ = actions.exportPlotsTrigger$
@@ -121,6 +149,7 @@ function model(actions, state$, vega$, config) {
       }
       const blob = new Blob([uInt8Array], { type: imageType })
       return {
+        sender: "plot",
         type: imageType,
         data: blob,
       }
@@ -129,12 +158,18 @@ function model(actions, state$, vega$, config) {
 
   const clipboardHeadTable$ = actions.exportHeadTableTrigger$
     .compose(sampleCombine(headTableCsv$))
-    .map(([_, table]) => table)
+    .map(([_, table]) => ({
+      sender: "headTable",
+      data: table,
+    }))
     .remember()
 
   const clipboardTailTable$ = actions.exportTailTableTrigger$
     .compose(sampleCombine(tailTableCsv$))
-    .map(([_, table]) => table)
+    .map(([_, table]) => ({
+      sender: "tailTable",
+      data: table,
+    }))
     .remember()
 
   const testAction$ = actions.testTrigger$
@@ -159,7 +194,7 @@ function model(actions, state$, vega$, config) {
   return {
     reducers$: xs.empty(),
     modal$: xs.merge(openModal$, closeModal$),
-    clipboard$: xs.merge(clipboardLink$, clipboardSignature$, clipboardPlots$, clipboardHeadTable$, clipboardTailTable$, testAction$),
+    clipboard$: xs.merge(clipboardLinkFab$, clipboardSignatureFab$, clipboardLink$, clipboardSignature$, clipboardPlots$, clipboardHeadTable$, clipboardTailTable$, testAction$),
     dataPresent: {
       signaturePresent$: signaturePresent$,
       plotsPresent$: plotsPresent$,
@@ -183,27 +218,49 @@ function model(actions, state$, vega$, config) {
  * @param {Object} dataPresent object with booleans of what data is available
  * @param {Object} exportData object with available data
  * @param {Object} config configuration object passed from workflow
+ * @param {Object} clipboard state of the clipboard driver which gives us our permissions and results
  * @returns Vdom div object with nested children for FAB and modal
  */
-function view(state$, dataPresent, exportData, config) {
+function view(state$, dataPresent, exportData, config, clipboard) {
 
-    const fab$ = dataPresent.signaturePresent$
-    .map((present) => {
+    const clipboardResultAutoClear$ = xs
+      .merge(
+        clipboard.results$,
+        clipboard.results$.compose(debounce(2000)).mapTo({})
+      )
+      .startWith({})
+
+    const fab$ = xs
+    .combine(
+      dataPresent.signaturePresent$,
+      clipboardResultAutoClear$,
+    )
+    .map(([signaturePresent, clipboardResult]) => {
       
+      const clipboardUrlBtnResult = "url-fab" != clipboardResult?.sender 
+      ? ""
+      : clipboardResult.state == "success" ? " .success" : " .failure"
+
+      const clipboardSigBtnResult = "signature-fab" != clipboardResult?.sender 
+      ? ""
+      : clipboardResult.state == "success" ? " .success" : " .failure"
+
+
       const extraSigClass = config.fabSignature != "update"
         ? config.fabSignature
-        : present ? "" : ".disabled"
+        : signaturePresent ? "" : " .disabled"
 
       return div(".fixed-action-btn", [
           span(".btn-floating .btn-large", i(".large .material-icons", "share")),
           ul([
-              li(span(".btn-floating .export-clipboard-link .waves-effect.waves-light", i(".material-icons", "link"))),
-              li(span(".btn-floating .export-clipboard-signature .waves-effect.waves-light " + extraSigClass, i(".material-icons", "content_copy"))),
+              li(span(".btn-floating .export-clipboard-link-fab .waves-effect.waves-light",span(".fab-wrap" + clipboardUrlBtnResult, i(".material-icons", "link")))),
+              li(span(".btn-floating .export-clipboard-signature-fab .waves-effect.waves-light" + extraSigClass, span(".fab-wrap" + clipboardSigBtnResult, i(".material-icons", "content_copy")))),
               // li(span(".btn-floating .export-file-report", i(".material-icons", "picture_as_pdf"))),
-              li(span(".btn-floating .modal-open-btn .waves-effect.waves-light", i(".material-icons", "open_with"))),
+              li(span(".btn-floating .modal-open-btn .waves-effect.waves-light", span(".test3", i(".material-icons", "open_with")))),
               // li(span(".btn-floating .test-btn", i(".material-icons", "star"))),
           ])
       ])})
+
 
     const modal$ = xs
       .combine(
@@ -217,6 +274,8 @@ function view(state$, dataPresent, exportData, config) {
         exportData.plotFile$,
         exportData.headTableCsvFile$,
         exportData.tailTableCsvFile$,
+        clipboard.copyImagesPermission$,
+        clipboardResultAutoClear$,
       )
       .map(([
         signaturePresent,
@@ -228,10 +287,20 @@ function view(state$, dataPresent, exportData, config) {
         signatureFile,
         plotFile,
         headTableCsvFile,
-        tailTableCsvFile
+        tailTableCsvFile,
+        clipboardPermissions,
+        clipboardResult,
       ]) => {
-        const addExportDiv = (text, clipboardId, fileData, fileName, available) => {
-          const availableText = available ? "" : " .disabled"
+
+        const copyImagesPermission = clipboardPermissions.state == "granted"
+
+        const addExportDiv = (identifier, text, clipboardId, fileData, fileName, available, clipboardAllowed=true, downloadAllowed=true) => {
+          const availableClipboardText = available && clipboardAllowed ? "" : " .disabled"
+          const availableDownloadText = available && downloadAllowed ? "" : " .disabled"
+
+          const clipboardBtnResult = identifier != clipboardResult?.sender 
+            ? ""
+            : clipboardResult.state == "success" ? " .success" : " .failure"
 
           // Styling should prevent the user to click the 'a' directly; this causes the page div#root to be corrupted.
           // Work around is to make the internal 'i' the full size of the 'a' thus "catching" the initial click.
@@ -243,8 +312,8 @@ function view(state$, dataPresent, exportData, config) {
           // Workaround is done in '.paddingfix' in the scss.
           return div(".row", [
             span(".col .s6 .push-s1", text),
-            span(".btn .col .s1 .offset-s1 .waves-effect .waves-light " + clipboardId + availableText, i(".material-icons", "content_copy")),
-            a(".btn .col .s1 .offset-s1 .waves-effect .waves-light .paddingfix " + availableText,
+            span(".btn .col .s1 .offset-s1 .waves-effect .waves-light " + clipboardId + " " + availableClipboardText + clipboardBtnResult, i(".material-icons", "content_copy")),
+            a(".btn .col .s1 .offset-s1 .waves-effect .waves-light .paddingfix " + availableDownloadText,
               {
                 props: {
                   href: fileData,
@@ -259,14 +328,15 @@ function view(state$, dataPresent, exportData, config) {
         return div([
           div("#modal-exporter.modal", [
             div(".modal-content", [
-              div(".row .title", 
-                p(".col .s12", "Export to clipboard or file")
-              ),
-              addExportDiv("Create link to this page's state", ".export-clipboard-link", urlFile, "url.txt", true),
-              addExportDiv("Copy signature", ".export-clipboard-signature", signatureFile, "signature.txt", signaturePresent),
-              addExportDiv("Copy " + config.plotName + " plot", ".export-clipboard-plots", plotFile, "plot.png", plotsPresent),
-              addExportDiv("Copy top table", ".export-clipboard-headTable", headTableCsvFile, "table.tsv", headTablePresent),
-              addExportDiv("Copy bottom table", ".export-clipboard-tailTable", tailTableCsvFile, "table.tsv", tailTablePresent),
+              div(".row .title", [
+                p(".col .s12", "Export to clipboard or file"),
+                //p(".col .s12", "" + clipboardResult.text),
+              ]),
+              addExportDiv("url", "Create link to this page's state", ".export-clipboard-link", urlFile, "url.txt", true),
+              addExportDiv("signature", "Copy signature", ".export-clipboard-signature", signatureFile, "signature.txt", signaturePresent),
+              addExportDiv("plot", "Copy " + config.plotName + " plot", ".export-clipboard-plots", plotFile, "plot.png", plotsPresent, copyImagesPermission),
+              addExportDiv("headTable", "Copy top table", ".export-clipboard-headTable", headTableCsvFile, "table.tsv", headTablePresent),
+              addExportDiv("tailTable", "Copy bottom table", ".export-clipboard-tailTable", tailTableCsvFile, "table.tsv", tailTablePresent),
               // div(".row", [
               //   span(".col .s6 .push-s1", "Export report"),
               //   span(".btn .col .s1 .offset-s3 .export-file-report .disabled", i(".material-icons", "file_download")),
@@ -274,7 +344,7 @@ function view(state$, dataPresent, exportData, config) {
             ]),
             div(".modal-footer", [
               button(".export-close .col .s8 .push-s2 .btn", "Close"),
-              div(".col .s12 .blue.lighten-3", {style: {wordWrap: "break-word"}}, url),
+              //div(".col .s12 .blue.lighten-3", {style: {wordWrap: "break-word"}}, url),
             ]),
           ]),
         ])
@@ -314,7 +384,7 @@ function Exporter(sources) {
 
   const model_ = model(actions, state$, sources.vega, fullConfig)
 
-  const vdom$ = view(state$, model_.dataPresent, model_.exportData, fullConfig)
+  const vdom$ = view(state$, model_.dataPresent, model_.exportData, fullConfig, sources.clipboard)
 
   const fabInit$ = vdom$.mapTo({
       state: "init",

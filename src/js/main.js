@@ -25,7 +25,7 @@ import { makeModalDriver } from './drivers/makeModalDriver'
 import { makeAutocompleteDriver } from './drivers/makeAutocompleteDriver';
 import { makeSidenavDriver } from './drivers/makeSidenavDriver';
 import { makeFloatingActionButtonDriver } from './drivers/makeFloatingActionButtonDriver';
-import { clipboardDriver } from './drivers/clipboardDriver';
+import { makeClipboardDriver } from './drivers/makeClipboardDriver'
 import '../sass/main.scss'
 
 import fromEvent from 'xstream/extra/fromEvent'
@@ -49,7 +49,7 @@ const drivers = {
     ac: makeAutocompleteDriver(),
     sidenav: makeSidenavDriver(),
     fab: makeFloatingActionButtonDriver(),
-    clipboard: clipboardDriver,
+    clipboard: makeClipboardDriver(),
     deployments: () => xs.fromPromise(fetch('/deployments.json').then(m => m.json()))
 };
 

@@ -49,7 +49,7 @@ export default function GenericTreatmentWorkflow(sources) {
   const scenarios$ = sources.onion.state$
     .take(1)
     .filter((state) => state.settings.common.ghostMode)
-    .map(state => runScenario(scenario( workflowGhostModeScenarioSelector(state) )))
+    .map(state => runScenario(scenario( workflowGhostModeScenarioSelector(state) ), state$))
   const scenarioReducer$ = scenarios$.map(s => s.scenarioReducer$)
     .flatten()
   const scenarioPopup$ = scenarios$.map(s => s.scenarioPopup$)

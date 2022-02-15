@@ -19,6 +19,10 @@ const typer = (text, json) => {
   )
 }
 
+function notEmpty(data) {
+  return data != undefined && data != ""
+}
+
 /**
  * Definition of the scenario
  * Configuration is provided by means of `config` object:
@@ -56,6 +60,7 @@ export const scenario = config =>
 
       { // Sample Selection
           delay: 500,
+          continue: (s) => (notEmpty(s.form.sampleSelection.output)),
           state: {},
           message: {
               text: 'All samples that correspond to the selected compound are tabulated',
@@ -105,7 +110,8 @@ export const scenario = config =>
       },
 
       { // Filter
-          delay: 7000,
+          delay: 500,
+          continue: (s) => (notEmpty(s.form.signature.output)),
           state: {
               filter: {
                 input: config.signature,

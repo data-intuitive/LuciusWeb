@@ -292,3 +292,63 @@ describe("uiReducer", function () {
       })
   })
 })
+
+describe("Search query", function () {
+  it("Updates the output which should match that of the search query, except for invalid values which should be discarded", () => {
+    const possibleValues = {
+      dose: [1, 2, 3],
+      cell: ["cell1", "cell2", "cell3"],
+      trtType: ["a", "b", "c"],
+    }
+    const possibleValues$ = fromDiagram("-x").mapTo(possibleValues)
+    const search = xs.of({
+      dose: [1, 2],
+      cell: ["cell1", "cell2", "cell3"],
+      trtType: ["a", "b", "d"]
+    })
+    const search$ = fromDiagram("--x").mapTo(search)
+
+    const reducers$ = model(
+      possibleValues$,
+      xs.empty(),
+      xs.empty(),
+      xs.empty(),
+      xs.empty(),
+      search$
+    )
+
+    // Predefine filters in settings as possible filters will be updated there
+    const defaultFilter = {settings: {filter: {}}}
+    const state$ = reducers$.fold((state, reducer) => reducer(state), defaultFilter)
+
+    // Outputs all valid values
+    let expectedOutput = [
+      {},
+      {},
+      {},
+      { dose: [2, 3], cell: ["cell1", "cell2", "cell3"], trtType: ["a", "b"] },
+    ]
+
+    let expectedFilterOutput = [
+      {},
+      {},
+      {},
+      { dose: [2, 3], cell: undefined, trtType: ["a", "b"] },
+    ]
+
+    state$
+      .drop(1) // drop the first state as it is undefined
+      .addListener({
+        next(state) {
+          assert.deepStrictEqual(state?.core?.output, expectedOutput.shift())
+          assert.deepStrictEqual(state?.core?.filter_output, expectedFilterOutput.shift())
+        },
+        error(e) {
+          console.log(e)
+        },
+        complete() {
+          console.log("done!")
+        },
+      })
+  })
+})

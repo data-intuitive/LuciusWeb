@@ -418,8 +418,14 @@ export default function Index(sources) {
       return result
     }
 
-    const params = new URLSearchParams(router.search)
-    const paramsObject = paramsToObject(params)
+    // we should not apply the same search query values when the page was reloaded
+    // if user refreshes or clicks same WF link, router.type is not set
+    // if we push new state, router.type == "push"
+    let paramsObject = {}
+    if (router?.type == "push") {
+      const params = new URLSearchParams(router.state)
+      paramsObject = paramsToObject(params)
+    }
 
     return {
       ...prevState,
@@ -465,27 +471,13 @@ export default function Index(sources) {
 
   const history$ = sources.onion.state$.fold((acc, x) => acc.concat([x]), [{}])
 
-  const historyDriver$ = xs.empty()
-  // const historyDriver$ = xs.periodic(30000).map(i => ({
-  //     type: 'replace',
-  //     hash: "tailTable"+i,
-  //     //pathname: "/genetic",
-  //     // search: "",
-  //     // state: undefined,
-  //   })
-  //   // '/genetic#tailTable'
-  //   )
-
-  // PushHistoryInput(
-  //   type: 'push'
-  //   pathname?: Pathname;
-  //   search?: Search;
-  //   state?: any;
-  //   hash?: Hash;
-  //   key?: LocationKey;
-  // )
-
-  // const historyDriver$ = xs.periodic(1000).map(i => '/genetic')
+  const historyDriver$ = router.history$
+    .map((router) => router.search)
+    .filter((search) => search != undefined && search != "" && search != "?")
+    .map((search) => ({
+      type: 'push',
+      state: search,
+    }))
 
   return {
     log: xs.merge(

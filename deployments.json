@@ -22,18 +22,36 @@
         },
         "ghost": {
           "compound": {
+            "params": {
+              "typer": 500,
+              "treatment": "BRD-K93645900",
+              "samples": "A375_6H_BRD_K93645900_10",
+              "trtType": "trt_cp"
+            },
             "treatment": "BRD-K93645900",
             "index": 0,
             "sample": ["A375_6H_BRD_K93645900_10"],
             "signature": "-CRCP"
           },
           "ligand": {
+            "params": {
+              "typer": 500,
+              "treatment": "ANGPT1",
+              "samples": "HCC515_4H_CMAP_CYT_SRP3007_50",
+              "trtType": "trt_cp"
+            },
             "treatment": "ANGPT1",
             "index": 0,
             "sample": ["HCC515_4H_CMAP_CYT_SRP3007_50"],
             "signature": "FBXO11 SLC35 F5BAG4 RIF1"
           },
           "genetic": {
+            "params": {
+              "typer": 500,
+              "treatment": "PARP2",
+              "samples": "DER001_HCC515_96H_X1_F1B6_DUO52HI53LO",
+              "trtType": "trt_cp"
+            },
             "treatment": "PARP2",
             "index": 0,
             "sample": ["DER001_HCC515_96H_X1_F1B6_DUO52HI53LO:B03"],

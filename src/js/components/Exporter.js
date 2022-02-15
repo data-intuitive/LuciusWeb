@@ -1,11 +1,22 @@
 import xs from "xstream"
 import { div, i, ul, li, p, input, button, span, a } from "@cycle/dom"
-import { isEmpty, mergeLeft } from "ramda"
+import { isEmpty, mergeLeft, equals } from "ramda"
 import { loggerFactory } from "../utils/logger"
 import delay from "xstream/extra/delay"
 import sampleCombine from "xstream/extra/sampleCombine"
+import dropRepeats from "xstream/extra/dropRepeats"
 import { convertToCSV } from "../utils/export"
 
+/**
+ * @module components/Exporter
+ */
+
+/**
+ * Get triggers from button presses in the DOM
+ * @function intent
+ * @param {*} domSource$ 
+ * @returns object containing trigger streams
+ */
 function intent(domSource$) {
   const exportLinkTrigger$ = domSource$.select(".export-clipboard-link").events("click")
   const exportSignatureTrigger$ = domSource$.select(".export-clipboard-signature").events("click")
@@ -30,6 +41,23 @@ function intent(domSource$) {
   }
 }
 
+/**
+ * collect data to be made available for copy/download
+ * trigger modal to be opened or closed
+ * send data to clipboard when triggered
+ * 
+ * @function model
+ * @param {Object} actions object of trigger streams
+ * @param {Stream} state$ full state
+ * @param {Stream} vega$ stream of vega objects, to be filtered 
+ * @param {Object} config configuration object passed from workflow
+ * @returns Object with 
+ *            * reducers$ placeholder for reducers
+ *            * modal$ data to be sent to the modal driver
+ *            * clipboard$ data to be sent to the clipboard driver
+ *            * dataPresent Object with booleans for what data is available
+ *            * exportData Object with data
+ */
 function model(actions, state$, vega$, config) {
   
   const openModal$ = actions.modalTrigger$
@@ -48,8 +76,9 @@ function model(actions, state$, vega$, config) {
 
   const url$ = state$.map((state) => state.routerInformation.pageStateURL).startWith("")
   const signature$ = state$.map((state) => state.form.signature?.output).startWith("")
-  const similarityPlot$ = vega$
-    .filter(vega => vega.el == config.plot)
+  // result already contains 'data:image/png;base64,'
+  const plotFile$ = vega$
+    .filter(vega => vega.el == config.plotId)
     .map((vega) => xs.fromPromise(vega.view.toImageURL('png')))
     .flatten()
     .startWith("")
@@ -64,6 +93,11 @@ function model(actions, state$, vega$, config) {
     .map((data) => convertToCSV(data))
     .startWith("")
 
+  const urlFile$ = url$.map(url => "data:text/plain;charset=utf-8," + url)
+  const signatureFile$ = signature$.map(signature => "data:text/plain;charset=utf-8," + signature)
+  const headTableCsvFile$ = headTableCsv$.map(headTableCsv => "data:text/tsv;charset=utf-8," + encodeURIComponent(headTableCsv))
+  const tailTableCsvFile$ = tailTableCsv$.map(tailTableCsv => "data:text/tsv;charset=utf-8," + encodeURIComponent(tailTableCsv))
+
   const clipboardLink$ = actions.exportLinkTrigger$
     .compose(sampleCombine(url$))
     .map(([_, url]) => url)
@@ -75,7 +109,7 @@ function model(actions, state$, vega$, config) {
     .remember()
 
   const clipboardPlots$ = actions.exportPlotsTrigger$
-    .compose(sampleCombine(similarityPlot$))
+    .compose(sampleCombine(plotFile$))
     .map(([_, data]) => {
       // input data is "data:image/png;base64,abcdef0123456789..."
       const parts = data.split(';base64,');
@@ -104,7 +138,7 @@ function model(actions, state$, vega$, config) {
     .remember()
 
   const testAction$ = actions.testTrigger$
-    .compose(sampleCombine(similarityPlot$))
+    .compose(sampleCombine(plotFile$))
     .map(([_, data]) => {
       // input data is "data:image/png;base64,abcdef0123456789..."
       const parts = data.split(';base64,');
@@ -134,29 +168,42 @@ function model(actions, state$, vega$, config) {
     },
     exportData: {
       url$: url$,
-      signature$: signature$,
-      similarityPlot$: similarityPlot$,
-      headTableCsv$: headTableCsv$,
-      tailTableCsv$: tailTableCsv$,
+      urlFile$: urlFile$,
+      signatureFile$: signatureFile$,
+      plotFile$: plotFile$,
+      headTableCsvFile$: headTableCsvFile$,
+      tailTableCsvFile$: tailTableCsvFile$,
     }
   }
 }
 
-function view(state$, dataPresent, exportData) {
+/**
+ * @function view
+ * @param {Stream} state$ full state
+ * @param {Object} dataPresent object with booleans of what data is available
+ * @param {Object} exportData object with available data
+ * @param {Object} config configuration object passed from workflow
+ * @returns Vdom div object with nested children for FAB and modal
+ */
+function view(state$, dataPresent, exportData, config) {
 
     const fab$ = dataPresent.signaturePresent$
-      .map((signature) =>
-        div(".fixed-action-btn", [
-            span(".btn-floating .btn-large", i(".large .material-icons", "share")),
-            ul([
-                li(span(".btn-floating .export-clipboard-link", i(".material-icons", "link"))),
-                li(span(".btn-floating .export-clipboard-signature", i(".material-icons", "content_copy"))),
-                // li(span(".btn-floating .export-file-report", i(".material-icons", "picture_as_pdf"))),
-                li(span(".btn-floating .modal-open-btn", i(".material-icons", "open_with"))),
-                // li(span(".btn-floating .test-btn", i(".material-icons", "star"))),
-            ])
-        ]))
-        .startWith(div())
+    .map((present) => {
+      
+      const extraSigClass = config.fabSignature != "update"
+        ? config.fabSignature
+        : present ? "" : ".disabled"
+
+      return div(".fixed-action-btn", [
+          span(".btn-floating .btn-large", i(".large .material-icons", "share")),
+          ul([
+              li(span(".btn-floating .export-clipboard-link .waves-effect.waves-light", i(".material-icons", "link"))),
+              li(span(".btn-floating .export-clipboard-signature .waves-effect.waves-light " + extraSigClass, i(".material-icons", "content_copy"))),
+              // li(span(".btn-floating .export-file-report", i(".material-icons", "picture_as_pdf"))),
+              li(span(".btn-floating .modal-open-btn .waves-effect.waves-light", i(".material-icons", "open_with"))),
+              // li(span(".btn-floating .test-btn", i(".material-icons", "star"))),
+          ])
+      ])})
 
     const modal$ = xs
       .combine(
@@ -165,23 +212,49 @@ function view(state$, dataPresent, exportData) {
         dataPresent.headTablePresent$,
         dataPresent.tailTablePresent$,
         exportData.url$,
-        exportData.signature$,
-        exportData.similarityPlot$,
-        exportData.headTableCsv$,
-        exportData.tailTableCsv$,
+        exportData.urlFile$,
+        exportData.signatureFile$,
+        exportData.plotFile$,
+        exportData.headTableCsvFile$,
+        exportData.tailTableCsvFile$,
       )
-      .map(([signaturePresent, plotsPresent, headTablePresent, tailTablePresent, url, signature, similarityPlot, headTableCsv, tailTableCsv]) => {
-        const signatureAvailable = signaturePresent ? "" : " .disabled"
-        const plotsAvailable = plotsPresent ? "" : " .disabled"
-        const headTableAvailable = headTablePresent ? "" : " .disabled"
-        const tailTableAvailable = tailTablePresent ? "" : " .disabled"
-        const reportAvailable = " .disabled"
+      .map(([
+        signaturePresent,
+        plotsPresent,
+        headTablePresent,
+        tailTablePresent,
+        url,
+        urlFile,
+        signatureFile,
+        plotFile,
+        headTableCsvFile,
+        tailTableCsvFile
+      ]) => {
+        const addExportDiv = (text, clipboardId, fileData, fileName, available) => {
+          const availableText = available ? "" : " .disabled"
 
-        const urlFile = "data:text/plain;charset=utf-8," + url
-        const signatureFile = "data:text/plain;charset=utf-8," + signature
-        const plotsFile = similarityPlot
-        const headTableCsvFile = "data:text/tsv;charset=utf-8," + encodeURIComponent(headTableCsv)
-        const tailTableCsvFile = "data:text/tsv;charset=utf-8," + encodeURIComponent(tailTableCsv)
+          // Styling should prevent the user to click the 'a' directly; this causes the page div#root to be corrupted.
+          // Work around is to make the internal 'i' the full size of the 'a' thus "catching" the initial click.
+          // Exact reason is not 100% clear. Using preventDefault doesn't seem to work.
+          //
+          // At the time of writing, the impression is that it could have to do with the exporter or sub-parts not being isolated.
+          // Debugging suggest the @cycle/dom to be the culprit.
+          // Removing the 'div#Root' -> 'fromEvent.js:16' event listener prevents the page from misbehaving.
+          // Workaround is done in '.paddingfix' in the scss.
+          return div(".row", [
+            span(".col .s6 .push-s1", text),
+            span(".btn .col .s1 .offset-s1 .waves-effect .waves-light " + clipboardId + availableText, i(".material-icons", "content_copy")),
+            a(".btn .col .s1 .offset-s1 .waves-effect .waves-light .paddingfix " + availableText,
+              {
+                props: {
+                  href: fileData,
+                  download: fileName,
+                },
+              },
+              i(".material-icons", "file_download"),
+            )
+          ])
+        }
 
         return div([
           div("#modal-exporter.modal", [
@@ -189,81 +262,15 @@ function view(state$, dataPresent, exportData) {
               div(".row .title", 
                 p(".col .s12", "Export to clipboard or file")
               ),
-              div(".row", [
-                span(".col .s6 .push-s1", "Create link to this page's state"),
-                span(".btn .col .s1 .offset-s1 .export-clipboard-link", i(".material-icons", "content_copy")),
-                // span(".btn .col .s1 .offset-s1 .export-file-link", i(".material-icons", "file_download")),
-                a(".btn .col .s1 .offset-s1",
-                  {
-                    props: {
-                      href: urlFile,
-                      download: "url.txt",
-                    },
-                  },
-                  i(".material-icons", "file_download"),
-                ),
-              ]),
-              div(".row", [
-                span(".col .s6 .push-s1", "Copy signature"),
-                span(".btn .col .s1 .offset-s1 .export-clipboard-signature" + signatureAvailable, i(".material-icons", "content_copy")),
-                // span(".btn .col .s1 .offset-s1 .export-file-signature" + signatureAvailable, i(".material-icons", "file_download")),
-                a(".btn .col .s1 .offset-s1" + signatureAvailable,
-                  {
-                    props: {
-                      href: signatureFile,
-                      download: "signature.txt",
-                    },
-                  },
-                  i(".material-icons", "file_download"),
-                ),
-              ]),
-              div(".row", [
-                span(".col .s6 .push-s1", "Copy binned plots"),
-                span(".btn .col .s1 .offset-s1 .export-clipboard-plots" + plotsAvailable, i(".material-icons", "content_copy")),
-                // span(".btn .col .s1 .offset-s1 .export-file-plots" + plotsAvailable, i(".material-icons", "file_download")),
-                a(".btn .col .s1 .offset-s1" + plotsAvailable,
-                  {
-                    props: {
-                      href: plotsFile,
-                      download: "plot.png",
-                    },
-                  },
-                  i(".material-icons", "file_download"),
-                ),
-              ]),
-              div(".row", [
-                span(".col .s6 .push-s1", "Copy top table"),
-                span(".btn .col .s1 .offset-s1 .export-clipboard-headTable" + headTableAvailable, i(".material-icons", "content_copy")),
-                // span(".btn .col .s1 .offset-s1 .export-file-headTable" + headTableAvailable, i(".material-icons", "file_download")),
-                a(".btn .col .s1 .offset-s1" + headTableAvailable,
-                  {
-                    props: {
-                      href: headTableCsvFile,
-                      download: "table.tsv",
-                    },
-                  },
-                  i(".material-icons", "file_download"),
-                ),
-              ]),
-              div(".row", [
-                span(".col .s6 .push-s1", "Copy bottom table"),
-                span(".btn .col .s1 .offset-s1 .export-clipboard-tailTable" + tailTableAvailable, i(".material-icons", "content_copy")),
-                // span(".btn .col .s1 .offset-s1 .export-file-tailTable" + bottomTableAvailable, i(".material-icons", "file_download")),
-                a(".btn .col .s1 .offset-s1" + tailTableAvailable,
-                  {
-                    props: {
-                      href: tailTableCsvFile,
-                      download: "table.tsv",
-                    },
-                  },
-                  i(".material-icons", "file_download"),
-                ),
-              ]),
-              div(".row", [
-                span(".col .s6 .push-s1", "Export report"),
-                // span(".btn .col .s1 .offset-s1", i(".material-icons", "content_copy")),
-                span(".btn .col .s1 .offset-s3 .export-file-report" + reportAvailable, i(".material-icons", "file_download")),
-              ]),
+              addExportDiv("Create link to this page's state", ".export-clipboard-link", urlFile, "url.txt", true),
+              addExportDiv("Copy signature", ".export-clipboard-signature", signatureFile, "signature.txt", signaturePresent),
+              addExportDiv("Copy " + config.plotName + " plot", ".export-clipboard-plots", plotFile, "plot.png", plotsPresent),
+              addExportDiv("Copy top table", ".export-clipboard-headTable", headTableCsvFile, "table.tsv", headTablePresent),
+              addExportDiv("Copy bottom table", ".export-clipboard-tailTable", tailTableCsvFile, "table.tsv", tailTablePresent),
+              // div(".row", [
+              //   span(".col .s6 .push-s1", "Export report"),
+              //   span(".btn .col .s1 .offset-s3 .export-file-report .disabled", i(".material-icons", "file_download")),
+              // ]),
             ]),
             div(".modal-footer", [
               button(".export-close .col .s8 .push-s2 .btn", "Close"),
@@ -285,7 +292,7 @@ function view(state$, dataPresent, exportData) {
 
 
 
-function Exporter(sources, config) {
+function Exporter(sources) {
 
   const logger = loggerFactory(
     "exporter",
@@ -294,9 +301,12 @@ function Exporter(sources, config) {
   )
 
   const defaultConfig = {
-    plot: "#simplot",
+    plotId: "#simplot", // id of the div passed to vega
+    plotName: "binned similarity", // part of the text to be displayed for plot copy/download
+    fabSignature: "update", // part of FAB class name, set to "", ".hide" or ".disabled". 
+                            //"update" sets ".disabled" when the signature is not available and updates the FAB when it becomes available
   }
-  const fullConfig = mergeLeft(config, defaultConfig)
+  const fullConfig = mergeLeft(sources.config, defaultConfig)
 
   const state$ = sources.onion.state$
 
@@ -304,22 +314,37 @@ function Exporter(sources, config) {
 
   const model_ = model(actions, state$, sources.vega, fullConfig)
 
-  const vdom$ = view(state$, model_.dataPresent, model_.exportData)
+  const vdom$ = view(state$, model_.dataPresent, model_.exportData, fullConfig)
 
-  const fabInit$ = xs.of({
+  const fabInit$ = vdom$.mapTo({
       state: "init",
       element: ".fixed-action-btn",
       options: {
           direction: "top",
         //   hoverEnabled: false,
       }
-  }).compose(delay(1000)).remember()
+    })
+    .compose(dropRepeats(equals)) // run just once
+    .compose(delay(50)) // let the vdom propagate first and next cycle initialize FAB
+
+  const fabUpdate$ = model_.dataPresent.signaturePresent$
+    .filter(_ => fullConfig.fabSignature == "update")
+    .compose(dropRepeats(equals))
+    .mapTo({
+      state: "update",
+      element: ".fixed-action-btn",
+      options: {
+          direction: "top",
+        //   hoverEnabled: false,
+      }
+    })
+    .compose(delay(50)) // let the vdom propagate first and next cycle update FAB
 
   return {
     log: xs.merge(logger(state$, "state$")),
     DOM: vdom$,
     onion: model_.reducers$,
-    fab: fabInit$,
+    fab: xs.merge(fabInit$, fabUpdate$),
     modal: model_.modal$,
     clipboard: model_.clipboard$,
   }

@@ -34,13 +34,13 @@ function DiseaseWorkflow(sources) {
   const scenarioReducer$ = sources.onion.state$
     .take(1)
     .filter((state) => state.settings.common.ghostMode)
-    .mapTo(runScenario(scenario).scenarioReducer$)
+    .mapTo(runScenario(scenario, state$).scenarioReducer$)
     .flatten()
     .startWith((prevState) => prevState)
   const scenarioPopup$ = sources.onion.state$
     .take(1)
     .filter((state) => state.settings.common.ghostMode)
-    .mapTo(runScenario(scenario).scenarioPopup$)
+    .mapTo(runScenario(scenario, state$).scenarioPopup$)
     .flatten()
     .startWith({ text: "Welcome to Disease Workflow", duration: 4000 })
 

@@ -25,7 +25,8 @@ const stateTemplate = {
 
 const checkLens = { 
   get: state => ({
-    query: state.core.query, 
+    query: state.core.query,
+    ghostUpdate: state.core.ghostUpdate,
     settings: state.settings,
     search: state.search,
     searchAutoRun: state.searchAutoRun,
@@ -161,14 +162,30 @@ function SignatureCheck(sources) {
     .mapTo(true)
     .compose(dropRepeats(equals))
 
-  const collapseUpdateReducer$ = xs.merge(collapseUpdate$,searchAutoRun$).compose(sampleCombine(data$))
+  const ghostUpdate$ = sources.onion.state$
+    .map((state) => state.ghostUpdate)
+    .filter((ghost) => ghost)
+    .compose(dropRepeats())
+
+  const collapseUpdateReducer$ = xs
+    .merge(
+      collapseUpdate$,
+      searchAutoRun$,
+      ghostUpdate$,
+    )
+    .compose(sampleCombine(data$))
     .map(([collapse, data]) => prevState => {
       return ({...prevState, query : data.map(x => (x.found ?? x.inL1000) ? x.symbol : '').join(" ").replace(/\s\s+/g, ' ').trim()});
     });
 
   // The result of this component is an event when valid
   // XXX: stays true the whole cycle, so maybe tackle this as well!!!!
-  const validated$ = xs.merge(collapseUpdate$,searchAutoRun$).map(update => true)
+  const validated$ = xs
+    .merge(
+      collapseUpdate$,
+      searchAutoRun$,
+      ghostUpdate$,
+    ).mapTo(true)
 
   return { 
     log: xs.merge(

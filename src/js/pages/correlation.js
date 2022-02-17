@@ -16,7 +16,7 @@ import { SampleTable, sampleTableLens } from '../components/SampleTable/SampleTa
 import { Exporter } from "../components/Exporter"
 
 // Support for ghost mode
-import { scenario } from '../scenarios/diseaseScenario'
+import { scenario } from '../scenarios/correlationScenario'
 import { runScenario } from '../utils/scenario'
 
 function CorrelationWorkflow(sources) {
@@ -29,13 +29,13 @@ function CorrelationWorkflow(sources) {
     const scenarioReducer$ =
         sources.onion.state$.take(1)
         .filter(state => state.settings.common.ghostMode)
-        .mapTo(runScenario(scenario).scenarioReducer$)
+        .mapTo(runScenario(scenario, state$).scenarioReducer$)
         .flatten()
         .startWith(prevState => prevState)
     const scenarioPopup$ =
         sources.onion.state$.take(1)
         .filter(state => state.settings.common.ghostMode)
-        .mapTo(runScenario(scenario).scenarioPopup$)
+        .mapTo(runScenario(scenario, state$).scenarioPopup$)
         .flatten()
         .startWith({ text: 'Welcome to Correlation Workflow', duration: 4000 })
 

@@ -37,7 +37,8 @@ const checkLens = {
 
 const checkLens1 = { 
   get: state => ({
-    query: state.core.query1, 
+    query: state.core.query1,
+    ghostUpdate: state.core.ghostUpdate1,
     settings: state.settings,
     search: state.search1,
     searchAutoRun: state.searchAutoRun,
@@ -49,6 +50,7 @@ const checkLens1 = {
 const checkLens2 = { 
   get: state => ({
     query: state.core.query2,
+    ghostUpdate: state.core.ghostUpdate2,
     settings: state.settings,
     search: state.search2,
     searchAutoRun: state.searchAutoRun,

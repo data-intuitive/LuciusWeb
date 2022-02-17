@@ -1,8 +1,5 @@
 
-const typerString1 = "-ENSG00000013583 DDX10 -217933_s_at -GLRX 4860 -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS"
-const typerString2 = "-ENSG00000013583 DDX10 -217933_s_at -GLRX 4860 -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS"
-
-export const scenario = [
+export const scenario = config => [
     { //Form
         delay: 500,
         state: {},
@@ -15,11 +12,7 @@ export const scenario = [
         delay: 200,
         state: {
             routerInformation: {
-                params: {
-                    signature1: typerString1,
-                    signature2: typerString2,
-                    typer: "50"
-                },
+                params: config.params,
             }
         }
     },
@@ -42,7 +35,7 @@ export const scenario = [
 
     { // Validate
         delay: 2000,
-        continue: (s) => (s.form.query1 == typerString1),
+        continue: (s) => (s.form.query1 == config.params.signature1),
         state: {},
         message: {
             text: 'When ready, press the update/validate button, removing faulty or non-measured L1000 genes',
@@ -55,7 +48,7 @@ export const scenario = [
     },
     {
         delay: 1000,
-        continue: (s) => (s.form.query2 == typerString2),
+        continue: (s) => (s.form.query2 == config.params.signature2),
         state: { form: { ghostUpdate2: true } }
     },
 

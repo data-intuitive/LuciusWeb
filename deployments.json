@@ -27,11 +27,7 @@
               "treatment": "BRD-K93645900",
               "samples": "A375_6H_BRD_K93645900_10",
               "trtType": "trt_cp"
-            },
-            "treatment": "BRD-K93645900",
-            "index": 0,
-            "sample": ["A375_6H_BRD_K93645900_10"],
-            "signature": "-CRCP"
+            }
           },
           "ligand": {
             "params": {
@@ -39,11 +35,7 @@
               "treatment": "ANGPT1",
               "samples": "HCC515_4H_CMAP_CYT_SRP3007_50",
               "trtType": "trt_cp"
-            },
-            "treatment": "ANGPT1",
-            "index": 0,
-            "sample": ["HCC515_4H_CMAP_CYT_SRP3007_50"],
-            "signature": "FBXO11 SLC35 F5BAG4 RIF1"
+            }
           },
           "genetic": {
             "params": {
@@ -51,11 +43,20 @@
               "treatment": "PARP2",
               "samples": "DER001_HCC515_96H_X1_F1B6_DUO52HI53LO",
               "trtType": "trt_cp"
-            },
-            "treatment": "PARP2",
-            "index": 0,
-            "sample": ["DER001_HCC515_96H_X1_F1B6_DUO52HI53LO:B03"],
-            "signature": "-COPS7A -KEAP1 -CCNB1 -HMG20B -ELOVL6 -DERA LPL -PLEKHJ1 -TPI1 ST3GAL5 -HAT1 -MLF2 -FOXG1 -STRAP -MRPL4 -EDN1 -PON2 KMT2A FRMD4A -C16orf58"
+            }
+          },
+          "disease": {
+            "params": {
+              "typer": 100,
+              "signature": "HSPA1A DNAJB1 DDIT4 -TSEN2"
+            }
+          },
+          "correlation": {
+            "params": {
+              "typer": 100,
+              "signature1": "HSPA1A DNAJB1 DDIT4 -TSEN2",
+              "signature2": "DNAJB1 DDIT4 -TSEN2"
+            }
           }
         },
         "modelTranslations": [

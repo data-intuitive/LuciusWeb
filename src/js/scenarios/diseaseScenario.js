@@ -16,13 +16,7 @@ const filterCellDose = {
             trtType: ['trt_cp', 'trt_lig']
         }
 
-const typerString = "-ENSG00000013583 DDX10 -217933_s_at -GLRX 4860 -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS"
-
-function notEmpty(data) {
-    return data != undefined && data != ""
-  }
-
-export const scenario = [
+export const scenario = config => [
     { //Form
         delay: 500,
         state: {},
@@ -35,10 +29,7 @@ export const scenario = [
         delay: 200,
         state: {
             routerInformation: {
-                params: {
-                    signature: typerString,
-                    typer: "100"
-                },
+                params: config.params,
             }
         }
     },
@@ -61,7 +52,7 @@ export const scenario = [
 
     { // Validate
         delay: 2000,
-        continue: (s) => (s.form.query == typerString),
+        continue: (s) => (s.form.query == config.params.signature),
         state: {},
         message: {
             text: 'When ready, press the update/validate button, removing faulty or non-measured L1000 genes',

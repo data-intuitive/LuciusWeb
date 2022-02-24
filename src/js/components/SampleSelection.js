@@ -36,11 +36,17 @@ const sampleSelectionLens = {
     core: typeof state.form !== "undefined" ? state.form.sampleSelection : {},
     settings: state.settings,
     ui: (state.ui??{}).sampleSelection ?? {dirty: false}, // Get state.ui.sampleSelection in a safe way or else get a default
+    search: state.params?.samples,
+    searchAutoRun: state.params?.autorun,
   }),
   // get: state => ({core: state.form.sampleSelection, settings: state.settings}),
   set: (state, childState) => ({
     ...state,
     form: { ...state.form, sampleSelection: childState.core},
+    pageState: {
+      ...state.pageState,
+      samples: childState.core.output?.join(),
+    }
   }),
 }
 
@@ -393,6 +399,39 @@ function SampleSelection(sources) {
       }
     })
 
+    const autoSelect$ = data$.compose(sampleCombine(state$))
+      .filter(([_, state]) => (state.search != undefined))
+      .mapTo(true)
+      .compose(dropRepeats(equals))
+
+    const autoSelectReducer$ = autoSelect$
+      .map((_) => (prevState) => {
+        const samplesToUse = prevState.search.split(",")
+
+        const newData = prevState.core.data.map((el) => {
+          // One sample object
+          var newEl = clone(el)
+          const use = samplesToUse.includes(el.id)//id === el.id
+          newEl.use = use
+          // console.log(el)
+          // console.log(newEl)
+          return newEl
+        })
+        return {
+          ...prevState,
+          core: {
+            ...prevState.core,
+            data: newData,
+            output: newData.filter((x) => x.use).map((x) => x.id),
+          },
+        }
+      })
+
+  const autoRun$ = autoSelectReducer$.compose(sampleCombine(state$))
+    .filter(([_, state]) => state.searchAutoRun == "" || state.searchAutoRun == "yes")
+    .mapTo(true)
+    .compose(dropRepeats(equals))
+
   const defaultReducer$ = xs.of((prevState) => ({
     ...prevState,
     core: { input: "", data: [] },
@@ -432,7 +471,8 @@ function SampleSelection(sources) {
       sources.onion.state$
         .map((state) => state.core.ghostoutput)
         .filter((ghost) => ghost)
-        .compose(dropRepeats())
+        .compose(dropRepeats()),
+      autoRun$,
     )
     .compose(sampleCombine(state$))
     .map(([ev, state]) => state.core.output)
@@ -453,6 +493,7 @@ function SampleSelection(sources) {
       requestReducer$,
       dataReducer$,
       selectReducer$,
+      autoSelectReducer$,
       busyReducer$,
       sortReducer$,
       hoverReducer$,

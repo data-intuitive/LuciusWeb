@@ -24,7 +24,9 @@ import switchPath from 'switch-path'
 import { makeModalDriver } from './drivers/makeModalDriver'
 import { makeAutocompleteDriver } from './drivers/makeAutocompleteDriver';
 import { makeSidenavDriver } from './drivers/makeSidenavDriver';
-import './main.scss'
+import { makeFloatingActionButtonDriver } from './drivers/makeFloatingActionButtonDriver';
+import { makeClipboardDriver } from './drivers/makeClipboardDriver'
+import '../sass/main.scss'
 
 import fromEvent from 'xstream/extra/fromEvent'
 import xs from 'xstream'
@@ -36,7 +38,7 @@ const drivers = {
     vega: makeVegaDriver(),
     HTTP: makeHTTPDriver(),
     // router: makeRouterDriver(captureClicks(makeHistoryDriver()), switchPath),
-    history: makeHistoryDriver(),
+    history: makeHistoryDriver({forceRefresh: false}),
     preventDefault: preventDefaultDriver,
     alert: alertDriver,
     storage: storageDriver,
@@ -46,8 +48,10 @@ const drivers = {
     modal: makeModalDriver(),
     ac: makeAutocompleteDriver(),
     sidenav: makeSidenavDriver(),
+    fab: makeFloatingActionButtonDriver(),
+    clipboard: makeClipboardDriver(),
     deployments: () => xs.fromPromise(fetch('/deployments.json').then(m => m.json()))
 };
 
-let StatifiedMain = onionify(storageify(routerify(Index, switchPath), { key: 'ComPass' }));
+let StatifiedMain = onionify(storageify(routerify(Index, switchPath, {omitHistory: false}), { key: 'ComPass' }));
 run(StatifiedMain, drivers);

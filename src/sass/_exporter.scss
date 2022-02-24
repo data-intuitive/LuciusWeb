@@ -1,0 +1,79 @@
+// style copy from materialize but add usage of 'span' instead of 'a'
+.fixed-action-btn {
+    ul {
+        span.btn-floating {
+          opacity: 0;
+        }
+      }
+}
+
+// own styling
+.fixed-action-btn {
+    > span.btn-floating {
+        background-color: color('red', 'base');
+    }
+    > ul {
+        span.export-clipboard-link-fab {
+            background-color: color('red', 'base')
+        }
+        span.export-clipboard-signature-fab {
+            background-color: color('yellow', 'darken-1')
+        }
+        span.export-pdf {
+            background-color: color('green', 'base')
+        }
+        span.modal-open-btn {
+            background-color: color('blue', 'base')
+        }
+
+        span.fab-wrap{
+            display: block;
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background-color: transparent;
+            box-shadow: none;
+            color: #fff;
+            //   line-height: $button-floating-large-size;
+            z-index: 1;
+            
+            &.success{
+                background-color:green;
+            }
+            &.failure{
+                background-color:red;
+            }
+        }
+    }
+
+}
+
+div #modal-exporter {
+    
+    div.title {
+        font-size: 1.5rem;
+    }
+
+    span.success {
+        background-color: green;
+    }
+    span.failure {
+        background-color: red;
+    }
+
+    // clicking *directly* on the a download link makes the router(?) go nuts. make sure we always click the i
+    // so to recapitulate, changing the padding fixes the underlying issue. the padding in itself is ok
+    a.paddingfix {
+        padding: 0px;
+        i {
+            width: 100%;
+        }
+    }
+
+    div.modal-footer {
+        > button.export-close{
+            background-color: color('blue-grey', 'base')
+        }
+    }
+}

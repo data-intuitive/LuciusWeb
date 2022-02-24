@@ -22,7 +22,7 @@ import {
   span,
   img,
 } from "@cycle/dom"
-import { merge, prop, mergeDeepLeft, mergeDeepRight } from "ramda"
+import { merge, prop, mergeDeepLeft, mergeDeepRight, equals, pickBy, identity } from "ramda"
 import * as R from "ramda"
 
 // Workflows
@@ -409,10 +409,53 @@ export default function Index(sources) {
   )
 
   const routerReducer$ = router.history$.map((router) => (prevState) => {
+
+    function paramsToObject(entries) {
+      const result = {}
+      for(const [key, value] of entries) { // each 'entry' is a [key, value] tupple
+        result[key] = value
+      }
+      return result
+    }
+
+    // we should not apply the same search query values when the page was reloaded
+    // if user refreshes or clicks same WF link, router.type is not set
+    // if we push new state, router.type == "push"
+    let paramsObject = {}
+    if (router?.type == "push") {
+      const params = new URLSearchParams(router.state)
+      paramsObject = paramsToObject(params)
+    }
+
     return {
       ...prevState,
-      routerInformation: router,
+      routerInformation: {
+        ...router,
+        params: paramsObject,
+        pageState: {}
+        }
     }
+  })
+
+  const pageStateReducer$ = state$.map((state) => state.routerInformation.pageState).compose(dropRepeats(equals))
+  .map((state) => (prevState) => {
+    // Don't output fields with undefined values
+    const filteredState = pickBy(identity, state)
+    const url = new URLSearchParams(filteredState)
+    const urlString = url.toString()
+
+    const fullUrl = urlString.length > 0
+      ? location.protocol + "//" + location.host + prevState.routerInformation.pathname + "?autorun&" + url.toString()
+      : location.protocol + "//" + location.host + prevState.routerInformation.pathname
+
+    return {
+      ...prevState,
+      routerInformation: {
+        ...prevState.routerInformation,
+        pageStateURL: fullUrl,
+      }
+    }
+
   })
 
   // Capture link targets and send to router driver
@@ -428,6 +471,14 @@ export default function Index(sources) {
 
   const history$ = sources.onion.state$.fold((acc, x) => acc.concat([x]), [{}])
 
+  const historyDriver$ = router.history$
+    .map((router) => router.search)
+    .filter((search) => search != undefined && search != "" && search != "?")
+    .map((search) => ({
+      type: 'push',
+      state: search,
+    }))
+
   return {
     log: xs.merge(
       // logger(page$, 'page$', '>> ', ' > ', ''),
@@ -441,6 +492,7 @@ export default function Index(sources) {
       defaultReducer$,
       deploymentsReducer$,
       routerReducer$,
+      pageStateReducer$,
       page$.map(prop("onion")).filter(Boolean).flatten()
     ),
     DOM: vdom$,
@@ -458,12 +510,15 @@ export default function Index(sources) {
     modal: page$.map(prop("modal")).filter(Boolean).flatten(),
     ac: page$.map(prop("ac")).filter(Boolean).flatten(),
     sidenav: sidenavEvent$,
+    fab: page$.map(prop("fab")).filter(Boolean).flatten(),
     storage: page$.map(prop("storage")).filter(Boolean).flatten(),
     deployments: page$
       .map(prop("deployments"))
       .filter(Boolean)
       .flatten()
       .debug("deployments"),
+    history: historyDriver$,
+    clipboard: page$.map(prop("clipboard")).filter(Boolean).flatten(),
   }
 }
 

@@ -153,15 +153,31 @@ function SampleSelection(sources) {
     const selectedClass = (selected) =>
       selected ? ".sampleSelected" : ".sampleDeselected"
 
+    function propSort(prop, descend) {
+      return (a, b) => {
+        const aValue = a[prop]
+        const bValue = b[prop]
+        const multi = descend ? -1 : 1
+
+        if (isNaN(aValue) || isNaN(bValue))
+          // works properly for integers but not for decimal numbers, so only use it as fallback
+          return aValue.localeCompare(bValue, undefined, {numeric: true})
+        else
+          return (Number(aValue) - Number(bValue) > 0 ? 1 : -1) * multi
+      }
+    }
+
     const dataSortAscend = sortWith([
       ascend(prop(state.core.sort)),
     ]);
     const dataSortDescend = sortWith([
       descend(prop(state.core.sort)),
     ]);
-    const sortedData = state.core.sort !== "" ?
-      state.core.direction ? dataSortDescend(data) : dataSortAscend(data) :
-      data
+    const sortedData = state.core.sort !== ""
+      ? state.core.sort == "dose" || state.core.sort == "time"
+        ? sortWith([propSort(state.core.sort, state.core.direction)])(data)
+        : state.core.direction ? dataSortDescend(data) : dataSortAscend(data)
+      : data
 
     let rows = sortedData.map((entry) => [
       td(".selection", { props: { id: entry.id } }, [

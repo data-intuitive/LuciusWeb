@@ -11,9 +11,14 @@ import {
   assocPath,
   equals,
   mergeAll,
+  lensProp,
+  view as viewR,
+  ascend,
+  sortWith
 } from "ramda"
 import { FetchFilters } from "./FetchFilters"
 import debounce from 'xstream/extra/debounce'
+import { safeModelToUi } from '../modelTranslations'
 
 /**
  * @module components/Filter
@@ -29,7 +34,7 @@ import debounce from 'xstream/extra/debounce'
 export const filterLens = {
   get: (state) => ({
     core: state.filter,
-    settings: { filter: state.settings.filter, api: state.settings.api },
+    settings: { filter: state.settings.filter, api: state.settings.api, modelTranslations: state.settings.common.modelTranslations},
     search: {
       dose: state.routerInformation.params?.dose,
       cell: state.routerInformation.params?.cell,
@@ -116,7 +121,7 @@ function intent(domSource$) {
     .remember()
 
   const showTypeUI$ = domSource$
-    .select(".type")
+    .select(".trtType")
     .events("click")
     .fold((x, _) => ({ trtType: !x.trtType }), { trtType: false })
     .startWith({ trtType: false })
@@ -160,7 +165,7 @@ function intent(domSource$) {
     .map((value) => ({ cell: value }))
 
   const typeToggled$ = domSource$
-    .select(".type-options")
+    .select(".trtType-options")
     .events("click")
     .map(function (ev) {
       ev.preventDefault()
@@ -517,78 +522,44 @@ function view(state$) {
             ),
           ]),
         ])
-      : div(".cell .col .s10 .offset-s1", [""])
+      : div(".col .s10 .offset-s1", [""])
 
 
   const loadedVdom$ = modifiedState$.map((state) => {
-    const possibleDoses = state.settings.filter.values.dose || [ "Populating filter dialog...", ]
-    const possibleCells = state.settings.filter.values.cell || [ "Populating filter dialog...", ]
-    const possibleTypes = state.settings.filter.values.trtType || [ "Populating filter dialog...", ]
 
-    const selectedDoses =
-      state.core.output.dose == undefined
-        ? possibleDoses
-        : state.core.output.dose
-    const selectedCells =
-      state.core.output.cell == undefined
-        ? possibleCells
-        : state.core.output.cell
-    const selectedTypes =
-      state.core.output.trtType == undefined
-        ? possibleTypes
-        : state.core.output.trtType
+    const propToFilterSection = (propName) => {
+      const lens = lensProp(propName)
+      const possibleValues = viewR(lens, state.settings.filter.values) || [ "Populating filter dialog...", ]
+      const selectedValues = viewR(lens, state.core.output) ?? possibleValues
+      const toggle = viewR(lens, state.core.state)
+      const domText = safeModelToUi(propName, state.settings.modelTranslations)
 
-    return div([
-      // DEBUG -- debugging purposes, remove when no longer necessary !!!
-      // div('.col .s12', [ div('', [ code('', JSON.stringify(fvs)) ] ) ]),
-      // div('.col .s12', [ div('', [ code('', JSON.stringify(state.settings.filter.values)) ] ) ]),
-      // div('.col .s12', [ div('', [ code('', JSON.stringify(state.core.output)) ] ) ]),
-      div(".col .s12", [
-        div(".chip .dose .col .s12", [
-          span(".dose .blue-grey-text", [
-            noFilter(selectedDoses, possibleDoses)
-              ? "No Dose Filter"
-              : "Doses: " + selectedDoses.join(", "),
+      return div(".col .s12", [
+        div(".chip " + "." + propName + ".col .s12", [
+          span("." + propName + " .blue-grey-text", [
+            noFilter(selectedValues, possibleValues)
+              ? "No " + domText + " Filter"
+              : domText + ": " + selectedValues.join(", "),
           ]),
         ]),
         togglableFilter(
-          "dose",
-          state.core.state.dose,
-          possibleDoses,
-          selectedDoses
+          propName,
+          toggle,
+          possibleValues,
+          selectedValues
         ),
-      ]),
-      div(".col .s12", [
-        div(".chip .cell .col .s12", [
-          span(".cell .blue-grey-text", [
-            noFilter(selectedCells, possibleCells)
-              ? "No Cell Filter"
-              : "Cells: " + selectedCells.join(", "),
-          ]),
-        ]),
-        togglableFilter(
-          "cell",
-          state.core.state.cell,
-          possibleCells,
-          selectedCells
-        ),
-      ]),
-      div(".col .s12", [
-        div(".chip .type .col .s12", [
-          span(".type .blue-grey-text", [
-            noFilter(selectedTypes, possibleTypes)
-              ? "No Type Filter"
-              : "Types: " + selectedTypes.join(", "),
-          ]),
-        ]),
-        togglableFilter(
-          "type",
-          state.core.state.trtType,
-          possibleTypes,
-          selectedTypes
-        ),
-      ]),
-    ])
+      ])
+    }
+
+    const filterGroups = Object.keys(state.settings.filter.values)
+    // sort by name that will be shown on the UI
+    const sortedFilterGroups = sortWith([
+        ascend(a => safeModelToUi(a, state.settings.modelTranslations))
+      ])(filterGroups)
+    const domArray = sortedFilterGroups
+      .map(f => propToFilterSection(f))
+
+    return div(domArray)
   })
 
   return xs.merge(

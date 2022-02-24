@@ -50,6 +50,21 @@
             "ui": "Secondary ID",
             "model": "jnjb",
             "comment": ""
+          },
+          {
+            "ui": "Cell",
+            "model": "cell",
+            "comment": "Filter group name"
+          },
+          {
+            "ui": "Dose",
+            "model": "dose",
+            "comment": "Filter group name"
+          },
+          {
+            "ui": "Type",
+            "model": "trtType",
+            "comment": "Filter group name"
           }
         ]
       },

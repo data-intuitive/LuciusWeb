@@ -116,35 +116,21 @@ function intent(domSource$, filterNames$) {
   //     .map(state => state.core.ghost.deselect)
   //     .compose(dropRepeats(equals))
 
-  const doseToggled$ = domSource$
-    .select(".dose-options")
-    .events("click")
-    .map(function (ev) {
-      ev.preventDefault()
-      return ev
-    })
-    .map((ev) => ev.ownerTarget.id)
-    .map((value) => ({ dose: value }))
-
-  const cellToggled$ = domSource$
-    .select(".cell-options")
-    .events("click")
-    .map(function (ev) {
-      ev.preventDefault()
-      return ev
-    })
-    .map((ev) => ev.ownerTarget.id)
-    .map((value) => ({ cell: value }))
-
-  const typeToggled$ = domSource$
-    .select(".trtType-options")
-    .events("click")
-    .map(function (ev) {
-      ev.preventDefault()
-      return ev
-    })
-    .map((ev) => ev.ownerTarget.id)
-    .map((value) => ({ trtType: value }))
+  const filterValueAction$ = filterNames$
+    .map((names) => xs.fromArray(names.map(
+      (name) => domSource$
+          .select("." + name + "-options")
+          .events("click")
+          .map(function (ev) {
+            ev.preventDefault()
+            return ev
+          })
+          .map((ev) => ev.ownerTarget.id)
+          .map((value) => ({ [name]: value }))
+      ))
+    )
+    .compose(flattenConcurrently)
+    .compose(flattenConcurrently)
 
   const modDown$ = domSource$
     .select("document")
@@ -167,15 +153,8 @@ function intent(domSource$, filterNames$) {
     .compose(dropRepeats(equals))
     .remember()
 
-  const action$ = xs.merge(
-    doseToggled$,
-    cellToggled$,
-    typeToggled$,
-    // toggledGhost$
-  )
-
   return {
-    filterValuesAction$: action$,
+    filterValuesAction$: filterValueAction$,
     modifier$: modifier$,
     filterAction$: filterAction$,
   }

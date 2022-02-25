@@ -18,6 +18,7 @@ import {
 } from "ramda"
 import { FetchFilters } from "./FetchFilters"
 import debounce from 'xstream/extra/debounce'
+import flattenConcurrently from 'xstream/extra/flattenConcurrently'
 import { safeModelToUi } from '../modelTranslations'
 
 /**
@@ -86,56 +87,27 @@ const isEmptyState = (state) => {
  * Filter intent, convert events on the dom to actions
  * @function intent
  * @param {Stream} domSource$ events from the dom
+ * @param {Stream} filterNames$ array of top-level filter names
  * @returns {Stream} object with:
  *                    - filterValuesAction$ stream of object where key is filter group (top level) and value is which option is being clicked/modified
  *                    - modifier$: stream of boolean of modifier key being pressed or not
  *                    - filterAction$: stream of object where key is filter group (top level) and value is boolean of the group being clicked open or not
  */
-function intent(domSource$) {
+function intent(domSource$, filterNames$) {
   // const expandAnyGhost$ = ghostChanges$.map(state => state.core.ghost.expand).startWith(false)
 
-  const showDoseUI$ = domSource$
-    .select(".dose")
-    .events("click")
-    .fold((x, _) => ({ dose: !x.dose }), { dose: false })
-    .startWith({ dose: false })
-
-  const showDose$ = xs
-    .merge(
-      showDoseUI$
-      // showAnyGhost$
+  const filterAction$ = filterNames$
+    .map((names) => xs.fromArray(names.map(
+      (name) => domSource$
+          .select("." + name)
+          .events("click")
+          .fold((x, _) => ({ [name]: !x[name] }), { [name]: false })
+          .startWith({ [name]: false })
+      ))
     )
-    .remember()
-
-  const showCellUI$ = domSource$
-    .select(".cell")
-    .events("click")
-    .fold((x, _) => ({ cell: !x.cell }), { cell: false })
-    .startWith({ cell: false })
-
-  const showCell$ = xs
-    .merge(
-      showCellUI$
-      // showAnyGhost$
-    )
-    .remember()
-
-  const showTypeUI$ = domSource$
-    .select(".trtType")
-    .events("click")
-    .fold((x, _) => ({ trtType: !x.trtType }), { trtType: false })
-    .startWith({ trtType: false })
-
-  const showType$ = xs
-    .merge(
-      showTypeUI$
-      // showAnyGhost$
-    )
-    .remember()
-
-  const filterAction$ = xs
-    .combine(showDose$, showCell$, showType$)
-    .map(mergeAll)
+    .compose(flattenConcurrently)
+    .compose(flattenConcurrently)
+    .fold((acc, new_) => ({...acc, ...new_}), ({}))
 
   // Toggles for filter options
   // const toggledGhost$ =
@@ -612,11 +584,15 @@ function Filter(sources) {
   // The debounce is required, else it simply does not work
   const state$ = sources.onion.state$.compose(debounce(100))
 
+  const filterNames$ = state$
+    .map(state => Object.keys(state.settings.filter.values))
+    .compose(dropRepeats(equals))
+
   const input$ = sources.input
 
   const filterQuery = FetchFilters(sources)
 
-  const actions = intent(sources.DOM)
+  const actions = intent(sources.DOM, filterNames$)
 
   const vdom$ = view(state$)
 

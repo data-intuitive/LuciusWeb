@@ -498,9 +498,10 @@ function view(state$) {
 
   /**
    * A table of check boxes that is only shown if needed
-   * @param {*} toggle Visible or not?
-   * @param {*} options Array of possible options
-   * @param {*} selection Array of selections (multiple)
+   * @param {String} filter Filter name as specified by the API
+   * @param {Boolean} toggle Visible or not?
+   * @param {Array} possibleOptions Array of possible options
+   * @param {Array} selectedOptions Array of selections (multiple)
    */
   const togglableFilter = (filter, toggle, possibleOptions, selectedOptions) =>
     toggle
@@ -524,6 +525,33 @@ function view(state$) {
         ])
       : div(".col .s10 .offset-s1", [""])
 
+  /**
+   * Top level of a filter group.
+   * First part contains the filter name and summary of the selected filters
+   * Second part, if toggled open, lists all filter values with selection boxes
+   * @param {Array} selectedValues All filter values that are currently selected
+   * @param {Array} possibleValues All possible filter values in this group
+   * @param {String} propName Filter name as specified by the API
+   * @param {String} domText Filter name as it should be displayed on the DOM
+   * @param {Boolean} toggle Filter is currently open or not
+   * @returns vdom div containing sub vdom elements
+   */
+  const collapsableFilter = (selectedValues, possibleValues, propName, domText, toggle) =>
+    div(".col .s12", [
+      div(".chip " + "." + propName + ".col .s12", [
+        span("." + propName + " .blue-grey-text", [
+          noFilter(selectedValues, possibleValues)
+            ? "No " + domText + " Filter"
+            : domText + ": " + selectedValues.join(", "),
+        ]),
+      ]),
+      togglableFilter(
+        propName,
+        toggle,
+        possibleValues,
+        selectedValues
+      ),
+    ])
 
   const loadedVdom$ = modifiedState$.map((state) => {
 
@@ -534,21 +562,7 @@ function view(state$) {
       const toggle = viewR(lens, state.core.state)
       const domText = safeModelToUi(propName, state.settings.modelTranslations)
 
-      return div(".col .s12", [
-        div(".chip " + "." + propName + ".col .s12", [
-          span("." + propName + " .blue-grey-text", [
-            noFilter(selectedValues, possibleValues)
-              ? "No " + domText + " Filter"
-              : domText + ": " + selectedValues.join(", "),
-          ]),
-        ]),
-        togglableFilter(
-          propName,
-          toggle,
-          possibleValues,
-          selectedValues
-        ),
-      ])
+      return collapsableFilter(selectedValues, possibleValues, propName, domText, toggle)
     }
 
     const filterGroups = Object.keys(state.settings.filter.values)

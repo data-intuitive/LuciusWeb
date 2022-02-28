@@ -14,7 +14,11 @@ import {
   lensProp,
   view as viewR,
   ascend,
-  sortWith
+  sortWith,
+  none,
+  any,
+  values,
+  identity,
 } from "ramda"
 import { FetchFilters } from "./FetchFilters"
 import debounce from 'xstream/extra/debounce'
@@ -319,7 +323,7 @@ export function model(
    * @type {Reducer}
    */
   const outputReducer$ = filterAction$
-    .filter((state) => !state.dose && !state.cell && !state.trtType)
+    .filter((state) => none(identity, values(state))) // check all values are false 
     .map(_ => (prevState) => ({
       ...prevState,
       core: { ...prevState.core, filter_output: minimizeFilterOutput(prevState) },
@@ -337,17 +341,14 @@ export function model(
         const values = searchValue.split(',')
         return values.filter(v => possibleValues.includes(v))
       }
-      
-      const matchedDoses = search.dose == undefined ? undefined : matchedFilters(search.dose, possibleValues.dose)
-      const matchedCells = search.cell == undefined ? undefined : matchedFilters(search.cell, possibleValues.cell)
-      const matchedTypes = search.trtType == undefined ? undefined : matchedFilters(search.trtType, possibleValues.trtType)
-      return {
-        dose: matchedDoses,
-        cell: matchedCells,
-        trtType: matchedTypes,
-      }
+
+      return keys(possibleValues)
+        .map((key) => (
+          { [key] : search[key] == undefined ? undefined : matchedFilters(search[key], possibleValues[key]) }
+        ))
+        .map(mergeAll)
     })
-    .filter((output) => (output.dose != undefined || output.cell != undefined || output.trtType != undefined)) // Only set filter if filter values are set
+    .filter((output) => any((value) => (value != undefined), values(output))) // any value not undefined?
     .compose(dropRepeats(equals)) // only do this once. Changes in the WF should not be overwritten
     .map((output) => (prevState) => {
       const filter_output = minimizeFilterOutput({

@@ -5,8 +5,8 @@ import debounce from 'xstream/extra/debounce'
 import { h, p, div, br, label, input, code, table, tr, td, b, h2, button, svg, h1 } from '@cycle/dom';
 import { clone, equals, omit } from 'ramda';
 import { CorrelationVegaSpec } from './CorrelationSpec.js'
-import { widthStream } from '../../utils/utils'
-import { loggerFactory } from '~/../../src/js/utils/logger'
+import { widthStream, widthHeightStream } from '../../utils/utils'
+import { loggerFactory } from '../../utils/logger'
 import { parse } from 'vega-parser'
 
 // Granular access to the settings, only api and sim keys
@@ -38,14 +38,14 @@ const isEmptyData = (data) => {
 }
 
 const makeVega = (elementID) => {
-    return div('.card-panel .center-align', [div(elementID)])
+    return div('.card-panel .center-align', { style: { height: '65vh', maxHeight: '75vw', width: '100%' } }, [div(elementID)])
 }
 
 function CorrelationPlot(sources) {
 
     const logger = loggerFactory('plots', sources.onion.state$, 'settings.plots.debug')
 
-    const state$ = sources.onion.state$.debug()
+    const state$ = sources.onion.state$
     const input$ = sources.input
 
     const visibility$ = (el) => sources.DOM.select(el)
@@ -57,7 +57,7 @@ function CorrelationPlot(sources) {
         .remember()
 
     // Size stream
-    const width$ = (el) => widthStream(sources.DOM, el)
+    const size$ = (el) => widthHeightStream(sources.DOM, el)
 
     const resize$ = sources.resize.startWith('go!')
 
@@ -128,8 +128,8 @@ function CorrelationPlot(sources) {
         .filter(data => !isEmptyData(data))
 
     // Ingest the data in the spec and return to the driver
-    const spec$ = xs.combine(nonEmptyData$, width$('#corrplot'), visibility$('#corrplot'), input$, resize$)
-        .map(([data, newwidth, visible]) => ({ spec: CorrelationVegaSpec(data), el: '#corrplot', width: newwidth, height: newwidth-100 }))
+    const spec$ = xs.combine(nonEmptyData$, size$('#corrplot'), visibility$('#corrplot'), input$, resize$)
+        .map(([data, newSize, visible]) => ({ spec: CorrelationVegaSpec(data), el: '#corrplot', width: newSize[0], height: newSize[1] }))
         .compose(debounce(10))
 
     const runtime$ = spec$
@@ -138,7 +138,7 @@ function CorrelationPlot(sources) {
     // ========================================================================
 
     const plotContainer = (plot) => {
-        return div('.col .s8 .offset-s2', {style : { padding: '0px'}}, [div('.col .s12', {style : { margin: '0 0 0 0', padding: 0}}, [
+        return div('.col .s10 .l8 .offset-s1 .offset-l2', {style : { padding: '0px'}}, [div('.col .s12', {style : { margin: '0 0 0 0', padding: 0}}, [
             plot,
         ]) ])
     }

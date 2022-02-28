@@ -10,7 +10,7 @@ import { SampleSelection, sampleSelectionLens } from './SampleSelection'
 import { mergeWith, merge } from 'ramda'
 import { SignatureGenerator, signatureLens } from './SignatureGenerator'
 import { stateDebug } from '../utils/utils'
-import { loggerFactory } from '~/../../src/js/utils/logger'
+import { loggerFactory } from '../utils/logger'
 
 function TargetForm(sources) {
 

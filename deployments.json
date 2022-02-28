@@ -2,13 +2,121 @@
   {
     "name": "default",
     "customizations": {
-        "wi": "https://github.com/data-intuitive/LuciusWeb"
-      },
+      "wi": "https://github.com/data-intuitive/LuciusWeb123"
+    },
     "services": {
       "filter": {
         "values": {
-          "concentration": ["0.5", "4.0", "1.5", "-0.5", "-6.0", "4.5", "-2.0", "5.0", "-8.0", "0.0", "3.5", "-Infinity", "-4.0", "-5.5", "-7.0", "3.0", "-1.5", "-1.0", "-2.5", "-6.5", "1.0", "2.5", "-3.0", "-4.5", "2.0"] ,
-          "protocol": ["breast", "N/A", "bone", "adipose", "skin", "central nervous system", "prostate", "ovary", "endometrium", "haematopoietic", "liver", "lung", "large intestine", "stomach", "blood", "other", "muscle", "kidney"],
+          "dose": ["sample_entry"],
+          "cell": ["sample_entry"],
+          "trtType": ["sample_entry"]
+        }
+      },
+      "common": {
+        "example": {
+          "compound": "BRD-K93645900",
+          "signature": "-WRONG HSPA1A DNAJB1 DDIT4 -TSEN2",
+          "ligand": "ANGPT1",
+          "genetic": "PARP2",
+          "target": "MELK"
+        },
+        "ghost": {
+          "compound": {
+            "treatment": "BRD-K93645900",
+            "index": 0,
+            "sample": ["A375_6H_BRD_K93645900_10"],
+            "signature": "-CRCP"
+          },
+          "ligand": {
+            "treatment": "ANGPT1",
+            "index": 0,
+            "sample": ["HCC515_4H_CMAP_CYT_SRP3007_50"],
+            "signature": "FBXO11 SLC35 F5BAG4 RIF1"
+          },
+          "genetic": {
+            "treatment": "PARP2",
+            "index": 0,
+            "sample": ["DER001_HCC515_96H_X1_F1B6_DUO52HI53LO:B03"],
+            "signature": "-COPS7A -KEAP1 -CCNB1 -HMG20B -ELOVL6 -DERA LPL -PLEKHJ1 -TPI1 ST3GAL5 -HAT1 -MLF2 -FOXG1 -STRAP -MRPL4 -EDN1 -PON2 KMT2A FRMD4A -C16orf58"
+          }
+        },
+        "modelTranslations": [
+          {
+            "ui": "ID",
+            "model": "id",
+            "comment": ""
+          },
+          {
+            "ui": "Secondary ID",
+            "model": "jnjb",
+            "comment": ""
+          }
+        ]
+      },
+      "stats": {
+        "endpoint": "classPath=com.dataintuitive.luciusapi.statistics"
+      },
+      "api": {
+        "url": "http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&sync=true&timeout=30"
+      },
+      "sourire": {
+        "url": "http://localhost:9999/molecule/"
+      },
+      "geneAnnotations": {
+        "url": "http://localhost:8082/gene/symbol/"
+      },
+      "treatmentAnnotations": {
+        "url": "http://localhost:8082/ca/"
+      },
+      "config": {
+        "logoUrl": "https://www.data-intuitive.com/images/logo_white.png",
+        "normalStatisticsResponseTime": 1.0
+      },
+      "strategy": {
+        "deployments": "theirs"
+      }
+    }
+  },
+  {
+    "name": "gsk",
+    "customizations": {
+      "wi": "https://github.com/data-intuitive/LuciusWeb"
+    },
+    "services": {
+      "filter": {
+        "values": {
+          "concentration": [
+            "<= 4.0",
+            "(4.0, 4.5]",
+            "(4.5, 5.0]",
+            "(5.0, 5.5]",
+            "(5.5, 6.0]",
+            "(6.0, 6.5]",
+            "(6.5, 7.0]",
+            "(7.0, 7.5]",
+            "> 7.5",
+            "Other"
+          ],
+          "protocol": [
+            "endometrium",
+            "adipose",
+            "blood",
+            "skin",
+            "central nervous system",
+            "-666",
+            "bone",
+            "large intestine",
+            "prostate",
+            "haematopoietic and lymphoid tissue",
+            "breast",
+            "lung",
+            "muscle",
+            "large instestine",
+            "stomach",
+            "kidney",
+            "liver",
+            "ovary"
+          ],
           "type": ["NA"]
         }
       },
@@ -26,20 +134,72 @@
           }
         ]
       },
-      "stats" : {
+      "stats": {
         "endpoint": "classPath=com.dataintuitive.luciusapi.statistics"
       },
-      "api" : {
-        "url": "http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&sync=true&timeout=30"
+      "api": {
+        "url": "https://compass.data-intuitive.app:445/jobs?context=luciusapi&appName=luciusapi&sync=true&timeout=30"
+      },
+      "sourire": {
+        "url": "https://compass.data-intuitive.app/molecule/"
+      },
+      "geneAnnotations": {
+        "url": "https://compass.data-intuitive.app/gene/symbol/"
+      },
+      "treatmentAnnotations": {
+        "url": "http://localhost:8082/ca/"
+      },
+      "config": {
+        "logoUrl": "",
+        "normalStatisticsResponseTime": 1.0
+      }
+    }
+  },
+  {
+    "name": "local-jnj",
+    "customizations": {
+      "wi": "https://github.com/data-intuitive/LuciusCore"
+    },
+    "services": {
+      "filter": {
+        "values": {
+          "concentration": ["0.1", "1", "10", "30"],
+          "protocol": ["MCF7", "PBMC"],
+          "type": ["test", "poscon"]
+        }
+      },
+      "common": {
+        "modelTranslations": [
+          {
+            "ui": "jnjs",
+            "model": "id",
+            "comment": ""
+          },
+          {
+            "ui": "jnjb",
+            "model": "jnjb",
+            "comment": ""
+          }
+        ]
+      },
+      "stats": {
+        "endpoint": "classPath=com.dataintuitive.luciusapi.statistics"
+      },
+      "api": {
+        "url": "http://localhost-test:8090/jobs?context=luciusapi&appName=luciusapi&sync=true&timeout=30"
       },
       "sourire": {
         "url": "http://localhost:9999/molecule/"
       },
-      "geneAnnotations" : {
-        "url" : "http://localhost:8082/gene/symbol/"
+      "geneAnnotations": {
+        "url": "http://localhost:8082/gene/symbol/"
       },
-      "compoundAnnotations" : {
-        "url" : "http://localhost:8082/drugbank/"
+      "treatmentAnnotations": {
+        "url": "http://localhost:8082/drugbank/"
+      },
+      "config": {
+        "logoUrl": "",
+        "normalStatisticsResponseTime": 1.0
       }
     }
   }

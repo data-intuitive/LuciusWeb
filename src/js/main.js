@@ -7,7 +7,8 @@ import { makeDOMDriver } from '@cycle/dom';
 import { makeHTTPDriver } from '@cycle/http';
 import { makeHistoryDriver, makeServerHistoryDriver, makeHashHistoryDriver, captureClicks } from '@cycle/history'
 import storageDriver from '@cycle/storage';
-import { makeRouterDriver } from 'cyclic-router';
+// import { makeRouterDriver } from 'cyclic-router';
+import {routerify} from 'cyclic-router'
 import onionify from 'cycle-onionify';
 import storageify from "cycle-storageify";
 import delay from 'xstream/extra/delay'
@@ -22,6 +23,7 @@ import { preventDefaultDriver } from './drivers/preventDefaultDriver';
 import switchPath from 'switch-path'
 import { makeModalDriver } from './drivers/makeModalDriver'
 import { makeAutocompleteDriver } from './drivers/makeAutocompleteDriver';
+import { makeSidenavDriver } from './drivers/makeSidenavDriver';
 import './main.scss'
 
 import fromEvent from 'xstream/extra/fromEvent'
@@ -33,7 +35,8 @@ const drivers = {
     DOM: makeDOMDriver('#root'),
     vega: makeVegaDriver(),
     HTTP: makeHTTPDriver(),
-    router: makeRouterDriver(captureClicks(makeHistoryDriver()), switchPath),
+    // router: makeRouterDriver(captureClicks(makeHistoryDriver()), switchPath),
+    history: makeHistoryDriver(),
     preventDefault: preventDefaultDriver,
     alert: alertDriver,
     storage: storageDriver,
@@ -42,8 +45,9 @@ const drivers = {
     log: logDriver,
     modal: makeModalDriver(),
     ac: makeAutocompleteDriver(),
+    sidenav: makeSidenavDriver(),
     deployments: () => xs.fromPromise(fetch('/deployments.json').then(m => m.json()))
 };
 
-let StatifiedMain = onionify(storageify(Index, { key: 'ComPass' }));
+let StatifiedMain = onionify(storageify(routerify(Index, switchPath), { key: 'ComPass' }));
 run(StatifiedMain, drivers);

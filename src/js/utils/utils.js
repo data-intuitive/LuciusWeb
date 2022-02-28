@@ -1,5 +1,5 @@
 import dropRepeats from 'xstream/extra/dropRepeats'
-import { prop } from 'ramda'
+import { prop, equals } from 'ramda'
 
 // Size stream, make it dependent on the size of container which is managed by CSS.
 // TODO: Make it update immediately, currently only updates on new query
@@ -20,6 +20,23 @@ export function widthStream(domSource$, el) {
         // .debug(log)
 }
 
+export function widthHeightStream(domSource$, el) {
+    return domSource$
+        .select(el)
+        .elements()
+        .map(elements => elements[0])
+        .map(container => {
+            if (container != undefined) {
+                return [container.offsetWidth, container.offsetHeight]
+            } else {
+                return [100, 100]
+            }
+        })
+        .compose(dropRepeats(equals))
+        .remember()
+        // .debug(log)
+}
+
 export const titleCase = (phrase) =>
     (phrase != null)
       ? phrase.toLowerCase().replace(/^\w|\s\w|\(\w|-\w\/\w/g, function(w) {return w.toUpperCase()})
@@ -28,7 +45,7 @@ export const titleCase = (phrase) =>
 /**
  * Take the absolute value of a gene in a very basic way.
  */
-export const absGene = (signedGene) => signedGene.replace('-', '').trim()
+export const absGene = (signedGene) => signedGene?.replace('-', '').trim()
 
 /**
  * For later use: Array extensions

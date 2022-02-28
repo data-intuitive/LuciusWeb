@@ -1,19 +1,19 @@
 const filterValues = {
-            concentration: ['0.1', '1', '10', '30'],
-            protocol: ['MCF7', 'PBMC'],
-            type: ['test', 'poscon']
+            dose: ["<= 4.0", "Other"],
+            cell: ["kidney", "haematopoietic", "adipose", "endometrium", "blood", "skin", "bone", "central nervous system", "lung", "muscle", "large intestine", "other", "breast", "liver", "prostate", "ovary", "stomach", "N/A"],
+            trtType: ["trt_cp", "trt_lig"]
         }
 
-const filterMCF7 = {
-            concentration: ['0.1', '1', '10', '30'],
-            protocol: ['MCF7'],
-            type: ['test', 'poscon']
+const filterCell = {
+            dose: ['<= 4.0', 'Other'],
+            cell: ['breast'],
+            trtType: ['trt_cp', 'trt_lig']
         }
 
-const filterMCF7Conc = {
-            concentration: [ '1' ],
-            protocol: ['MCF7'],
-            type: ['test', 'poscon']
+const filterCellDose = {
+            dose: ['<= 4.0'],
+            cell: ['breast'],
+            trtType: ['trt_cp', 'trt_lig']
         }
 
 export const scenario = [
@@ -123,10 +123,9 @@ export const scenario = [
             filter: {
               input: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS',
               output: filterValues,
-              ghost: { expand: false }
+              filter_output: filterValues,
+              state: {dose: false, cell: false, trtType: false},
             },
-            headTable: { input: { query: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS' } },
-            tailTable: { input: { query: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS' } },
         },
         message: {
             text: 'When ready, press <i class="material-icons">play_arrow</i>',
@@ -136,77 +135,99 @@ export const scenario = [
 
     // Wait a bit for everything to load...
 
-    { // Filter
+    { // open Filter #1
         delay: 12000,
         state: {
             filter: {
-              input: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS',
-              output: filterMCF7,
-              ghost: { expand: true, deselect: {protocol: 'MCF'} }
+              state: {dose: true, cell: false, trtType: false}, // expand filters
             },
-            headTable: { input: { filter: filterMCF7, query: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS' } },
-            tailTable: { input: { filter: filterMCF7, query: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS' } },
         },
         message: {
-            text: 'Set filter to MCF7',
+            text: 'Open filters',
             duration: 7000
         }
     },
-    {
-        delay: 8000,
+    { // open Filter #2
+        delay: 500,
         state: {
             filter: {
-              input: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS',
-              output: filterMCF7Conc,
-              ghost: { expand: true, deselect: {concentration: '0.1'} }
+              state: {dose: true, cell: true, trtType: false}, // expand filters
             },
-            headTable: { input: { filter: filterMCF7Conc, query: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS' } },
-            tailTable: { input: { filter: filterMCF7Conc, query: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS' } },
+        },
+    },
+    { // open Filter #3
+        delay: 500,
+        state: {
+            filter: {
+              state: {dose: true, cell: true, trtType: true}, // expand filters
+            },
+        },
+    },
+    { // Select cell
+        delay: 4000,
+        state: {
+            filter: {
+              output: filterCell,
+              state: {dose: true, cell: true, trtType: true}, // expand filters
+            },
         },
         message: {
-            text: 'Set filter to 1mM',
+            text: 'Set filter to breast',
             duration: 7000
         }
     },
-    {
+    { // select dose
+        delay: 4000,
+        state: {
+            filter: {
+              output: filterCellDose,
+              state: {dose: true, cell: true, trtType: true}, // expand filters
+            },
+        },
+        message: {
+            text: 'Set filter to <= 4.0',
+            duration: 7000
+        }
+    },
+    { // close Filter #1
+        delay: 4000,
+        state: {
+            filter: {
+              state: {dose: false, cell: true, trtType: true}, // expand filters
+            },
+        },
+        message: {
+            text: 'Close filters to apply filter values',
+            duration: 7000
+        }
+    },
+    { // close Filter #2
         delay: 500,
         state: {
             filter: {
-              input: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS',
-              output: filterMCF7Conc,
-              ghost: { expand: true, deselect: {concentration: '10'} }
+              state: {dose: false, cell: false, trtType: true}, // expand filters
             },
-            headTable: { input: { filter: filterMCF7Conc, query: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS' } },
-            tailTable: { input: { filter: filterMCF7Conc, query: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS' } },
-        }
+        },
     },
-    {
+    { // close Filter #3
         delay: 500,
         state: {
             filter: {
-              input: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS',
-              output: filterMCF7Conc,
-              ghost: { expand: true, deselect: {concentration: '30'} }
+              output: filterCellDose,
+              filter_output: filterCellDose,
+              state: {dose: false, cell: false, trtType: false}, // expand filters
             },
-            headTable: { input: { filter: filterMCF7Conc, query: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS' } },
-            tailTable: { input: { filter: filterMCF7Conc, query: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS' } },
-        }
+        },
     },
-    {
+    { // output text
         delay: 6000,
-        state: {
-            filter: {
-              input: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS',
-              output: filterMCF7Conc,
-              ghost: { expand: false }
-            }
-        },
+        state: {},
         message: {
             text: 'The corresponding plots are vizualised for the entire compound database',
             duration: 4000
         }
     },
-    {
+    { // output text
         delay: 3000,
         state: {},
         message: {

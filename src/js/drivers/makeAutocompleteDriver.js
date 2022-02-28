@@ -32,12 +32,12 @@ function makeAutocompleteDriver() {
               ac = M.Autocomplete.init(elem, {
                 data: acInfo.render(acInfo.data),
                 onAutocomplete: function (str) {
-                  listener.next(acInfo.strip(str))
+                  const stripped = acInfo.strip(str)
+                  listener.next(stripped)
+                  elem.value = acInfo.strip(stripped)
                 }
               })
               ac.open()
-              // if (ac.isOpen || acInfo.data.length == 1) { ac.close() }
-              // else { ac.open() }
             }
           },
           error: (m) => {

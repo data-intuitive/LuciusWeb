@@ -6,7 +6,7 @@ import { h, p, div, br, label, input, code, table, tr, td, b, h2, button, svg, h
 import { clone, equals } from 'ramda';
 import { vegaSpec } from './spec.js'
 import { widthStream } from '../../utils/utils'
-import { loggerFactory } from '~/../../src/js/utils/logger'
+import { loggerFactory } from '../../utils/logger'
 import { parse } from 'vega-parser'
 
 // Element ID for this vega component

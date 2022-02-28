@@ -7,7 +7,7 @@ import { clone, equals, omit } from 'ramda';
 import { vegaSpec } from './spec.js'
 import { widthStream } from '../../utils/utils'
 import { stateDebug } from '../../utils/utils'
-import { loggerFactory } from '~/../../src/js/utils/logger'
+import { loggerFactory } from '../../utils/logger'
 import { parse } from 'vega-parser'
 
 const elementID = '#vega'

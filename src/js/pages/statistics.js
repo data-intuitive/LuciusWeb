@@ -5,7 +5,7 @@ import { mergeWith, merge } from 'ramda'
 import { clone, equal, equals, mergeAll, prop, props } from 'ramda';
 import dropRepeats from 'xstream/extra/dropRepeats'
 
-import { initSettings } from './settings'
+import { initSettings } from '../configuration.js'
 
 // Components
 import { Statistics } from '../components/Statistics'

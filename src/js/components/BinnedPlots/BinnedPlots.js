@@ -7,15 +7,18 @@ import { clone, equals, omit } from 'ramda';
 import { histogramVegaSpec } from './HistogramSpec.js'
 import { similarityPlotVegaSpec } from './SimilarityPlotSpec.js'
 import { widthStream } from '../../utils/utils'
-import { loggerFactory } from '~/../../src/js/utils/logger'
+import { loggerFactory } from '../../utils/logger'
 import { parse } from 'vega-parser'
+import { dirtyWrapperStream } from "../../utils/ui"
 
 // const elementID = '#hist'
 // const component = 'histogram'
 
 // Granular access to the settings, only api and sim keys
 const plotsLens = {
-    get: state => ({ core: state.plots, settings: { plots: state.settings.plots, api: state.settings.api } }),
+    get: state => ({ core: state.plots, settings: { plots: state.settings.plots, api: state.settings.api }, 
+        ui: (state.ui??{}).plots ?? {dirty: false}, // Get state.ui.prots in a safe way or else get a default
+    }),
     set: (state, childState) => ({...state, plots: childState.core })
 };
 
@@ -241,14 +244,17 @@ function BinnedPlots(sources) {
             div('.red .white-text', [p('An error occured !!!')]),
             div('.red .white-text', [p('An error occured !!!')])))
 
+    
     // Merge the streams, last event is shown...
-    const vdom$ = xs.merge(
-        initVdom$,
-        errorVdom$,
-        loadingVdom$,
-        emptyLoadedVdom$,
-        nonEmptyLoadedVdom$
-    )
+    // Wrap component vdom with an extra div that handles being dirty
+    const vdom$ = dirtyWrapperStream(state$, 
+        xs.merge(
+            initVdom$,
+            errorVdom$,
+            loadingVdom$,
+            emptyLoadedVdom$,
+            nonEmptyLoadedVdom$
+        ) )
 
     // ========================================================================
 

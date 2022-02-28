@@ -21,7 +21,7 @@ describe("defaultReducer", function () {
         const newState = f(state)
         assert.deepStrictEqual(newState.core.output, {})
         assert.deepStrictEqual(newState.core.filter_output, {})
-        assert.deepStrictEqual(newState.core.state, {dose: false, cell: false, trtType: false})
+        assert.deepStrictEqual(newState.core.state, {})
       },
       error(e) {
         done(e)

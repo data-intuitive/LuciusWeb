@@ -19,6 +19,7 @@ import {
   any,
   values,
   identity,
+  replace,
 } from "ramda"
 import { FetchFilters } from "./FetchFilters"
 import debounce from 'xstream/extra/debounce'
@@ -37,32 +38,53 @@ import { safeModelToUi } from '../modelTranslations'
  * @type {Lens}
  */
 export const filterLens = {
-  get: (state) => ({
-    core: state.filter,
-    settings: { filter: state.settings.filter, api: state.settings.api, modelTranslations: state.settings.common.modelTranslations},
-    search: {
-      dose: state.routerInformation.params?.dose,
-      cell: state.routerInformation.params?.cell,
-      trtType: state.routerInformation.params?.trtType,
+  get: (state) => {
+
+    // Get keys starting with 'filter_' but that is not only 'filter_'
+    const keys_ = keys(state.routerInformation.params)
+      .filter((key) => key.startsWith("filter_") && key != "filter_")
+    const searchArr = keys_.map((key) => {
+      const newKey = replace(/^filter_/, "", key)
+      return {
+        [newKey]: state.routerInformation.params[key]
+      }
+    })
+    const searchObj = mergeAll(searchArr)
+
+    return {
+      core: state.filter,
+      settings: { filter: state.settings.filter, api: state.settings.api, modelTranslations: state.settings.common.modelTranslations},
+      search: searchObj,
     }
-  }),
-  set: (state, childState) => ({
-    ...state,
-    filter: childState.core,
-    settings: {
-      ...state.settings,
-      filter: childState.settings.filter,
-    },
-    routerInformation: {
-      ...state.routerInformation,
-      pageState: {
-        ...state.routerInformation.pageState,
-        dose: childState.core.filter_output?.dose?.join(),
-        cell: childState.core.filter_output?.cell?.join(),
-        trtType: childState.core.filter_output?.trtType?.join(),
+  },
+  set: (state, childState) => {
+
+    const filter_outputs = childState.core.filter_output
+    const filterStates = keys(filter_outputs)
+      .map((key) => ({ ["filter_" + key] : filter_outputs[key]?.join() }))
+    const mergedFilterState = mergeAll(filterStates)
+    // mergedFilterState is an object with e.g.
+    // {
+    //   filter_dose: "123",
+    //   filter_cell: "abc,def",
+    // }
+
+    return {
+      ...state,
+      filter: childState.core,
+      settings: {
+        ...state.settings,
+        filter: childState.settings.filter,
+      },
+      routerInformation: {
+        ...state.routerInformation,
+        pageState: {
+          ...state.routerInformation.pageState,
+          ...mergedFilterState,
+        }
       }
     }
-  }),
+  },
 }
 
 /**
@@ -342,11 +364,12 @@ export function model(
         return values.filter(v => possibleValues.includes(v))
       }
 
-      return keys(possibleValues)
-        .map((key) => (
-          { [key] : search[key] == undefined ? undefined : matchedFilters(search[key], possibleValues[key]) }
-        ))
-        .map(mergeAll)
+      return mergeAll(
+        keys(possibleValues)
+          .map((key) => (
+            { [key] : search[key] == undefined ? undefined : matchedFilters(search[key], possibleValues[key]) }
+          ))
+        )
     })
     .filter((output) => any((value) => (value != undefined), values(output))) // any value not undefined?
     .compose(dropRepeats(equals)) // only do this once. Changes in the WF should not be overwritten

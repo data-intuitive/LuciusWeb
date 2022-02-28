@@ -1,4 +1,4 @@
-import { loggerFactory } from '~/../../src/js/utils/logger'
+import { loggerFactory } from '../utils/logger'
 import xs from 'xstream'
 import { keys, values, filter, head, equals, map, prop, clone, omit, merge } from 'ramda'
 import dropRepeats from 'xstream/extra/dropRepeats'
@@ -13,9 +13,9 @@ import delay from 'xstream/extra/delay'
  * Please note:
  *  - No isolation is performed, but make sure the appropriate config key is pushed through!
  */
-function CompoundAnnotation(sources, id = ".compoundPopup") {
+function TreatmentAnnotation(sources, id = ".treatmentPopup") {
 
-  const logger = loggerFactory('compoundAnnotation', sources.onion.state$, 'settings.compoundAnnotations.debug')
+  const logger = loggerFactory('treatmentAnnotation', sources.onion.state$, 'settings.treatmentAnnotations.debug')
   const state$ = sources.onion.state$
 
   const trigger$ =
@@ -30,16 +30,16 @@ function CompoundAnnotation(sources, id = ".compoundPopup") {
     trigger$
       .compose(sampleCombine(state$))
       .map(([el, state]) => {
-        const url = state.settings.compoundAnnotations.url
+        const url = state.settings.treatmentAnnotations.url
         return {
           url: url + 'id' + '/' + el,
           method: 'GET',
-          'category': 'compound'
+          'category': 'treatment'
         }
       })
 
   const response$ = sources.HTTP
-    .select('compound')
+    .select('treatment')
     .map((response$) =>
       response$.replaceError(() => xs.of({ body: { id: 'NA'} }))
     )
@@ -55,7 +55,7 @@ function CompoundAnnotation(sources, id = ".compoundPopup") {
           span('.col.l9', [ content ])
         ])
 
-  // Display code for CompoundAnnotation in Brutus
+  // Display code for TreatmentAnnotation in Brutus
   const displayAnnotation = (annotation) => {
     const title = annotation.name
     const targets = annotation.targetGenes
@@ -111,7 +111,7 @@ function CompoundAnnotation(sources, id = ".compoundPopup") {
       return div('#modal-' + annotation.id + '.modal.bottom-sheet.grey.darken-4.grey-text.row', [
         div('.col.s12.modal-content', [
           div('.grey-text.col.l12.s12',  [
-            h4('.grey-text.text-lighten-2', [ titleCase('No annotations available for this compound') ]),
+            h4('.grey-text.text-lighten-2', [ titleCase('No annotations available for this treatment') ]),
           ]),
         ])
       ])
@@ -132,4 +132,4 @@ function CompoundAnnotation(sources, id = ".compoundPopup") {
 
 }
 
-export { CompoundAnnotation }
+export { TreatmentAnnotation }

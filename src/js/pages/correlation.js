@@ -9,9 +9,9 @@ import dropRepeats from 'xstream/extra/dropRepeats'
 import { CorrelationForm, formLens } from '../components/CorrelationForm'
 import { CorrelationPlot, correlationPlotsLens } from '../components/BinnedPlots/CorrelationPlot'
 import { makeTable, headTableLens, tailTableLens } from '../components/Table'
-import { initSettings } from './settings'
+import { initSettings } from '../configuration.js'
 import { Filter, compoundFilterLens } from '../components/Filter'
-import { loggerFactory } from '~/../../src/js/utils/logger'
+import { loggerFactory } from '../utils/logger'
 import { SampleTable, sampleTableLens } from '../components/SampleTable/SampleTable'
 
 // Support for ghost mode

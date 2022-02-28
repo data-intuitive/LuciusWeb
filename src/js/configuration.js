@@ -1,5 +1,5 @@
 export const initSettings = {
-    version: 4.001,
+    version: 5.4,
     deployment: {
       "name": "default",
     },
@@ -58,6 +58,7 @@ export const initSettings = {
     },
     plots: {
         debug: false,
+        displayPlots: 'before tables',
         bins: 40,
         binsX: 20
     },
@@ -67,8 +68,15 @@ export const initSettings = {
     geneAnnotations: {
         debug: false
     },
-    compoundAnnotations: {
+    treatmentAnnotations: {
         debug: false,
         version: 'v1',
+    },
+    config: {
+        showAdminButton: false,
+        // logoUrl: 'https://www.data-intuitive.com/images/logo_white.png',
+    },
+    strategy: {
+      deployments: "theirs"
     }
 };

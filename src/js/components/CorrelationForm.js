@@ -7,7 +7,7 @@ import { logThis, log } from '../utils/logger'
 import { ENTER_KEYCODE } from '../utils/keycodes.js'
 import { SignatureCheck, checkLens1, checkLens2 } from '../components/SignatureCheck'
 import dropRepeats from 'xstream/extra/dropRepeats'
-import { loggerFactory } from '~/../../src/js/utils/logger'
+import { loggerFactory } from '../utils/logger'
 
 const stateTemplate = {
     form: {
@@ -21,8 +21,8 @@ const stateTemplate = {
 
 // Granular access to global state and parts of settings
 const formLens = {
-    get: state => ({ form: state.form, settings: { form: state.settings.form, api: state.settings.api } }),
-    set: (state, childState) => ({ ...state, form: childState.form })
+    get: state => ({ core: state.form, settings: { form: state.settings.form, api: state.settings.api } }),
+    set: (state, childState) => ({ ...state, form: childState.core })
 };
 
 function CorrelationForm(sources) {
@@ -36,8 +36,8 @@ function CorrelationForm(sources) {
     const signatureCheck2 = isolate(SignatureCheck, { onion: checkLens2 })(sources)
 
     // Valid query?
-    const validated1$ = state$.map(state => state.form.validated1)
-    const validated2$ = state$.map(state => state.form.validated2)
+    const validated1$ = state$.map(state => state.core.validated1)
+    const validated2$ = state$.map(state => state.core.validated2)
 
   const vdom1$ = xs.combine(state$)
   .map(([state, check1dom, check2dom, validated1, validated2]) => {
@@ -47,33 +47,33 @@ function CorrelationForm(sources) {
   const vdom$ = xs.combine(state$, signatureCheck1.DOM, signatureCheck2.DOM, validated1$, validated2$)
         .map(
         ([state, checkdom1, checkdom2, validated1, validated2]) => {
-            const query1 = state.form.query1
-            const query2 = state.form.query2
+            const query1 = state.core.query1
+            const query2 = state.core.query2
             return div(
                 [
-                    div('.row .blue .darken-3 .white-text', { style: { margin: '0px', padding: '20px 10px 10px 10px' } }, [
+                    div('.row .WF-header .white-text', { style: { margin: '0px', padding: '20px 10px 10px 10px' } }, [
                         // label('Query: '),
                         div('.Default1 .waves-effect .col .s1 .center-align', [
-                            i('.large  .center-align .material-icons .blue-text', { style: { fontSize: '45px', fontColor: 'gray' } }, 'search'),
+                            i('.large  .center-align .material-icons', { style: { fontSize: '45px', fontColor: 'gray' } }, 'search'),
                         ]),
                         input('.Query1 .col s10 .white-text', { style: { fontSize: '20px' }, props: { type: 'text', value: query1 }, value: query1 }),
                     ]),
                     div([
-                        (!validated1 || query1 == '') ? div('.blue.lighten-3',[checkdom1]) : div()
+                        (!validated1 || query1 == '') ? div('.validation',[checkdom1]) : div()
                     ]),
-                    div('.row .blue .darken-3 .white-text', { style: { margin: '0px', padding: '20px 10px 10px 10px' } }, [
+                    div('.row .WF-header .white-text', { style: { margin: '0px', padding: '20px 10px 10px 10px' } }, [
                         div('.Default2 .waves-effect .col .s1 .center-align', [
-                            i('.large  .center-align .material-icons .blue-text', { style: { fontSize: '45px', fontColor: 'gray' } }, 'search'),
+                            i('.large  .center-align .material-icons', { style: { fontSize: '45px', fontColor: 'gray' } }, 'search'),
                         ]),
                         input('.Query2 .col s10 .white-text', { style: { fontSize: '20px' }, props: { type: 'text', value: query2 }, value: query2 }),
                         (validated1 && validated2)
                             ? div('.SignatureCheck2 .waves-effect .col .s1 .center-align', [
-                                i('.large .material-icons', { style: { fontSize: '45px', fontColor: 'grey' } }, ['play_arrow'])])
+                                i('.large .material-icons .validated', { style: { fontSize: '45px', fontColor: 'grey' } }, ['play_arrow'])])
                             : div('.SignatureCheck2 .col .s1 .center-align', [
-                                i('.large .material-icons .blue-text', { style: { fontSize: '45px', fontColor: 'grey' } }, 'play_arrow')])
+                                i('.large .material-icons', { style: { fontSize: '45px', fontColor: 'grey' } }, 'play_arrow')])
                     ]),
                     div([
-                        (!validated2 || query2 == '') ? div('.blue.lighten-3', [checkdom2]) : div()
+                        (!validated2 || query2 == '') ? div('.validation', [checkdom2]) : div()
                     ])
                 ])
         });
@@ -82,12 +82,12 @@ function CorrelationForm(sources) {
     const newQuery1$ = xs.merge(
         sources.DOM.select('.Query1').events('input').map(ev => ev.target.value),
         // Ghost 
-        state$.map(state => state.form.query1).compose(dropRepeats())
+        state$.map(state => state.core.query1).compose(dropRepeats())
     )
     const newQuery2$ = xs.merge(
         sources.DOM.select('.Query2').events('input').map(ev => ev.target.value),
         // Ghost 
-        state$.map(state => state.form.query2).compose(dropRepeats())
+        state$.map(state => state.core.query2).compose(dropRepeats())
     )
 
     // Updated state is propagated and picked up by the necessary components
@@ -100,15 +100,15 @@ function CorrelationForm(sources) {
     const setDefault1$ = sources.DOM.select('.Default1').events('click')
     const setDefaultReducer1$ = setDefault1$.map(events => prevState => {
         let newState = clone(prevState)
-        newState.form.query1 = 'ENSG00000012048 -WRONG HSPA1A DNAJB1 DDIT4 -TSEN2'
-        newState.form.validated1 = false
+        newState.core.query1 = 'ENSG00000012048 -WRONG HSPA1A DNAJB1 DDIT4 -TSEN2'
+        newState.core.validated1 = false
         return newState
     })
     const setDefault2$ = sources.DOM.select('.Default2').events('click')
     const setDefaultReducer2$ = setDefault2$.map(events => prevState => {
         let newState = clone(prevState)
-        newState.form.query2 = 'ENSG00000012048 -WRONG HSPA1A DNAJB1 DDIT4 -TSEN2'
-        newState.form.validated2 = false
+        newState.core.query2 = 'ENSG00000012048 -WRONG HSPA1A DNAJB1 DDIT4 -TSEN2'
+        newState.core.validated2 = false
         return newState
     })
 
@@ -118,7 +118,7 @@ function CorrelationForm(sources) {
         if (typeof prevState === 'undefined') {
             // Settings are handled higher up, but in case we use this component standalone, ...
             return {
-                form: {
+                core: {
                     query1: '',
                     query2: '',
                     validated1: false,
@@ -129,7 +129,7 @@ function CorrelationForm(sources) {
         } else {
             return ({
                 ...prevState,
-                form: {
+                core: {
                     query1: '',
                     query2: '',
                     validated1: false,
@@ -143,13 +143,13 @@ function CorrelationForm(sources) {
     const query1Reducer$ = newQuery1$.map(query => prevState => {
         // Signatureform -- queryReducer
         let newState = clone(prevState)
-        newState.form.query1 = query
+        newState.core.query1 = query
         return newState
     })
     const query2Reducer$ = newQuery2$.map(query => prevState => {
         // Signatureform -- queryReducer
         let newState = clone(prevState)
-        newState.form.query2 = query
+        newState.core.query2 = query
         return newState
     })
 
@@ -157,13 +157,13 @@ function CorrelationForm(sources) {
     const invalidateReducer1$ = newQuery1$.map(query => prevState => {
         // Signatureform -- invalidateReducer
         let newState = clone(prevState)
-        newState.form.validated1 = false
+        newState.core.validated1 = false
         return newState
     })
     const invalidateReducer2$ = newQuery2$.map(query => prevState => {
         // Signatureform -- invalidateReducer
         let newState = clone(prevState)
-        newState.form.validated2 = false
+        newState.core.validated2 = false
         return newState
     })
 
@@ -172,14 +172,14 @@ function CorrelationForm(sources) {
         .map(signal => prevState => {
             // Signatureform -- validateReducer
             let newState = clone(prevState)
-            newState.form.validated1 = true
+            newState.core.validated1 = true
             return newState
         })
     const validateReducer2$ = signatureCheck2.validated
         .map(signal => prevState => {
             // Signatureform -- validateReducer
             let newState = clone(prevState)
-            newState.form.validated2 = true
+            newState.core.validated2 = true
             return newState
         })
 
@@ -192,10 +192,10 @@ function CorrelationForm(sources) {
     const query$ = xs.merge(
         update$,
         // Ghost mode
-        sources.onion.state$.map(state => state.form.ghost).filter(ghost => ghost).compose(dropRepeats())
+        sources.onion.state$.map(state => state.core.ghost).filter(ghost => ghost).compose(dropRepeats())
     )
         .compose(sampleCombine(state$))
-        .map(([update, state]) => ({query1: state.form.query1, query2: state.form.query2}))
+        .map(([update, state]) => ({query1: state.core.query1, query2: state.core.query2}))
         .remember()
 
     return {

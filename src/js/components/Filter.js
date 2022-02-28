@@ -516,7 +516,7 @@ function view(state$) {
       return collapsableFilter(selectedValues, possibleValues, propName, domText, toggle)
     }
 
-    const filterGroups = Object.keys(state.settings.filter.values)
+    const filterGroups = keys(state.settings.filter.values)
     // sort by name that will be shown on the UI
     const sortedFilterGroups = sortWith([
         ascend(a => safeModelToUi(a, state.settings.modelTranslations))
@@ -564,7 +564,7 @@ function Filter(sources) {
   const state$ = sources.onion.state$.compose(debounce(100))
 
   const filterNames$ = state$
-    .map(state => Object.keys(state.settings.filter.values))
+    .map(state => keys(state.settings.filter.values))
     .compose(dropRepeats(equals))
 
   const input$ = sources.input

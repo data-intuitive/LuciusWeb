@@ -217,7 +217,7 @@ export function model(
     core: {
       output: {},
       filter_output: {},
-      state: {dose: false, cell: false, trtType: false},
+      state: {},
       dirty: false,
     },
   }))

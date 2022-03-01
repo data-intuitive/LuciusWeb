@@ -462,7 +462,9 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
      * @const makeTable/Table/data$
      * @type {Stream}
      */
-    const data$ = validResponse$.map((result) => result.body.result.data)
+    const data$ = validResponse$
+      .map((result) => result.body.result.data)
+      .map((data) => data ?? [])
 
     /**
      * Stream of table data converted into TSV format

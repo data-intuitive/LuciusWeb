@@ -129,7 +129,10 @@ function TreatmentCheck(sources) {
     .map((response$) => response$.replaceError(() => xs.of([])))
     .flatten()
 
-  const data$ = response$.map((res) => res.body.result.data).remember()
+  const data$ = response$
+    .map((res) => res.body.result.data)
+    .map((data) => data ?? [])
+    .remember()
 
   const initVdom$ = emptyState$.mapTo(div())
 

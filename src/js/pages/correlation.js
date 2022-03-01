@@ -10,7 +10,7 @@ import { CorrelationForm, formLens } from '../components/CorrelationForm'
 import { CorrelationPlot, correlationPlotsLens } from '../components/BinnedPlots/CorrelationPlot'
 import { makeTable, headTableLens, tailTableLens } from '../components/Table'
 import { initSettings } from '../configuration.js'
-import { Filter, compoundFilterLens } from '../components/Filter'
+import { Filter, filterLens } from '../components/Filter'
 import { loggerFactory } from '../utils/logger'
 import { SampleTable, sampleTableLens } from '../components/SampleTable/SampleTable'
 import { Exporter } from "../components/Exporter"
@@ -42,9 +42,16 @@ function CorrelationWorkflow(sources) {
     const correlationForm = isolate(CorrelationForm, { onion: formLens })(sources)
     const queries$ = correlationForm.output
 
+    const doubleSignature$ = queries$
+        .filter((queries) => (queries.query1 != undefined && queries.query1 != ""))
+        .filter((queries) => (queries.query2 != undefined && queries.query2 != ""))
+        .map((queries) => (queries.query1 + " + " + queries.query2))
     // Filter Form
-    // const filterForm = isolate(Filter, { onion: compoundFilterLens })({...sources, input: queries$})
-    // const filter$ = filterForm.output.remember()
+    const filterForm = isolate(Filter, { onion: filterLens })({
+        ...sources,
+        input: doubleSignature$
+    })
+    const filter$ = filterForm.output.remember()
 
     // default Reducer, initialization
     const defaultReducer$ = xs.of(prevState => {
@@ -64,8 +71,18 @@ function CorrelationWorkflow(sources) {
     })
 
     // Binned Plots Component
-    const correlationPlot = isolate(CorrelationPlot, { onion: correlationPlotsLens })
-        ({...sources, input: queries$.remember() });
+    const correlationPlot = isolate(CorrelationPlot, { onion: correlationPlotsLens })({
+        ...sources, 
+        input: xs
+            .combine(queries$, filter$)
+            .map(([queries, filter]) =>
+                ({
+                    ...queries,
+                    filter: filter,
+                })
+            )
+            .remember()
+    });
 
     // tables
     // const headTableContainer = makeTable(SampleTable, sampleTableLens)
@@ -98,7 +115,7 @@ function CorrelationWorkflow(sources) {
 
     const vdom$ = xs.combine(
             correlationForm.DOM,
-            // filterForm.DOM,
+            filterForm.DOM,
             correlationPlot.DOM,
             // headTable.DOM,
             // tailTable.DOM,
@@ -107,7 +124,7 @@ function CorrelationWorkflow(sources) {
         )
         .map(([
                 form,
-                // filter,
+                filter,
                 plot,
                 // headTable,
                 // tailTable,
@@ -117,7 +134,7 @@ function CorrelationWorkflow(sources) {
             div('.row .correlation', { style: { margin: '0px 0px 0px 0px' } }, [
                 form,
                 div('.col .s10 .offset-s1', pageStyle, [
-                    // div('.row', [filter]),
+                    div('.row', [filter]),
                     div('.row', [plot]),
                     // div('.row', []),
                     // div('.col .s12', [headTable]),
@@ -138,7 +155,7 @@ function CorrelationWorkflow(sources) {
         onion: xs.merge(
             defaultReducer$,
             correlationForm.onion,
-            // filterForm.onion,
+            filterForm.onion,
             correlationPlot.onion,
             // headTable.onion,
             // tailTable.onion,
@@ -150,6 +167,7 @@ function CorrelationWorkflow(sources) {
         ),
         HTTP: xs.merge(
             correlationForm.HTTP,
+            filterForm.HTTP,
             correlationPlot.HTTP,
             // headTable.HTTP,
             // tailTable.HTTP

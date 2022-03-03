@@ -65,43 +65,19 @@ function Admin(sources) {
   const loadJar$ = sources.DOM.select(".jarFile").events("change").remember().debug("loadJar$")
   const loadConfig$ = sources.DOM.select(".configFile").events("change").remember().debug("loadConfig$")
 
-  function readFile(file){
-    return new Promise((resolve, reject) => {
-      var fr = new FileReader();  
-      fr.onload = () => {
-        resolve(fr.result )
-      };
-      fr.onerror = reject;
-      fr.readAsBinaryString(file);
-      // fr.readAsText(file);
-    });
-  }
-
   const jarFile$ = loadJar$
     .map((_) => {
-      const input = document.getElementById("jarFile")
-      
+      const input = document.getElementById("jarFile")      
       const file = input.files[0]
-      console.log("jar file:")
-      console.log(file)
-
-      return xs.fromPromise(readFile(file))
+      return file
     })
-    .flatten()
-    .debug("jarFile$")
 
   const configFile$ = loadConfig$
     .map((_) => {
-      const input = document.getElementById("configFile")
-      
+      const input = document.getElementById("configFile")      
       const file = input.files[0]
-      console.log("config file:")
-      console.log(file)
-
-      return xs.fromPromise(readFile(file))
+      return file
     })
-    .flatten()
-    .debug("configFile$")
 
   // Deleting previous context...
   // curl -X DELETE localhost:8090/contexts/luciusapi
@@ -119,7 +95,7 @@ function Admin(sources) {
     .map(([_, [state, jar]]) => ({
       url: "http://localhost:8090/binaries/luciusapi",
       method: "POST",
-      headers: { "Content-Type": "application/java-archive" },
+      type: "application/java-archive",
       send: jar,
       category: "init",
     }))

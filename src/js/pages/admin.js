@@ -1,5 +1,5 @@
 import xs from "xstream"
-import { div, p, span, button, textarea } from "@cycle/dom"
+import { div, p, span, button, textarea, input } from "@cycle/dom"
 import { merge, prop, equals } from "ramda"
 
 import { initSettings } from "../configuration"
@@ -62,6 +62,47 @@ function Admin(sources) {
   const trigger4$ = sources.DOM.select(".trigger4").events("click").remember()
   const trigger5$ = sources.DOM.select(".trigger5").events("click").remember()
 
+  const loadJar$ = sources.DOM.select(".jarFile").events("change").remember().debug("loadJar$")
+  const loadConfig$ = sources.DOM.select(".configFile").events("change").remember().debug("loadConfig$")
+
+  function readFile(file){
+    return new Promise((resolve, reject) => {
+      var fr = new FileReader();  
+      fr.onload = () => {
+        resolve(fr.result )
+      };
+      fr.onerror = reject;
+      fr.readAsBinaryString(file);
+      // fr.readAsText(file);
+    });
+  }
+
+  const jarFile$ = loadJar$
+    .map((_) => {
+      const input = document.getElementById("jarFile")
+      
+      const file = input.files[0]
+      console.log("jar file:")
+      console.log(file)
+
+      return xs.fromPromise(readFile(file))
+    })
+    .flatten()
+    .debug("jarFile$")
+
+  const configFile$ = loadConfig$
+    .map((_) => {
+      const input = document.getElementById("configFile")
+      
+      const file = input.files[0]
+      console.log("config file:")
+      console.log(file)
+
+      return xs.fromPromise(readFile(file))
+    })
+    .flatten()
+    .debug("configFile$")
+
   // Deleting previous context...
   // curl -X DELETE localhost:8090/contexts/luciusapi
   const requestTrigger1$ = trigger1$.compose(sampleCombine(state$))
@@ -74,15 +115,14 @@ function Admin(sources) {
 
   // Uploading assembly jar...
   // curl -H Content-Type: application/java-archive --data-binary @target/scala-2.11/LuciusAPI-assembly-5.0.1.jar localhost:8090/binaries/luciusapi
-  const requestTrigger2$ = trigger2$.compose(sampleCombine(state$))
-    .map(([_, state]) => ({
+  const requestTrigger2$ = trigger2$.compose(sampleCombine(xs.combine(state$, jarFile$)))
+    .map(([_, [state, jar]]) => ({
       url: "http://localhost:8090/binaries/luciusapi",
       method: "POST",
-      headers: { ContentType: "application/java-archive" },
-      attach: [{ name: "jar", path: "file:/home/hendrik/DI/compass/LuciusAPI/target/scala-2.11/LuciusAPI-assembly-5.0.1.jar" }],
-      send: {},
+      headers: { "Content-Type": "application/java-archive" },
+      send: jar,
       category: "init",
-    })).debug("requestTrigger2$")
+    }))
 
   // Starting new context...
   // curl -d  localhost:8090/contexts/luciusapi?context-factory=spark.jobserver.context.SessionContextFactory&spark.scheduler.mode=FAIR&spark.jobserver.context-creation-timeout=60&spark.memory.fraction=0.7&spark.dynamicAllocation.enabled=false&spark.executor.instances=6&spark.executor.cores=4&spark.executor.memory=4g&spark.yarn.executor.memoryOverhead=2g&spark.yarn.am.memory=4G&spark.driver.memory=4G
@@ -92,38 +132,12 @@ function Admin(sources) {
       method: "POST",
       send: {},
       category: "init",
-    })).debug("requestTrigger3$")
+    }))
 
   // Initializing API...
   // curl --data-binary @utils/../../config/spark_config.conf localhost:8090/jobs?context=luciusapi&appName=luciusapi&classPath=com.dataintuitive.luciusapi.initialize
-  const config = `{
-    db.uris = [
-      #"/home/hendrik/DI/compass/S3_compass/sample-extended/target/2021-07-02/results.parquet",
-      #"/home/hendrik/DI/compass/S3_compass/sample/target/2021-07-02/results.parquet",
-      "/home/hendrik/DI/compass/S3_compass/2022-1/batch_012022/target/2022-01-24/results.parquet",
-    "/home/hendrik/DI/compass/S3_compass/2022-1/batch_012422/target/2022-01-24/results.parquet",
-    "/home/hendrik/DI/compass/S3_compass/2022-1/batch_012822/target/2022-01-24/results.parquet",
-    ]
-    geneAnnotations = "/home/hendrik/DI/compass/S3_compass/sample/source/GSE92742_Broad_LINCS_gene_info.txt"
-    storageLevel = "MEMORY_ONLY_1"
-    partitions = 4
-    geneFeatures {
-      "pr_gene_id" = "id"
-      "pr_gene_symbol" = "symbol"
-      "pr_is_lm" = dataType
-      "pr_is_bing" = dataType2
-      "pr_is_name" = "name"
-    }
-    geneDataType {
-      "1-1" = "L1000"
-      "0-1" = "BING"
-      "0-0" = "AIG"
-      "1-0" = "INVALID"
-    }
-  }`
-  
-  const requestTrigger4$ = trigger4$.compose(sampleCombine(state$))
-    .map(([_, state]) => ({
+  const requestTrigger4$ = trigger4$.compose(sampleCombine(xs.combine(state$, configFile$)))
+    .map(([_, [state, config]]) => ({
       url: "http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&classPath=com.dataintuitive.luciusapi.initialize",
       method: "POST",
       send: config,
@@ -159,7 +173,7 @@ function Admin(sources) {
     )
     .flatten()
     .debug("initResponse$")
-    .map((t) => "<-- " + (t != undefined ? t.body.status + ": " + t.body.result : "response missing"))
+    .map((t) => "<-- " + (t != undefined ? t.body.status + ": " + (t.body.result ?? t.body.duration ?? "") : "response missing"))
 
   const initText$ = xs
     .merge(
@@ -174,24 +188,26 @@ function Admin(sources) {
         div([p("Server poll status: " + (state.core?.state == undefined ? "no reply received" : "reply successfully received"))]),
         div(".row .s12"),
         div(".row .s12", [
-          span(".col .s2", "Step 1"),
-          span(".col .s4 .offset-s1", "Delete previous context"),
-          button(".trigger1 .col .s2 .offset-s3 .btn .grey", "Start"),
+          span(".col .s1", "Step 1"),
+          span(".col .s3 .offset-s1", "Delete previous context"),
+          button(".trigger1 .col .s2 .offset-s5 .btn .grey", "Start"),
         ]),
         div(".row .s12", [
-          span(".col .s2", "Step 2"),
-          span(".col .s4 .offset-s1", "Upload assembly jar"),
-          button(".trigger2 .col .s2 .offset-s3 .btn .grey", "Start"),
+          span(".col .s1", "Step 2"),
+          span(".col .s3 .offset-s1", "Upload assembly jar"),
+          input(".col .s3 .offset-s1 .jarFile", { props: {type: "file", name: "jarFile", id: "jarFile", accept: "application/java-archive"} }),
+          button(".trigger2 .col .s2 .offset-s1 .btn .grey", "Start"),
         ]),
         div(".row .s12", [
-          span(".col .s2", "Step 3"),
-          span(".col .s4 .offset-s1", "Start new context"),
-          button(".trigger3 .col .s2 .offset-s3 .btn .grey", "Start"),
+          span(".col .s1", "Step 3"),
+          span(".col .s3 .offset-s1", "Start new context"),
+          button(".trigger3 .col .s2 .offset-s5 .btn .grey", "Start"),
         ]),
         div(".row .s12", [
-          span(".col .s2", "Step 4"),
-          span(".col .s4 .offset-s1", "Initialize API"),
-          button(".trigger4 .col .s2 .offset-s3 .btn .grey", "Start"),
+          span(".col .s1", "Step 4"),
+          span(".col .s3 .offset-s1", "Initialize API"),
+          input(".col .s3 .offset-s1 .configFile", { props: {type: "file", name: "configFile", id: "configFile", accept: "application/json, .conf"} }),
+          button(".trigger4 .col .s2 .offset-s1 .btn .grey", "Start"),
         ]),
         div(".row .s12", textarea({ props: { value: initText, readOnly: true}, style: { height: "400px" } })),
         div(".row .s12", [

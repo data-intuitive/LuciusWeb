@@ -1,14 +1,40 @@
 # CHANGELOG
 
-## Version 5.0.0-alpha4
+## Version 5.1.0
 
-## Functionality
+### Functionality
+
+- URL Queries: ComPass accepts URL queries and runs the complete analysis automatically. For instance, the following URI:
+
+  ```
+  http://localhost:3000/disease?autorun&signature=HSPA1A+DNAJB1+DDIT4+-TSEN2&numTableHead=10
+  ```
+
+  will run the Disease workflow using the signature `HSPA1A DNAJB1 DDIT4` and will show 10 entries for the top table.
+
+- Export: Add buttons to export data and plots to a file or copy it to the clipboard. A popup window is available with all the possible export features on the right bottom of the screen.
+
+- Correlation workflow has filters.
+
+- Sample tables can be sorted by clicking the columns header
+
+### Other
+
+- Ghost mode has been improved, it no longer requires explicit timings in the scenarios
+
+## Version 5.0.1
+
+__TODO__
+
+## Version 5.0.0
+
+### Functionality
 
 - A new 'Genetic' workflow is created useful for searching for genetic perturbations.
 - Inverting the filter selection can be done using the `ALT` (Option on Mac) modifier key instead of the `a` key
 - Filter values are populated dynamically based on the data available through the API
 
-## Other
+### Other
 
 - The dependency stack has been cleaned and (partly) updated
 - Cycle dependencies have been updated to the latest versions except for `@cycle/state`.

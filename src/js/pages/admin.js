@@ -63,68 +63,14 @@ function intent(domSource$) {
   }
 }
 
-function model() {
-
-}
-
-function view() {
-
-}
-
-
-/**
- * This component should become an API managemt page used to trigger initialization
- * and other operational aspects of managing LuciusAPI.
- */
-function Admin(sources) {
-  const state$ = sources.onion.state$.debug("state$")
-    .compose(dropRepeats(equals))
-    .startWith({ core: defaultState, settings: initSettings })
-  // .map(state => merge(state, state.settings.admin, state.settings.api))
-
-  const request$ = state$.map((state) => ({
-    url: state.settings.api.url + "/jobs",
-    method: "GET",
-    send: {},
-    category: "status",
-  }))
-
-  const response$$ = sources.HTTP.select("status")
-
-  const invalidResponse$ = response$$
-    .map(
-      (response$) =>
-        response$
-          .filter((response) => false) // ignore regular events
-          .replaceError((error) => xs.of(error)) // emit error
-    )
-    .flatten()
-
-  const actions = intent(sources.DOM)
-
-  /**
-   * Parse the successful results only.
-   *
-   * We add a little wait time (`debounce`) in order for the jobserver
-   * to be up-to-date with the actual jobs. Otherwize, we measure the
-   * wrong job times.
-   */
-  const validResponse$ = response$$
-    .map((response$) => response$.replaceError((error) => xs.empty()))
-    .flatten()
-    .compose(debounce(500))
-
-  const Settings = isolate(SettingsEditor, "settings")({
-    ...sources,
-    settings$: xs.of(settingsConfig)
-  })
-
+function model(actions, state$) {
   const jarFile$ = actions.loadJar$
     .map((_) => {
       const input = document.getElementById("jarFile")      
       const file = input.files[0]
       return file
     })
+    .startWith(undefined)
 
   const configFile$ = actions.loadConfig$
     .map((_) => {
@@ -132,6 +78,7 @@ function Admin(sources) {
       const file = input.files[0]
       return file
     })
+    .startWith(undefined)
 
   // Deleting previous context...
   // curl -X DELETE localhost:8090/contexts/luciusapi
@@ -176,46 +123,46 @@ function Admin(sources) {
 
   const requestTrigger5$ = actions.trigger5$.compose(sampleCombine(state$))
     .map(([_, state]) => ({
-      url: state.settings.reload.url + "jobs?status=finished",
+      url: state.settings.reload.url + "jobs/9ab0a4bb-0e62-49f4-8654-db47e701c59c",
       method: "DELETE",
       send: {},
       category: "init",
     }))
 
-  const initRequestText$ = xs
-    .merge(
+  return {
+    jarFile$: jarFile$,
+    configFile$: configFile$,
+    requests$: xs.merge(
       requestTrigger1$,
       requestTrigger2$,
       requestTrigger3$,
       requestTrigger4$,
+      requestTrigger5$,
     )
+  }
+}
+
+function view(requests$, responses$, statusDisplay$, settingsDOM$, jarFile$, configFile$) {
+
+  const requestsText$ = requests$
     .map((obj) => (
       "--> " + obj.method + ": " + obj.url
     ))
-  
-  const initResponse$$ = sources.HTTP.select("init")
 
-  const initResponse$ = initResponse$$
-    .map(
-      (response$) =>
-        response$.debug("response$")
-          .replaceError((error) => xs.of(error.response)) // emit error
-    )
-    .flatten()
-    .debug("initResponse$")
+  const responsesText$ = responses$
     .map((t) => "<-- " + (t != undefined ? t.body.status + ": " + (t.body.result ?? t.body.duration ?? "") : "response missing"))
 
   const initText$ = xs
     .merge(
-      initRequestText$,
-      initResponse$
+      requestsText$,
+      responsesText$
     )
     .fold((acc, t) => acc + t + "\r\n", "")
 
-  const vdom$ = xs.combine(state$, Settings.DOM, initText$)
-    .map(([state, settings, initText]) =>
+  const vdom$ = xs.combine(statusDisplay$, settingsDOM$, initText$, jarFile$, configFile$)
+    .map(([statusDisplay, settings, initText, jarFile, configFile]) =>
       div(".container", [
-        div([p("Server poll status: " + (state.core?.state == undefined ? "no reply received" : "reply successfully received"))]),
+        div([p("Server poll status: " + (statusDisplay  ? "reply successfully received" : "no reply received"))]),
         settings,
         div(".row .s12"),
         div(".row .s12", [
@@ -227,7 +174,7 @@ function Admin(sources) {
           span(".col .s1", "Step 2"),
           span(".col .s3 .offset-s1", "Upload assembly jar"),
           input(".col .s3 .offset-s1 .jarFile", { props: {type: "file", name: "jarFile", id: "jarFile", accept: "application/java-archive"} }),
-          button(".trigger2 .col .s2 .offset-s1 .btn .grey", "Start"),
+          button(".trigger2 .col .s2 .offset-s1 .btn .grey" + (jarFile == undefined ? " .disabled" : ""), "Start"),
         ]),
         div(".row .s12", [
           span(".col .s1", "Step 3"),
@@ -238,7 +185,7 @@ function Admin(sources) {
           span(".col .s1", "Step 4"),
           span(".col .s3 .offset-s1", "Initialize API"),
           input(".col .s3 .offset-s1 .configFile", { props: {type: "file", name: "configFile", id: "configFile", accept: "application/json, .conf"} }),
-          button(".trigger4 .col .s2 .offset-s1 .btn .grey", "Start"),
+          button(".trigger4 .col .s2 .offset-s1 .btn .grey" + (configFile == undefined ? " .disabled" : ""), "Start"),
         ]),
         div(".row .s12", textarea({ props: { value: initText, readOnly: true}, style: { height: "400px" } })),
         div(".row .s12", [
@@ -247,6 +194,75 @@ function Admin(sources) {
         div(".row .s12", [""]),
       ])
     )
+  return vdom$
+}
+
+
+/**
+ * This component should become an API managemt page used to trigger initialization
+ * and other operational aspects of managing LuciusAPI.
+ */
+function Admin(sources) {
+  const state$ = sources.onion.state$.debug("state$")
+    .compose(dropRepeats(equals))
+    .startWith({ core: defaultState, settings: initSettings })
+  // .map(state => merge(state, state.settings.admin, state.settings.api))
+
+  const statusRequest$ = state$.map((state) => ({
+    url: state.settings.api.url + "/jobs",
+    method: "GET",
+    send: {},
+    category: "status",
+  }))
+
+  const statusResponse$$ = sources.HTTP.select("status")
+
+  const invalidStatusResponse$ = statusResponse$$
+    .map(
+      (response$) =>
+        response$
+          .filter((response) => false) // ignore regular events
+          .replaceError((error) => xs.of(error)) // emit error
+    )
+    .flatten()
+
+  /**
+   * Parse the successful results only.
+   *
+   * We add a little wait time (`debounce`) in order for the jobserver
+   * to be up-to-date with the actual jobs. Otherwize, we measure the
+   * wrong job times.
+   */
+  const validStatusResponse$ = statusResponse$$
+    .map((response$) => response$.replaceError((error) => xs.empty()))
+    .flatten()
+    .compose(debounce(500))
+
+  const statusDisplay$ = validStatusResponse$
+    .mapTo(true)
+    .startWith(false)
+
+  const Settings = isolate(SettingsEditor, "settings")({
+    ...sources,
+    settings$: xs.of(settingsConfig)
+  })
+
+  const response$$ = sources.HTTP.select("init")
+
+  const responses$ = response$$
+    .map(
+      (response$) =>
+        response$.debug("response$")
+          .replaceError((error) => xs.of(error.response)) // emit error
+    )
+    .flatten()
+    .debug("responses$")
+
+    const actions = intent(sources.DOM)
+
+    const model_ = model(actions, state$)
+  
+    const vdom$ = view(model_.requests$, responses$, statusDisplay$, Settings.DOM, model_.jarFile$, model_.configFile$)
 
 
   // This is needed in order to get the onion stream active!
@@ -258,17 +274,17 @@ function Admin(sources) {
     }
   })
 
-  const responseReducer$ = validResponse$.map((response) => (prevState) => ({
-    ...prevState,
-    core: { ...prevState.core, state: 1 },
-  }))
+  // const responseReducer$ = validResponse$.map((response) => (prevState) => ({
+  //   ...prevState,
+  //   core: { ...prevState.core, state: 1 },
+  // }))
 
   const settingsReducer$ = Settings.onion.compose(debounce(200))
 
   return {
     DOM: vdom$,
-    HTTP: xs.merge(request$, requestTrigger1$, requestTrigger2$, requestTrigger3$, requestTrigger4$, requestTrigger5$),
-    onion: xs.merge(defaultReducer$, responseReducer$, settingsReducer$),
+    HTTP: xs.merge(statusRequest$, model_.requests$),
+    onion: xs.merge(defaultReducer$, /*responseReducer$,*/ settingsReducer$),
   }
 }
 

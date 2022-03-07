@@ -40,7 +40,7 @@ import Debug from "./pages/debug"
 import Home from "./pages/home"
 import { IsolatedSettings } from "./pages/settings"
 import { IsolatedAdminSettings } from "./pages/adminSettings"
-import Admin from "./pages/admin"
+import Init from "./pages/init"
 
 // Utilities
 import { initSettings } from "./configuration.js"
@@ -84,7 +84,7 @@ export default function Index(sources) {
     "/correlation": CorrelationWorkflow,
     "/debug": Debug,
     "/admin": IsolatedAdminSettings,
-    "/reload": Admin,
+    "/init": Init,
     "*": Home,
   })(sources)
 

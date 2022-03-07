@@ -1,5 +1,5 @@
 import xs from "xstream"
-import { div, p, span, button, textarea, input } from "@cycle/dom"
+import { div, p, span, button, textarea, input, a } from "@cycle/dom"
 import isolate from "@cycle/isolate"
 import { merge, prop, equals } from "ramda"
 
@@ -20,7 +20,7 @@ const defaultState = {
 
 const settingsConfig = [
   {
-    group: "reload",
+    group: "init",
     title: "API Settings",
     settings: [
       {
@@ -46,7 +46,7 @@ function intent(domSource$) {
   const trigger2$ = domSource$.select(".trigger2").events("click").remember()
   const trigger3$ = domSource$.select(".trigger3").events("click").remember()
   const trigger4$ = domSource$.select(".trigger4").events("click").remember()
-  const trigger5$ = domSource$.select(".trigger5").events("click").remember()
+  // const trigger5$ = domSource$.select(".trigger5").events("click").remember()
 
   const loadJar$ = domSource$.select(".jarFile").events("change").remember().debug("loadJar$")
   const loadConfig$ = domSource$.select(".configFile").events("change").remember().debug("loadConfig$")
@@ -56,7 +56,7 @@ function intent(domSource$) {
     trigger2$: trigger2$,
     trigger3$: trigger3$,
     trigger4$: trigger4$,
-    trigger5$: trigger5$,
+    // trigger5$: trigger5$,
 
     loadJar$: loadJar$,
     loadConfig$: loadConfig$,
@@ -84,7 +84,7 @@ function model(actions, state$) {
   // curl -X DELETE localhost:8090/contexts/luciusapi
   const requestTrigger1$ = actions.trigger1$.compose(sampleCombine(state$))
     .map(([_, state]) => ({
-      url: state.settings.reload.url + "contexts/luciusapi",
+      url: state.settings.init.url + "contexts/luciusapi",
       method: "DELETE",
       send: {},
       category: "init",
@@ -94,7 +94,7 @@ function model(actions, state$) {
   // curl -H Content-Type: application/java-archive --data-binary @target/scala-2.11/LuciusAPI-assembly-5.0.1.jar localhost:8090/binaries/luciusapi
   const requestTrigger2$ = actions.trigger2$.compose(sampleCombine(xs.combine(state$, jarFile$)))
     .map(([_, [state, jar]]) => ({
-      url: state.settings.reload.url + "binaries/luciusapi",
+      url: state.settings.init.url + "binaries/luciusapi",
       method: "POST",
       type: "application/java-archive",
       send: jar,
@@ -105,7 +105,7 @@ function model(actions, state$) {
   // curl -d  localhost:8090/contexts/luciusapi?context-factory=spark.jobserver.context.SessionContextFactory&spark.scheduler.mode=FAIR&spark.jobserver.context-creation-timeout=60&spark.memory.fraction=0.7&spark.dynamicAllocation.enabled=false&spark.executor.instances=6&spark.executor.cores=4&spark.executor.memory=4g&spark.yarn.executor.memoryOverhead=2g&spark.yarn.am.memory=4G&spark.driver.memory=4G
   const requestTrigger3$ = actions.trigger3$.compose(sampleCombine(state$))
     .map(([_, state]) => ({
-      url: state.settings.reload.url + "contexts/luciusapi?" + state.settings.reload.contextOptions,
+      url: state.settings.init.url + "contexts/luciusapi?" + state.settings.init.contextOptions,
       method: "POST",
       send: {},
       category: "init",
@@ -115,19 +115,19 @@ function model(actions, state$) {
   // curl --data-binary @utils/../../config/spark_config.conf localhost:8090/jobs?context=luciusapi&appName=luciusapi&classPath=com.dataintuitive.luciusapi.initialize
   const requestTrigger4$ = actions.trigger4$.compose(sampleCombine(xs.combine(state$, configFile$)))
     .map(([_, [state, config]]) => ({
-      url: state.settings.reload.url + "jobs?context=luciusapi&appName=luciusapi&classPath=com.dataintuitive.luciusapi.initialize",
+      url: state.settings.init.url + "jobs?context=luciusapi&appName=luciusapi&classPath=com.dataintuitive.luciusapi.initialize",
       method: "POST",
       send: config,
       category: "init",
     }))
 
-  const requestTrigger5$ = actions.trigger5$.compose(sampleCombine(state$))
-    .map(([_, state]) => ({
-      url: state.settings.reload.url + "jobs/9ab0a4bb-0e62-49f4-8654-db47e701c59c",
-      method: "DELETE",
-      send: {},
-      category: "init",
-    }))
+  // const requestTrigger5$ = actions.trigger5$.compose(sampleCombine(state$))
+  //   .map(([_, state]) => ({
+  //     url: state.settings.init.url + "jobs/9ab0a4bb-0e62-49f4-8654-db47e701c59c",
+  //     method: "DELETE",
+  //     send: {},
+  //     category: "init",
+  //   }))
 
   return {
     jarFile$: jarFile$,
@@ -137,7 +137,7 @@ function model(actions, state$) {
       requestTrigger2$,
       requestTrigger3$,
       requestTrigger4$,
-      requestTrigger5$,
+      // requestTrigger5$,
     )
   }
 }
@@ -162,6 +162,7 @@ function view(requests$, responses$, statusDisplay$, settingsDOM$, jarFile$, con
   const vdom$ = xs.combine(statusDisplay$, settingsDOM$, initText$, jarFile$, configFile$)
     .map(([statusDisplay, settings, initText, jarFile, configFile]) =>
       div(".container", [
+        div(".row .s12", a({props: {href: "http://localhost:8090", target: "_blank"}}, "Spark overview page")),
         div([p("Server poll status: " + (statusDisplay  ? "reply successfully received" : "no reply received"))]),
         settings,
         div(".row .s12"),
@@ -188,9 +189,9 @@ function view(requests$, responses$, statusDisplay$, settingsDOM$, jarFile$, con
           button(".trigger4 .col .s2 .offset-s1 .btn .grey" + (configFile == undefined ? " .disabled" : ""), "Start"),
         ]),
         div(".row .s12", textarea({ props: { value: initText, readOnly: true}, style: { height: "400px" } })),
-        div(".row .s12", [
-          button(".trigger5 .col .s2 .btn .grey", "Test button"),
-        ]),
+        // div(".row .s12", [
+        //   button(".trigger5 .col .s2 .btn .grey", "Test button"),
+        // ]),
         div(".row .s12", [""]),
       ])
     )
@@ -202,11 +203,13 @@ function view(requests$, responses$, statusDisplay$, settingsDOM$, jarFile$, con
  * This component should become an API managemt page used to trigger initialization
  * and other operational aspects of managing LuciusAPI.
  */
-function Admin(sources) {
+function Init(sources) {
   const state$ = sources.onion.state$.debug("state$")
     .compose(dropRepeats(equals))
     .startWith({ core: defaultState, settings: initSettings })
   // .map(state => merge(state, state.settings.admin, state.settings.api))
+
+  const apiUri = state$.map((state) => state.settings.init.url)
 
   const statusRequest$ = state$.map((state) => ({
     url: state.settings.api.url + "/jobs",
@@ -288,4 +291,4 @@ function Admin(sources) {
   }
 }
 
-export default Admin
+export default Init

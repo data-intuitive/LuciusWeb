@@ -16,103 +16,52 @@ const filterCellDose = {
             trtType: ['trt_cp', 'trt_lig']
         }
 
-export const scenario = [
+export const scenario = config => [
     { //Form
         delay: 500,
-        state: { form: { query: "-E", validated: false } },
+        state: {},
         message: {
             text: 'Please enter the gene symbols, or ENSMBL or ENTREZ ID or Probe set ID, from your gene signature',
             duration: 8000
         }
     },
-    {
+    { // Use typer to write full query string
         delay: 200,
-        state: { form: { query: "-EN", validated: false } },
+        state: {
+            routerInformation: {
+                params: config.params,
+            }
+        }
     },
     {
-        delay: 100,
-        state: { form: { query: "-ENS", validated: false } },
-    },
-    {
-        delay: 600,
-        state: { form: { query: "-ENSG00000013583", validated: false } },
+        delay: 700,
+        state: {},
         message: {
             text: 'Downregulated genes are marked with "-"',
             duration: 4000
         }
     },
     {
-        delay: 1000,
-        state: { form: { query: "-ENSG00000013583 DDX10", validated: false } },
-    },
-    {
-        delay: 1000,
-        state: { form: { query: "-ENSG00000013583 DDX10 -217933_s_at", validated: false } },
-    },
-    {
-        delay: 1000,
-        state: { form: { query: "-ENSG00000013583 DDX10 -217933_s_at -GLRX", validated: false } },
-    },
-    {
-        delay: 1000,
-        state: { form: { query: "-ENSG00000013583 DDX10 -217933_s_at -GLRX 4860", validated: false } },
+        delay: 4000,
+        state: {},
         message: {
             text: 'The table provides feedback for the gene symbols in the signature',
             duration: 4000
         }
     },
-    {
-        delay: 1000,
-        state: { form: { query: "-ENSG00000013583 DDX10 -217933_s_at -GLRX 4860 -SLC2A6", validated: false } },
-    },
-    {
-        delay: 1000,
-        state: { form: { query: "-ENSG00000013583 DDX10 -217933_s_at -GLRX 4860 -SLC2A6 PMAIP1", validated: false } },
-    },
-    {
-        delay: 1000,
-        state: { form: { query: "-ENSG00000013583 DDX10 -217933_s_at -GLRX 4860 -SLC2A6 PMAIP1 DDIT4", validated: false } },
-    },
-    {
-        delay: 1000,
-        state: { form: { query: "-ENSG00000013583 DDX10 -217933_s_at -GLRX 4860 -SLC2A6 PMAIP1 DDIT4 -RAB31", validated: false } },
-    },
-    {
-        delay: 1000,
-        state: { form: { query: "-ENSG00000013583 DDX10 -217933_s_at -GLRX 4860 -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN", validated: false } },
-    },
-    {
-        delay: 1000,
-        state: { form: { query: "-ENSG00000013583 DDX10 -217933_s_at -GLRX 4860 -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10", validated: false } },
-    },
-    {
-        delay: 1000,
-        state: { form: { query: "-ENSG00000013583 DDX10 -217933_s_at -GLRX 4860 -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21", validated: false } },
-    },
-    {
-        delay: 1000,
-        state: { form: { query: "-ENSG00000013583 DDX10 -217933_s_at -GLRX 4860 -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1", validated: false } },
-    },
-    {
-        delay: 1000,
-        state: { form: { query: "-ENSG00000013583 DDX10 -217933_s_at -GLRX 4860 -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5", validated: false } },
-    },
-    {
-        delay: 1000,
-        state: { form: { query: "-ENSG00000013583 DDX10 -217933_s_at -GLRX 4860 -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS", validated: false } },
-    },
 
     { // Validate
         delay: 2000,
-        state: { form: { query: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS', validated: true } },
+        continue: (s) => (s.form.query == config.params.signature),
+        state: {},
         message: {
             text: 'When ready, press the update/validate button, removing faulty or non-measured L1000 genes',
             duration: 6000
         }
     },
     {
-        delay: 100,
-        state: { form: { validated: true } },
+        delay: 1000,
+        state: { form: { ghostUpdate: true } }
     },
 
     // Initiate Ghost, prepare tables to fit on the screen
@@ -120,12 +69,12 @@ export const scenario = [
         delay: 4000,
         state: {
             form: { ghost: true },
-            filter: {
-              input: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS',
-              output: filterValues,
-              filter_output: filterValues,
-              state: {dose: false, cell: false, trtType: false},
-            },
+            // filter: {
+            // //   input: '-HEBP1 DDX10 -LAP3 -GLRX NP -SLC2A6 PMAIP1 DDIT4 -RAB31 FYN HSD17B10 KLHL21 MMP1 MAPKAPK5 EPRS',
+            //   output: filterValues,
+            //   filter_output: filterValues,
+            //   state: {dose: false, cell: false, trtType: false},
+            // },
         },
         message: {
             text: 'When ready, press <i class="material-icons">play_arrow</i>',

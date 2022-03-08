@@ -463,6 +463,7 @@ export default function Index(sources) {
   // Capture link targets and send to router driver
   const router$ = sources.DOM.select("a")
     .events("click")
+    .filter((ev) => !ev.ownerTarget.classList.contains("do-not-route"))
     .map((ev) => ev.target.pathname)
     .remember()
 

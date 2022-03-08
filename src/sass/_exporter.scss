@@ -64,12 +64,12 @@ div #modal-exporter {
 
     // clicking *directly* on the a download link makes the router(?) go nuts. make sure we always click the i
     // so to recapitulate, changing the padding fixes the underlying issue. the padding in itself is ok
-    a.paddingfix {
-        padding: 0px;
-        i {
-            width: 100%;
-        }
-    }
+    // a.paddingfix {
+    //     padding: 0px;
+    //     i {
+    //         width: 100%;
+    //     }
+    // }
 
     div.modal-footer {
         > button.export-close{

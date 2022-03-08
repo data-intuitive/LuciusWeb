@@ -313,7 +313,7 @@ function view(state$, dataPresent, exportData, config, clipboard) {
           return div(".row", [
             span(".col .s6 .push-s1", text),
             span(".btn .col .s1 .offset-s1 .waves-effect .waves-light " + clipboardId + " " + availableClipboardText + clipboardBtnResult, i(".material-icons", "content_copy")),
-            a(".btn .col .s1 .offset-s1 .waves-effect .waves-light .paddingfix " + availableDownloadText,
+            a(".btn .col .s1 .offset-s1 .waves-effect .waves-light .do-not-route " + availableDownloadText,
               {
                 props: {
                   href: fileData,

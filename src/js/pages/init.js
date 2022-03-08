@@ -162,7 +162,7 @@ function view(requests$, responses$, statusDisplay$, settingsDOM$, jarFile$, con
   const vdom$ = xs.combine(statusDisplay$, settingsDOM$, initText$, jarFile$, configFile$)
     .map(([statusDisplay, settings, initText, jarFile, configFile]) =>
       div(".container", [
-        div(".row .s12", a({props: {href: "http://localhost:8090", target: "_blank"}}, "Spark overview page")),
+        div(".row .s12", a(".do-not-route",{props: {href: "http://localhost:8090", target: "_blank"}}, "Spark overview page")),
         div([p("Server poll status: " + (statusDisplay  ? "reply successfully received" : "no reply received"))]),
         settings,
         div(".row .s12"),

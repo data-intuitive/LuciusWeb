@@ -24,7 +24,8 @@
 
 ## Version 5.0.1
 
-__TODO__
+- The head and tail tables use pictures to display the treatment type
+- Adapt the behaviour for the autocomplete when there is only one option to choose from and if the entered value matches the single autocomplete value
 
 ## Version 5.0.0
 

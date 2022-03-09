@@ -1,12 +1,13 @@
 import xs from "xstream"
 import { div, i, ul, li, p, input, button, span, a } from "@cycle/dom"
-import { isEmpty, mergeLeft, equals } from "ramda"
+import { isEmpty, mergeLeft, equals, keys } from "ramda"
 import { loggerFactory } from "../utils/logger"
 import delay from "xstream/extra/delay"
 import debounce from "xstream/extra/debounce"
 import sampleCombine from "xstream/extra/sampleCombine"
 import dropRepeats from "xstream/extra/dropRepeats"
-import { convertToCSV } from "../utils/export"
+import { convertToCSV, convertTableToMd } from "../utils/export"
+import { map } from "jquery"
 
 /**
  * @module components/Exporter
@@ -99,6 +100,87 @@ function model(actions, state$, vega$, config) {
     .map((data) => convertToCSV(data))
     .startWith("")
 
+  const urlMd$ = url$
+
+  const queryMd$ = state$.map((state) => state.form.check.output)
+  const samplesMd$ = state$.map((state) => state.form?.sampleSelection?.output?.map((s) => "- " + s).join("\n"))
+
+  const signatureMd$ = signature$
+
+  const filterMd$ = state$.map((state) => {
+    if (state.filter?.filter_output?.length == 0) {
+      return "No filters applied"
+    }
+    else {
+      const allGroupNames = keys(state.settings.filter.values)
+      const allFilters = allGroupNames.map((group) => {
+        if (state.filter.filter_output[group] != undefined)
+        {
+          return "\n### " + group + "\n\n" + state.filter.filter_output[group].map((f) => "- " + f).join("\n")
+        }
+        else
+        {
+          return "### " + group + "\nNo filters selected"
+        }
+        
+      })
+      return allFilters.join("\n")
+    }
+  })
+
+  const plotMd$ = plotFile$
+    .filter((data) => data != "")
+    .map((data) => "![](" + data + ")")
+
+  const headTableMd$ = state$.map((state) => state.headTable?.data)
+    .filter((data) => notEmptyOrUndefined(data))
+    .map((data) => convertTableToMd(data))
+    .startWith("")
+  
+  const tailTableMd$ = state$.map((state) => state.tailTable?.data)
+    .filter((data) => notEmptyOrUndefined(data))
+    .map((data) => convertTableToMd(data))
+    .startWith("")
+
+  const combinedMd$ = xs.combine(urlMd$, queryMd$, samplesMd$, signatureMd$, filterMd$, plotMd$, headTableMd$, tailTableMd$)
+    .map(([url, query, samples, signature, filter, plot, head, tail]) => 
+      [
+        "# Workflow report",
+        "",
+        "## Search query URL",
+        "",
+        url,
+        "",
+        "## Query",
+        "",
+        query,
+        "",
+        "## Selected samples",
+        "",
+        samples,
+        "",
+        "## Signature",
+        "",
+        signature,
+        "",
+        "## Filter",
+        "",
+        filter,
+        "",
+        "## Plot",
+        "",
+        plot,
+        "",
+        "## Top Table",
+        "",
+        head,
+        "",
+        "## Bottom Table",
+        "",
+        tail
+      ].join("\n")
+    )
+
   const urlFile$ = url$.map(url => "data:text/plain;charset=utf-8," + url)
   const signatureFile$ = signature$.map(signature => "data:text/plain;charset=utf-8," + signature)
   const headTableCsvFile$ = headTableCsv$.map(headTableCsv => "data:text/tsv;charset=utf-8," + encodeURIComponent(headTableCsv))
@@ -173,20 +255,15 @@ function model(actions, state$, vega$, config) {
     .remember()
 
   const testAction$ = actions.testTrigger$
-    .compose(sampleCombine(plotFile$))
-    .map(([_, data]) => {
-      // input data is "data:image/png;base64,abcdef0123456789..."
-      const parts = data.split(';base64,');
-      const imageType = parts[0].split(':')[1];
-      const decodedData = window.atob(parts[1]);
-      const uInt8Array = new Uint8Array(decodedData.length);
-      for (let i = 0; i < decodedData.length; i++) {
-        uInt8Array[i] = decodedData.charCodeAt(i);
-      }
-      const blob = new Blob([uInt8Array], { type: imageType })
+    .compose(sampleCombine(combinedMd$))
+    .map(([_, md]) => {
+
+      // console.log("------------md------------")
+      // console.log(md)
+      
       return {
-        type: imageType,
-        data: blob,
+        sender: 'test-fab',
+        data: md,
       }
     })
     .remember()
@@ -257,7 +334,7 @@ function view(state$, dataPresent, exportData, config, clipboard) {
               li(span(".btn-floating .export-clipboard-signature-fab .waves-effect.waves-light" + extraSigClass, span(".fab-wrap" + clipboardSigBtnResult, i(".material-icons", "content_copy")))),
               // li(span(".btn-floating .export-file-report", i(".material-icons", "picture_as_pdf"))),
               li(span(".btn-floating .modal-open-btn .waves-effect.waves-light", span(".test3", i(".material-icons", "open_with")))),
-              // li(span(".btn-floating .test-btn", i(".material-icons", "star"))),
+              li(span(".btn-floating .test-btn", i(".material-icons", "star"))),
           ])
       ])})
 
@@ -378,7 +455,7 @@ function Exporter(sources) {
   }
   const fullConfig = mergeLeft(sources.config, defaultConfig)
 
-  const state$ = sources.onion.state$
+  const state$ = sources.onion.state$.debug("state$")
 
   const actions = intent(sources.DOM)
 

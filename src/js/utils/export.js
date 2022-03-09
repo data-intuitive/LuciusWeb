@@ -47,4 +47,32 @@ function convertToCSV_internal(objArray) {
     return csv;
 }
 
-export { convertToCSV }
+function convertTableToMd(objArray) {
+    
+    function convertToSafeString(s) {
+        return s.replace('|', '\|')
+    }
+
+    function toTableLine(arr) {
+        return '| ' + arr.join(' | ') + ' |'       
+    }
+
+    const header = ["Zhang Score", "Sample ID", "Cell", "Treatment ID", "Treatment Name", "Treatment Type"]
+    const headerMd = toTableLine(header)
+    const headerMdSubLine = toTableLine(header.map(s => '---'))
+
+    const md = [headerMd, headerMdSubLine]
+        .concat(
+            objArray.map(row => (
+                toTableLine(
+                    [row.zhang.toString(), row.id, row.cell, row.trt_id, row.trt_name, row.trt]
+                    .map(s => convertToSafeString(s))
+                )
+            )
+        ))
+        .join('\n')
+
+    return md
+}
+
+export { convertToCSV, convertTableToMd }

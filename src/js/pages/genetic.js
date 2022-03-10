@@ -11,6 +11,7 @@ export default function GeneticWorkflow(sources) {
           mainDivClass: ".row .genetic",
           loggerName: "genetic",
           ghostModeScenarioSelector: ((state) => state.settings.common.ghost.genetic),
+          workflowName: "Genetic"
         },
   }
 

@@ -1,6 +1,6 @@
 import xs from "xstream"
 import { div, i, ul, li, p, input, button, span, a } from "@cycle/dom"
-import { isEmpty, mergeLeft, equals, keys } from "ramda"
+import { isEmpty, mergeLeft, equals, keys, toUpper } from "ramda"
 import { loggerFactory } from "../utils/logger"
 import delay from "xstream/extra/delay"
 import debounce from "xstream/extra/debounce"
@@ -102,9 +102,13 @@ function model(actions, state$, vega$, config) {
 
   const urlMd$ = url$
 
-  const queryMd$ = state$.map((state) => state.form.check.output)
-  const samplesMd$ = state$.map((state) => state.form?.sampleSelection?.output?.map((s) => "- " + s).join("\n"))
+  const treatmentQueryMd$ = state$.map((state) => state.form.check?.output)
+  const signatureQueryMd$ = state$.map((state) => state.form.query)
+  const signatureQuery1Md$ = state$.map((state) => state.form.query1)
+  const signatureQuery2Md$ = state$.map((state) => state.form.query2)
 
+  // present in generic treatment WFs
+  const samplesMd$ = state$.map((state) => state.form.sampleSelection?.output?.map((s) => "- " + s).join("\n")).startWith("")
   const signatureMd$ = signature$
 
   const filterMd$ = state$.map((state) => {
@@ -120,17 +124,19 @@ function model(actions, state$, vega$, config) {
         }
         else
         {
-          return "### " + group + "\nNo filters selected"
+          return "\n### " + group + "\n\nNo filters selected"
         }
         
       })
       return allFilters.join("\n")
     }
   })
+  .startWith("")
 
   const plotMd$ = plotFile$
     .filter((data) => data != "")
     .map((data) => "![](" + data + ")")
+    .startWith("")
 
   const headTableMd$ = state$.map((state) => state.headTable?.data)
     .filter((data) => notEmptyOrUndefined(data))
@@ -142,44 +148,69 @@ function model(actions, state$, vega$, config) {
     .map((data) => convertTableToMd(data))
     .startWith("")
 
-  const combinedMd$ = xs.combine(urlMd$, queryMd$, samplesMd$, signatureMd$, filterMd$, plotMd$, headTableMd$, tailTableMd$)
-    .map(([url, query, samples, signature, filter, plot, head, tail]) => 
+  // data streams with headers added
+  const addHeaderL2 = (h) => (s) => ("\n" + "## " + h + "\n" + s)
+  const urlMdWH$ = urlMd$.map(addHeaderL2("Search query URL"))
+  const treatmentQueryMdWH$ = treatmentQueryMd$.map(addHeaderL2("Treatment query"))
+  const signatureQueryMdWH$ = signatureQueryMd$.map(addHeaderL2("Signature query"))
+  const signatureQuery1MdWH$ = signatureQuery1Md$.map(addHeaderL2("Signature query 1"))
+  const signatureQuery2MdWH$ = signatureQuery2Md$.map(addHeaderL2("Signature query 2"))
+  const samplesMdWH$ = samplesMd$.map(addHeaderL2("Selected samples"))
+  const signatureMdWH$ = signatureMd$.map(addHeaderL2("Signature"))
+  const filterMdWH$ = filterMd$.map(addHeaderL2("Filter"))
+  const plotMdWH$ = plotMd$.map(addHeaderL2("Plot"))
+  const headTableMdWH$ = headTableMd$.map(addHeaderL2("Top table"))
+  const tailTableMdWH$ = tailTableMd$.map(addHeaderL2("Bottom table"))
+
+  const WFTitleMd$ = xs.of("# " + config.workflowName + " Workflow report")
+
+  const genericMd$ = xs.combine(WFTitleMd$, urlMdWH$, treatmentQueryMdWH$, samplesMdWH$, signatureMdWH$, filterMdWH$, plotMdWH$, headTableMdWH$, tailTableMdWH$)
+    .map(([WFTitle, url, treatmentQuery, samples, signature, filter, plot, head, tail]) => 
       [
-        "# Workflow report",
-        "",
-        "## Search query URL",
-        "",
+        WFTitle,
         url,
-        "",
-        "## Query",
-        "",
-        query,
-        "",
-        "## Selected samples",
-        "",
+        treatmentQuery,
         samples,
-        "",
-        "## Signature",
-        "",
         signature,
-        "",
-        "## Filter",
-        "",
         filter,
-        "",
-        "## Plot",
-        "",
         plot,
-        "",
-        "## Top Table",
-        "",
         head,
-        "",
-        "## Bottom Table",
-        "",
         tail
       ].join("\n")
     )
+
+  const DiseaseMd$ = xs.combine(WFTitleMd$, urlMdWH$, signatureQueryMdWH$, filterMdWH$, plotMdWH$, headTableMdWH$, tailTableMdWH$)
+    .map(([WFTitle, url, signatureQuery, filter, plot, head, tail]) => 
+      [
+        WFTitle,
+        url,
+        signatureQuery,
+        filter,
+        plot,
+        head,
+        tail
+      ].join("\n")
+    )
+
+  const CorrelationMd$ = xs.combine(WFTitleMd$, urlMdWH$, signatureQuery1MdWH$, signatureQuery2MdWH$, filterMdWH$, plotMdWH$)
+    .map(([WFTitle, url, signatureQuery1, signatureQuery2, filter, plot, head, tail]) => 
+      [
+        WFTitle,
+        url,
+        signatureQuery1,
+        signatureQuery2,
+        filter,
+        plot,
+      ].join("\n")
+    )
+
+  const MdSelector = {
+    "": genericMd$, // generic treatment
+    "DISEASE": DiseaseMd$,
+    "CORRELATION": CorrelationMd$,
+  }
+
+  const selectedMd$ = MdSelector[toUpper(config.workflowName)] ?? MdSelector[""]
 
   const urlFile$ = url$.map(url => "data:text/plain;charset=utf-8," + url)
   const signatureFile$ = signature$.map(signature => "data:text/plain;charset=utf-8," + signature)
@@ -255,7 +286,7 @@ function model(actions, state$, vega$, config) {
     .remember()
 
   const testAction$ = actions.testTrigger$
-    .compose(sampleCombine(combinedMd$))
+    .compose(sampleCombine(selectedMd$))
     .map(([_, md]) => {
 
       // console.log("------------md------------")
@@ -452,6 +483,7 @@ function Exporter(sources) {
     plotName: "binned similarity", // part of the text to be displayed for plot copy/download
     fabSignature: "update", // part of FAB class name, set to "", ".hide" or ".disabled". 
                             //"update" sets ".disabled" when the signature is not available and updates the FAB when it becomes available
+    workflowName: "", // Both the name to add in the MarkDown report and select how the content in combined
   }
   const fullConfig = mergeLeft(sources.config, defaultConfig)
 

@@ -11,6 +11,7 @@ export default function CompoundWorkflow(sources) {
           mainDivClass: ".row .compound",
           loggerName: "compound",
           ghostModeScenarioSelector: ((state) => state.settings.common.ghost.compound),
+          workflowName: "Compound"
         },
   }
 

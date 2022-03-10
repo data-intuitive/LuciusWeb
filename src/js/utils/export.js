@@ -75,4 +75,25 @@ function convertTableToMd(objArray) {
     return md
 }
 
-export { convertToCSV, convertTableToMd }
+function convertFilterToMd(selectedFilters, availableFilters) {
+    if (selectedFilters == undefined || selectedFilters?.length == 0) {
+        return "No filters applied"
+      }
+    else {
+        const allGroupNames = keys(availableFilters)
+        const allFilters = allGroupNames.map((group) => {
+        if (selectedFilters[group] != undefined)
+        {
+            return "\n### " + group + "\n\n" + selectedFilters[group].map((f) => "- " + f).join("\n")
+        }
+        else
+        {
+            return "\n### " + group + "\n\nNo filters selected"
+        }
+        
+    })
+    return allFilters.join("\n")
+    }
+}
+
+export { convertToCSV, convertTableToMd, convertFilterToMd }

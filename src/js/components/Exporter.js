@@ -6,7 +6,7 @@ import delay from "xstream/extra/delay"
 import debounce from "xstream/extra/debounce"
 import sampleCombine from "xstream/extra/sampleCombine"
 import dropRepeats from "xstream/extra/dropRepeats"
-import { convertToCSV, convertTableToMd } from "../utils/export"
+import { convertToCSV, convertTableToMd, convertFilterToMd } from "../utils/export"
 import { map } from "jquery"
 
 /**
@@ -111,27 +111,8 @@ function model(actions, state$, vega$, config) {
   const samplesMd$ = state$.map((state) => state.form.sampleSelection?.output?.map((s) => "- " + s).join("\n")).startWith("")
   const signatureMd$ = signature$
 
-  const filterMd$ = state$.map((state) => {
-    if (state.filter?.filter_output?.length == 0) {
-      return "No filters applied"
-    }
-    else {
-      const allGroupNames = keys(state.settings.filter.values)
-      const allFilters = allGroupNames.map((group) => {
-        if (state.filter.filter_output[group] != undefined)
-        {
-          return "\n### " + group + "\n\n" + state.filter.filter_output[group].map((f) => "- " + f).join("\n")
-        }
-        else
-        {
-          return "\n### " + group + "\n\nNo filters selected"
-        }
-        
-      })
-      return allFilters.join("\n")
-    }
-  })
-  .startWith("")
+  const filterMd$ = state$.map((state) => convertFilterToMd(state.filter.filter_output, state.settings.filter.values))
+    .startWith("")
 
   const plotMd$ = plotFile$
     .filter((data) => data != "")

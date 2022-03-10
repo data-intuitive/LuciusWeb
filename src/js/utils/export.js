@@ -140,7 +140,9 @@ function convertSelectedSamplesToMd(samplesArr) {
         ))
         .join('\n')
 
-    const md = ["", "### Selected samples", "", selectedMd, "", "### Deselected samples", "", notSelectedMd].join("\n")
+    const md = notSelectedArr.length > 0
+        ? ["", "### Selected samples", "", selectedMd, "", "### Deselected samples", "", notSelectedMd].join("\n")
+        : ["", "### Selected samples", "", selectedMd].join("\n")
 
     return md
 }

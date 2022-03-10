@@ -81,7 +81,7 @@ function model(actions, state$, vega$, config) {
   const headTablePresent$ = state$.map((state) => notEmptyOrUndefined(state.headTable?.data)).startWith(false)
   const tailTablePresent$ = state$.map((state) => notEmptyOrUndefined(state.tailTable?.data)).startWith(false)
 
-  const url$ = state$.map((state) => state.routerInformation.pageStateURL).startWith("")
+  const url$ = state$.map((state) => state.routerInformation.pageStateURL).map((url) => "["+url+"]("+url+")").startWith("")
   const signature$ = state$.map((state) => state.form.signature?.output).startWith("")
   // result already contains 'data:image/png;base64,'
   const plotFile$ = vega$
@@ -102,10 +102,10 @@ function model(actions, state$, vega$, config) {
 
   const urlMd$ = url$
 
-  const treatmentQueryMd$ = state$.map((state) => state.form.check?.output)
-  const signatureQueryMd$ = state$.map((state) => state.form.query)
-  const signatureQuery1Md$ = state$.map((state) => state.form.query1)
-  const signatureQuery2Md$ = state$.map((state) => state.form.query2)
+  const treatmentQueryMd$ = state$.map((state) => state.form.check?.output) // generic treatment WF
+  const signatureQueryMd$ = state$.map((state) => state.form.query) // disease WF
+  const signatureQuery1Md$ = state$.map((state) => state.form.query1) // correlation WF
+  const signatureQuery2Md$ = state$.map((state) => state.form.query2) // correlation WF
 
   // present in generic treatment WFs
   const samplesMd$ = state$.map((state) => state.form.sampleSelection?.output?.map((s) => "- " + s).join("\n")).startWith("")

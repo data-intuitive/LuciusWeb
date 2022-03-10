@@ -65,7 +65,7 @@ function convertTableToMd(objArray) {
         .concat(
             objArray.map(row => (
                 toTableLine(
-                    [row.zhang.toString(), row.id, row.cell, row.trt_id, row.trt_name, row.trt]
+                    [parseFloat(row.zhang).toFixed(3), row.id, row.cell, row.trt_id, row.trt_name, row.trt]
                     .map(s => convertToSafeString(s))
                 )
             )

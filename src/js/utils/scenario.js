@@ -30,15 +30,12 @@ export const runScenario = (scenario, state$) => {
           .compose(debounce(equals))
           .filter(a => a == true)
           .compose(dropRepeats(equals))
-          .debug("trigger$")
         const triggerDelayed$ = trigger$
           .compose(delay(10))
-          .debug("triggerDelayed$")
         
         const triggerOutput$ = trigger$
           .mapTo(step)
           .endWhen(triggerDelayed$)
-          .debug("triggerOutput$")
 
         return triggerOutput$.compose(delay(step.delay))
       }

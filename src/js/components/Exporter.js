@@ -6,7 +6,7 @@ import delay from "xstream/extra/delay"
 import debounce from "xstream/extra/debounce"
 import sampleCombine from "xstream/extra/sampleCombine"
 import dropRepeats from "xstream/extra/dropRepeats"
-import { convertToCSV, convertTableToMd, convertFilterToMd } from "../utils/export"
+import { convertToCSV, convertTableToMd, convertFilterToMd, convertSelectedSamplesToMd } from "../utils/export"
 import { map } from "jquery"
 
 /**
@@ -108,7 +108,7 @@ function model(actions, state$, vega$, config) {
   const signatureQuery2Md$ = state$.map((state) => state.form.query2) // correlation WF
 
   // present in generic treatment WFs
-  const samplesMd$ = state$.map((state) => state.form.sampleSelection?.output?.map((s) => "- " + s).join("\n")).startWith("")
+  const samplesMd$ = state$.map((state) => convertSelectedSamplesToMd(state.form.sampleSelection?.data)).startWith("")
   const signatureMd$ = signature$
 
   const filterMd$ = state$.map((state) => convertFilterToMd(state.filter.filter_output, state.settings.filter.values))
@@ -130,7 +130,7 @@ function model(actions, state$, vega$, config) {
     .startWith("")
 
   // data streams with headers added
-  const addHeaderL2 = (h) => (s) => ("\n" + "## " + h + "\n" + s)
+  const addHeaderL2 = (h) => (s) => ("\n" + "## " + h + "\n\n" + s)
   const urlMdWH$ = urlMd$.map(addHeaderL2("Search query URL"))
   const treatmentQueryMdWH$ = treatmentQueryMd$.map(addHeaderL2("Treatment query"))
   const signatureQueryMdWH$ = signatureQueryMd$.map(addHeaderL2("Signature query"))

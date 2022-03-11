@@ -6,6 +6,8 @@
 
 ### Other
 
+- Filter functionality made dynamic so that new filter groups can be added as needed
+
 ## Version 5.1.0
 
 ### Functionality

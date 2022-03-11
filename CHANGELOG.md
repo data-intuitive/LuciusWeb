@@ -4,6 +4,8 @@
 
 ### Functionality
 
+- Add browser access to restarting the API
+
 ### Other
 
 ## Version 5.1.0

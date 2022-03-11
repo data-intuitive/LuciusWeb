@@ -6,6 +6,8 @@
 
 ### Other
 
+- Improve sturdiness against invalid input
+
 ## Version 5.1.0
 
 ### Functionality

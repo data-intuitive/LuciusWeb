@@ -302,14 +302,6 @@ function view(state$, dataPresent, exportData, config, clipboard) {
             ? ""
             : clipboardResult.state == "success" ? " .success" : " .failure"
 
-          // Styling should prevent the user to click the 'a' directly; this causes the page div#root to be corrupted.
-          // Work around is to make the internal 'i' the full size of the 'a' thus "catching" the initial click.
-          // Exact reason is not 100% clear. Using preventDefault doesn't seem to work.
-          //
-          // At the time of writing, the impression is that it could have to do with the exporter or sub-parts not being isolated.
-          // Debugging suggest the @cycle/dom to be the culprit.
-          // Removing the 'div#Root' -> 'fromEvent.js:16' event listener prevents the page from misbehaving.
-          // Workaround is done in '.paddingfix' in the scss.
           return div(".row", [
             span(".col .s6 .push-s1", text),
             span(".btn .col .s1 .offset-s1 .waves-effect .waves-light " + clipboardId + " " + availableClipboardText + clipboardBtnResult, i(".material-icons", "content_copy")),

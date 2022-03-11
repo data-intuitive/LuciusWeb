@@ -627,6 +627,7 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
         ])
       )
       .remember()
+      .compose(delay(100))
 
     /**
      * Full vdom content once request is received

@@ -12,8 +12,9 @@ import {
   thead,
   tbody,
   p,
+  i,
 } from "@cycle/dom"
-import { clone, equals, merge } from "ramda"
+import { clone, equals, merge, sortWith, prop, ascend, descend } from "ramda"
 import xs from "xstream"
 import dropRepeats from "xstream/extra/dropRepeats"
 import debounce from 'xstream/extra/debounce'
@@ -151,7 +152,34 @@ function SampleSelection(sources) {
       : {}
     const selectedClass = (selected) =>
       selected ? ".sampleSelected" : ".sampleDeselected"
-    let rows = data.map((entry) => [
+
+    function propSort(prop, descend) {
+      return (a, b) => {
+        const aValue = a[prop]
+        const bValue = b[prop]
+        const multi = descend ? -1 : 1
+
+        if (isNaN(aValue) || isNaN(bValue))
+          // works properly for integers but not for decimal numbers, so only use it as fallback
+          return aValue.localeCompare(bValue, undefined, {numeric: true})
+        else
+          return (Number(aValue) - Number(bValue) > 0 ? 1 : -1) * multi
+      }
+    }
+
+    const dataSortAscend = sortWith([
+      ascend(prop(state.core.sort)),
+    ]);
+    const dataSortDescend = sortWith([
+      descend(prop(state.core.sort)),
+    ]);
+    const sortedData = state.core.sort !== ""
+      ? state.core.sort == "dose" || state.core.sort == "time"
+        ? sortWith([propSort(state.core.sort, state.core.direction)])(data)
+        : state.core.direction ? dataSortDescend(data) : dataSortAscend(data)
+      : data
+
+    let rows = sortedData.map((entry) => [
       td(".selection", { props: { id: entry.id } }, [
         label("", { props: { id: entry.id } }, [
           input(
@@ -178,7 +206,15 @@ function SampleSelection(sources) {
       td(selectedClass(entry.use),
           ((_) => {
             const dose = entry.dose !== "N/A" ? entry.dose + " " + entry.dose_unit : entry.dose
-            return dose.length > 6 ? dose.substring(0, 6) + "..." : dose
+            const maxLength = 7
+            if (dose.length <= maxLength)
+              return dose
+            else if (isNaN(entry.dose) || entry.dose_unit.length >= 3)
+              return dose.substring(0, maxLength-1) + "..."
+              // adding '...' is quite small on screen (in non-monospaced fonts), so we're ignoring that
+            else
+              return Number(entry.dose).toFixed(maxLength - 3 - entry.dose_unit?.length) + " " + entry.dose_unit
+              // -3 = '0.' and ' '
           })()
       ),
       // td(selectedClass(entry.use), entry.batch),
@@ -186,17 +222,61 @@ function SampleSelection(sources) {
       td(selectedClass(entry.use), entry.time !== "N/A" ? entry.time + " " + entry.time_unit : entry.time),
       td(selectedClass(entry.use), entry.significantGenes),
     ])
+
+    const sortableHeaderEntry = (id, text, state, sortable=true) =>
+    {
+      const currentSortId = state.core.sort
+      const sortDirection = state.core.direction
+      const hover = state.core.sortHover === id
+      const loaded = state.core.data.length > 0
+
+      const sortIcon = 
+        id === currentSortId ?
+          sortDirection ? "arrow_upward" : "arrow_downward" :
+          hover ? "sort" : ""
+      
+      return th(
+          button(
+          ".btn-flat" + (loaded && sortable ? " .sortable" : ""),
+          {
+            style: {
+              whiteSpace: "nowrap",
+              "margin-bottom": "0px",
+              "margin-top": "0px",
+              "vertical-align": "middle",
+            },
+            props: {
+              id: id,
+            }
+          },
+          [
+            span(
+              {
+                style: {
+                  "vertical-align": "top",
+                  fontSize: "1em",
+                  fontWeight: "bold",
+                  textTransform: "none",
+                  paddingLeft: "1.5em",
+                },
+              },
+              text
+            ),
+            i(".material-icons", {style: {width: "1.5em"}}, sortIcon)
+          ]
+        )
+      )
+    }
+
     const header = tr([
-      th("Use?"),
-      th(safeModelToUi("id", state.settings.common.modelTranslations)),
-      th("Name"),
-      th("Sample"),
-      th("Cell"),
-      th("Dose"),
-      // th("Batch"),
-      // th("Year"),
-      th("Time"),
-      th("Sign. Genes"),
+      sortableHeaderEntry("use", "Use?", state, false),
+      sortableHeaderEntry("trt_id", safeModelToUi("id", state.settings.common.modelTranslations), state),
+      sortableHeaderEntry("trt_name", "Name", state),
+      sortableHeaderEntry("id", "Sample", state),
+      sortableHeaderEntry("cell", "Cell", state),
+      sortableHeaderEntry("dose", "Dose", state),
+      sortableHeaderEntry("time", "Time", state),
+      sortableHeaderEntry("significantGenes", "Sign. Genes", state),
     ])
 
     let body = []
@@ -280,6 +360,20 @@ function SampleSelection(sources) {
     .mapTo(false)
 
   const a$ = xs.merge(aDown$, aUp$).compose(dropRepeats(equals)).startWith(false)
+
+  const sortClick$ = sources.DOM.select(".sortable")
+  .events("click")
+  .map((ev) => ev.ownerTarget.id)
+  .startWith("")
+
+  const sortHover$ = sources.DOM.select(".sortable")
+  .events("mouseenter")
+  .map((ev) => ev.ownerTarget.id)
+  .startWith("")
+
+  const sortLeave$ = sources.DOM.select(".sortable")
+  .events("mouseleave")
+  .mapTo("")
 
   const selectReducer$ = useClick$
     .compose(sampleCombine(a$))
@@ -367,6 +461,25 @@ function SampleSelection(sources) {
     core: { ...prevState.core, request: req },
   }))
 
+  const sortReducer$ = sortClick$.map((sort) => (prevState) => ({
+    ...prevState,
+    core: {
+      ...prevState.core,
+      sort: sort,
+      direction: (sort != prevState.core.sort ? false : !prevState.core.direction)
+    }
+  }))
+
+  const hoverReducer$ = xs.merge(sortHover$, sortLeave$)
+    .map((hover) => (prevState) => ({
+      ...prevState,
+      core: {
+        ...prevState.core,
+        sortHover: hover,
+      }
+    }))
+
+
   const sampleSelection$ = xs
     .merge(
       sources.DOM.select(".doSelect").events("click"),
@@ -398,6 +511,8 @@ function SampleSelection(sources) {
       selectReducer$,
       autoSelectReducer$,
       busyReducer$,
+      sortReducer$,
+      hoverReducer$,
       dirtyReducer$,
     ),
     output: sampleSelection$,

@@ -55,6 +55,7 @@ import {
   correlationSVG,
   settingsSVG,
 } from "./svg"
+import sampleCombine from "xstream/extra/sampleCombine"
 
 export default function Index(sources) {
   const { router } = sources
@@ -410,7 +411,12 @@ export default function Index(sources) {
     }
   )
 
-  const routerReducer$ = router.history$.map((router) => (prevState) => {
+  const ghostModeEnabled$ = state$
+    .map((state) => state.settings.common.ghostMode)
+
+  const routerReducer$ = router.history$
+    .compose(sampleCombine(ghostModeEnabled$))
+    .map(([router, ghostMode]) => (prevState) => {
 
     function paramsToObject(entries) {
       const result = {}
@@ -423,8 +429,9 @@ export default function Index(sources) {
     // we should not apply the same search query values when the page was reloaded
     // if user refreshes or clicks same WF link, router.type is not set
     // if we push new state, router.type == "push"
+    // Also, don't allow search queries when ghost mode is enabled
     let paramsObject = {}
-    if (router?.type == "push") {
+    if (router?.type == "push" && ghostMode != true) {
       const params = new URLSearchParams(router.state)
       paramsObject = paramsToObject(params)
     }
@@ -438,6 +445,12 @@ export default function Index(sources) {
         }
     }
   })
+
+  const ghostModeWarning$ = router.history$
+    .compose(sampleCombine(ghostModeEnabled$))
+    .filter(([router, ghostMode]) => (router?.type == "push"))
+    .filter(([router, ghostMode]) => (ghostMode == true))
+    .mapTo({ text: 'Search query ignored as Ghost Mode is enabled', duration: 10000 })
 
   const pageStateReducer$ = state$.map((state) => state.routerInformation.pageState).compose(dropRepeats(equals))
   .map((state) => (prevState) => {
@@ -508,7 +521,10 @@ export default function Index(sources) {
       prevent$,
       page$.map(prop("preventDefault")).filter(Boolean).flatten()
     ),
-    popup: page$.map(prop("popup")).filter(Boolean).flatten(),
+    popup: xs.merge(
+      ghostModeWarning$,
+      page$.map(prop("popup")).filter(Boolean).flatten(),
+    ),
     modal: page$.map(prop("modal")).filter(Boolean).flatten(),
     ac: page$.map(prop("ac")).filter(Boolean).flatten(),
     sidenav: sidenavEvent$,

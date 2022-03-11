@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## Version 5.2.0
+
+### Functionality
+
+### Other
+
 ## Version 5.1.0
 
 ### Functionality

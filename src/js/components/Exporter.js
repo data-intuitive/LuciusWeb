@@ -1,6 +1,6 @@
 import xs from "xstream"
 import { div, i, ul, li, p, input, button, span, a } from "@cycle/dom"
-import { isEmpty, mergeLeft, equals, keys, toUpper } from "ramda"
+import { isEmpty, mergeLeft, equals, keys, toUpper, all, identity } from "ramda"
 import { loggerFactory } from "../utils/logger"
 import delay from "xstream/extra/delay"
 import debounce from "xstream/extra/debounce"
@@ -28,6 +28,7 @@ function intent(domSource$) {
   const exportPlotsTrigger$ = domSource$.select(".export-clipboard-plots").events("click")
   const exportHeadTableTrigger$ = domSource$.select(".export-clipboard-headTable").events("click")
   const exportTailTableTrigger$ = domSource$.select(".export-clipboard-tailTable").events("click")
+  const exportMdReportTrigger$ = domSource$.select(".export-clipboard-mdReport").events("click")
 
   const modalTrigger$ = domSource$.select(".modal-open-btn").events("click")
   const modalCloseTrigger$ = domSource$.select(".export-close").events("click")
@@ -42,6 +43,7 @@ function intent(domSource$) {
     exportPlotsTrigger$: exportPlotsTrigger$,
     exportHeadTableTrigger$: exportHeadTableTrigger$,
     exportTailTableTrigger$: exportTailTableTrigger$,
+    exportMdReportTrigger$: exportMdReportTrigger$,
     modalTrigger$: modalTrigger$,
     modalCloseTrigger$: modalCloseTrigger$,
     testTrigger$: testTrigger$,
@@ -80,6 +82,18 @@ function model(actions, state$, vega$, config) {
   const plotsPresent$ = state$.map((state) => notEmptyOrUndefined(state.plots.data)).startWith(false)
   const headTablePresent$ = state$.map((state) => notEmptyOrUndefined(state.headTable?.data)).startWith(false)
   const tailTablePresent$ = state$.map((state) => notEmptyOrUndefined(state.tailTable?.data)).startWith(false)
+
+  const genericMdDataPresent$ = xs.combine(signaturePresent$, plotsPresent$, headTablePresent$, tailTablePresent$).map((arr) => all(identity)(arr))
+  const diseaseMdDataPresent$ = xs.combine(plotsPresent$, headTablePresent$, tailTablePresent$).map((arr) => all(identity)(arr))
+  const correlationMdDataPresent$ = plotsPresent$
+
+  const mdPresentSelector = {
+    "": genericMdDataPresent$, // generic treatment
+    "DISEASE": diseaseMdDataPresent$,
+    "CORRELATION": correlationMdDataPresent$,
+  }
+
+  const mdReportPresent$ = (mdPresentSelector[toUpper(config.workflowName)] ?? mdPresentSelector[""])
 
   const url$ = state$.map((state) => state.routerInformation.pageStateURL).map((url) => "["+url+"]("+url+")").startWith("")
   const signature$ = state$.map((state) => state.form.signature?.output).startWith("")
@@ -197,6 +211,7 @@ function model(actions, state$, vega$, config) {
   const signatureFile$ = signature$.map(signature => "data:text/plain;charset=utf-8," + signature)
   const headTableCsvFile$ = headTableCsv$.map(headTableCsv => "data:text/tsv;charset=utf-8," + encodeURIComponent(headTableCsv))
   const tailTableCsvFile$ = tailTableCsv$.map(tailTableCsv => "data:text/tsv;charset=utf-8," + encodeURIComponent(tailTableCsv))
+  const mdReportFile$ = selectedMd$.map(md => "data:text/plain;charset=utf-8," + md)
 
   const clipboardLinkFab$ = actions.exportLinkTriggerFab$
     .compose(sampleCombine(url$))
@@ -266,13 +281,18 @@ function model(actions, state$, vega$, config) {
     }))
     .remember()
 
+  const clipboardMdReport$ = actions.exportMdReportTrigger$
+    .compose(sampleCombine(selectedMd$))
+    .map(([_, md]) => ({
+      sender: "mdReport",
+      data: md,
+    }))
+    .remember()
+
   const testAction$ = actions.testTrigger$
     .compose(sampleCombine(selectedMd$))
     .map(([_, md]) => {
-
-      // console.log("------------md------------")
-      // console.log(md)
-      
+     
       return {
         sender: 'test-fab',
         data: md,
@@ -283,12 +303,23 @@ function model(actions, state$, vega$, config) {
   return {
     reducers$: xs.empty(),
     modal$: xs.merge(openModal$, closeModal$),
-    clipboard$: xs.merge(clipboardLinkFab$, clipboardSignatureFab$, clipboardLink$, clipboardSignature$, clipboardPlots$, clipboardHeadTable$, clipboardTailTable$, testAction$),
+    clipboard$: xs.merge(
+      clipboardLinkFab$,
+      clipboardSignatureFab$,
+      clipboardLink$,
+      clipboardSignature$,
+      clipboardPlots$,
+      clipboardHeadTable$,
+      clipboardTailTable$,
+      clipboardMdReport$,
+      testAction$,
+    ),
     dataPresent: {
       signaturePresent$: signaturePresent$,
       plotsPresent$: plotsPresent$,
       headTablePresent$: headTablePresent$,
       tailTablePresent$: tailTablePresent$,
+      mdReportPresent$: mdReportPresent$,
     },
     exportData: {
       url$: url$,
@@ -297,6 +328,7 @@ function model(actions, state$, vega$, config) {
       plotFile$: plotFile$,
       headTableCsvFile$: headTableCsvFile$,
       tailTableCsvFile$: tailTableCsvFile$,
+      mdReportFile$: mdReportFile$,
     }
   }
 }
@@ -346,7 +378,7 @@ function view(state$, dataPresent, exportData, config, clipboard) {
               li(span(".btn-floating .export-clipboard-signature-fab .waves-effect.waves-light" + extraSigClass, span(".fab-wrap" + clipboardSigBtnResult, i(".material-icons", "content_copy")))),
               // li(span(".btn-floating .export-file-report", i(".material-icons", "picture_as_pdf"))),
               li(span(".btn-floating .modal-open-btn .waves-effect.waves-light", span(".test3", i(".material-icons", "open_with")))),
-              li(span(".btn-floating .test-btn", i(".material-icons", "star"))),
+              // li(span(".btn-floating .test-btn", i(".material-icons", "star"))),
           ])
       ])})
 
@@ -357,12 +389,14 @@ function view(state$, dataPresent, exportData, config, clipboard) {
         dataPresent.plotsPresent$,
         dataPresent.headTablePresent$,
         dataPresent.tailTablePresent$,
+        dataPresent.mdReportPresent$,
         exportData.url$,
         exportData.urlFile$,
         exportData.signatureFile$,
         exportData.plotFile$,
         exportData.headTableCsvFile$,
         exportData.tailTableCsvFile$,
+        exportData.mdReportFile$,
         clipboard.copyImagesPermission$,
         clipboardResultAutoClear$,
       )
@@ -371,12 +405,14 @@ function view(state$, dataPresent, exportData, config, clipboard) {
         plotsPresent,
         headTablePresent,
         tailTablePresent,
+        mdReportPresent,
         url,
         urlFile,
         signatureFile,
         plotFile,
         headTableCsvFile,
         tailTableCsvFile,
+        mdReportFile,
         clipboardPermissions,
         clipboardResult,
       ]) => {
@@ -426,6 +462,7 @@ function view(state$, dataPresent, exportData, config, clipboard) {
               addExportDiv("plot", "Copy " + config.plotName + " plot", ".export-clipboard-plots", plotFile, "plot.png", plotsPresent, copyImagesPermission),
               addExportDiv("headTable", "Copy top table", ".export-clipboard-headTable", headTableCsvFile, "table.tsv", headTablePresent),
               addExportDiv("tailTable", "Copy bottom table", ".export-clipboard-tailTable", tailTableCsvFile, "table.tsv", tailTablePresent),
+              addExportDiv("mdReport", "Copy MarkDown report", ".export-clipboard-mdReport", mdReportFile, "report.md", mdReportPresent),
               // div(".row", [
               //   span(".col .s6 .push-s1", "Export report"),
               //   span(".btn .col .s1 .offset-s3 .export-file-report .disabled", i(".material-icons", "file_download")),
@@ -468,7 +505,7 @@ function Exporter(sources) {
   }
   const fullConfig = mergeLeft(sources.config, defaultConfig)
 
-  const state$ = sources.onion.state$.debug("state$")
+  const state$ = sources.onion.state$
 
   const actions = intent(sources.DOM)
 

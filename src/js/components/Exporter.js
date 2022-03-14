@@ -95,7 +95,7 @@ function model(actions, state$, vega$, config) {
 
   const mdReportPresent$ = (mdPresentSelector[toUpper(config.workflowName)] ?? mdPresentSelector[""])
 
-  const url$ = state$.map((state) => state.routerInformation.pageStateURL).map((url) => "["+url+"]("+url+")").startWith("")
+  const url$ = state$.map((state) => state.routerInformation.pageStateURL).startWith("")
   const signature$ = state$.map((state) => state.form.signature?.output).startWith("")
   // result already contains 'data:image/png;base64,'
   const plotFile$ = vega$
@@ -114,7 +114,7 @@ function model(actions, state$, vega$, config) {
     .map((data) => convertToCSV(data))
     .startWith("")
 
-  const urlMd$ = url$
+  const urlMd$ = url$.map((url) => "["+url+"]("+url+")").startWith("")
 
   const treatmentQueryMd$ = state$.map((state) => state.form.check?.output) // generic treatment WF
   const signatureQueryMd$ = state$.map((state) => state.form.query) // disease WF
@@ -211,7 +211,7 @@ function model(actions, state$, vega$, config) {
   const signatureFile$ = signature$.map(signature => "data:text/plain;charset=utf-8," + signature)
   const headTableCsvFile$ = headTableCsv$.map(headTableCsv => "data:text/tsv;charset=utf-8," + encodeURIComponent(headTableCsv))
   const tailTableCsvFile$ = tailTableCsv$.map(tailTableCsv => "data:text/tsv;charset=utf-8," + encodeURIComponent(tailTableCsv))
-  const mdReportFile$ = selectedMd$.map(md => "data:text/plain;charset=utf-8," + md)
+  const mdReportFile$ = selectedMd$.map(md => "data:text/plain;charset=utf-8," + encodeURIComponent(md))
 
   const clipboardLinkFab$ = actions.exportLinkTriggerFab$
     .compose(sampleCombine(url$))

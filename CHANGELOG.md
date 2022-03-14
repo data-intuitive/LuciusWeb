@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Version 5.0.2
+
+- Fix mistake in sample selection column truncation code
+
 ## Version 5.0.0-alpha4
 
 ## Functionality

@@ -47,7 +47,6 @@ function makeClipboardDriver(provideOwnSink= false) {
                     })()
                   : xs.fromPromise(navigator.clipboard.writeText(message.data))
               const clipboardMapped$ = clipboard$
-                .debug("clipboard$")
                 .map((res) =>
                   res == undefined
                     ? { state: "success", sender: message.sender }

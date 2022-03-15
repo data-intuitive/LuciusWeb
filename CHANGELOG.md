@@ -4,6 +4,8 @@
 
 ### Functionality
 
+- Add exporting of report in Markdown format
+
 ### Other
 
 ## Version 5.1.0

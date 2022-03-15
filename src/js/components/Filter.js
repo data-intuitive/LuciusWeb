@@ -374,8 +374,8 @@ export function model(
    * @const model/searchReducer$
    * @type {Reducer}
    */
-  const searchReducer$ = input$.compose(sampleCombine(xs.combine(possibleValues$, search$)))
-    .map(([_, [possibleValues, search]]) => {
+  const searchReducer$ = xs.combine(input$, possibleValues$).compose(sampleCombine(search$))
+    .map(([[_, possibleValues], search]) => {
 
       const matchedFilters = (searchValue, possibleValues) => {
         const values = searchValue.split(',')

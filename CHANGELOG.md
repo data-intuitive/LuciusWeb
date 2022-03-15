@@ -7,6 +7,7 @@
 ### Other
 
 - Filter functionality made dynamic so that new filter groups can be added as needed
+- Improve sturdiness against invalid input
 
 ## Version 5.1.0
 

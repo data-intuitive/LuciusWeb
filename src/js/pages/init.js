@@ -142,7 +142,7 @@ function model(actions, state$) {
   }
 }
 
-function view(requests$, responses$, statusDisplay$, settingsDOM$, jarFile$, configFile$) {
+function view(requests$, responses$, statusDisplay$, settingsDOM$, jarFile$, configFile$, apiUrl$) {
 
   const requestsText$ = requests$
     .map((obj) => (
@@ -159,11 +159,20 @@ function view(requests$, responses$, statusDisplay$, settingsDOM$, jarFile$, con
     )
     .fold((acc, t) => acc + t + "\r\n", "")
 
-  const vdom$ = xs.combine(statusDisplay$, settingsDOM$, initText$, jarFile$, configFile$)
-    .map(([statusDisplay, settings, initText, jarFile, configFile]) =>
-      div(".container", [
-        div(".row .s12", a({props: {href: "http://localhost:8090", target: "_blank"}}, "Spark overview page")),
-        div([p("Server poll status: " + (statusDisplay  ? "reply successfully received" : "no reply received"))]),
+  const vdom$ = xs.combine(apiUrl$, statusDisplay$, settingsDOM$, initText$, jarFile$, configFile$)
+    .map(([sjsLink, statusDisplay, settings, initText, jarFile, configFile]) =>
+      div(".container .init", [
+        div(".row .s12", a({props: {href: sjsLink, target: "_blank"}}, "Spark overview page")),
+        div([p("Server poll status: ", [
+          span("SJS status query: "),
+          span(".status-" + statusDisplay, 
+            statusDisplay == "loading" 
+            ? "no reply received yet" 
+            : statusDisplay == "valid" 
+              ? "reply successfully received" 
+              : "status query failed" 
+          )
+        ])]),
         settings,
         div(".row .s12"),
         div(".row .s12", [
@@ -204,15 +213,15 @@ function view(requests$, responses$, statusDisplay$, settingsDOM$, jarFile$, con
  * and other operational aspects of managing LuciusAPI.
  */
 function Init(sources) {
-  const state$ = sources.onion.state$.debug("state$")
+  const state$ = sources.onion.state$
     .compose(dropRepeats(equals))
     .startWith({ core: defaultState, settings: initSettings })
   // .map(state => merge(state, state.settings.admin, state.settings.api))
 
-  const apiUri = state$.map((state) => state.settings.init.url)
+  const apiUrl$ = state$.map((state) => state.settings.init?.url).compose(debounce(1000))
 
-  const statusRequest$ = state$.map((state) => ({
-    url: state.settings.api.url + "/jobs",
+  const statusRequest$ = apiUrl$.map((url) => ({
+    url: url + "jobs",
     method: "GET",
     send: {},
     category: "status",
@@ -241,9 +250,12 @@ function Init(sources) {
     .flatten()
     .compose(debounce(500))
 
-  const statusDisplay$ = validStatusResponse$
-    .mapTo(true)
-    .startWith(false)
+  const statusDisplay$ = xs
+    .merge(
+      validStatusResponse$.mapTo("valid"),
+      invalidStatusResponse$.mapTo("invalid")
+    ) 
+    .startWith("loading")
 
   const Settings = isolate(SettingsEditor, "settings")({
     ...sources,
@@ -265,7 +277,7 @@ function Init(sources) {
 
     const model_ = model(actions, state$)
   
-    const vdom$ = view(model_.requests$, responses$, statusDisplay$, Settings.DOM, model_.jarFile$, model_.configFile$)
+    const vdom$ = view(model_.requests$, responses$, statusDisplay$, Settings.DOM, model_.jarFile$, model_.configFile$, apiUrl$)
 
 
   // This is needed in order to get the onion stream active!

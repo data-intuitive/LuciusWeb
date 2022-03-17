@@ -4,6 +4,8 @@
 
 ### Functionality
 
+- Add browser access to restarting the API
+
 ### Other
 
 - Filter functionality made dynamic so that new filter groups can be added as needed

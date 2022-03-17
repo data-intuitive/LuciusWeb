@@ -7,9 +7,6 @@
     "services": {
       "filter": {
         "values": {
-          "dose": ["sample_entry"],
-          "cell": ["sample_entry"],
-          "trtType": ["sample_entry"]
         }
       },
       "common": {
@@ -69,6 +66,21 @@
             "ui": "Secondary ID",
             "model": "jnjb",
             "comment": ""
+          },
+          {
+            "ui": "Cell",
+            "model": "cell",
+            "comment": "Filter group name"
+          },
+          {
+            "ui": "Dose",
+            "model": "dose",
+            "comment": "Filter group name"
+          },
+          {
+            "ui": "Type",
+            "model": "trtType",
+            "comment": "Filter group name"
           }
         ]
       },

@@ -263,7 +263,10 @@ export default function GenericTreatmentWorkflow(sources) {
       .remember(),
   })
 
-  const exporter = Exporter(sources)
+  const exporter = Exporter({
+    ...sources,
+    config: { workflowName: workflow.workflowName },
+  })
 
   /**
    * Style object used in div capsulating filter, displayPlots and tables

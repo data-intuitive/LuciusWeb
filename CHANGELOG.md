@@ -4,6 +4,7 @@
 
 ### Functionality
 
+- Add exporting of report in Markdown format
 - Add browser access to restarting the API
 
 ### Other

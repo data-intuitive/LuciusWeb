@@ -189,7 +189,7 @@ function DiseaseWorkflow(sources) {
 
   const exporter = Exporter({
     ...sources,
-    config: { fabSignature: ".hide" }
+    config: { fabSignature: ".hide", workflowName: "Disease" }
   })
 
   /**

@@ -97,6 +97,7 @@ function CorrelationWorkflow(sources) {
             plotId: "#corrplot",
             plotName: "correlation",
             fabSignature: ".hide",
+            workflowName: "Correlation"
         }
     })
 

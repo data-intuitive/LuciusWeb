@@ -11,6 +11,7 @@ export default function LigandWorkflow(sources) {
           mainDivClass: ".row .ligand",
           loggerName: "ligand",
           ghostModeScenarioSelector: ((state) => state.settings.common.ghost.ligand),
+          workflowName: "Ligand"
         },
   }
 

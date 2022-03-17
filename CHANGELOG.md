@@ -5,8 +5,16 @@
 ### Functionality
 
 - Add exporting of report in Markdown format
+- Add browser access to restarting the API
 
 ### Other
+
+- Filter functionality made dynamic so that new filter groups can be added as needed
+- Improve sturdiness against invalid input
+
+### Deployment changes
+
+- Requires extra translations for each filter type in `deployments.json`
 
 ## Version 5.1.0
 

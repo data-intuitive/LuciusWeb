@@ -7,9 +7,6 @@
     "services": {
       "filter": {
         "values": {
-          "dose": ["sample_entry"],
-          "cell": ["sample_entry"],
-          "trtType": ["sample_entry"]
         }
       },
       "common": {
@@ -69,6 +66,21 @@
             "ui": "Secondary ID",
             "model": "jnjb",
             "comment": ""
+          },
+          {
+            "ui": "Cell",
+            "model": "cell",
+            "comment": "Filter group name"
+          },
+          {
+            "ui": "Dose",
+            "model": "dose",
+            "comment": "Filter group name"
+          },
+          {
+            "ui": "Type",
+            "model": "trtType",
+            "comment": "Filter group name"
           }
         ]
       },
@@ -77,6 +89,10 @@
       },
       "api": {
         "url": "http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&sync=true&timeout=30"
+      },
+      "init": {
+        "url": "http://localhost:8090/",
+        "contextOptions": "context-factory=spark.jobserver.context.SessionContextFactory&spark.scheduler.mode=FAIR&spark.jobserver.context-creation-timeout=60&spark.memory.fraction=0.7&spark.dynamicAllocation.enabled=false&spark.executor.instances=6&spark.executor.cores=4&spark.executor.memory=4g&spark.yarn.executor.memoryOverhead=2g&spark.yarn.am.memory=4G&spark.driver.memory=4G"
       },
       "sourire": {
         "url": "http://localhost:9999/molecule/"

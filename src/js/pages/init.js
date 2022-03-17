@@ -162,7 +162,7 @@ function view(requests$, responses$, statusDisplay$, settingsDOM$, jarFile$, con
   const vdom$ = xs.combine(apiUrl$, statusDisplay$, settingsDOM$, initText$, jarFile$, configFile$)
     .map(([sjsLink, statusDisplay, settings, initText, jarFile, configFile]) =>
       div(".container .init", [
-        div(".row .s12", a({props: {href: sjsLink, target: "_blank"}}, "Spark overview page")),
+        div(".row .s12", a(".do-not-route", {props: {href: sjsLink, target: "_blank"}}, "Spark overview page")),
         div([p("Server poll status: ", [
           span("SJS status query: "),
           span(".status-" + statusDisplay, 

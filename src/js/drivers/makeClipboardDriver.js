@@ -17,8 +17,12 @@ function makeClipboardDriver(provideOwnSink= false) {
   // Firefox by default doesn't allow the clipboard write and doesn't implement the permissions API call
   // so we're kind of forced to assume that if the API call fails that we won't have the necessary permissions
   const queryOpts = { name: "clipboard-write", allowWithoutGesture: false }
-  const copyImagesPermission$ = xs
-    .fromPromise(navigator.permissions.query(queryOpts))
+  const copyImagesPermission$ =  xs
+    .fromPromise(
+      navigator.permissions.query(queryOpts)
+        .then((_) => { return _ })
+        .catch((_) => { return { state: "error" } })
+    )
     .replaceError((_) => xs.of({ state: "error" }))
 
   function clipboardDriver(stream$) {
@@ -47,7 +51,6 @@ function makeClipboardDriver(provideOwnSink= false) {
                     })()
                   : xs.fromPromise(navigator.clipboard.writeText(message.data))
               const clipboardMapped$ = clipboard$
-                .debug("clipboard$")
                 .map((res) =>
                   res == undefined
                     ? { state: "success", sender: message.sender }

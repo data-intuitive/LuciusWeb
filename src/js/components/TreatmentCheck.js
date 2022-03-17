@@ -129,7 +129,10 @@ function TreatmentCheck(sources) {
     .map((response$) => response$.replaceError(() => xs.of([])))
     .flatten()
 
-  const data$ = response$.map((res) => res.body.result.data).remember()
+  const data$ = response$
+    .map((res) => res.body.result.data)
+    .map((data) => data ?? [])
+    .remember()
 
   const initVdom$ = emptyState$.mapTo(div())
 
@@ -238,11 +241,10 @@ function TreatmentCheck(sources) {
   }))
 
   // Feed the autocomplete driver
-  const ac$ = data$
-    .filter((data) => data.length > 1)
-    .map((data) => ({
+  const ac$ = data$.compose(sampleCombine(input$))
+    .map(([data, input]) => ({
       el: ".treatmentQuery",
-      data: data,
+      data: (data.length == 1 && data[0].trtId == input) ? [] : data,
       render: function (data) {
         return mergeAll(
           data.map((d) => ({ [d.trtId + " - " + d.trtName + " (" + d.count + ")"]: null }))

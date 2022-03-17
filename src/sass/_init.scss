@@ -1,0 +1,12 @@
+// Styling of the status query
+main div.init {
+    span.status-loading {
+        color: orange;
+    }
+    span.status-valid {
+        color: green;
+    }
+    span.status-invalid {
+        color: red;
+    }
+}

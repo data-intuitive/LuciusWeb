@@ -142,16 +142,49 @@ function SampleSelection(sources) {
     .map((json) => json.result.data)
     .remember()
 
-  // Helper function for rendering the table, based on the state
-  const makeTable = (state, annotation, initialization) => {
-    const data = state.core.data
-    const blurStyle = state.settings.common.blur
-      ? {
-          style: { filter: "blur(" + state.settings.common.amountBlur + "px)" },
-        }
-      : {}
-    const selectedClass = (selected) =>
-      selected ? ".sampleSelected" : ".sampleDeselected"
+  /**
+   * Filter an array of sample data by the specified criteria
+   * 
+   * Criteria object has entries for each property to filter by.
+   * Each entry has another object with 'type'
+   * type, string:
+   *  - limits
+   *  - values
+   * values, array of :
+   *  - limits => object with 'min', 'max', 'unit'
+   *  - values => object with 'value', 'unit'
+   * 
+   * In case of multiple properties to be filtered, use AND logic
+   * In case of multiple limits/values for a property, use OR logic
+   * 
+   * {
+   *    dose: { 
+   *      type: 'limits'
+   *      values: [
+   *        { min: 1, max: 2, unit: 'um'},
+   *        { min: 100, max 1000, unit: 'um'}
+   *      ]
+   *    }
+   * }
+   * 
+   * @param {Array} data Data to filter
+   * @param {Object} criteria 
+   * @returns Array of filtered data
+   */
+  const filterData = (data, criteria) => {
+    // TODO add some logic here
+    return data
+  }
+
+  /**
+   * Sorts an array of sample data by the specified property and direction
+   * Dose and time are sorted numerically instead of alphabetically, otherwise 3 > 10
+   * @param {Array} data Data to be sorted
+   * @param {String} sortBy Property name to sort by
+   * @param {Boolean} direction True = descending, False = ascending
+   * @returns Array of sorted data
+   */
+  const sortData = (data, sortBy, direction) => {
 
     function propSort(prop, descend) {
       return (a, b) => {
@@ -168,16 +201,32 @@ function SampleSelection(sources) {
     }
 
     const dataSortAscend = sortWith([
-      ascend(prop(state.core.sort)),
+      ascend(prop(sortBy)),
     ]);
     const dataSortDescend = sortWith([
-      descend(prop(state.core.sort)),
+      descend(prop(sortBy)),
     ]);
-    const sortedData = state.core.sort !== ""
-      ? state.core.sort == "dose" || state.core.sort == "time"
-        ? sortWith([propSort(state.core.sort, state.core.direction)])(data)
-        : state.core.direction ? dataSortDescend(data) : dataSortAscend(data)
+
+    return sortBy !== ""
+      ? sortBy == "dose" || sortBy == "time"
+        ? sortWith([propSort(sortBy, direction)])(data)
+        : direction ? dataSortDescend(data) : dataSortAscend(data)
       : data
+  }
+
+  // Helper function for rendering the table, based on the state
+  const makeTable = (state, annotation, initialization) => {
+    const data = state.core.data
+    const blurStyle = state.settings.common.blur
+      ? {
+          style: { filter: "blur(" + state.settings.common.amountBlur + "px)" },
+        }
+      : {}
+    const selectedClass = (selected) =>
+      selected ? ".sampleSelected" : ".sampleDeselected"
+    
+    const filteredData = filterData(data, undefined)
+    const sortedData = sortData(filteredData, state.core.sort, state.core.direction)
 
     let rows = sortedData.map((entry) => [
       td(".selection", { props: { id: entry.id } }, [

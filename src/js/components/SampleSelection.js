@@ -14,7 +14,7 @@ import {
   p,
   i,
 } from "@cycle/dom"
-import { clone, equals, merge, sortWith, prop, ascend, descend } from "ramda"
+import { clone, equals, merge, sortWith, prop, ascend, descend, keys, length, includes, anyPass, allPass, filter } from "ramda"
 import xs from "xstream"
 import dropRepeats from "xstream/extra/dropRepeats"
 import debounce from 'xstream/extra/debounce'
@@ -48,6 +48,143 @@ const sampleSelectionLens = {
       samples: childState.core.output?.join(),
     }
   }),
+}
+
+/**
+ * Create function to check value against a single criterion
+ * 
+ * { type: 'range', min: 1, max: 2, unit: 'um' },
+ * { type: 'value', value: 1, unit: 'um' },
+ * 
+ * @param {Object} criterion 
+ * @returns function (sampleEntry) => boolean
+ */
+export const createFilterCheck = (filterKey) => (criterion) => {
+  if (criterion.type == 'range') {
+    const minCheck = criterion.min == undefined 
+      ? () => true
+      : (value) => value[filterKey] >= criterion.min
+    const maxCheck = criterion.max == undefined 
+      ? () => true
+      : (value) => value[filterKey] <= criterion.max
+    const unitCheck = criterion.unit == undefined 
+      ? () => true
+      : (value) => value[filterKey + "_unit"] == criterion.unit
+
+    return allPass([minCheck, maxCheck, unitCheck])
+  }
+  else if (criterion.type == 'value') {
+    const valueCheck = criterion.value == undefined
+      ? () => true
+      : (value) => value[filterKey] == criterion.value
+    const unitCheck = criterion.unit == undefined 
+      ? () => true
+      : (value) => value[filterKey + "_unit"] == criterion.unit
+    
+    return allPass([valueCheck, unitCheck])
+  }
+
+  console.warn("Criterion type " + criterion.type + " unknown.")
+  return (value) => false
+}
+
+/**
+ * Filter an array of sample data by the specified criteria
+ * 
+ * Criteria object has entries for each property to filter by.
+ * Each entry has an array of object with, each should have a type field
+ * type, string:
+ *  - 'range'
+ *  - 'value'
+ * Depending on the type, the following fields can be added
+ *  - range:
+ *    - min
+ *    - max
+ *    - unit
+ *  - value:
+ *    - value
+ *    - unit
+ * 
+ * In case of multiple properties to be filtered, use AND logic
+ * In case of multiple limits/values for a property, use OR logic
+ * 
+ * {
+ *   dose: [
+ *     { type: 'range', min: 1, max: 2, unit: 'um' },
+ *     { type: 'value', value: 1, unit: 'um' },
+ *     ...
+ *   ]
+ * }
+ * 
+ * @param {Array} data Data to filter
+ * @param {Object} criteria 
+ * @returns Array of filtered data
+ */
+export const filterData = (data, criteria) => {
+  // we need at least 1 data entry to be able to filter
+  // not just as concept but also for our code to work
+  if (length(data) == 0)
+    return data
+
+  const filterKeys = keys(criteria)
+  const dataKeys = keys(data[0])
+  const criteriaArray = []
+
+  for (const filterKey of filterKeys) {
+    if (!includes(filterKey, dataKeys)) {
+      console.warn("Not using '" + filterKey + "' to filter data as it is not found in the data set.")
+      continue
+    }
+
+    if (!Array.isArray(criteria[filterKey])) {
+      console.warn("Not using '" + filterKey+ "' to filter data as it is the wrong data type: " + (typeof criteria[filterKey]) + ".")
+      continue
+    }
+
+    const check = anyPass(criteria[filterKey].map(createFilterCheck(filterKey)))
+    criteriaArray.push(check)
+  }
+
+  const filteredData = filter(allPass(criteriaArray), data)
+  return filteredData
+}
+
+/**
+ * Sorts an array of sample data by the specified property and direction
+ * Dose and time are sorted numerically instead of alphabetically, otherwise 3 > 10
+ * @param {Array} data Data to be sorted
+ * @param {String} sortBy Property name to sort by
+ * @param {Boolean} direction True = descending, False = ascending
+ * @returns Array of sorted data
+ */
+export const sortData = (data, sortBy, direction) => {
+
+  function propSort(prop, descend) {
+    return (a, b) => {
+      const aValue = a[prop]
+      const bValue = b[prop]
+      const multi = descend ? -1 : 1
+
+      if (isNaN(aValue) || isNaN(bValue))
+        // works properly for integers but not for decimal numbers, so only use it as fallback
+        return aValue.localeCompare(bValue, undefined, {numeric: true})
+      else
+        return (Number(aValue) - Number(bValue) > 0 ? 1 : -1) * multi
+    }
+  }
+
+  const dataSortAscend = sortWith([
+    ascend(prop(sortBy)),
+  ]);
+  const dataSortDescend = sortWith([
+    descend(prop(sortBy)),
+  ]);
+
+  return sortBy !== ""
+    ? sortBy == "dose" || sortBy == "time"
+      ? sortWith([propSort(sortBy, direction)])(data)
+      : direction ? dataSortDescend(data) : dataSortAscend(data)
+    : data
 }
 
 /**
@@ -141,78 +278,6 @@ function SampleSelection(sources) {
     .map((res) => res.body)
     .map((json) => json.result.data)
     .remember()
-
-  /**
-   * Filter an array of sample data by the specified criteria
-   * 
-   * Criteria object has entries for each property to filter by.
-   * Each entry has another object with 'type'
-   * type, string:
-   *  - limits
-   *  - values
-   * values, array of :
-   *  - limits => object with 'min', 'max', 'unit'
-   *  - values => object with 'value', 'unit'
-   * 
-   * In case of multiple properties to be filtered, use AND logic
-   * In case of multiple limits/values for a property, use OR logic
-   * 
-   * {
-   *    dose: { 
-   *      type: 'limits'
-   *      values: [
-   *        { min: 1, max: 2, unit: 'um'},
-   *        { min: 100, max 1000, unit: 'um'}
-   *      ]
-   *    }
-   * }
-   * 
-   * @param {Array} data Data to filter
-   * @param {Object} criteria 
-   * @returns Array of filtered data
-   */
-  const filterData = (data, criteria) => {
-    // TODO add some logic here
-    return data
-  }
-
-  /**
-   * Sorts an array of sample data by the specified property and direction
-   * Dose and time are sorted numerically instead of alphabetically, otherwise 3 > 10
-   * @param {Array} data Data to be sorted
-   * @param {String} sortBy Property name to sort by
-   * @param {Boolean} direction True = descending, False = ascending
-   * @returns Array of sorted data
-   */
-  const sortData = (data, sortBy, direction) => {
-
-    function propSort(prop, descend) {
-      return (a, b) => {
-        const aValue = a[prop]
-        const bValue = b[prop]
-        const multi = descend ? -1 : 1
-
-        if (isNaN(aValue) || isNaN(bValue))
-          // works properly for integers but not for decimal numbers, so only use it as fallback
-          return aValue.localeCompare(bValue, undefined, {numeric: true})
-        else
-          return (Number(aValue) - Number(bValue) > 0 ? 1 : -1) * multi
-      }
-    }
-
-    const dataSortAscend = sortWith([
-      ascend(prop(sortBy)),
-    ]);
-    const dataSortDescend = sortWith([
-      descend(prop(sortBy)),
-    ]);
-
-    return sortBy !== ""
-      ? sortBy == "dose" || sortBy == "time"
-        ? sortWith([propSort(sortBy, direction)])(data)
-        : direction ? dataSortDescend(data) : dataSortAscend(data)
-      : data
-  }
 
   // Helper function for rendering the table, based on the state
   const makeTable = (state, annotation, initialization) => {

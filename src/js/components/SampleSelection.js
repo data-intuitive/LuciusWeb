@@ -14,7 +14,7 @@ import {
   p,
   i,
 } from "@cycle/dom"
-import { clone, equals, merge, sortWith, prop, ascend, descend, keys, length, includes, anyPass, allPass, filter } from "ramda"
+import { clone, equals, merge, sortWith, prop, ascend, descend, keys, length, includes, anyPass, allPass, filter, uniq, reduce, countBy, identity, none, min, max } from "ramda"
 import xs from "xstream"
 import dropRepeats from "xstream/extra/dropRepeats"
 import debounce from 'xstream/extra/debounce'
@@ -147,6 +147,70 @@ export const filterData = (data, criteria) => {
 
   const filteredData = filter(allPass(criteriaArray), data)
   return filteredData
+}
+
+const composedFilterInfo = {
+  'field1': {
+    hasUnits: false,
+    hasRange: false,
+    min: 0,
+    max: 0,
+    values: [
+      { unit: '', values: {'a': 3, 'b': 2, 'c': 2, 'd': 3}, hasRange: false, minValue: 0, maxValue: 0, amount: 10 },
+    ]
+  },
+  'field2': {
+    hasUnits: true,
+    hasRange: true, // only true if all units have 'hasRange' == true
+    min: 0.001, // minimum of all values
+    max: 100,
+    values: [
+      { unit: 'unit1', values: {0.001: 2, 0.01: 2, 0.1: 3, 1: 3}, hasRange: true, minValue: 0.001, maxValue: 1, amount: 10 },
+      { unit: 'unit2', values: {10: 5, 100: 5}, hasRange: true, minValue: 10, maxValue: 100, amount: 10 },
+    ]
+  }
+}
+
+const composeFilterInfo = (data) => {
+  // we need at least 1 data entry to be able to compose the data types that will be present in the data
+  if (length(data) == 0)
+    return {}
+
+  const getValueStruct = (unit, arr) => {
+    const counts = countBy(identity, arr)
+    const isAllNumbers = none(isNaN, arr)
+    const minValue = isAllNumbers ? reduce(min, Number(arr[0]), arr.map(Number)) : 0
+    const maxValue = isAllNumbers ? reduce(max, Number(arr[0]), arr.map(Number)) : 0
+    return { unit: unit, values: counts, hasRange: isAllNumbers, minValue: minValue, maxValue: maxValue, amount: length(arr)}
+  }
+
+  const dataKeys = keys(data[0])
+
+  for (const dataKey of dataKeys) {
+
+    if (includes(dataKey + "_unit", dataKeys)) {
+      console.log(dataKey + " has units")
+
+      const units = uniq(data.map(prop(dataKey + "_unit")))
+
+      const unitValuesArr = units.map((unit) => {
+        const unitFilter = (entry) => prop(dataKey + "_unit", entry) == unit
+        const filteredData = filter(unitFilter, data)
+        const arr = filteredData.map(prop(dataKey))
+        
+        return getValueStruct(unit, arr)
+      })
+
+      console.log("unitValuesArr: " + JSON.stringify(unitValuesArr))
+    }
+    else {
+      const arr = data.map(prop(dataKey))
+      const valuesArr = [getValueStruct('', arr)]
+
+      console.log("valuesArr: " + JSON.stringify(valuesArr))
+    }
+
+  }
 }
 
 /**
@@ -290,6 +354,7 @@ function SampleSelection(sources) {
     const selectedClass = (selected) =>
       selected ? ".sampleSelected" : ".sampleDeselected"
     
+    const filterInfo = composeFilterInfo(data) // TODO use filterInfo to display filter options on GUI
     const filteredData = filterData(data, undefined)
     const sortedData = sortData(filteredData, state.core.sort, state.core.direction)
 

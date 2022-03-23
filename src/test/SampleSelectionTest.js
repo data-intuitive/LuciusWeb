@@ -1,6 +1,10 @@
 import "mocha"
 import * as assert from "assert"
-import { createFilterCheck, filterData, sortData } from "../js/components/SampleSelection.js"
+import { filterData, sortData } from "../js/components/SampleSelection.js"
+
+/**
+ * Tests to verify filtering
+ */
 
 const filterTestData = [
     { field1:  1, field2: 100, field2_unit: "abc", field3: 1, field3_unit: "foo" },
@@ -173,5 +177,77 @@ describe("Filter on two fields at once", function() {
         }
         const filterOutput = filterData(filterTestData, filter)
         assert.equal(filterOutput.length, 10)
+    })
+})
+
+/**
+ * Tests to verify sorting
+ */
+
+
+// unsorted data
+const sortTestData = [
+    { dose:  '10', field1:  '10', field2: 'a' },
+    { dose:   '2', field1:   '2', field2: 'b' },
+    { dose:   '1', field1:   '1', field2: 'd' },
+    { dose:   '1', field1:   '1', field2: 'c' },
+    { dose: '0.1', field1: '0.1', field2: 'e' },
+]
+
+describe("Sorting alphabetically", function() {
+    it("sorts text ascending", () => {
+        const sorted = sortData(sortTestData, 'field2', false)
+        assert.equal(sorted[0].field2, 'a')
+        assert.equal(sorted[1].field2, 'b')
+        assert.equal(sorted[2].field2, 'c')
+        assert.equal(sorted[3].field2, 'd')
+        assert.equal(sorted[4].field2, 'e')
+    })
+
+    it("sorts text descending", () => {
+        const sorted = sortData(sortTestData, 'field2', true)
+        assert.equal(sorted[0].field2, 'e')
+        assert.equal(sorted[1].field2, 'd')
+        assert.equal(sorted[2].field2, 'c')
+        assert.equal(sorted[3].field2, 'b')
+        assert.equal(sorted[4].field2, 'a')
+    })
+
+    it("sorts number strings ascending", () => {
+        const sorted = sortData(sortTestData, 'field1', false)
+        assert.equal(sorted[0].field1, '0.1')
+        assert.equal(sorted[1].field1,   '1')
+        assert.equal(sorted[2].field1,   '1')
+        assert.equal(sorted[3].field1,  '10')
+        assert.equal(sorted[4].field1,   '2')
+    })
+
+    it("sorts number strings descending", () => {
+        const sorted = sortData(sortTestData, 'field1', true)
+        assert.equal(sorted[0].field1,   '2')
+        assert.equal(sorted[1].field1,  '10')
+        assert.equal(sorted[2].field1,   '1')
+        assert.equal(sorted[3].field1,   '1')
+        assert.equal(sorted[4].field1, '0.1')
+    })
+})
+
+describe("sort numbers numerically when the property is dose or time", function() {
+    it("sorts numbers ascending", () => {
+        const sorted = sortData(sortTestData, 'dose', false)
+        assert.equal(sorted[0].field1, '0.1')
+        assert.equal(sorted[1].field1,   '1')
+        assert.equal(sorted[2].field1,   '1')
+        assert.equal(sorted[3].field1,   '2')
+        assert.equal(sorted[4].field1,  '10')
+    })
+
+    it("sorts numbers descending", () => {
+        const sorted = sortData(sortTestData, 'dose', true)
+        assert.equal(sorted[0].field1,  '10')
+        assert.equal(sorted[1].field1,   '2')
+        assert.equal(sorted[2].field1,   '1')
+        assert.equal(sorted[3].field1,   '1')
+        assert.equal(sorted[4].field1, '0.1')
     })
 })

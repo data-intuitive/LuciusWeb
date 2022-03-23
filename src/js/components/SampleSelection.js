@@ -59,7 +59,7 @@ const sampleSelectionLens = {
  * @param {Object} criterion 
  * @returns function (sampleEntry) => boolean
  */
-export const createFilterCheck = (filterKey) => (criterion) => {
+const createFilterCheck = (filterKey) => (criterion) => {
   if (criterion.type == 'range') {
     const minCheck = criterion.min == undefined 
       ? () => true

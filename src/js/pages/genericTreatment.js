@@ -265,7 +265,7 @@ export default function GenericTreatmentWorkflow(sources) {
 
   const exporter = Exporter({
     ...sources,
-    config: { workflowName: workflow.workflowName },
+    config: { workflowName: workflow.workflowName ?? "" },
   })
 
   /**

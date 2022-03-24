@@ -14,7 +14,7 @@ import {
   p,
   i,
 } from "@cycle/dom"
-import { clone, equals, merge, sortWith, prop, ascend, descend, keys, length, includes, anyPass, allPass, filter, uniq, reduce, countBy, identity, none, min, max } from "ramda"
+import { clone, equals, merge, sortWith, prop, ascend, descend, keys, length, includes, anyPass, allPass, filter, uniq, reduce, apply, countBy, identity, none, all, min, max } from "ramda"
 import xs from "xstream"
 import dropRepeats from "xstream/extra/dropRepeats"
 import debounce from 'xstream/extra/debounce'
@@ -149,27 +149,27 @@ export const filterData = (data, criteria) => {
   return filteredData
 }
 
-const composedFilterInfo = {
-  'field1': {
-    hasUnits: false,
-    hasRange: false,
-    min: 0,
-    max: 0,
-    values: [
-      { unit: '', values: {'a': 3, 'b': 2, 'c': 2, 'd': 3}, hasRange: false, minValue: 0, maxValue: 0, amount: 10 },
-    ]
-  },
-  'field2': {
-    hasUnits: true,
-    hasRange: true, // only true if all units have 'hasRange' == true
-    min: 0.001, // minimum of all values
-    max: 100,
-    values: [
-      { unit: 'unit1', values: {0.001: 2, 0.01: 2, 0.1: 3, 1: 3}, hasRange: true, minValue: 0.001, maxValue: 1, amount: 10 },
-      { unit: 'unit2', values: {10: 5, 100: 5}, hasRange: true, minValue: 10, maxValue: 100, amount: 10 },
-    ]
-  }
-}
+// const composedFilterInfo = {
+//   'field1': {
+//     hasUnits: false,
+//     hasRange: false,
+//     minValue: 0,
+//     maxValue: 0,
+//     values: [
+//       { unit: '', values: {'a': 3, 'b': 2, 'c': 2, 'd': 3}, hasRange: false, minValue: 0, maxValue: 0, amount: 10 },
+//     ]
+//   },
+//   'field2': {
+//     hasUnits: true,
+//     hasRange: true, // only true if all units have 'hasRange' == true
+//     minValue: 0.001, // minimum of all values
+//     maxValue: 100,
+//     values: [
+//       { unit: 'unit1', values: {0.001: 2, 0.01: 2, 0.1: 3, 1: 3}, hasRange: true, minValue: 0.001, maxValue: 1, amount: 10 },
+//       { unit: 'unit2', values: {10: 5, 100: 5}, hasRange: true, minValue: 10, maxValue: 100, amount: 10 },
+//     ]
+//   }
+// }
 
 const composeFilterInfo = (data) => {
   // we need at least 1 data entry to be able to compose the data types that will be present in the data
@@ -179,18 +179,15 @@ const composeFilterInfo = (data) => {
   const getValueStruct = (unit, arr) => {
     const counts = countBy(identity, arr)
     const isAllNumbers = none(isNaN, arr)
-    const minValue = isAllNumbers ? reduce(min, Number(arr[0]), arr.map(Number)) : 0
-    const maxValue = isAllNumbers ? reduce(max, Number(arr[0]), arr.map(Number)) : 0
+    const minValue = isAllNumbers ? apply(Math.min, arr) : 0
+    const maxValue = isAllNumbers ? apply(Math.max, arr) : 0
     return { unit: unit, values: counts, hasRange: isAllNumbers, minValue: minValue, maxValue: maxValue, amount: length(arr)}
   }
 
   const dataKeys = keys(data[0])
 
-  for (const dataKey of dataKeys) {
-
+  const mappedDataArr = dataKeys.map((dataKey) => {
     if (includes(dataKey + "_unit", dataKeys)) {
-      console.log(dataKey + " has units")
-
       const units = uniq(data.map(prop(dataKey + "_unit")))
 
       const unitValuesArr = units.map((unit) => {
@@ -201,16 +198,25 @@ const composeFilterInfo = (data) => {
         return getValueStruct(unit, arr)
       })
 
-      console.log("unitValuesArr: " + JSON.stringify(unitValuesArr))
+      const allHasRange = all(prop('hasRange'), unitValuesArr)
+      const allMinValue = allHasRange ? apply(Math.min, unitValuesArr.map(prop('minValue'))) : 0
+      const allMaxValue = allHasRange ? apply(Math.max, unitValuesArr.map(prop('maxValue'))) : 0
+
+      return { [dataKey]: { hasUnits: true, hasRange: allHasRange, minValue: allMinValue, maxValue: allMaxValue, values: unitValuesArr } }
     }
     else {
       const arr = data.map(prop(dataKey))
-      const valuesArr = [getValueStruct('', arr)]
+      const values = getValueStruct('', arr)
 
-      console.log("valuesArr: " + JSON.stringify(valuesArr))
+      return { [dataKey]: { hasUnits: false, hasRange: values.hasRange, minValue: values.minValue, maxValue: values.maxValue, values: [values] } }
     }
 
-  }
+  })
+
+  const reducer = (acc, value) => ({...acc, ...value})
+  const result = reduce(reducer, {}, mappedDataArr)
+  // console.log("result: " + JSON.stringify(result))
+  return result
 }
 
 /**

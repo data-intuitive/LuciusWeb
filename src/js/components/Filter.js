@@ -30,6 +30,11 @@ export const filterLens = {
   get: (state) => ({
     core: state.filter,
     settings: { filter: state.settings.filter, api: state.settings.api },
+    search: {
+      dose: state.routerInformation.params?.dose,
+      cell: state.routerInformation.params?.cell,
+      trtType: state.routerInformation.params?.trtType,
+    }
   }),
   set: (state, childState) => ({
     ...state,
@@ -38,6 +43,15 @@ export const filterLens = {
       ...state.settings,
       filter: childState.settings.filter,
     },
+    routerInformation: {
+      ...state.routerInformation,
+      pageState: {
+        ...state.routerInformation.pageState,
+        dose: childState.core.filter_output?.dose?.join(),
+        cell: childState.core.filter_output?.cell?.join(),
+        trtType: childState.core.filter_output?.trtType?.join(),
+      }
+    }
   }),
 }
 
@@ -199,7 +213,7 @@ function intent(domSource$) {
  * @param {Stream} filterValuesAction$ object where key is filter group (top level; dose, cell, type) and value is which option is being clicked/modified
  * @param {Stream} modifier$ boolean of modifier key being pressed or not
  * @param {Stream} filterAction$ object where key is filter group (top level; dose, cell, type) and value is boolean of the group being clicked open or not
- * @param {Stream} state$ readback of full state object used for comparing committed state vs current state, if not identical means ui is dirty
+ * @param {Stream} search$ search query values for filter settings
  * @returns {Stream} reducers
  */
 export function model(
@@ -208,6 +222,7 @@ export function model(
   filterValuesAction$,
   modifier$,
   filterAction$,
+  search$,
 ) {
 
   /**
@@ -355,6 +370,48 @@ export function model(
     }))
 
   /**
+   * Set filter values during page load when search query contains filter values
+   * @const model/searchReducer$
+   * @type {Reducer}
+   */
+  const searchReducer$ = xs.combine(input$, possibleValues$).compose(sampleCombine(search$))
+    .map(([[_, possibleValues], search]) => {
+
+      const matchedFilters = (searchValue, possibleValues) => {
+        const values = searchValue.split(',')
+        return values.filter(v => possibleValues.includes(v))
+      }
+      
+      const matchedDoses = search.dose == undefined ? undefined : matchedFilters(search.dose, possibleValues.dose)
+      const matchedCells = search.cell == undefined ? undefined : matchedFilters(search.cell, possibleValues.cell)
+      const matchedTypes = search.trtType == undefined ? undefined : matchedFilters(search.trtType, possibleValues.trtType)
+      return {
+        dose: matchedDoses,
+        cell: matchedCells,
+        trtType: matchedTypes,
+      }
+    })
+    .filter((output) => (output.dose != undefined || output.cell != undefined || output.trtType != undefined)) // Only set filter if filter values are set
+    .compose(dropRepeats(equals)) // only do this once. Changes in the WF should not be overwritten
+    .map((output) => (prevState) => {
+      const filter_output = minimizeFilterOutput({
+        ...prevState,
+        core: {
+          ...prevState.core,
+          output: output,
+        }
+      })
+      return {
+        ...prevState,
+        core: {
+          ...prevState.core,
+          output: output,
+          filter_output: filter_output,
+        }
+      }
+    })
+
+  /**
    * Dirty state reducer, custom version than in ui.js as more logic is required and otherwise need to loop state$ back into model
    * Uses value change or opening/closing of the filters and compares current state with committed state
    * 
@@ -377,6 +434,7 @@ export function model(
     possibleValuesReducer$,
     filterReducer$,
     toggleReducer$,
+    searchReducer$,
     outputReducer$,
     dirtyReducer$,
   )
@@ -583,6 +641,7 @@ function Filter(sources) {
       actions.filterValuesAction$,
       actions.modifier$,
       actions.filterAction$,
+      state$.map((state) => (state.search)),
   )
 
   const outputTrigger$ = 

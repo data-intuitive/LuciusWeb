@@ -8,6 +8,7 @@ import { ENTER_KEYCODE } from '../utils/keycodes.js'
 import { SignatureCheck, checkLens1, checkLens2 } from '../components/SignatureCheck'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import { loggerFactory } from '../utils/logger'
+import { typer } from '../utils/searchUtils'
 
 const stateTemplate = {
     form: {
@@ -21,8 +22,29 @@ const stateTemplate = {
 
 // Granular access to global state and parts of settings
 const formLens = {
-    get: state => ({ core: state.form, settings: { form: state.settings.form, api: state.settings.api } }),
-    set: (state, childState) => ({ ...state, form: childState.core })
+    get: state => ({
+        core: state.form, 
+        settings: { 
+            form: state.settings.form, 
+            api: state.settings.api 
+        },
+        search1: state.routerInformation.params?.signature1,
+        search2: state.routerInformation.params?.signature2,
+        searchAutoRun: state.routerInformation.params?.autorun,
+        searchTyper: state.routerInformation.params?.typer,
+    }),
+    set: (state, childState) => ({
+        ...state,
+        form: childState.core,
+        routerInformation: {
+            ...state.routerInformation,
+            pageState: {
+              ...state.routerInformation.pageState,
+              signature1: childState.core.query1,
+              signature2: childState.core.query2,
+            }
+          }
+    })
 };
 
 function CorrelationForm(sources) {
@@ -79,15 +101,20 @@ function CorrelationForm(sources) {
         });
 
     // Update in query, or simply ENTER
+    const typer1$ = typer(state$, 'search1', 'searchTyper')
     const newQuery1$ = xs.merge(
         sources.DOM.select('.Query1').events('input').map(ev => ev.target.value),
         // Ghost 
-        state$.map(state => state.core.query1).compose(dropRepeats())
+        state$.map(state => state.core.query1).compose(dropRepeats()),
+        typer1$,
     )
+
+    const typer2$ = typer(state$, 'search2', 'searchTyper')
     const newQuery2$ = xs.merge(
         sources.DOM.select('.Query2').events('input').map(ev => ev.target.value),
         // Ghost 
-        state$.map(state => state.core.query2).compose(dropRepeats())
+        state$.map(state => state.core.query2).compose(dropRepeats()),
+        typer2$,
     )
 
     // Updated state is propagated and picked up by the necessary components
@@ -187,12 +214,25 @@ function CorrelationForm(sources) {
     const childReducer1$ = signatureCheck1.onion
     const childReducer2$ = signatureCheck2.onion
 
+    // Auto start query
+    // Only run once, even if query is changed and then reverted to original value
+    const searchAutoRun$ = state$
+    .filter(
+        (state) => state.searchAutoRun == "" || state.searchAutoRun == "yes"
+    )
+    .filter((state) => state.search1 == state.core.query1 && state.search2 == state.core.query2)
+    .filter((state) => state.core.validated1 == true && state.core.validated2 == true)
+    .mapTo(true)
+    .compose(dropRepeats(equals))
+
+
     // When GO clicked or enter -> send updated 'value' to sink
     // Maybe catch when no valid query?
     const query$ = xs.merge(
         update$,
         // Ghost mode
-        sources.onion.state$.map(state => state.core.ghost).filter(ghost => ghost).compose(dropRepeats())
+        sources.onion.state$.map(state => state.core.ghost).filter(ghost => ghost).compose(dropRepeats()),
+        searchAutoRun$,
     )
         .compose(sampleCombine(state$))
         .map(([update, state]) => ({query1: state.core.query1, query2: state.core.query2}))

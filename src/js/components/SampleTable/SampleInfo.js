@@ -232,6 +232,31 @@ export function SampleInfo(sources) {
           div(".col .s8", { style: blur }, [sample.trt_name])
         ])
       ]),
+      trt_oe: div(".row", { style: { fontWeight: "small" } }, [
+        div(".valign-wrapper", [
+          div(".col .s2 .l1 .left-align", { style: { fontWeight: "bold" } }, [
+            zhangRounded,
+          ]),
+
+          div(".col .l2 .hide-on-med-and-down .truncate", [sample.id]),
+          div(".col .l1 .hide-on-med-and-down", [sample.cell]),
+          div(".col .l2 .hide-on-med-and-down .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
+          div(".col .l3 .hide-on-med-and-down", { style: blur }, [sample.trt_name]),
+
+          div(".col .s2 .offset-s5 .l1", { style: blur }, imgForTrtPart),
+          div(".col .s3 .l2 .center-align", { style: blur }, visualizeTextPart),
+        ]),
+        div(".hide-on-large-only", {style: {paddingTop: "10px"}}, [
+          div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Sample ID"]),
+          div(".col .s8 .truncate", [sample.id]),
+          div(".col .s4 .m3 .offset-m1", ["Cell"]),
+          div(".col .s8", [sample.cell]),
+          div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Treatment ID"]),
+          div(".col .s8 .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
+          div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Treatment Name"]),
+          div(".col .s8", { style: blur }, [sample.trt_name])
+        ])
+      ]),
       trt_lig: div(".row", { style: { fontWeight: "small" } }, [
         div(".valign-wrapper", [
           div(".col .s2 .l1 .left-align", { style: { fontWeight: "bold" } }, [
@@ -384,6 +409,23 @@ export function SampleInfo(sources) {
         ),
       ]),
       trt_sh: div([
+        div(".row", [
+          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
+          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
+          div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
+          { style: merge(blur, { height: "100%", "margin-top": "30px"}) },
+          visualizeTextPart
+        ),
+        ]),
+        div(
+          ".row",
+          { style: { margin: "15px 0px 0px 0px" } },
+          [p(".col .s12.filterHeader", hStyle, "Filter Info:")].concat(
+            _filters.map((x) => p(pStyle, entrySmall(x.key, x.value)))
+          )
+        ),
+      ]),
+      trt_oe: div([
         div(".row", [
           div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
           div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),

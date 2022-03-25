@@ -349,6 +349,36 @@ function SampleSelection(sources) {
     .map((json) => json.result.data)
     .remember()
 
+  const makeFilters = (state, initialization) => {
+    const data = state.core.data
+    const filterInfo = composeFilterInfo(data)
+
+    const createFilter = (key, info) => p([
+      div(span(key)), 
+      div([
+        div([span("hasUnits: "), span(info.hasUnits)]),
+        div([span("hasRange: "), span(info.hasRange)]),
+        div([span("minValue: "), span(info.minValue)]),
+        div([span("maxValue: "), span(info.maxValue)]),
+        div([
+          span("values:" ), 
+          div(info.values.map((_) => span(JSON.stringify(_))))
+        ])
+      ])
+    ])
+
+    const filters = keys(filterInfo).map((key) => createFilter(key, filterInfo[key]))
+
+    return div(".sampleSelectionFilters", 
+      div(".row",
+        div(".col .s10 .offset-s1 .l10 .offset-l1", 
+          initialization
+          ? [span()]
+          : filters
+        ))
+    )
+  }
+
   // Helper function for rendering the table, based on the state
   const makeTable = (state, annotation, initialization) => {
     const data = state.core.data
@@ -360,7 +390,6 @@ function SampleSelection(sources) {
     const selectedClass = (selected) =>
       selected ? ".sampleSelected" : ".sampleDeselected"
     
-    const filterInfo = composeFilterInfo(data) // TODO use filterInfo to display filter options on GUI
     const filteredData = filterData(data, undefined)
     const sortedData = sortData(filteredData, state.core.sort, state.core.direction)
 
@@ -486,13 +515,20 @@ function SampleSelection(sources) {
     ])
   }
 
+  const makeFiltersAndTable = (state, annotation, initialization) => {
+    return div([
+        makeFilters(state, initialization),
+        makeTable(state, annotation, initialization)
+      ])
+  }
+
   const initVdom$ = emptyState$.mapTo(div())
 
   const loadingVdom$ = request$
     .compose(sampleCombine(loadingState$))
     .map(([_, state]) =>
       // Use the same makeTable function, pass a initialization=true parameter and a body DOM with preloading
-      makeTable(
+      makeFiltersAndTable(
         state,
         div(".col.s10.offset-s1.l10.offset-l1", [
           div(
@@ -509,7 +545,7 @@ function SampleSelection(sources) {
   const loadedVdom$ = xs
     .combine(modifiedState$, treatmentAnnotations.DOM)
     .filter(([state, _]) => state.core.busy == false)
-    .map(([state, annotation]) => makeTable(state, annotation, false))
+    .map(([state, annotation]) => makeFiltersAndTable(state, annotation, false))
 
   // Wrap component vdom with an extra div that handles being dirty
   const vdom$ = dirtyWrapperStream( state$, xs.merge(initVdom$, loadingVdom$, loadedVdom$))

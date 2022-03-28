@@ -209,7 +209,7 @@ function SampleSelection(sources) {
             const maxLength = 7
             if (dose.length <= maxLength)
               return dose
-            else if (isNaN(entry.dose) || entry.dose_unit.length >= 3)
+            else if (isNaN(entry.dose) || entry.dose_unit?.length >= 3)
               return dose.substring(0, maxLength-1) + "..."
               // adding '...' is quite small on screen (in non-monospaced fonts), so we're ignoring that
             else

@@ -22,6 +22,10 @@
 
 - Ghost mode has been improved, it no longer requires explicit timings in the scenarios
 
+## Version 5.0.2
+
+- Fix mistake in sample selection column truncation code
+
 ## Version 5.0.1
 
 - The head and tail tables use pictures to display the treatment type

@@ -1,5 +1,7 @@
 import xs from "xstream"
 import { div, label, input, button, span, p, i } from "@cycle/dom"
+import { pick, mix } from 'cycle-onionify';
+import isolate from '@cycle/isolate'
 import {
   prop,
   keys,
@@ -19,6 +21,37 @@ const SampleSelectionFiltersLens = {
   get: (state) => ({ ...state }),
   set: (state, childState) => ({ ...state }),
 }
+
+
+
+function SingleSampleSelectionFilter(sources) {
+    const state$ = sources.onion.state$.debug()
+    const key = sources.key
+    const filterInfo$ = sources.filterInfo$
+
+    const createFilter = (key, info) =>
+      p([
+        div(span(key)),
+        div([
+          div([span("hasUnits: "), span(info.hasUnits)]),
+          div([span("hasRange: "), span(info.hasRange)]),
+          div([span("minValue: "), span(info.minValue)]),
+          div([span("maxValue: "), span(info.maxValue)]),
+          div([
+            span("values:"),
+            div(info.values.map((_) => span(JSON.stringify(_)))),
+          ]),
+        ]),
+      ])
+
+    
+
+    return {
+        DOM: filterInfo$.map((info) => createFilter(key, info[key]))
+    }
+}
+
+
 
 // const composedFilterInfo = {
 //   'field1': {
@@ -45,8 +78,6 @@ const SampleSelectionFiltersLens = {
 const composeFilterInfo = (data) => {
   // we need at least 1 data entry to be able to compose the data types that will be present in the data
   if (length(data) == 0) return {}
-
-  console.log(data)
 
   const getValueStruct = (unit, arr) => {
     const counts = countBy(identity, arr)
@@ -110,64 +141,44 @@ const composeFilterInfo = (data) => {
     }
   })
 
+  // go from array of objects { 'key': {...} } to single object { 'key1': {...}, 'key2': {...} }
   const reducer = (acc, value) => ({ ...acc, ...value })
   const result = reduce(reducer, {}, mappedDataArr)
   // console.log("result: " + JSON.stringify(result))
   return result
 }
 
-//   const childrenSinks$ = array$.map(array => {
-//     return array.map((_, index) => isolate(SampleInfo, index)(sources))
-//   });
-
-// const composedChildrenSinks$ = childrenSinks$.compose(pick('DOM')).compose(mix(xs.combine))
 
 function intent(domSource$) {}
 
-function model(state$) {
+function model(sources, state$) {
   const filterInfo$ = state$.map((state) => composeFilterInfo(state.core.data))
+
+  const childrenSinks$ = filterInfo$.map(filterInfo => {
+    const keys_ = keys(filterInfo)
+    return keys_.map((key) => isolate(SingleSampleSelectionFilter, key)({
+        ...sources,
+        key: key,
+        filterInfo$: filterInfo$
+        }))
+  });
 
   return {
     filterInfo$: filterInfo$,
+    childrenSinks$: childrenSinks$
   }
 }
 
-function view(filterInfo$) {
-  const makeFilters = (filterInfo, initialization) => {
-    // const filterInfo = composeFilterInfo(data)
+function view(filterInfo$, childrenSinks$) {
 
-    const createFilter = (key, info) =>
-      p([
-        div(span(key)),
-        div([
-          div([span("hasUnits: "), span(info.hasUnits)]),
-          div([span("hasRange: "), span(info.hasRange)]),
-          div([span("minValue: "), span(info.minValue)]),
-          div([span("maxValue: "), span(info.maxValue)]),
-          div([
-            span("values:"),
-            div(info.values.map((_) => span(JSON.stringify(_)))),
-          ]),
-        ]),
-      ])
+  const composedChildrenSinks$ = childrenSinks$.compose(pick('DOM')).compose(mix(xs.combine))
 
-    const filters = keys(filterInfo).map((key) =>
-      createFilter(key, filterInfo[key])
-    )
-
-    return div(
+  const vdom$ = composedChildrenSinks$.map((arr) =>
+    div(
       ".sampleSelectionFilters",
-      div(
-        ".row",
-        div(
-          ".col .s10 .offset-s1 .l10 .offset-l1",
-          initialization ? [span()] : filters
-        )
-      )
+      div(".row", div(".col .s10 .offset-s1 .l10 .offset-l1", arr))
     )
-  }
-
-  const vdom$ = filterInfo$.map((filterInfo) => makeFilters(filterInfo, false))
+  )
 
   return vdom$
 }
@@ -176,8 +187,8 @@ function SampleSelectionFilters(sources) {
   const state$ = sources.onion.state$
 
   //   intent()
-  const model_ = model(state$)
-  const vdom$ = view(model_.filterInfo$)
+  const model_ = model(sources, state$)
+  const vdom$ = view(model_.filterInfo$, model_.childrenSinks$)
 
   return {
     log: xs.empty(),

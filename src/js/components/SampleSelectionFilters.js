@@ -1,5 +1,5 @@
 import xs from "xstream"
-import { div, label, input, button, span, p, i } from "@cycle/dom"
+import { div, label, input, button, span, p, i, ul, li } from "@cycle/dom"
 import { pick, mix } from 'cycle-onionify';
 import isolate from '@cycle/isolate'
 import {
@@ -15,6 +15,7 @@ import {
   identity,
   none,
   all,
+  toPairs,
 } from "ramda"
 
 const SampleSelectionFiltersLens = {
@@ -29,6 +30,29 @@ function SingleSampleSelectionFilter(sources) {
     const key = sources.key
     const filterInfo$ = sources.filterInfo$
 
+    const thisFilterInfo$ = filterInfo$.map((info) => info[key])
+
+    const valueElements = (key, unitInfo) => {
+
+        const list = toPairs(unitInfo.values).map(([value, amount]) => li([
+            label("", { props: { id: value + "-" + amount } }, [
+                input(
+                    ".grey",
+                    { props: { type: "checkbox", checked: true, id: key + "-" + value} },
+                    "tt"
+                ),
+                span(value),
+                span(" "),
+                span("(" + amount + ")")
+                ]),
+        ]))
+
+        return div(".sampleSelectionFilter-" + key, [
+            span(key + ' - ' + unitInfo.unit),
+            ul(list)
+        ])
+    }
+
     const createFilter = (key, info) =>
       p([
         div(span(key)),
@@ -39,7 +63,8 @@ function SingleSampleSelectionFilter(sources) {
           div([span("maxValue: "), span(info.maxValue)]),
           div([
             span("values:"),
-            div(info.values.map((_) => span(JSON.stringify(_)))),
+            //div(info.values.map((_) => span(JSON.stringify(_)))),
+            div(info.values.map((_) => valueElements(key, _)))
           ]),
         ]),
       ])
@@ -47,7 +72,7 @@ function SingleSampleSelectionFilter(sources) {
     
 
     return {
-        DOM: filterInfo$.map((info) => createFilter(key, info[key]))
+        DOM: thisFilterInfo$.map((info) => createFilter(key, info))
     }
 }
 

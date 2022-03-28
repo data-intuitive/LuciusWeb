@@ -19,6 +19,10 @@ const typer = (text, json) => {
   )
 }
 
+function notEmpty(data) {
+  return data != undefined && data != ""
+}
+
 /**
  * Definition of the scenario
  * Configuration is provided by means of `config` object:
@@ -37,25 +41,39 @@ export const scenario = config =>
           state: { form: { check: { ghostinput: true } } },
       },
     ],
-    typer(
-      config.treatment,
-      { // Form input
-          state: { form: { check: { input: config.treatment, showSuggestions: true, validated: false } } },
-      }
-    ),
     [
-      { // Form input
-        delay: 1500,
-        state: { form: { check: { input: config.treatment, showSuggestions: false, validated: true } } },
+      {
+        delay: 500,
+        state: {
+          routerInformation: {
+            params: config.params,
+          }
+        }
+      }
+    ],
+    [
+      { // Sample Selection
+        delay: 100,
+        state: {},
+        message: {
+            text: 'Enter a treatment for which to search',
+            duration: 4000
+        }
       },
 
       { // GO
-          delay: 1000,
-          state: { form: { check: { ghostoutput: true } } },
+        delay: 1000,
+        continue: (s) => (s.form.check.validated),
+        state: { form: { check: { ghostoutput: true } } },
+        // message: {
+        //   text: 'Press the \'GO\' button',
+        //   duration: 4000
+        // }
       },
 
       { // Sample Selection
           delay: 500,
+          continue: (s) => (notEmpty(s.form.sampleSelection.output)),
           state: {},
           message: {
               text: 'All samples that correspond to the selected compound are tabulated',
@@ -64,31 +82,24 @@ export const scenario = config =>
       },
       {
           delay: 3000,
-          state: { form: { sampleSelection: { data: { index: config.index, value: { use: true } } } } },
+          state: {},
           message: {
               text: 'select or deselect the desired sample(s)',
               duration: 4000
           }
       },
-      // {
-      //     delay: 1000,
-      //     state: { form: { sampleSelection: { data: { index: 2, value: { use: false } } } } },
-      // },
-      // {
-      //     delay: 1000,
-      //     state: { form: { sampleSelection: { data: { index: 3, value: { use: false } } } } },
-      // },
 
       { // Signature creation
           delay: 500,
-          state: { form: { sampleSelection: { ghostoutput: true, output: config.sample } } },
+          state: { form: { sampleSelection: { ghostoutput: true } } },
           message: {
               text: 'Press Select',
               duration: 4000
           }
       },
       {
-          delay: 4000,
+          delay: 100,
+          continue: (s) => (notEmpty(s.form.signature.output)),
           state: {},
           message: {
               text: 'A signed ranked gene signature is generated across the samples',
@@ -105,19 +116,11 @@ export const scenario = config =>
       },
 
       { // Filter
-          delay: 7000,
-          state: {
-              filter: {
-                input: config.signature,
-                output: { trtType: [ "trt_cp" ] },
-                filter_output: { trtType: [ "trt_cp" ] },
-                ghost: { expand: false }
-              },
-              headTable: { input: { query: config.signature } },
-              tailTable: { input: { query: config.signature } },
-          },
+          delay: 500,
+          continue: (s) => (notEmpty(s.form.signature.output)),
+          state: {},
           message: {
-              text: 'Set filter a filter',
+              text: 'Set a filter',
               duration: 7000
           }
       },

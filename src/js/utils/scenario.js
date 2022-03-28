@@ -1,7 +1,9 @@
 import xs from "xstream"
-import { mergeDeepRight, mergeDeepWithKey } from "ramda"
+import { mergeDeepRight, mergeDeepWithKey, equals } from "ramda"
 import delay from "xstream/extra/delay"
 import concat from "xstream/extra/concat"
+import dropRepeats from "xstream/extra/dropRepeats"
+import debounce from "xstream/extra/debounce"
 
 /**
  * We expect the following input for the right-hand side:
@@ -19,10 +21,27 @@ const updateData = (k, l, r) =>
  * The hardest part is providing the new state and merging that to the previous one.
  * Especially for Arrays, because we don't want to provide the full array in every step.
  */
-export const runScenario = (scenario) => {
-  const scenarioStreamArray = scenario.map((step) =>
-    xs.of(step).compose(delay(step.delay))
-  )
+export const runScenario = (scenario, state$) => {
+
+  const scenarioStreamArray = scenario.map((step) => {
+      if (step.continue != undefined) {
+        const trigger$ = state$
+          .map((s) => step.continue(s))
+          .compose(debounce(equals))
+          .filter(a => a == true)
+          .compose(dropRepeats(equals))
+        const triggerDelayed$ = trigger$
+          .compose(delay(10))
+        
+        const triggerOutput$ = trigger$
+          .mapTo(step)
+          .endWhen(triggerDelayed$)
+
+        return triggerOutput$.compose(delay(step.delay))
+      }
+      else
+        return xs.of(step).compose(delay(step.delay))
+  })
 
   const reducerStreamArray = scenarioStreamArray.map((step$) =>
     step$.map(

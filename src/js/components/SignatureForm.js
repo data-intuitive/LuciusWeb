@@ -9,6 +9,7 @@ import { SignatureCheck, checkLens } from '../components/SignatureCheck'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import { loggerFactory } from '../utils/logger'
 import { dirtyUiReducer } from '../utils/ui'
+import { typer } from '../utils/searchUtils'
 
 // Granular access to global state and parts of settings
 const formLens = {
@@ -20,8 +21,21 @@ const formLens = {
       common: state.settings.common,
     },
     ui: state.ui?.form ?? {},
+    search: state.routerInformation.params?.signature,
+    searchAutoRun: state.routerInformation.params?.autorun,
+    searchTyper: state.routerInformation.params?.typer,
   }),
-  set: (state, childState) => ({ ...state, form: {...childState.core } }),
+  set: (state, childState) => ({
+    ...state,
+    form: {...childState.core },
+    routerInformation: {
+      ...state.routerInformation,
+      pageState: {
+        ...state.routerInformation.pageState,
+        signature: childState.core.query,
+      }
+    }
+  }),
 }
 
 function model(newQuery$, state$, sources, signatureCheckSink, actions$) {
@@ -89,10 +103,22 @@ function model(newQuery$, state$, sources, signatureCheckSink, actions$) {
   // When update is clicked, update the query. Onionify does the rest
   const childReducer$ = signatureCheckSink.onion
 
+  // Auto start query
+  // Only run once, even if query is changed and then reverted to original value
+  const searchAutoRun$ = state$
+    .filter(
+      (state) => state.searchAutoRun == "" || state.searchAutoRun == "yes"
+    )
+    .filter((state) => state.search == state.core.query)
+    .filter((state) => state.core.validated == true)
+    .mapTo(true)
+    .compose(dropRepeats(equals))
+
   // When GO clicked or enter -> send updated 'value' to sink
   // Maybe catch when no valid query?
   const query$ = xs.merge(
     actions$.update$,
+    searchAutoRun$,
     // Ghost mode
     sources.onion.state$.map(state => state.core.ghost).filter(ghost => ghost).compose(dropRepeats())
     )
@@ -174,11 +200,14 @@ function SignatureForm(sources) {
   const signatureCheckHTTP$ = signatureCheckSink.HTTP;
   const signatureCheckReducer$ = signatureCheckSink.onion;
 
+  const typer$ = typer(state$, 'search', 'searchTyper')
+
   // Update in query, or simply ENTER
   const newQuery$ = xs.merge(
     domSource$.select('.Query').events('input').map(ev => ev.target.value),
     // Ghost
-    state$.map(state => state.core.query).compose(dropRepeats())
+    state$.map(state => state.core.query).compose(dropRepeats()),
+    typer$,
   )
 
   const actions$ = intent(domSource$)

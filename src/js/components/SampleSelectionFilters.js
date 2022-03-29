@@ -46,7 +46,7 @@ const SampleSelectionFiltersLens = {
 
 function SingleSampleSelectionFilter(sources) {
     const domSource$ = sources.DOM
-    const state$ = sources.onion.state$.debug("state$").addListener({ })
+    const state$ = sources.onion.state$//.debug("SingleSampleSelectionFilter-state$").addListener({ })
     const key = sources.key
     const filterInfo$ = sources.filterInfo$
 
@@ -227,6 +227,8 @@ function intent(domSource$) {}
 function model(sources, state$) {
   const filterInfo$ = state$
     .map((state) => composeFilterInfo(state.core.data))
+    .compose(dropRepeats(equals))
+    .remember()
 
   const childrenSinks$ = filterInfo$.map(filterInfo => {
     const keys_ = keys(filterInfo)
@@ -249,8 +251,7 @@ function model(sources, state$) {
     ...prevState,
     core: {
       ...prevState?.core,
-      // filterInfo: filterInfo,
-      foo: "bar"
+      filterInfo: filterInfo,
     }
   }))
 
@@ -259,7 +260,7 @@ function model(sources, state$) {
     childrenSinks$: childrenSinks$,
     onion: xs.merge(
       defaultReducer$,
-      // filterInfoReducer$
+      filterInfoReducer$
       ),
   }
 }
@@ -274,6 +275,7 @@ function view(filterInfo$, childrenSinks$) {
       div(".row", div(".col .s10 .offset-s1 .l10 .offset-l1", arr))
     )
   )
+  .startWith(div())
 
   return vdom$
 }

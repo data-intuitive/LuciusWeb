@@ -17,6 +17,8 @@ import {
   all,
   toPairs,
 } from "ramda"
+import { flatten } from "ramda";
+import flattenConcurrently from "xstream/extra/flattenConcurrently";
 
 const SampleSelectionFiltersLens = {
   get: (state) => ({ ...state }),
@@ -26,19 +28,47 @@ const SampleSelectionFiltersLens = {
 
 
 function SingleSampleSelectionFilter(sources) {
-    const state$ = sources.onion.state$.debug()
+    const domSource$ = sources.DOM
+    const state$ = sources.onion.state$.debug("state$").addListener({ })
     const key = sources.key
     const filterInfo$ = sources.filterInfo$
 
     const thisFilterInfo$ = filterInfo$.map((info) => info[key])
 
+    // serialize fields into a string that's deserializable again
+    // might need to adjust delimiter and check if certain characters need to be escaped
+    const serialize = (key, unit, value) => {
+      const str = [key, unit, value].join("___")
+      return str
+    }
+
+    const deserialize = (str) => {
+      const arr = str.split("___")
+      return arr
+    }
+
+    const thisFilterActionNames$ = thisFilterInfo$
+      .map((info) => info.values.map(
+          (unitInfo) => keys(unitInfo.values).map(
+            (v) => serialize(key, unitInfo.unit, v))
+      ))
+      .map((_) => flatten(_))
+      .debug("thisFilterActionNames$")
+
+    const useClick$ = sources.DOM.select(".selection-cb")
+      // .events("click", { preventDefault: true })
+      .events("click")
+      .map((ev) => ev.ownerTarget.id)
+      .debug("useClick$")
+      .addListener({ })
+    
     const valueElements = (key, unitInfo) => {
 
-        const list = toPairs(unitInfo.values).map(([value, amount]) => li([
-            label("", { props: { id: value + "-" + amount } }, [
+        const list = toPairs(unitInfo.values).map(([value, amount]) => li(".selection",[
+            label("", { props: { id: "." + key } }, [
                 input(
-                    ".grey",
-                    { props: { type: "checkbox", checked: true, id: key + "-" + value} },
+                    ".grey .selection-cb",
+                    { props: { type: "checkbox", checked: true, id: "." + serialize(key, unitInfo.unit, value) } },
                     "tt"
                 ),
                 span(value),

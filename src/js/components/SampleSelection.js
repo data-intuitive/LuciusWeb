@@ -640,6 +640,7 @@ function SampleSelection(sources) {
       sortReducer$,
       hoverReducer$,
       dirtyReducer$,
+      sampleFilters.onion,
     ),
     output: sampleSelection$,
     modal: treatmentAnnotations.modal,

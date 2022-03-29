@@ -19,10 +19,27 @@ import {
 } from "ramda"
 import { flatten } from "ramda";
 import flattenConcurrently from "xstream/extra/flattenConcurrently";
+import dropRepeats from "xstream/extra/dropRepeats";
+import { equals } from "ramda";
 
 const SampleSelectionFiltersLens = {
-  get: (state) => ({ ...state }),
-  set: (state, childState) => ({ ...state }),
+  // get: (state) => ({ ...state }),
+  // set: (state, childState) => ({ ...state }),
+  get: (state) => ({
+    core: {
+      data: state.core.data,
+    }
+  }),
+  set: (state, childState) => ({
+    ...state,
+    core: {
+      ...state.core,
+      sampleSelectionFilters: {
+        filterData: childState.core?.filterData,
+        filterInfo: childState.core?.filterInfo,
+      }
+    },
+  }),
 }
 
 
@@ -102,7 +119,8 @@ function SingleSampleSelectionFilter(sources) {
     
 
     return {
-        DOM: thisFilterInfo$.map((info) => createFilter(key, info))
+        DOM: thisFilterInfo$.map((info) => createFilter(key, info)),
+        onion: xs.empty(),
     }
 }
 
@@ -207,7 +225,8 @@ const composeFilterInfo = (data) => {
 function intent(domSource$) {}
 
 function model(sources, state$) {
-  const filterInfo$ = state$.map((state) => composeFilterInfo(state.core.data))
+  const filterInfo$ = state$
+    .map((state) => composeFilterInfo(state.core.data))
 
   const childrenSinks$ = filterInfo$.map(filterInfo => {
     const keys_ = keys(filterInfo)
@@ -218,9 +237,30 @@ function model(sources, state$) {
         }))
   });
 
+  const defaultReducer$ = xs.of((prevState) => ({
+    ...prevState,
+    core: {
+      filterData: "foo",
+      filterInfo: "bar",
+    }
+  }))
+
+  const filterInfoReducer$ = filterInfo$.map((filterInfo) => (prevState) => ({
+    ...prevState,
+    core: {
+      ...prevState?.core,
+      // filterInfo: filterInfo,
+      foo: "bar"
+    }
+  }))
+
   return {
     filterInfo$: filterInfo$,
-    childrenSinks$: childrenSinks$
+    childrenSinks$: childrenSinks$,
+    onion: xs.merge(
+      defaultReducer$,
+      // filterInfoReducer$
+      ),
   }
 }
 
@@ -239,7 +279,7 @@ function view(filterInfo$, childrenSinks$) {
 }
 
 function SampleSelectionFilters(sources) {
-  const state$ = sources.onion.state$
+  const state$ = sources.onion.state$.debug("SampleSelectionFilters-state$")
 
   //   intent()
   const model_ = model(sources, state$)
@@ -248,6 +288,7 @@ function SampleSelectionFilters(sources) {
   return {
     log: xs.empty(),
     DOM: vdom$,
+    onion: model_.onion,
   }
 }
 

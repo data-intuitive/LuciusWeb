@@ -21,6 +21,7 @@
 ### Other
 
 - Ghost mode has been improved, it no longer requires explicit timings in the scenarios
+- Moved scss files from `src/js` to `src/sass`, so any alternative versions of e.g. `_variables.scss` or `_main.custom.scss` should now be placed in the new folder
 
 ## Version 5.0.2
 

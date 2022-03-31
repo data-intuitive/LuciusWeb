@@ -95,18 +95,19 @@ function SingleSampleSelectionFilter(sources) {
               ),
               span(value),
               span(" "),
-              span("(" + amount + ")")
+              span("(" + amount + ")"),
+              span(" "),
+              span("use: " + use)
               ]),
         ])
       })
 
-        return div(".sampleSelectionFilter-" + key, [
+        return div(".sampleSelectionFilter-" + key, { style: { borderStyle: "solid"} }, [
             span(key + ' - ' + unitInfo.unit),
             ul(list)
         ])
     }
 
-    // TODO use 'filterData' to retrieve checked or unchecked values
     const createFilter = (key, info, filterData) =>
       p([
         div(span(key)),

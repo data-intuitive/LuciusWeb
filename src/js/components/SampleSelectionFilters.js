@@ -28,6 +28,8 @@ const SampleSelectionFiltersLens = {
   get: (state) => ({
     core: {
       data: state.core.data,
+      filterData: state.core?.sampleSelectionFilters?.filterData,
+      filterInfo: state.core?.sampleSelectionFilters?.filterInfo,
     }
   }),
   set: (state, childState) => ({
@@ -42,50 +44,32 @@ const SampleSelectionFiltersLens = {
   }),
 }
 
+// serialize fields into a string that's deserializable again
+// might need to adjust delimiter and check if certain characters need to be escaped
+const serialize = (key, unit, value) => {
+  const str = [key, unit, value].join("___")
+  return str
+}
 
+const deserialize = (str) => {
+  const arr = str.split("___")
+  return arr
+}
 
 function SingleSampleSelectionFilter(sources) {
-    const domSource$ = sources.DOM
-    const state$ = sources.onion.state$//.debug("SingleSampleSelectionFilter-state$").addListener({ })
+
     const key = sources.key
     const filterInfo$ = sources.filterInfo$
 
     const thisFilterInfo$ = filterInfo$.map((info) => info[key])
-
-    // serialize fields into a string that's deserializable again
-    // might need to adjust delimiter and check if certain characters need to be escaped
-    const serialize = (key, unit, value) => {
-      const str = [key, unit, value].join("___")
-      return str
-    }
-
-    const deserialize = (str) => {
-      const arr = str.split("___")
-      return arr
-    }
-
-    const thisFilterActionNames$ = thisFilterInfo$
-      .map((info) => info.values.map(
-          (unitInfo) => keys(unitInfo.values).map(
-            (v) => serialize(key, unitInfo.unit, v))
-      ))
-      .map((_) => flatten(_))
-      .debug("thisFilterActionNames$")
-
-    const useClick$ = sources.DOM.select(".selection-cb")
-      // .events("click", { preventDefault: true })
-      .events("click")
-      .map((ev) => ev.ownerTarget.id)
-      .debug("useClick$")
-      .addListener({ })
-    
+   
     const valueElements = (key, unitInfo) => {
 
         const list = toPairs(unitInfo.values).map(([value, amount]) => li(".selection",[
             label("", { props: { id: "." + key } }, [
                 input(
                     ".grey .selection-cb",
-                    { props: { type: "checkbox", checked: true, id: "." + serialize(key, unitInfo.unit, value) } },
+                    { props: { type: "checkbox", checked: true, id: serialize(key, unitInfo.unit, value) } },
                     "tt"
                 ),
                 span(value),
@@ -116,11 +100,8 @@ function SingleSampleSelectionFilter(sources) {
         ]),
       ])
 
-    
-
     return {
         DOM: thisFilterInfo$.map((info) => createFilter(key, info)),
-        onion: xs.empty(),
     }
 }
 
@@ -222,22 +203,25 @@ const composeFilterInfo = (data) => {
 }
 
 
-function intent(domSource$) {}
+function intent(domSource$) {
 
-function model(sources, state$) {
+  const useClick$ = domSource$.select(".selection-cb")
+  // .events("click", { preventDefault: true })
+  .events("click")
+  .map((ev) => ev.ownerTarget.id)
+
+  return {
+    useClick$: useClick$
+  }
+}
+
+function model(sources, state$, useClick$) {
   const filterInfo$ = state$
     .map((state) => composeFilterInfo(state.core.data))
     .compose(dropRepeats(equals))
     .remember()
 
-  const childrenSinks$ = filterInfo$.map(filterInfo => {
-    const keys_ = keys(filterInfo)
-    return keys_.map((key) => isolate(SingleSampleSelectionFilter, key)({
-        ...sources,
-        key: key,
-        filterInfo$: filterInfo$
-        }))
-  });
+  const useClickTest = useClick$.map((id) => deserialize(id)).debug("useClickTest")//.addListener({ })
 
   const defaultReducer$ = xs.of((prevState) => ({
     ...prevState,
@@ -250,17 +234,25 @@ function model(sources, state$) {
   const filterInfoReducer$ = filterInfo$.map((filterInfo) => (prevState) => ({
     ...prevState,
     core: {
-      ...prevState?.core,
       filterInfo: filterInfo,
+      filterData: prevState.core.filterData,
+    }
+  }))
+
+  const valueSelectedReducer$ = useClickTest.map(([key, unit, value]) => (prevState) => ({
+    ...prevState,
+    core: {
+      filterInfo: prevState.core.filterInfo,
+      filterData: key + "-" + unit + "-" + value
     }
   }))
 
   return {
     filterInfo$: filterInfo$,
-    childrenSinks$: childrenSinks$,
     onion: xs.merge(
       defaultReducer$,
-      filterInfoReducer$
+      filterInfoReducer$,
+      valueSelectedReducer$,
       ),
   }
 }
@@ -281,11 +273,24 @@ function view(filterInfo$, childrenSinks$) {
 }
 
 function SampleSelectionFilters(sources) {
-  const state$ = sources.onion.state$.debug("SampleSelectionFilters-state$")
+  const state$ = sources.onion.state$//.debug("SampleSelectionFilters-state$")
 
-  //   intent()
-  const model_ = model(sources, state$)
-  const vdom$ = view(model_.filterInfo$, model_.childrenSinks$)
+
+
+  const intent_ = intent(sources.DOM)
+  const model_ = model(sources, state$, intent_.useClick$)
+
+  const childrenSinks$ = model_.filterInfo$.map(filterInfo => {
+    const keys_ = keys(filterInfo)
+    return keys_.map((key) => SingleSampleSelectionFilter({
+        ...sources,
+        key: key,
+        filterInfo$: model_.filterInfo$
+        }))
+  })
+  .remember()
+
+  const vdom$ = view(model_.filterInfo$, childrenSinks$)
 
   return {
     log: xs.empty(),

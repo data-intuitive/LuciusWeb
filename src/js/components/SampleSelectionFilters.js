@@ -16,11 +16,18 @@ import {
   none,
   all,
   toPairs,
+  fromPairs,
+  flatten,
+  equals,
+  lensProp,
+  set,
+  findIndex,
+  adjust,
+  view as viewR,
+  find,
+  whereEq,
 } from "ramda"
-import { flatten } from "ramda";
-import flattenConcurrently from "xstream/extra/flattenConcurrently";
 import dropRepeats from "xstream/extra/dropRepeats";
-import { equals } from "ramda";
 
 const SampleSelectionFiltersLens = {
   // get: (state) => ({ ...state }),
@@ -59,24 +66,39 @@ const deserialize = (str) => {
 function SingleSampleSelectionFilter(sources) {
 
     const key = sources.key
-    const filterInfo$ = sources.filterInfo$
 
-    const thisFilterInfo$ = filterInfo$.map((info) => info[key])
+    const thisFilterInfo$ = sources.filterInfo$.map((info) => info[key])
+    const thisFilterData$ = sources.filterData$.map((data) => data[key])
    
-    const valueElements = (key, unitInfo) => {
+    const valueElements = (key, unitInfo, filterData) => {
 
-        const list = toPairs(unitInfo.values).map(([value, amount]) => li(".selection",[
-            label("", { props: { id: "." + key } }, [
-                input(
-                    ".grey .selection-cb",
-                    { props: { type: "checkbox", checked: true, id: serialize(key, unitInfo.unit, value) } },
-                    "tt"
-                ),
-                span(value),
-                span(" "),
-                span("(" + amount + ")")
-                ]),
-        ]))
+      const list = toPairs(unitInfo.values).map(([value, amount]) => {
+        
+        var use = false
+        const matcher = whereEq({ type: 'value', unit: unitInfo.unit, value: value })
+        if (filterData?.length > 0) {
+          const data = find( matcher )(filterData)
+          // console.log("data: " + JSON.stringify(data))
+          use = data.use
+        }
+
+        if (use == false) {
+          console.log("not checked: " + serialize(key, unitInfo.unit, value))
+        }
+
+        return li(".selection",[
+          label("", { props: { id: "." + key } }, [
+              input(
+                  ".grey .selection-cb",
+                  { props: { type: "checkbox", checked: use, id: serialize(key, unitInfo.unit, value) } },
+                  "tt"
+              ),
+              span(value),
+              span(" "),
+              span("(" + amount + ")")
+              ]),
+        ])
+      })
 
         return div(".sampleSelectionFilter-" + key, [
             span(key + ' - ' + unitInfo.unit),
@@ -84,7 +106,8 @@ function SingleSampleSelectionFilter(sources) {
         ])
     }
 
-    const createFilter = (key, info) =>
+    // TODO use 'filterData' to retrieve checked or unchecked values
+    const createFilter = (key, info, filterData) =>
       p([
         div(span(key)),
         div([
@@ -95,13 +118,20 @@ function SingleSampleSelectionFilter(sources) {
           div([
             span("values:"),
             //div(info.values.map((_) => span(JSON.stringify(_)))),
-            div(info.values.map((_) => valueElements(key, _)))
+            div(info.values.map((_) => valueElements(key, _, filterData)))
           ]),
         ]),
       ])
 
+    const vdom$ = xs
+      .combine(
+        thisFilterInfo$,
+        thisFilterData$,
+      )
+      .map(([info, filterData]) => createFilter(key, info, filterData))
+
     return {
-        DOM: thisFilterInfo$.map((info) => createFilter(key, info)),
+        DOM: vdom$,
     }
 }
 
@@ -205,31 +235,64 @@ const composeFilterInfo = (data) => {
 
 function intent(domSource$) {
 
-  const useClick$ = domSource$.select(".selection-cb")
-  // .events("click", { preventDefault: true })
-  .events("click")
+  const useValueClick$ = domSource$.select(".selection-cb")
+  .events("click", { preventDefault: true })
+  // .events("click")
   .map((ev) => ev.ownerTarget.id)
 
   return {
-    useClick$: useClick$
+    useValueClick$: useValueClick$
   }
 }
 
-function model(sources, state$, useClick$) {
+function model(state$, useClick$) {
   const filterInfo$ = state$
     .map((state) => composeFilterInfo(state.core.data))
     .compose(dropRepeats(equals))
     .remember()
 
-  const useClickTest = useClick$.map((id) => deserialize(id)).debug("useClickTest")//.addListener({ })
-
   const defaultReducer$ = xs.of((prevState) => ({
     ...prevState,
     core: {
-      filterData: "foo",
-      filterInfo: "bar",
+      filterData: {},
+      filterInfo: {},
     }
   }))
+
+  const initialFilterData$ = filterInfo$.map((filterInfo) => {
+
+    const filterDataPairs = toPairs(filterInfo).map(([key, value]) => {
+      const nestedValues = value.values.map((valuesPerUnit) => keys(valuesPerUnit.values).map((v) => ({ type: 'value', value: v, unit: valuesPerUnit.unit, use: true })))
+      const flattenedValues = flatten(nestedValues)
+
+      return [key, flattenedValues]
+    })
+
+    const filterData = fromPairs(filterDataPairs)
+    return filterData
+  })
+
+  const updateFilterData = (key, unit, value, prevFilterData) => {
+    const keyLens = lensProp(key)
+    const matcher = whereEq({ type: 'value', unit: unit, value: value })
+    const toggleUse = (v) => ({ ...v, use: !v.use })
+
+
+    console.log("prevFilterData: ")
+    console.log(prevFilterData)
+    console.log("key: " + key + " unit: " + unit + " value: " + value)
+
+    const currentFilterDataKey = viewR(keyLens, prevFilterData)
+    const index = findIndex( matcher )(currentFilterDataKey)
+    
+    // if value not found, return unchanged state
+    if (index < 0)
+      return prevState
+
+    const currentFilterDataOnlyKeyUpdatedValue = adjust(index, toggleUse, currentFilterDataKey )
+    const updatedFilterData = set(keyLens, currentFilterDataOnlyKeyUpdatedValue, prevFilterData)
+    return updatedFilterData
+  }
 
   const filterInfoReducer$ = filterInfo$.map((filterInfo) => (prevState) => ({
     ...prevState,
@@ -239,25 +302,40 @@ function model(sources, state$, useClick$) {
     }
   }))
 
-  const valueSelectedReducer$ = useClickTest.map(([key, unit, value]) => (prevState) => ({
+  const initFilterDataReducer$ = initialFilterData$.map((filterData) => (prevState) => ({
     ...prevState,
     core: {
       filterInfo: prevState.core.filterInfo,
-      filterData: key + "-" + unit + "-" + value
+      filterData: filterData,
     }
   }))
 
+  const filterData$ = state$.map((state) => state.core.filterData)
+
+  const filterDataReducer$ = useClick$.map((id) => (prevState) => {
+    const [key, unit, value] = deserialize(id)
+    const filterData = updateFilterData(key, unit, value, prevState.core.filterData)
+    return {
+    ...prevState,
+    core: {
+      filterInfo: prevState.core.filterInfo,
+      filterData: filterData,
+    }
+  }})
+
   return {
     filterInfo$: filterInfo$,
+    filterData$: filterData$,
     onion: xs.merge(
       defaultReducer$,
       filterInfoReducer$,
-      valueSelectedReducer$,
+      initFilterDataReducer$,
+      filterDataReducer$,
       ),
   }
 }
 
-function view(filterInfo$, childrenSinks$) {
+function view(childrenSinks$) {
 
   const composedChildrenSinks$ = childrenSinks$.compose(pick('DOM')).compose(mix(xs.combine))
 
@@ -275,22 +353,21 @@ function view(filterInfo$, childrenSinks$) {
 function SampleSelectionFilters(sources) {
   const state$ = sources.onion.state$//.debug("SampleSelectionFilters-state$")
 
-
-
   const intent_ = intent(sources.DOM)
-  const model_ = model(sources, state$, intent_.useClick$)
+  const model_ = model(state$, intent_.useValueClick$)
 
   const childrenSinks$ = model_.filterInfo$.map(filterInfo => {
     const keys_ = keys(filterInfo)
     return keys_.map((key) => SingleSampleSelectionFilter({
         ...sources,
         key: key,
-        filterInfo$: model_.filterInfo$
+        filterInfo$: model_.filterInfo$,
+        filterData$: model_.filterData$,
         }))
   })
   .remember()
 
-  const vdom$ = view(model_.filterInfo$, childrenSinks$)
+  const vdom$ = view(childrenSinks$)
 
   return {
     log: xs.empty(),

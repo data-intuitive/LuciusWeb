@@ -28,6 +28,7 @@ import {
   whereEq,
 } from "ramda"
 import dropRepeats from "xstream/extra/dropRepeats";
+import flattenConcurrently from 'xstream/extra/flattenConcurrently'
 
 const SampleSelectionFiltersLens = {
   // get: (state) => ({ ...state }),
@@ -79,12 +80,12 @@ function SingleSampleSelectionFilter(sources) {
         if (filterData?.length > 0) {
           const data = find( matcher )(filterData)
           // console.log("data: " + JSON.stringify(data))
-          use = data.use
+          use = data?.use
         }
 
-        if (use == false) {
-          console.log("not checked: " + serialize(key, unitInfo.unit, value))
-        }
+        // if (use == false) {
+        //   console.log("not checked: " + serialize(key, unitInfo.unit, value))
+        // }
 
         return li(".selection",[
           label("", { props: { id: "." + key } }, [
@@ -102,10 +103,22 @@ function SingleSampleSelectionFilter(sources) {
         ])
       })
 
-        return div(".sampleSelectionFilter-" + key, { style: { borderStyle: "solid"} }, [
-            span(key + ' - ' + unitInfo.unit),
-            ul(list)
-        ])
+      return div(".sampleSelectionFilter-" + key + "-checkboxes", { style: { borderStyle: "solid"} }, [
+          span(key + ' - ' + unitInfo.unit),
+          ul(list)
+      ])
+    }
+
+    const sliderElements = (key, unitInfo, filterData) => {
+      // console.log("slider unitInfo: " + JSON.stringify(unitInfo))
+
+      const sliderDiv = div(".sampleSelectionFilter-" + key + "-sliders", { style: { borderStyle: "solid"} }, [
+        span(key + '  - ', unitInfo.unit),
+        span(" slider"),
+        div(".sampleSelectionFilterSlider", { props: { id: serialize(key, unitInfo.unit, '-slider-')}})
+      ])
+
+      return unitInfo.hasRange ? sliderDiv : div()
     }
 
     const createFilter = (key, info, filterData) =>
@@ -119,11 +132,37 @@ function SingleSampleSelectionFilter(sources) {
           div([
             span("values:"),
             //div(info.values.map((_) => span(JSON.stringify(_)))),
-            div(info.values.map((_) => valueElements(key, _, filterData)))
+            div(info.values.map((_) => valueElements(key, _, filterData))),
+            div(info.values.map((_) => sliderElements(key, _, filterData))),
           ]),
         ]),
       ])
 
+    const createSliderDriverObject = (unitInfo) => ({
+      id: serialize(key, unitInfo.unit, '-slider-'),
+      object: {
+        start: [unitInfo.minValue, unitInfo.maxValue],
+        connect: true,
+        step: 1,
+        orientation: 'horizontal', // 'horizontal' or 'vertical'
+        range: {
+          'min': unitInfo.minValue,
+          'max': unitInfo.maxValue
+        },
+        // format: wNumb({
+        //   decimals: 0
+        // })
+       }
+     })
+
+    const sliderDriver$ = thisFilterInfo$
+      .map((info) => xs.fromArray(info.values))
+      .compose(flattenConcurrently)
+      .filter((unitInfo) => unitInfo.hasRange)
+      .map((unitInfo) => createSliderDriverObject(unitInfo))
+      .debug("sliderDriver$")
+      // .addListener({ })
+    
     const vdom$ = xs
       .combine(
         thisFilterInfo$,
@@ -133,6 +172,7 @@ function SingleSampleSelectionFilter(sources) {
 
     return {
         DOM: vdom$,
+        sliderDriver: sliderDriver$,
     }
 }
 
@@ -179,7 +219,7 @@ const composeFilterInfo = (data) => {
     }
   }
 
-  const dataKeys = keys(data[0])
+  const dataKeys = keys(data[0]).filter((v) => v != 'use')
 
   const mappedDataArr = dataKeys.map((dataKey) => {
     if (includes(dataKey + "_unit", dataKeys)) {

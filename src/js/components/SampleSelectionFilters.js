@@ -29,6 +29,7 @@ import {
 } from "ramda"
 import dropRepeats from "xstream/extra/dropRepeats";
 import flattenConcurrently from 'xstream/extra/flattenConcurrently'
+import delay from "xstream/extra/delay"
 
 const SampleSelectionFiltersLens = {
   // get: (state) => ({ ...state }),
@@ -64,12 +65,10 @@ const deserialize = (str) => {
   return arr
 }
 
-function SingleSampleSelectionFilter(sources) {
+function SingleSampleSelectionFilter(key, filterInfo$, filterData$) {
 
-    const key = sources.key
-
-    const thisFilterInfo$ = sources.filterInfo$.map((info) => info[key])
-    const thisFilterData$ = sources.filterData$.map((data) => data[key])
+    const thisFilterInfo$ = filterInfo$.map((info) => info[key])
+    const thisFilterData$ = filterData$.map((data) => data[key])
    
     const valueElements = (key, unitInfo, filterData) => {
 
@@ -137,8 +136,15 @@ function SingleSampleSelectionFilter(sources) {
           ]),
         ]),
       ])
+    
+    const vdom$ = xs
+      .combine(
+        thisFilterInfo$,
+        thisFilterData$,
+      )
+      .map(([info, filterData]) => createFilter(key, info, filterData))
 
-    const createSliderDriverObject = (unitInfo) => ({
+    const createSliderDriverObject = (key, unitInfo) => ({
       id: serialize(key, unitInfo.unit, '-slider-'),
       object: {
         start: [unitInfo.minValue, unitInfo.maxValue],
@@ -152,27 +158,18 @@ function SingleSampleSelectionFilter(sources) {
         // format: wNumb({
         //   decimals: 0
         // })
-       }
-     })
+      }
+    })
 
-    const sliderDriver$ = thisFilterInfo$
+    const slider$ = thisFilterInfo$
       .map((info) => xs.fromArray(info.values))
       .compose(flattenConcurrently)
       .filter((unitInfo) => unitInfo.hasRange)
-      .map((unitInfo) => createSliderDriverObject(unitInfo))
-      .debug("sliderDriver$")
-      // .addListener({ })
-    
-    const vdom$ = xs
-      .combine(
-        thisFilterInfo$,
-        thisFilterData$,
-      )
-      .map(([info, filterData]) => createFilter(key, info, filterData))
+      .map((unitInfo) => createSliderDriverObject(key, unitInfo))
 
     return {
         DOM: vdom$,
-        sliderDriver: sliderDriver$,
+        slider: slider$,
     }
 }
 
@@ -319,9 +316,9 @@ function model(state$, useClick$) {
     const toggleUse = (v) => ({ ...v, use: !v.use })
 
 
-    console.log("prevFilterData: ")
-    console.log(prevFilterData)
-    console.log("key: " + key + " unit: " + unit + " value: " + value)
+    // console.log("prevFilterData: ")
+    // console.log(prevFilterData)
+    // console.log("key: " + key + " unit: " + unit + " value: " + value)
 
     const currentFilterDataKey = viewR(keyLens, prevFilterData)
     const index = findIndex( matcher )(currentFilterDataKey)
@@ -397,23 +394,22 @@ function SampleSelectionFilters(sources) {
   const intent_ = intent(sources.DOM)
   const model_ = model(state$, intent_.useValueClick$)
 
-  const childrenSinks$ = model_.filterInfo$.map(filterInfo => {
-    const keys_ = keys(filterInfo)
-    return keys_.map((key) => SingleSampleSelectionFilter({
-        ...sources,
-        key: key,
-        filterInfo$: model_.filterInfo$,
-        filterData$: model_.filterData$,
-        }))
-  })
-  .remember()
+  const childrenSinks$ = model_.filterInfo$
+    .map((filterInfo) => 
+      keys(filterInfo).map((key) => 
+        SingleSampleSelectionFilter(key, model_.filterInfo$, model_.filterData$)))
+    .debug("childrenSinks$")
+    .remember()
 
   const vdom$ = view(childrenSinks$)
+  
+  const sliderDriver$ = childrenSinks$.compose(pick('slider')).compose(mix(xs.merge))
 
   return {
     log: xs.empty(),
     DOM: vdom$,
     onion: model_.onion,
+    slider: sliderDriver$.compose(delay(10))
   }
 }
 

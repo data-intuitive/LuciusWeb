@@ -644,6 +644,7 @@ function SampleSelection(sources) {
     ),
     output: sampleSelection$,
     modal: treatmentAnnotations.modal,
+    slider: sampleFilters.slider,
   }
 }
 

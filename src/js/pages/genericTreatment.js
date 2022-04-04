@@ -344,5 +344,6 @@ export default function GenericTreatmentWorkflow(sources) {
     ac: TreatmentFormSink.ac,
     fab: exporter.fab,
     clipboard: exporter.clipboard,
+    slider: TreatmentFormSink.slider,
   }
 }

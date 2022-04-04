@@ -69,7 +69,7 @@ const createFilterCheck = (filterKey) => (criterion) => {
     const maxCheck = criterion.max == undefined 
       ? () => true
       : (value) => value[filterKey] <= criterion.max
-    const unitCheck = criterion.unit == undefined 
+    const unitCheck = criterion.unit == undefined  || criterion.unit == ''
       ? () => true
       : (value) => value[filterKey + "_unit"] == criterion.unit
 
@@ -79,7 +79,7 @@ const createFilterCheck = (filterKey) => (criterion) => {
     const valueCheck = criterion.value == undefined
       ? () => true
       : (value) => value[filterKey] == criterion.value
-    const unitCheck = criterion.unit == undefined 
+    const unitCheck = criterion.unit == undefined || criterion.unit == ''
       ? () => true
       : (value) => value[filterKey + "_unit"] == criterion.unit
     
@@ -284,7 +284,7 @@ function SampleSelection(sources) {
   const sampleFilters = isolate(SampleSelectionFilters, { onion: SampleSelectionFiltersLens })(sources)
 
   // Helper function for rendering the table, based on the state
-  const makeTable = (state, annotation, initialization) => {
+  const makeTable = (state, annotation, initialization, filtersObject) => {
     const data = state.core.data
     const blurStyle = state.settings.common.blur
       ? {
@@ -294,7 +294,7 @@ function SampleSelection(sources) {
     const selectedClass = (selected) =>
       selected ? ".sampleSelected" : ".sampleDeselected"
     
-    const filteredData = filterData(data, undefined)
+    const filteredData = filterData(data, filtersObject)
     const sortedData = sortData(filteredData, state.core.sort, state.core.direction)
 
     let rows = sortedData.map((entry) => [
@@ -419,18 +419,18 @@ function SampleSelection(sources) {
     ])
   }
 
-  const makeFiltersAndTable = (state, annotation, initialization, filtersDom) => {
+  const makeFiltersAndTable = (state, annotation, initialization, filtersDom, filtersObject) => {
     return div([
       filtersDom,
-      makeTable(state, annotation, initialization)
+      makeTable(state, annotation, initialization, filtersObject)
     ])
   }
 
   const initVdom$ = emptyState$.mapTo(div())
 
   const loadingVdom$ = request$
-    .compose(sampleCombine(loadingState$, sampleFilters.DOM))
-    .map(([_, state, filtersDom]) =>
+    .compose(sampleCombine(loadingState$, sampleFilters.DOM, sampleFilters.output))
+    .map(([_, state, filtersDom, filtersObject]) =>
       // Use the same makeTable function, pass a initialization=true parameter and a body DOM with preloading
       makeFiltersAndTable(
         state,
@@ -442,15 +442,16 @@ function SampleSelection(sources) {
           ),
         ]),
         true,
-        filtersDom
+        filtersDom,
+        filtersObject
       )
     )
     .remember()
 
   const loadedVdom$ = xs
-    .combine(modifiedState$, treatmentAnnotations.DOM, sampleFilters.DOM)
-    .filter(([state, _1, _2]) => state.core.busy == false)
-    .map(([state, annotation, filtersDom]) => makeFiltersAndTable(state, annotation, false, filtersDom))
+    .combine(modifiedState$, treatmentAnnotations.DOM, sampleFilters.DOM, sampleFilters.output)
+    .filter(([state, _1, _2, _3]) => state.core.busy == false)
+    .map(([state, annotation, filtersDom, filtersObject]) => makeFiltersAndTable(state, annotation, false, filtersDom, filtersObject))
 
   // Wrap component vdom with an extra div that handles being dirty
   const vdom$ = dirtyWrapperStream( state$, xs.merge(initVdom$, loadingVdom$, loadedVdom$))

@@ -404,12 +404,18 @@ function SampleSelectionFilters(sources) {
   const vdom$ = view(childrenSinks$)
   
   const sliderDriver$ = childrenSinks$.compose(pick('slider')).compose(mix(xs.merge))
+  
+  const filterOutput$ = model_.filterData$
+    .map((dataObject) => toPairs(dataObject))
+    .map((arr) => arr.map(([key, values]) => [ key, filter( (v) => (v?.type != 'value') || v?.use , values) ])) // don't use 'type' == 'value' when 'use' is false
+    .map((dataPairs) => fromPairs(dataPairs))
 
   return {
     log: xs.empty(),
     DOM: vdom$,
     onion: model_.onion,
-    slider: sliderDriver$.compose(delay(10))
+    slider: sliderDriver$.compose(delay(10)),
+    output: filterOutput$,
   }
 }
 

@@ -78,13 +78,8 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$) {
         const matcher = whereEq({ type: 'value', unit: unitInfo.unit, value: value })
         if (filterData?.length > 0) {
           const data = find( matcher )(filterData)
-          // console.log("data: " + JSON.stringify(data))
           use = data?.use
         }
-
-        // if (use == false) {
-        //   console.log("not checked: " + serialize(key, unitInfo.unit, value))
-        // }
 
         return li(".selection",[
           label("", { props: { id: "." + key } }, [
@@ -271,7 +266,6 @@ const composeFilterInfo = (data) => {
   // go from array of objects { 'key': {...} } to single object { 'key1': {...}, 'key2': {...} }
   const reducer = (acc, value) => ({ ...acc, ...value })
   const result = reduce(reducer, {}, mappedDataArr)
-  // console.log("result: " + JSON.stringify(result))
   return result
 }
 
@@ -381,7 +375,6 @@ function model(state$, useClick$, sliderEvents$) {
   })
 
   const sliderFilterDataReducer$ = sliderEvents$.map((ev) => (prevState) => {
-    console.log("sliderFilterDataReducer$ ev", ev)
     const [key, unit, _] = deserialize(ev.id)
     const filterData = updateSliderFilterData(key, unit, ev.value, ev.handle, prevState.core.filterData)
     return {

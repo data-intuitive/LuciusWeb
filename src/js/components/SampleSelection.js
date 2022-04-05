@@ -65,10 +65,10 @@ const createFilterCheck = (filterKey) => (criterion) => {
   if (criterion.type == 'range') {
     const minCheck = criterion.min == undefined 
       ? () => true
-      : (value) => value[filterKey] >= criterion.min
+      : (value) => Number(value[filterKey]) >= Number(criterion.min)
     const maxCheck = criterion.max == undefined 
       ? () => true
-      : (value) => value[filterKey] <= criterion.max
+      : (value) => Number(value[filterKey]) <= Number(criterion.max)
     const unitCheck = criterion.unit == undefined  || criterion.unit == ''
       ? () => true
       : (value) => value[filterKey + "_unit"] == criterion.unit

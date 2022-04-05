@@ -149,23 +149,54 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$) {
       object: {
         start: [unitInfo.minValue, unitInfo.maxValue],
         connect: true,
-        step: 1,
-        orientation: 'horizontal', // 'horizontal' or 'vertical'
+        orientation: 'horizontal',
         range: {
           'min': unitInfo.minValue,
           'max': unitInfo.maxValue
         },
-        // format: wNumb({
-        //   decimals: 0
-        // })
       }
     })
+
+    const createSliderDriverObjectStepped = (key, unitInfo) => {
+
+      const rescale = (v) => {
+        if (v == unitInfo.minValue)
+          return 'min'
+        else if (v == unitInfo.maxValue)
+          return 'max'
+        
+        const scaled = (Number(v) - Number(unitInfo.minValue)) / (Number(unitInfo.maxValue) - Number(unitInfo.minValue)) * 100
+        return scaled.toFixed(0).toString() + "%"
+      }
+
+      const rangeValues = keys(unitInfo.values)
+      const scaledPairs = rangeValues.map((v) => [rescale(v), Number(v)])
+      const scaledRange = fromPairs(scaledPairs)
+      const pipValues = keys(unitInfo.values).map((v) => Number(v))
+
+      return {
+        id: serialize(key, unitInfo.unit, '-slider-'),
+        object: {
+          start: [unitInfo.minValue, unitInfo.maxValue],
+          snap: true,
+          connect: true,
+          orientation: 'horizontal',
+          range: scaledRange,
+          pips: {
+            mode: 'values',
+            values: pipValues,
+            density: 4,
+            stepped: true
+          }
+        }
+      }
+    }
 
     const slider$ = thisFilterInfo$
       .map((info) => xs.fromArray(info.values))
       .compose(flattenConcurrently)
       .filter((unitInfo) => unitInfo.hasRange)
-      .map((unitInfo) => createSliderDriverObject(key, unitInfo))
+      .map((unitInfo) => createSliderDriverObjectStepped(key, unitInfo))
 
     return {
         DOM: vdom$,
@@ -209,7 +240,7 @@ const composeFilterInfo = (data) => {
     return {
       unit: unit,
       values: counts,
-      hasRange: isAllNumbers,
+      hasRange: isAllNumbers && length(keys(counts)) >= 3,
       minValue: minValue,
       maxValue: maxValue,
       amount: length(arr),

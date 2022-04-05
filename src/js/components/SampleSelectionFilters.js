@@ -109,12 +109,17 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$) {
     }
 
     const sliderElements = (key, unitInfo, filterData) => {
-      // console.log("slider unitInfo: " + JSON.stringify(unitInfo))
-
+      const sliderData = filter((f) => f?.type == 'range' && f?.unit == unitInfo.unit, filterData ?? [])
+      const sanitizedSliderData = length(sliderData) > 0 ? sliderData[0] : { }
+      
       const sliderDiv = div(".sampleSelectionFilter-" + key + "-sliders", { style: { borderStyle: "solid"} }, [
         span(key + '  - ', unitInfo.unit),
         span(" slider"),
-        div(".sampleSelectionFilterSlider", { props: { id: serialize(key, unitInfo.unit, '-slider-')}})
+        div(".sampleSelectionFilterSlider", { props: { id: serialize(key, unitInfo.unit, '-slider-')}}),
+        div([
+          div([span("min: "), span(sanitizedSliderData.min)]),
+          div([span("max: "), span(sanitizedSliderData.max)]),
+        ])
       ])
 
       return unitInfo.hasRange ? sliderDiv : div()
@@ -283,7 +288,7 @@ function intent(domSource$) {
   }
 }
 
-function model(state$, useClick$) {
+function model(state$, useClick$, sliderEvents$) {
   const filterInfo$ = state$
     .map((state) => composeFilterInfo(state.core.data))
     .compose(dropRepeats(equals))
@@ -301,7 +306,8 @@ function model(state$, useClick$) {
 
     const filterDataPairs = toPairs(filterInfo).map(([key, value]) => {
       const nestedValues = value.values.map((valuesPerUnit) => keys(valuesPerUnit.values).map((v) => ({ type: 'value', value: v, unit: valuesPerUnit.unit, use: true })))
-      const flattenedValues = flatten(nestedValues)
+      const nestedRange = value.values.map((valuesPerUnit) => valuesPerUnit.hasRange ? [{ type: 'range', min: valuesPerUnit.minValue, max: value.maxValue, unit: valuesPerUnit.unit }] : [])
+      const flattenedValues = flatten(nestedValues.concat(nestedRange)) // tag on nestedRange, either empty array or array with single object
 
       return [key, flattenedValues]
     })
@@ -315,19 +321,31 @@ function model(state$, useClick$) {
     const matcher = whereEq({ type: 'value', unit: unit, value: value })
     const toggleUse = (v) => ({ ...v, use: !v.use })
 
+    const currentFilterDataKey = viewR(keyLens, prevFilterData)
+    const index = findIndex( matcher )(currentFilterDataKey)
+    
+    // if value not found, return unchanged state
+    if (index < 0)
+      return prevFilterData
 
-    // console.log("prevFilterData: ")
-    // console.log(prevFilterData)
-    // console.log("key: " + key + " unit: " + unit + " value: " + value)
+    const currentFilterDataOnlyKeyUpdatedValue = adjust(index, toggleUse, currentFilterDataKey )
+    const updatedFilterData = set(keyLens, currentFilterDataOnlyKeyUpdatedValue, prevFilterData)
+    return updatedFilterData
+  }
+
+  const updateSliderFilterData = (key, unit, sliderValue, sliderHandle, prevFilterData) => {
+    const keyLens = lensProp(key)
+    const matcher = whereEq({ type: 'range', unit: unit })
+    const changeRanges = (v) => ({ ...v, min: sliderValue[0], max: sliderValue[1] })
 
     const currentFilterDataKey = viewR(keyLens, prevFilterData)
     const index = findIndex( matcher )(currentFilterDataKey)
     
     // if value not found, return unchanged state
     if (index < 0)
-      return prevState
+      return prevFilterData
 
-    const currentFilterDataOnlyKeyUpdatedValue = adjust(index, toggleUse, currentFilterDataKey )
+    const currentFilterDataOnlyKeyUpdatedValue = adjust(index, changeRanges, currentFilterDataKey )
     const updatedFilterData = set(keyLens, currentFilterDataOnlyKeyUpdatedValue, prevFilterData)
     return updatedFilterData
   }
@@ -354,12 +372,26 @@ function model(state$, useClick$) {
     const [key, unit, value] = deserialize(id)
     const filterData = updateFilterData(key, unit, value, prevState.core.filterData)
     return {
-    ...prevState,
-    core: {
-      filterInfo: prevState.core.filterInfo,
-      filterData: filterData,
+      ...prevState,
+      core: {
+        filterInfo: prevState.core.filterInfo,
+        filterData: filterData,
+      }
     }
-  }})
+  })
+
+  const sliderFilterDataReducer$ = sliderEvents$.map((ev) => (prevState) => {
+    console.log("sliderFilterDataReducer$ ev", ev)
+    const [key, unit, _] = deserialize(ev.id)
+    const filterData = updateSliderFilterData(key, unit, ev.value, ev.handle, prevState.core.filterData)
+    return {
+      ...prevState,
+      core: {
+        filterInfo: prevState.core.filterInfo,
+        filterData: filterData,
+      }
+    }
+  })
 
   return {
     filterInfo$: filterInfo$,
@@ -369,6 +401,7 @@ function model(state$, useClick$) {
       filterInfoReducer$,
       initFilterDataReducer$,
       filterDataReducer$,
+      sliderFilterDataReducer$,
       ),
   }
 }
@@ -389,16 +422,16 @@ function view(childrenSinks$) {
 }
 
 function SampleSelectionFilters(sources) {
-  const state$ = sources.onion.state$//.debug("SampleSelectionFilters-state$")
+  const state$ = sources.onion.state$
+  const sliderEvents$ = sources.slider
 
   const intent_ = intent(sources.DOM)
-  const model_ = model(state$, intent_.useValueClick$)
+  const model_ = model(state$, intent_.useValueClick$, sliderEvents$)
 
   const childrenSinks$ = model_.filterInfo$
     .map((filterInfo) => 
       keys(filterInfo).map((key) => 
         SingleSampleSelectionFilter(key, model_.filterInfo$, model_.filterData$)))
-    .debug("childrenSinks$")
     .remember()
 
   const vdom$ = view(childrenSinks$)

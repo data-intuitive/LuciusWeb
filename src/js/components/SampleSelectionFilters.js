@@ -466,12 +466,34 @@ function model(state$, useClick$, sliderEvents$) {
     return (rangeValue.min != thisFilterInfo.min) || (rangeValue.max != thisFilterInfo.max)
   }
 
+  // per key & unit, either output all values if one or more value was deselected, or pass no values at all when all are still selected
+  // however, still always pass range data
+  const filterUnitsWithAllValuesSelected = (keyValuePairs, info) => {
+    function filterData(data, info) {
+      if (info == undefined)
+        return data
+      // array of values per unit
+      const filteredUnitData = info.values.map((unitInfo) => {
+        const unitData = filter((v) => v.unit == unitInfo.unit, data) // get data from only matching unit, still contains both 'value' and 'range' types
+        const unitValues = filter((v) => v.type == 'value', unitData).map((v) => v.value) // only keep 'value' type and map to only value type so we have a flat list of values
+        const unitInfoValues = keys(unitInfo.values) // get flat list of values from unitInfo
+        const noChangeFound = equals(unitValues, unitInfoValues)
+        return noChangeFound ? unitData.filter((v) => v.type == 'range') : unitData
+      })
+      return flatten(filteredUnitData)
+    }
+    const filteredData = keyValuePairs.map(([key, value]) => [ key, filterData(value, info[key]) ])
+    return filteredData
+  }
+
   const filterOutput$ = xs
-    .combine(filterData$,filterInfo$)
-    .map(([dataObject, info]) => [toPairs(dataObject), info])
+    .combine(filterData$, filterInfo$)
+    .map(([dataObject, info]) => [toPairs(dataObject), info]) // split object to an array of key/value pairs
     .map(([arr, info]) => [arr.map(([key, values]) => [ key, filter( (v) => (v?.type != 'value') || v?.use , values) ]), info]) // don't use 'type' == 'value' when 'use' is false
     .map(([arr, info]) => [arr.map(([key, values]) => [ key, filter( (v) => (v?.type != 'range') || filterRangeChanged(v, key, info) , values) ]), info]) // don't use 'type' == 'range' when min & max are same as in FilterInfo
-    .map(([dataPairs, info]) => fromPairs(dataPairs))
+    .map(([arr, info]) => [filterUnitsWithAllValuesSelected(arr, info), info]) // remove all values in a unit group that have values selected
+    .map(([arr, info]) => [filter(([key, values]) => length(values) != 0, arr), info]) // remove a key if there is no more data left
+    .map(([dataPairs, info]) => fromPairs(dataPairs)) // rebuild to an object
 
   return {
     filterInfo$: filterInfo$,

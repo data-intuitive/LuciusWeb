@@ -284,7 +284,7 @@ function SampleSelection(sources) {
   const sampleFilters = isolate(SampleSelectionFilters, { onion: SampleSelectionFiltersLens })(sources)
 
   // Helper function for rendering the table, based on the state
-  const makeTable = (state, annotation, initialization, filtersObject) => {
+  const makeTable = (state, annotation, initialization) => {
     const data = state.core.data
     const blurStyle = state.settings.common.blur
       ? {
@@ -294,7 +294,7 @@ function SampleSelection(sources) {
     const selectedClass = (selected) =>
       selected ? ".sampleSelected" : ".sampleDeselected"
     
-    const filteredData = filterData(data, filtersObject)
+    const filteredData = filterData(data, state.core.filtersObject)
     const sortedData = sortData(filteredData, state.core.sort, state.core.direction)
 
     let rows = sortedData.map((entry) => [
@@ -429,8 +429,8 @@ function SampleSelection(sources) {
   const initVdom$ = emptyState$.mapTo(div())
 
   const loadingVdom$ = request$
-    .compose(sampleCombine(loadingState$, sampleFilters.DOM, sampleFilters.output))
-    .map(([_, state, filtersDom, filtersObject]) =>
+    .compose(sampleCombine(loadingState$, sampleFilters.DOM))
+    .map(([_, state, filtersDom]) =>
       // Use the same makeTable function, pass a initialization=true parameter and a body DOM with preloading
       makeFiltersAndTable(
         state,
@@ -442,16 +442,15 @@ function SampleSelection(sources) {
           ),
         ]),
         true,
-        filtersDom,
-        filtersObject
+        filtersDom
       )
     )
     .remember()
 
   const loadedVdom$ = xs
-    .combine(modifiedState$, treatmentAnnotations.DOM, sampleFilters.DOM, sampleFilters.output)
-    .filter(([state, _1, _2, _3]) => state.core.busy == false)
-    .map(([state, annotation, filtersDom, filtersObject]) => makeFiltersAndTable(state, annotation, false, filtersDom, filtersObject))
+    .combine(modifiedState$, treatmentAnnotations.DOM, sampleFilters.DOM)
+    .filter(([state, _1, _2]) => state.core.busy == false)
+    .map(([state, annotation, filtersDom]) => makeFiltersAndTable(state, annotation, false, filtersDom))
 
   // Wrap component vdom with an extra div that handles being dirty
   const vdom$ = dirtyWrapperStream( state$, xs.merge(initVdom$, loadingVdom$, loadedVdom$))
@@ -463,10 +462,21 @@ function SampleSelection(sources) {
       core: {
         ...prevState.core,
         data: newData,
-        output: newData.filter((x) => x.use).map((x) => x.id),
+        output: filterData(newData, prevState.core.filtersObject).filter((x) => x.use).map((x) => x.id),
       },
     }
   })
+
+  const filtersObjectReducer$ = sampleFilters.output
+    .compose(dropRepeats(equals))
+    .map((filtersObject) => (prevState) => ({
+      ...prevState,
+      core: {
+        ...prevState.core,
+        filtersObject: filtersObject,
+        output: filterData(prevState.core.data, filtersObject).filter((x) => x.use).map((x) => x.id),
+      }
+    }))
 
   const useClick$ = sources.DOM.select(".selection")
     .events("click", { preventDefault: true })
@@ -521,7 +531,7 @@ function SampleSelection(sources) {
           core: {
             ...prevState.core,
             data: newData,
-            output: newData.filter((x) => x.use).map((x) => x.id),
+            output: filterData(newData, prevState.core.filtersObject).filter((x) => x.use).map((x) => x.id),
           },
         }
       } else {
@@ -536,7 +546,7 @@ function SampleSelection(sources) {
           core: {
             ...prevState.core,
             data: newData,
-            output: newData.filter((x) => x.use).map((x) => x.id),
+            output: filterData(newData, prevState.core.filtersObject).filter((x) => x.use).map((x) => x.id),
           },
         }
       }
@@ -565,7 +575,7 @@ function SampleSelection(sources) {
           core: {
             ...prevState.core,
             data: newData,
-            output: newData.filter((x) => x.use).map((x) => x.id),
+            output: filterData(newData, prevState.core.filtersObject).filter((x) => x.use).map((x) => x.id),
           },
         }
       })
@@ -577,7 +587,7 @@ function SampleSelection(sources) {
 
   const defaultReducer$ = xs.of((prevState) => ({
     ...prevState,
-    core: { input: "", data: [] },
+    core: { input: "", data: [], filtersObject: {} },
   }))
   const inputReducer$ = input$.map((i) => (prevState) => ({
     ...prevState,
@@ -635,6 +645,7 @@ function SampleSelection(sources) {
       inputReducer$,
       requestReducer$,
       dataReducer$,
+      filtersObjectReducer$,
       selectReducer$,
       autoSelectReducer$,
       busyReducer$,

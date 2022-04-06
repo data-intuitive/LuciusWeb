@@ -81,11 +81,11 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$) {
           use = data?.use
         }
 
-        return li(".selection",[
-          label("", { props: { id: "." + key } }, [
+        return li(".selection-list", { props: { id: serialize(key, unitInfo.unit, value) }}, [
+          label("", [
               input(
-                  ".grey .selection-cb",
-                  { props: { type: "checkbox", checked: use, id: serialize(key, unitInfo.unit, value) } },
+                  ".selection-cb",
+                  { props: { type: "checkbox", checked: use } },
                   "tt"
               ),
               span(value),
@@ -338,9 +338,8 @@ const composeFilterInfo = (data) => {
 
 function intent(domSource$) {
 
-  const useValueClick$ = domSource$.select(".selection-cb")
+  const useValueClick$ = domSource$.select(".selection-list")
   .events("click", { preventDefault: true })
-  // .events("click")
   .map((ev) => ev.ownerTarget.id)
 
   return {

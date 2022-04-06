@@ -166,11 +166,46 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$) {
           return 'max'
         
         const scaled = (Number(v) - Number(unitInfo.minValue)) / (Number(unitInfo.maxValue) - Number(unitInfo.minValue)) * 100
-        return scaled.toFixed(0).toString() + "%"
+        return scaled.toString() + "%"
       }
 
       const rangeValues = keys(unitInfo.values)
       const scaledPairs = rangeValues.map((v) => [rescale(v), Number(v)])
+      const scaledRange = fromPairs(scaledPairs)
+      const pipValues = keys(unitInfo.values).map((v) => Number(v))
+
+      return {
+        id: serialize(key, unitInfo.unit, '-slider-'),
+        object: {
+          start: [unitInfo.minValue, unitInfo.maxValue],
+          snap: true,
+          connect: true,
+          orientation: 'horizontal',
+          range: scaledRange,
+          pips: {
+            mode: 'values',
+            values: pipValues,
+            density: 4,
+            stepped: true
+          }
+        }
+      }
+    }
+
+    const createSliderDriverObjectSteppedUniformSpaced = (key, unitInfo) => {
+
+      const rescale = (v, index, total) => {
+        if (v == unitInfo.minValue)
+          return 'min'
+        else if (v == unitInfo.maxValue)
+          return 'max'
+        
+        const scaled = (index - 1) / (total - 1) * 100
+        return scaled.toString() + "%"
+      }
+
+      const rangeValues = keys(unitInfo.values)
+      const scaledPairs = rangeValues.map((v, i) => [rescale(v, i, length(rangeValues)), Number(v)])
       const scaledRange = fromPairs(scaledPairs)
       const pipValues = keys(unitInfo.values).map((v) => Number(v))
 

@@ -126,8 +126,8 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$) {
         div([
           div([span("hasUnits: "), span(info.hasUnits)]),
           div([span("hasRange: "), span(info.hasRange)]),
-          div([span("minValue: "), span(info.minValue)]),
-          div([span("maxValue: "), span(info.maxValue)]),
+          div([span("min: "), span(info.min)]),
+          div([span("max: "), span(info.max)]),
           div([
             span("values:"),
             //div(info.values.map((_) => span(JSON.stringify(_)))),
@@ -147,12 +147,12 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$) {
     const createSliderDriverObject = (key, unitInfo) => ({
       id: serialize(key, unitInfo.unit, '-slider-'),
       object: {
-        start: [unitInfo.minValue, unitInfo.maxValue],
+        start: [unitInfo.min, unitInfo.max],
         connect: true,
         orientation: 'horizontal',
         range: {
-          'min': unitInfo.minValue,
-          'max': unitInfo.maxValue
+          'min': unitInfo.min,
+          'max': unitInfo.max
         },
       }
     })
@@ -160,12 +160,12 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$) {
     const createSliderDriverObjectStepped = (key, unitInfo) => {
 
       const rescale = (v) => {
-        if (v == unitInfo.minValue)
+        if (v == unitInfo.min)
           return 'min'
-        else if (v == unitInfo.maxValue)
+        else if (v == unitInfo.max)
           return 'max'
         
-        const scaled = (Number(v) - Number(unitInfo.minValue)) / (Number(unitInfo.maxValue) - Number(unitInfo.minValue)) * 100
+        const scaled = (Number(v) - Number(unitInfo.min)) / (Number(unitInfo.max) - Number(unitInfo.min)) * 100
         return scaled.toString() + "%"
       }
 
@@ -177,7 +177,7 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$) {
       return {
         id: serialize(key, unitInfo.unit, '-slider-'),
         object: {
-          start: [unitInfo.minValue, unitInfo.maxValue],
+          start: [unitInfo.min, unitInfo.max],
           snap: true,
           connect: true,
           orientation: 'horizontal',
@@ -195,9 +195,9 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$) {
     const createSliderDriverObjectSteppedUniformSpaced = (key, unitInfo) => {
 
       const rescale = (v, index, total) => {
-        if (v == unitInfo.minValue)
+        if (v == unitInfo.min)
           return 'min'
-        else if (v == unitInfo.maxValue)
+        else if (v == unitInfo.max)
           return 'max'
         
         const scaled = (index - 1) / (total - 1) * 100
@@ -212,7 +212,7 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$) {
       return {
         id: serialize(key, unitInfo.unit, '-slider-'),
         object: {
-          start: [unitInfo.minValue, unitInfo.maxValue],
+          start: [unitInfo.min, unitInfo.max],
           snap: true,
           connect: true,
           orientation: 'horizontal',
@@ -245,20 +245,20 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$) {
 //   'field1': {
 //     hasUnits: false,
 //     hasRange: false,
-//     minValue: 0,
-//     maxValue: 0,
+//     min: 0,
+//     max: 0,
 //     values: [
-//       { unit: '', values: {'a': 3, 'b': 2, 'c': 2, 'd': 3}, hasRange: false, minValue: 0, maxValue: 0, amount: 10 },
+//       { unit: '', values: {'a': 3, 'b': 2, 'c': 2, 'd': 3}, hasRange: false, min: 0, max: 0, amount: 10 },
 //     ]
 //   },
 //   'field2': {
 //     hasUnits: true,
 //     hasRange: true, // only true if all units have 'hasRange' == true
-//     minValue: 0.001, // minimum of all values
-//     maxValue: 100,
+//     min: 0.001, // minimum of all values
+//     max: 100,
 //     values: [
-//       { unit: 'unit1', values: {0.001: 2, 0.01: 2, 0.1: 3, 1: 3}, hasRange: true, minValue: 0.001, maxValue: 1, amount: 10 },
-//       { unit: 'unit2', values: {10: 5, 100: 5}, hasRange: true, minValue: 10, maxValue: 100, amount: 10 },
+//       { unit: 'unit1', values: {0.001: 2, 0.01: 2, 0.1: 3, 1: 3}, hasRange: true, min: 0.001, max: 1, amount: 10 },
+//       { unit: 'unit2', values: {10: 5, 100: 5}, hasRange: true, min: 10, max: 100, amount: 10 },
 //     ]
 //   }
 // }
@@ -276,8 +276,8 @@ const composeFilterInfo = (data) => {
       unit: unit,
       values: counts,
       hasRange: isAllNumbers && length(keys(counts)) >= 3,
-      minValue: minValue,
-      maxValue: maxValue,
+      min: minValue,
+      max: maxValue,
       amount: length(arr),
     }
   }
@@ -298,18 +298,18 @@ const composeFilterInfo = (data) => {
 
       const allHasRange = all(prop("hasRange"), unitValuesArr)
       const allMinValue = allHasRange
-        ? apply(Math.min, unitValuesArr.map(prop("minValue")))
+        ? apply(Math.min, unitValuesArr.map(prop("min")))
         : 0
       const allMaxValue = allHasRange
-        ? apply(Math.max, unitValuesArr.map(prop("maxValue")))
+        ? apply(Math.max, unitValuesArr.map(prop("max")))
         : 0
 
       return {
         [dataKey]: {
           hasUnits: true,
           hasRange: allHasRange,
-          minValue: allMinValue,
-          maxValue: allMaxValue,
+          min: allMinValue,
+          max: allMaxValue,
           values: unitValuesArr,
         },
       }
@@ -321,8 +321,8 @@ const composeFilterInfo = (data) => {
         [dataKey]: {
           hasUnits: false,
           hasRange: values.hasRange,
-          minValue: values.minValue,
-          maxValue: values.maxValue,
+          min: values.min,
+          max: values.max,
           values: [values],
         },
       }
@@ -366,7 +366,7 @@ function model(state$, useClick$, sliderEvents$) {
 
     const filterDataPairs = toPairs(filterInfo).map(([key, value]) => {
       const nestedValues = value.values.map((valuesPerUnit) => keys(valuesPerUnit.values).map((v) => ({ type: 'value', value: v, unit: valuesPerUnit.unit, use: true })))
-      const nestedRange = value.values.map((valuesPerUnit) => valuesPerUnit.hasRange ? [{ type: 'range', min: valuesPerUnit.minValue, max: value.maxValue, unit: valuesPerUnit.unit }] : [])
+      const nestedRange = value.values.map((valuesPerUnit) => valuesPerUnit.hasRange ? [{ type: 'range', min: valuesPerUnit.min, max: value.max, unit: valuesPerUnit.unit }] : [])
       const flattenedValues = flatten(nestedValues.concat(nestedRange)) // tag on nestedRange, either empty array or array with single object
 
       return [key, flattenedValues]
@@ -452,9 +452,32 @@ function model(state$, useClick$, sliderEvents$) {
     }
   })
 
+  const filterRangeChanged = (rangeValue, key, filterInfo) => {
+    if (length(keys(filterInfo)) == 0)
+      return false
+
+    const thisFilterInfo = find((v) => v.unit == rangeValue.unit, filterInfo[key]?.values ?? [])
+    if (thisFilterInfo == undefined) {
+      console.warn("unexpected result of filtering range information")
+      console.log('rangeValue', rangeValue)
+      console.log('key', key)
+      console.log('filterInfo', filterInfo)
+      return false
+    }
+    return (rangeValue.min != thisFilterInfo.min) || (rangeValue.max != thisFilterInfo.max)
+  }
+
+  const filterOutput$ = xs
+    .combine(filterData$,filterInfo$)
+    .map(([dataObject, info]) => [toPairs(dataObject), info])
+    .map(([arr, info]) => [arr.map(([key, values]) => [ key, filter( (v) => (v?.type != 'value') || v?.use , values) ]), info]) // don't use 'type' == 'value' when 'use' is false
+    .map(([arr, info]) => [arr.map(([key, values]) => [ key, filter( (v) => (v?.type != 'range') || filterRangeChanged(v, key, info) , values) ]), info]) // don't use 'type' == 'range' when min & max are same as in FilterInfo
+    .map(([dataPairs, info]) => fromPairs(dataPairs))
+
   return {
     filterInfo$: filterInfo$,
     filterData$: filterData$,
+    filterOutput$: filterOutput$,
     onion: xs.merge(
       defaultReducer$,
       filterInfoReducer$,
@@ -496,18 +519,13 @@ function SampleSelectionFilters(sources) {
   const vdom$ = view(childrenSinks$)
   
   const sliderDriver$ = childrenSinks$.compose(pick('slider')).compose(mix(xs.merge))
-  
-  const filterOutput$ = model_.filterData$
-    .map((dataObject) => toPairs(dataObject))
-    .map((arr) => arr.map(([key, values]) => [ key, filter( (v) => (v?.type != 'value') || v?.use , values) ])) // don't use 'type' == 'value' when 'use' is false
-    .map((dataPairs) => fromPairs(dataPairs))
 
   return {
     log: xs.empty(),
     DOM: vdom$,
     onion: model_.onion,
     slider: sliderDriver$.compose(delay(10)),
-    output: filterOutput$,
+    output: model_.filterOutput$,
   }
 }
 

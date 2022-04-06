@@ -16,6 +16,11 @@ function makeSliderDriver() {
         in$.addListener({
             next: (slider) => {
                 var sliderElement = document.getElementById(slider.id)
+
+                if (sliderElement.noUiSlider != undefined) {
+                    sliderElement.noUiSlider.destroy()
+                }                
+
                 noUiSlider.create(sliderElement, slider.object)
                 sliderElement.noUiSlider.on('update', sliderCallback(slider.id))
             },

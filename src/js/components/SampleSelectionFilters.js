@@ -81,7 +81,7 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$) {
           use = data?.use
         }
 
-        return li(".selection-list", { props: { id: serialize(key, unitInfo.unit, value) }}, [
+        return div(".collection-item", { props: { id: serialize(key, unitInfo.unit, value) }}, [
           label("", [
               input(
                   ".selection-cb",
@@ -91,15 +91,15 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$) {
               span(value),
               span(" "),
               span("(" + amount + ")"),
-              span(" "),
-              span("use: " + use)
+              // span(" "),
+              // span("use: " + use)
               ]),
         ])
       })
 
-      return div(".sampleSelectionFilter-" + key + "-checkboxes", { style: { borderStyle: "solid"} }, [
-          span(key + ' - ' + unitInfo.unit),
-          ul(list)
+      return div(".sampleSelectionFilter-" + key + "-checkboxes", [
+          // unitInfo.unit != '' ? span(key + ' - ' + unitInfo.unit) : span(key),
+          div(".collection .selection", list)
       ])
     }
 
@@ -107,9 +107,10 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$) {
       const sliderData = filter((f) => f?.type == 'range' && f?.unit == unitInfo.unit, filterData ?? [])
       const sanitizedSliderData = length(sliderData) > 0 ? sliderData[0] : { }
       
-      const sliderDiv = div(".sampleSelectionFilter-" + key + "-sliders", { style: { borderStyle: "solid"} }, [
-        span(key + '  - ', unitInfo.unit),
-        span(" slider"),
+      const sliderDiv = div(".sampleSelectionFilter-" + key + "-sliders", [
+        // unitInfo.unit != '' ? span(key + '  - ' + unitInfo.unit) : span(key),
+        // span(" "),
+        // span("slider"),
         div(".sampleSelectionFilterSlider", { props: { id: serialize(key, unitInfo.unit, '-slider-')}}),
         div([
           div([span("min: "), span(sanitizedSliderData.min)]),
@@ -120,22 +121,27 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$) {
       return unitInfo.hasRange ? sliderDiv : div()
     }
 
-    const createFilter = (key, info, filterData) =>
-      p([
-        div(span(key)),
-        div([
-          div([span("hasUnits: "), span(info.hasUnits)]),
-          div([span("hasRange: "), span(info.hasRange)]),
-          div([span("min: "), span(info.min)]),
-          div([span("max: "), span(info.max)]),
-          div([
-            span("values:"),
-            //div(info.values.map((_) => span(JSON.stringify(_)))),
-            div(info.values.map((_) => valueElements(key, _, filterData))),
-            div(info.values.map((_) => sliderElements(key, _, filterData))),
-          ]),
-        ]),
-      ])
+    const createFilter = (key, info, filterData) => {
+
+      console.log("info", info)
+      const mappedInfo = flatten(info.values.map((unitInfo) => {
+        const unitValuePairs = toPairs(unitInfo.values)
+        const firstDataChunk = { ...unitInfo, values: fromPairs(unitValuePairs.filter((_, i) => i < unitValuePairs.length / 2)) }
+        const secondDataChunk = { ...unitInfo, values: fromPairs(unitValuePairs.filter((_, i) => i >= unitValuePairs.length / 2)) }
+        return [
+          div(".chip " + "." + key + ".col .s12", [span(key), span(" "), span(unitInfo.unit)]),
+          div(".col .s12", [
+            div(".col.l6.s12", valueElements(key, firstDataChunk, filterData)),
+            div(".col.l6.s12", valueElements(key, secondDataChunk, filterData)),
+            div(".col .s12", sliderElements(key, unitInfo, filterData)),
+          ])
+        ]}
+      ))
+
+      return div(".col .s12",
+        mappedInfo
+        )
+      }
     
     const vdom$ = xs
       .combine(
@@ -338,7 +344,7 @@ const composeFilterInfo = (data) => {
 
 function intent(domSource$) {
 
-  const useValueClick$ = domSource$.select(".selection-list")
+  const useValueClick$ = domSource$.select(".collection-item")
     .events("click", { preventDefault: true })
     .map((ev) => ({id: ev.ownerTarget.id, modifier: ev.altKey}))
 

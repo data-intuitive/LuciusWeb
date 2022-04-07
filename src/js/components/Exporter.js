@@ -437,17 +437,27 @@ function view(state$, dataPresent, exportData, config, clipboard) {
           // Workaround is done in '.paddingfix' in the scss.
           return div(".row", [
             span(".col .s6 .push-s1", text),
-            span(".btn .col .s1 .offset-s1 .waves-effect .waves-light " + clipboardId + " " + availableClipboardText + clipboardBtnResult, i(".material-icons", "content_copy")),
-            a(".btn .col .s1 .offset-s1 .waves-effect .waves-light .paddingfix " + availableDownloadText,
-              {
-                props: {
-                  href: fileData,
-                  download: fileName,
+            div(".col .s1 .offset-s1 .tooltip", [
+              span(".btn .waves-effect .waves-light " + clipboardId + " " + availableClipboardText + clipboardBtnResult, i(".material-icons", "content_copy")),
+              span(".tooltiptext", "Copy to clipboard")
+            ]),
+            div(".col .s1 .offset-s1 .tooltip", [
+              a(".btn .waves-effect .waves-light .paddingfix " + availableDownloadText,
+                {
+                  props: {
+                    href: fileData,
+                    download: fileName,
+                  },
                 },
-              },
-              i(".material-icons", "file_download"),
-            )
+                i(".material-icons", "file_download"),
+              ),
+              span(".tooltiptext", "Download as file")
+            ]),
           ])
+        }
+
+        function capitalizeFirstLetter(string) {
+          return string.charAt(0).toUpperCase() + string.slice(1);
         }
 
         return div([
@@ -457,16 +467,12 @@ function view(state$, dataPresent, exportData, config, clipboard) {
                 p(".col .s12", "Export to clipboard or file"),
                 //p(".col .s12", "" + clipboardResult.text),
               ]),
-              addExportDiv("url", "Create link to this page's state", ".export-clipboard-link", urlFile, "url.txt", true),
-              addExportDiv("signature", "Copy signature", ".export-clipboard-signature", signatureFile, "signature.txt", signaturePresent),
-              addExportDiv("plot", "Copy " + config.plotName + " plot", ".export-clipboard-plots", plotFile, "plot.png", plotsPresent, copyImagesPermission),
-              addExportDiv("headTable", "Copy top table", ".export-clipboard-headTable", headTableCsvFile, "table.tsv", headTablePresent),
-              addExportDiv("tailTable", "Copy bottom table", ".export-clipboard-tailTable", tailTableCsvFile, "table.tsv", tailTablePresent),
-              addExportDiv("mdReport", "Copy MarkDown report", ".export-clipboard-mdReport", mdReportFile, "report.md", mdReportPresent),
-              // div(".row", [
-              //   span(".col .s6 .push-s1", "Export report"),
-              //   span(".btn .col .s1 .offset-s3 .export-file-report .disabled", i(".material-icons", "file_download")),
-              // ]),
+              addExportDiv("url", "Url to this page's state", ".export-clipboard-link", urlFile, "url.txt", true),
+              addExportDiv("signature", "Signature", ".export-clipboard-signature", signatureFile, "signature.txt", signaturePresent),
+              addExportDiv("plot", capitalizeFirstLetter(config.plotName) + " plot", ".export-clipboard-plots", plotFile, "plot.png", plotsPresent, copyImagesPermission),
+              addExportDiv("headTable", "Top table", ".export-clipboard-headTable", headTableCsvFile, "table.tsv", headTablePresent),
+              addExportDiv("tailTable", "Bottom table", ".export-clipboard-tailTable", tailTableCsvFile, "table.tsv", tailTablePresent),
+              addExportDiv("mdReport", "Markdown report", ".export-clipboard-mdReport", mdReportFile, "report.md", mdReportPresent),
             ]),
             div(".modal-footer", [
               button(".export-close .col .s8 .push-s2 .btn", "Close"),

@@ -339,8 +339,8 @@ const composeFilterInfo = (data) => {
 function intent(domSource$) {
 
   const useValueClick$ = domSource$.select(".selection-list")
-  .events("click", { preventDefault: true })
-  .map((ev) => ev.ownerTarget.id)
+    .events("click", { preventDefault: true })
+    .map((ev) => ({id: ev.ownerTarget.id, modifier: ev.altKey}))
 
   return {
     useValueClick$: useValueClick$
@@ -375,19 +375,17 @@ function model(state$, useClick$, sliderEvents$) {
     return filterData
   })
 
-  const updateFilterData = (key, unit, value, prevFilterData) => {
+  const updateFilterData = (key, unit, value, modifier, prevFilterData) => {
     const keyLens = lensProp(key)
-    const matcher = whereEq({ type: 'value', unit: unit, value: value })
+    // if modifier key is pressed, toggle all data points that match this key & unit, otherwise toggle single data point matching key, unit and value
+    const matcher = modifier
+      ? whereEq({ type: 'value', unit: unit })
+      : whereEq({ type: 'value', unit: unit, value: value })
     const toggleUse = (v) => ({ ...v, use: !v.use })
+    const matchToggle = (v) => matcher(v) ? toggleUse(v) : v
 
     const currentFilterDataKey = viewR(keyLens, prevFilterData)
-    const index = findIndex( matcher )(currentFilterDataKey)
-    
-    // if value not found, return unchanged state
-    if (index < 0)
-      return prevFilterData
-
-    const currentFilterDataOnlyKeyUpdatedValue = adjust(index, toggleUse, currentFilterDataKey )
+    const currentFilterDataOnlyKeyUpdatedValue = currentFilterDataKey.map((data) => matchToggle(data))
     const updatedFilterData = set(keyLens, currentFilterDataOnlyKeyUpdatedValue, prevFilterData)
     return updatedFilterData
   }
@@ -427,9 +425,9 @@ function model(state$, useClick$, sliderEvents$) {
 
   const filterData$ = state$.map((state) => state.core.filterData)
 
-  const filterDataReducer$ = useClick$.map((id) => (prevState) => {
-    const [key, unit, value] = deserialize(id)
-    const filterData = updateFilterData(key, unit, value, prevState.core.filterData)
+  const filterDataReducer$ = useClick$.map((ev) => (prevState) => {
+    const [key, unit, value] = deserialize(ev.id)
+    const filterData = updateFilterData(key, unit, value, ev.modifier, prevState.core.filterData)
     return {
       ...prevState,
       core: {

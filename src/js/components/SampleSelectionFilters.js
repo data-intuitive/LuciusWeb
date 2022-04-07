@@ -394,15 +394,10 @@ function model(state$, useClick$, sliderEvents$) {
     const keyLens = lensProp(key)
     const matcher = whereEq({ type: 'range', unit: unit })
     const changeRanges = (v) => ({ ...v, min: sliderValue[0], max: sliderValue[1] })
+    const matchUpdate = (v) => matcher(v) ? changeRanges(v) : v
 
     const currentFilterDataKey = viewR(keyLens, prevFilterData)
-    const index = findIndex( matcher )(currentFilterDataKey)
-    
-    // if value not found, return unchanged state
-    if (index < 0)
-      return prevFilterData
-
-    const currentFilterDataOnlyKeyUpdatedValue = adjust(index, changeRanges, currentFilterDataKey )
+    const currentFilterDataOnlyKeyUpdatedValue = currentFilterDataKey.map((data) => matchUpdate(data))
     const updatedFilterData = set(keyLens, currentFilterDataOnlyKeyUpdatedValue, prevFilterData)
     return updatedFilterData
   }

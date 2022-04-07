@@ -152,6 +152,17 @@ export const filterData = (data, criteria) => {
 }
 
 /**
+ * update hide field to earmark the field as filtered
+ * @param {Array} data Data to filter
+ * @param {Object} criteria 
+ * @returns Array of data with the hide field updated
+ */
+const hideFilteredData = (data, criteria) => {
+  const filteredData = filterData(data, criteria)
+  return data.map((v) => ({ ...v, hide: !includes(v, filteredData) }) )
+}
+
+/**
  * Sorts an array of sample data by the specified property and direction
  * Dose and time are sorted numerically instead of alphabetically, otherwise 3 > 10
  * @param {Array} data Data to be sorted
@@ -285,7 +296,7 @@ function SampleSelection(sources) {
 
   // Helper function for rendering the table, based on the state
   const makeTable = (state, annotation, initialization) => {
-    const data = state.core.data
+    const data = state.core.usageData
     const blurStyle = state.settings.common.blur
       ? {
           style: { filter: "blur(" + state.settings.common.amountBlur + "px)" },
@@ -294,7 +305,7 @@ function SampleSelection(sources) {
     const selectedClass = (selected) =>
       selected ? ".sampleSelected" : ".sampleDeselected"
     
-    const filteredData = filterData(data, state.core.filtersObject)
+    const filteredData = filter((v) => !v.hide, data)
     const sortedData = sortData(filteredData, state.core.sort, state.core.direction)
 
     let rows = sortedData.map((entry) => [
@@ -456,27 +467,33 @@ function SampleSelection(sources) {
   const vdom$ = dirtyWrapperStream( state$, xs.merge(initVdom$, loadingVdom$, loadedVdom$))
 
   const dataReducer$ = data$.map((data) => (prevState) => {
-    const newData = data.map((el) => merge(el, { use: true }))
+    const newData = data.map((el) => merge(el, { use: true, hide: false }))
+    const hiddenData = hideFilteredData(newData, prevState.core.filtersObject)
     return {
       ...prevState,
       core: {
         ...prevState.core,
-        data: newData,
-        output: filterData(newData, prevState.core.filtersObject).filter((x) => x.use).map((x) => x.id),
+        data: data,
+        usageData: hiddenData,
+        output: hiddenData.filter((x) => x.use && !x.hide).map((x) => x.id),
       },
     }
   })
 
   const filtersObjectReducer$ = sampleFilters.output
     .compose(dropRepeats(equals))
-    .map((filtersObject) => (prevState) => ({
-      ...prevState,
-      core: {
-        ...prevState.core,
-        filtersObject: filtersObject,
-        output: filterData(prevState.core.data, filtersObject).filter((x) => x.use).map((x) => x.id),
+    .map((filtersObject) => (prevState) => {
+      const hiddenData = hideFilteredData(prevState.core.usageData, filtersObject)
+      return {
+        ...prevState,
+        core: {
+          ...prevState.core,
+          filtersObject: filtersObject,
+          usageData: hiddenData,
+          output: hiddenData.filter((x) => x.use && !x.hide).map((x) => x.id),
+        }
       }
-    }))
+    })
 
   const useClick$ = sources.DOM.select(".selection")
     .events("click", { preventDefault: true })
@@ -517,7 +534,7 @@ function SampleSelection(sources) {
     .map(([id, a]) => (prevState) => {
       // a = false is the usual behavior
       if (!a) {
-        const newData = prevState.core.data.map((el) => {
+        const newData = prevState.core.usageData.map((el) => {
           // One sample object
           var newEl = clone(el)
           const switchUse = id === el.id
@@ -530,12 +547,12 @@ function SampleSelection(sources) {
           ...prevState,
           core: {
             ...prevState.core,
-            data: newData,
-            output: filterData(newData, prevState.core.filtersObject).filter((x) => x.use).map((x) => x.id),
+            usageData: newData,
+            output: newData.filter((x) => x.use && !x.hide).map((x) => x.id),
           },
         }
       } else {
-        const newData = prevState.core.data.map((el) => {
+        const newData = prevState.core.usageData.map((el) => {
           // One sample object
           var newEl = clone(el)
           newEl.use = !el.use
@@ -545,8 +562,8 @@ function SampleSelection(sources) {
           ...prevState,
           core: {
             ...prevState.core,
-            data: newData,
-            output: filterData(newData, prevState.core.filtersObject).filter((x) => x.use).map((x) => x.id),
+            usageData: newData,
+            output: newData.filter((x) => x.use && !x.hide).map((x) => x.id),
           },
         }
       }
@@ -561,7 +578,7 @@ function SampleSelection(sources) {
       .map((_) => (prevState) => {
         const samplesToUse = prevState.search.split(",")
 
-        const newData = prevState.core.data.map((el) => {
+        const newData = prevState.core.usageData.map((el) => {
           // One sample object
           var newEl = clone(el)
           const use = samplesToUse.includes(el.id)//id === el.id
@@ -574,8 +591,8 @@ function SampleSelection(sources) {
           ...prevState,
           core: {
             ...prevState.core,
-            data: newData,
-            output: filterData(newData, prevState.core.filtersObject).filter((x) => x.use).map((x) => x.id),
+            usageData: newData,
+            output: newData.filter((x) => x.use && !x.hide).map((x) => x.id),
           },
         }
       })
@@ -587,7 +604,7 @@ function SampleSelection(sources) {
 
   const defaultReducer$ = xs.of((prevState) => ({
     ...prevState,
-    core: { input: "", data: [], filtersObject: {} },
+    core: { input: "", data: [], usageData: [], filtersObject: {} },
   }))
   const inputReducer$ = input$.map((i) => (prevState) => ({
     ...prevState,

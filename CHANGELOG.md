@@ -12,6 +12,7 @@
 
 - Filter functionality made dynamic so that new filter groups can be added as needed
 - Improve sturdiness against invalid input
+- Filter a-link references on 'do-not-route' before sending to the router
 
 ### Deployment changes
 

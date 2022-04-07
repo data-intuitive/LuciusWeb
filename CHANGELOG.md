@@ -4,7 +4,9 @@
 
 ### Functionality
 
+- Add exporting of report in Markdown format
 - Add browser access to restarting the API
+- Display tooltip for clipboard and download buttons in export menu
 
 ### Other
 

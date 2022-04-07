@@ -67,4 +67,54 @@ div #modal-exporter {
             background-color: color('blue-grey', 'base')
         }
     }
+
+    // clipboard and download button tooltips
+    $color-tooltip-background: color('blue-grey', 'base') !default;
+    $color-tooltip-text: white !default;
+    .tooltip {
+        position: relative;
+        display: inline-block;
+
+        // expand & center button in middle of div, so we can align the tooltip to the center too
+        .btn {
+            margin: 0 -16px;
+            justify-content: center;
+            display: flex;
+        }
+
+        .tooltiptext {
+            visibility: hidden;
+            width: 150px;
+            background-color: $color-tooltip-background;
+            color: $color-tooltip-text;
+            text-align: center;
+            padding: 5px 0;
+            border-radius: 6px;
+            
+            /* Position the tooltip text - see examples below! */
+            position: absolute;
+            z-index: 1;
+
+            bottom: 130%;
+            left: 50%;
+            margin-left: -75px;
+        }
+
+        &:hover .tooltiptext {
+            visibility: visible;
+        }
+
+        // Arrow pointing down
+        .tooltiptext::after {
+            content: " ";
+            position: absolute;
+            top: 100%; /* At the bottom of the tooltip */
+            left: 50%;
+            margin-left: -10px;
+            border-width: 10px;
+            border-style: solid;
+            border-color: $color-tooltip-background transparent transparent transparent;
+        }
+    }
+
 }

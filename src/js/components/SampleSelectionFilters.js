@@ -39,6 +39,7 @@ const SampleSelectionFiltersLens = {
       data: state.core.data,
       filterData: state.core?.sampleSelectionFilters?.filterData,
       filterInfo: state.core?.sampleSelectionFilters?.filterInfo,
+      stateData: state.core?.sampleSelectionFilters?.stateData,
     }
   }),
   set: (state, childState) => ({
@@ -48,6 +49,7 @@ const SampleSelectionFiltersLens = {
       sampleSelectionFilters: {
         filterData: childState.core?.filterData,
         filterInfo: childState.core?.filterInfo,
+        stateData: childState.core?.stateData,
       }
     },
   }),
@@ -65,7 +67,7 @@ const deserialize = (str) => {
   return arr
 }
 
-function SingleSampleSelectionFilter(key, filterInfo$, filterData$) {
+function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$) {
 
     const thisFilterInfo$ = filterInfo$.map((info) => info[key])
     const thisFilterData$ = filterData$.map((data) => data[key])
@@ -121,34 +123,40 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$) {
       return unitInfo.hasRange ? sliderDiv : div()
     }
 
-    const createFilter = (key, info, filterData) => {
+    const createFilter = (key, info, filterData, stateData) => {
 
-      console.log("info", info)
       const mappedInfo = flatten(info.values.map((unitInfo) => {
         const unitValuePairs = toPairs(unitInfo.values)
         const firstDataChunk = { ...unitInfo, values: fromPairs(unitValuePairs.filter((_, i) => i < unitValuePairs.length / 2)) }
         const secondDataChunk = { ...unitInfo, values: fromPairs(unitValuePairs.filter((_, i) => i >= unitValuePairs.length / 2)) }
-        return [
-          div(".chip " + "." + key + ".col .s12", [span(key), span(" "), span(unitInfo.unit)]),
-          div(".col .s12", [
-            div(".col.l6.s12", valueElements(key, firstDataChunk, filterData)),
-            div(".col.l6.s12", valueElements(key, secondDataChunk, filterData)),
-            div(".col .s12", sliderElements(key, unitInfo, filterData)),
-          ])
-        ]}
-      ))
 
-      return div(".col .s12",
-        mappedInfo
-        )
-      }
+        const thisStateData = stateData[serialize(key, unitInfo.unit, "-header-")]
+
+        // TODO fix sliders getting thrown away because noUiSlider library can't find them during init
+        return thisStateData
+          ? [
+            div(".chip .sampleSelectionFilterHeader .col .s12", { props: { id: serialize(key, unitInfo.unit, "-header-") } } , [span(key), span(" "), span(unitInfo.unit)]),
+            div(".col .s12", [
+                div(".col.l6.s12", valueElements(key, firstDataChunk, filterData)),
+                div(".col.l6.s12", valueElements(key, secondDataChunk, filterData)),
+                div(".col .s12", sliderElements(key, unitInfo, filterData)),
+              ])
+            ]
+          : [
+            div(".chip .sampleSelectionFilterHeader .col .s12.m4.l2", { props: { id: serialize(key, unitInfo.unit, "-header-") } } , [span(key), span(" "), span(unitInfo.unit)]),
+            ]
+      }))
+
+      return mappedInfo
+    }
     
     const vdom$ = xs
       .combine(
         thisFilterInfo$,
         thisFilterData$,
+        stateData$,
       )
-      .map(([info, filterData]) => createFilter(key, info, filterData))
+      .map(([info, filterData, stateData]) => createFilter(key, info, filterData, stateData))
 
     const createSliderDriverObject = (key, unitInfo) => ({
       id: serialize(key, unitInfo.unit, '-slider-'),
@@ -348,12 +356,17 @@ function intent(domSource$) {
     .events("click", { preventDefault: true })
     .map((ev) => ({id: ev.ownerTarget.id, modifier: ev.altKey}))
 
+  const headerClick$ = domSource$.select(".sampleSelectionFilterHeader")
+    .events("click")
+    .map((ev) => ev.ownerTarget.id)
+
   return {
-    useValueClick$: useValueClick$
+    useValueClick$: useValueClick$,
+    headerClick$: headerClick$,
   }
 }
 
-function model(state$, useClick$, sliderEvents$) {
+function model(state$, intents, sliderEvents$) {
   const filterInfo$ = state$
     .map((state) => composeFilterInfo(state.core.data))
     .compose(dropRepeats(equals))
@@ -364,6 +377,7 @@ function model(state$, useClick$, sliderEvents$) {
     core: {
       filterData: {},
       filterInfo: {},
+      state: {},
     }
   }))
 
@@ -411,28 +425,54 @@ function model(state$, useClick$, sliderEvents$) {
   const filterInfoReducer$ = filterInfo$.map((filterInfo) => (prevState) => ({
     ...prevState,
     core: {
+      ...prevState.core,
       filterInfo: filterInfo,
-      filterData: prevState.core.filterData,
     }
   }))
 
   const initFilterDataReducer$ = initialFilterData$.map((filterData) => (prevState) => ({
     ...prevState,
     core: {
-      filterInfo: prevState.core.filterInfo,
+      ...prevState.core,
       filterData: filterData,
     }
   }))
 
+  const initStateDataReducer$ = initialFilterData$.map((filterData) => (prevState) => {
+    const newStateDataHeaders = uniq(flatten(toPairs(filterData).map(([key, value]) => value.map((v) => serialize(key, v.unit, "-header-")))))
+    // if already exists, use old state value, otherwise set to false (closed)
+    const updatedStateData = fromPairs(newStateDataHeaders.map((h) => [h, prevState.core.stateData[h] ?? false]))
+    return {
+      ...prevState,
+      core: {
+        ...prevState.core,
+        stateData: updatedStateData,
+      }
+    }
+  })
+
+  const stateDataReducer$ = intents.headerClick$.map((id) => (prevState) => ({
+    ...prevState,
+    core: {
+      ...prevState.core,
+      stateData: {
+        ...prevState.core.stateData,
+        [id]: !prevState.core.stateData[id],
+      }
+    }
+  }))
+
+  const stateData$ = state$.map((state) => state.core.stateData)
+
   const filterData$ = state$.map((state) => state.core.filterData)
 
-  const filterDataReducer$ = useClick$.map((ev) => (prevState) => {
+  const filterDataReducer$ = intents.useValueClick$.map((ev) => (prevState) => {
     const [key, unit, value] = deserialize(ev.id)
     const filterData = updateFilterData(key, unit, value, ev.modifier, prevState.core.filterData)
     return {
       ...prevState,
       core: {
-        filterInfo: prevState.core.filterInfo,
+        ...prevState.core,
         filterData: filterData,
       }
     }
@@ -444,7 +484,7 @@ function model(state$, useClick$, sliderEvents$) {
     return {
       ...prevState,
       core: {
-        filterInfo: prevState.core.filterInfo,
+        ...prevState.core,
         filterData: filterData,
       }
     }
@@ -498,10 +538,13 @@ function model(state$, useClick$, sliderEvents$) {
     filterInfo$: filterInfo$,
     filterData$: filterData$,
     filterOutput$: filterOutput$,
+    stateData$: stateData$,
     onion: xs.merge(
       defaultReducer$,
       filterInfoReducer$,
       initFilterDataReducer$,
+      initStateDataReducer$,
+      stateDataReducer$,
       filterDataReducer$,
       sliderFilterDataReducer$,
       ),
@@ -512,28 +555,32 @@ function view(childrenSinks$) {
 
   const composedChildrenSinks$ = childrenSinks$.compose(pick('DOM')).compose(mix(xs.combine))
 
-  const vdom$ = composedChildrenSinks$.map((arr) =>
-    div(
-      ".sampleSelectionFilters",
-      div(".row", div(".col .s10 .offset-s1 .l10 .offset-l1", arr))
+  const vdom$ = composedChildrenSinks$
+    .map((arr) => flatten([].concat(arr)))
+    .map((arr) =>
+      div(
+        ".sampleSelectionFilters .col .s10 .offset-s1",
+        div(".row",
+          div(div(".col .s12", arr))
+        )
+      )
     )
-  )
-  .startWith(div())
+    .startWith(div())
 
   return vdom$
 }
 
 function SampleSelectionFilters(sources) {
-  const state$ = sources.onion.state$
+  const state$ = sources.onion.state$.debug("state$")
   const sliderEvents$ = sources.slider
 
   const intent_ = intent(sources.DOM)
-  const model_ = model(state$, intent_.useValueClick$, sliderEvents$)
+  const model_ = model(state$, intent_, sliderEvents$)
 
   const childrenSinks$ = model_.filterInfo$
     .map((filterInfo) => 
       keys(filterInfo).map((key) => 
-        SingleSampleSelectionFilter(key, model_.filterInfo$, model_.filterData$)))
+        SingleSampleSelectionFilter(key, model_.filterInfo$, model_.filterData$, model_.stateData$)))
     .remember()
 
   const vdom$ = view(childrenSinks$)

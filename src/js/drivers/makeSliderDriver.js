@@ -17,12 +17,13 @@ function makeSliderDriver() {
             next: (slider) => {
                 var sliderElement = document.getElementById(slider.id)
 
-                if (sliderElement.noUiSlider != undefined) {
+                if (sliderElement?.noUiSlider != undefined) {
                     sliderElement.noUiSlider.destroy()
                 }                
-
-                noUiSlider.create(sliderElement, slider.object)
-                sliderElement.noUiSlider.on('update', sliderCallback(slider.id))
+                if (slider.shown) {
+                    noUiSlider.create(sliderElement, slider.object)
+                    sliderElement.noUiSlider.on('update', sliderCallback(slider.id))
+                }
             },
             error: (e) => {
                 console.error(e)

@@ -1,7 +1,6 @@
 import xs from "xstream"
 import { div, label, input, button, span, p, i, ul, li } from "@cycle/dom"
 import { pick, mix } from 'cycle-onionify';
-import isolate from '@cycle/isolate'
 import {
   prop,
   keys,
@@ -21,14 +20,13 @@ import {
   equals,
   lensProp,
   set,
-  findIndex,
-  adjust,
   view as viewR,
   find,
   whereEq,
 } from "ramda"
 import dropRepeats from "xstream/extra/dropRepeats";
 import flattenConcurrently from 'xstream/extra/flattenConcurrently'
+import SampleCombine from 'xstream/extra/sampleCombine'
 import delay from "xstream/extra/delay"
 
 const SampleSelectionFiltersLens = {
@@ -131,8 +129,6 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$) 
         const secondDataChunk = { ...unitInfo, values: fromPairs(unitValuePairs.filter((_, i) => i >= unitValuePairs.length / 2)) }
 
         const thisStateData = stateData[serialize(key, unitInfo.unit, "-header-")]
-
-        // TODO fix sliders getting thrown away because noUiSlider library can't find them during init
         return thisStateData
           ? [
             div(".chip .sampleSelectionFilterHeader .col .s12", { props: { id: serialize(key, unitInfo.unit, "-header-") } } , [span(key), span(" "), span(unitInfo.unit)]),
@@ -158,10 +154,10 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$) 
       )
       .map(([info, filterData, stateData]) => createFilter(key, info, filterData, stateData))
 
-    const createSliderDriverObject = (key, unitInfo) => ({
+    const createSliderDriverObject = (key, unitInfo, minValue, maxValue) => ({
       id: serialize(key, unitInfo.unit, '-slider-'),
       object: {
-        start: [unitInfo.min, unitInfo.max],
+        start: [minValue, maxValue],
         connect: true,
         orientation: 'horizontal',
         range: {
@@ -171,7 +167,7 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$) 
       }
     })
 
-    const createSliderDriverObjectStepped = (key, unitInfo) => {
+    const createSliderDriverObjectStepped = (key, unitInfo, minValue, maxValue) => {
 
       const rescale = (v) => {
         if (v == unitInfo.min)
@@ -191,7 +187,7 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$) 
       return {
         id: serialize(key, unitInfo.unit, '-slider-'),
         object: {
-          start: [unitInfo.min, unitInfo.max],
+          start: [minValue, maxValue],
           snap: true,
           connect: true,
           orientation: 'horizontal',
@@ -206,7 +202,7 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$) 
       }
     }
 
-    const createSliderDriverObjectSteppedUniformSpaced = (key, unitInfo) => {
+    const createSliderDriverObjectSteppedUniformSpaced = (key, unitInfo, minValue, maxValue) => {
 
       const rescale = (v, index, total) => {
         if (v == unitInfo.min)
@@ -226,7 +222,7 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$) 
       return {
         id: serialize(key, unitInfo.unit, '-slider-'),
         object: {
-          start: [unitInfo.min, unitInfo.max],
+          start: [minValue, maxValue],
           snap: true,
           connect: true,
           orientation: 'horizontal',
@@ -241,11 +237,27 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$) 
       }
     }
 
-    const slider$ = thisFilterInfo$
+    const sliderInfo$ = thisFilterInfo$
       .map((info) => xs.fromArray(info.values))
       .compose(flattenConcurrently)
       .filter((unitInfo) => unitInfo.hasRange)
-      .map((unitInfo) => createSliderDriverObjectStepped(key, unitInfo))
+    const sliderData$ = thisFilterData$
+      .map((dataArr) => find((d) => d.type == "range", dataArr ?? []))
+    const sliderObject$ = xs
+      .combine(sliderInfo$, sliderData$)
+      .map(([unitInfo, unitData]) => createSliderDriverObjectStepped(key, unitInfo, unitData?.min ?? unitInfo.min, unitData?.max ?? unitInfo.max))
+
+    const slider$ = stateData$
+      .compose(dropRepeats(equals))
+      .compose(SampleCombine(sliderObject$))
+      .map(([states, sliderObject]) => {
+        const [sliderKey, sliderUnit, _] = deserialize(sliderObject.id)
+        const headerId = serialize(sliderKey, sliderUnit, '-header-')
+        return {
+          ...sliderObject,
+          shown: states[headerId]
+        }
+      })
 
     return {
         DOM: vdom$,
@@ -571,7 +583,7 @@ function view(childrenSinks$) {
 }
 
 function SampleSelectionFilters(sources) {
-  const state$ = sources.onion.state$.debug("state$")
+  const state$ = sources.onion.state$
   const sliderEvents$ = sources.slider
 
   const intent_ = intent(sources.DOM)

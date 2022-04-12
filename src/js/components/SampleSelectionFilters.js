@@ -330,34 +330,32 @@ const composeFilterInfo = (data) => {
         ? apply(Math.max, unitValuesArr.map(prop("max")))
         : 0
 
-      return {
-        [dataKey]: {
+      return [
+        dataKey, {
           hasUnits: true,
           hasRange: allHasRange,
           min: allMinValue,
           max: allMaxValue,
           values: unitValuesArr,
         },
-      }
+      ]
     } else {
       const arr = data.map(prop(dataKey))
       const values = getValueStruct("", arr)
 
-      return {
-        [dataKey]: {
+      return [
+        dataKey, {
           hasUnits: false,
           hasRange: values.hasRange,
           min: values.min,
           max: values.max,
           values: [values],
         },
-      }
+      ]
     }
   })
 
-  // go from array of objects { 'key': {...} } to single object { 'key1': {...}, 'key2': {...} }
-  const reducer = (acc, value) => ({ ...acc, ...value })
-  const result = reduce(reducer, {}, mappedDataArr)
+  const result = fromPairs(mappedDataArr)
   return result
 }
 

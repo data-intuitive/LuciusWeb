@@ -1,3 +1,7 @@
 div.sampleSelectionFilterSlider {
     margin: 10px 20px 60px 10px;
 }
+
+div.chip.activeFilter {
+    background-color: color('yellow', 'lighten-2');
+}

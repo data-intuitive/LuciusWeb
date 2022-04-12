@@ -129,10 +129,15 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$) 
         const firstDataChunk = { ...unitInfo, values: fromPairs(unitValuePairs.filter((_, i) => i < unitValuePairs.length / 2)) }
         const secondDataChunk = { ...unitInfo, values: fromPairs(unitValuePairs.filter((_, i) => i >= unitValuePairs.length / 2)) }
 
-        const thisStateData = stateData[serialize(key, unitInfo.unit, "-header-")]
+        const thisStateData = stateData[serialize(key, unitInfo.unit, "-header-")] // open (true) or closed (false)
+        // any filter value or range set? if so set class so css coloring can be set
+        const filterDeselectedValues = filter((d) => d.type == 'value' && d.use == false, filterData ?? [])
+        const filterRanges = filter((d) => d.type == 'range' && (d.min != unitInfo.min || d.max != unitInfo.max), filterData ?? [])
+        const hasActiveFilter = filterDeselectedValues.length + filterRanges.length != 0
+        const activeFilterClass = hasActiveFilter ? " .activeFilter" : ""
         return thisStateData
           ? [
-            div(".chip .sampleSelectionFilterHeader .col .s12", { props: { id: serialize(key, unitInfo.unit, "-header-") } } , [span(key), span(" "), span(unitInfo.unit)]),
+            div(".chip .sampleSelectionFilterHeader .col .s12" + activeFilterClass, { props: { id: serialize(key, unitInfo.unit, "-header-") } } , [span(key), span(" "), span(unitInfo.unit)]),
             div(".col .s12", [
                 div(".col.l6.s12", valueElements(key, firstDataChunk, filterData)),
                 div(".col.l6.s12", valueElements(key, secondDataChunk, filterData)),
@@ -140,7 +145,7 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$) 
               ])
             ]
           : [
-            div(".chip .sampleSelectionFilterHeader .col .s12.m4.l2", { props: { id: serialize(key, unitInfo.unit, "-header-") } } , [span(key), span(" "), span(unitInfo.unit)]),
+            div(".chip .sampleSelectionFilterHeader .col .s12.m4.l2" + activeFilterClass, { props: { id: serialize(key, unitInfo.unit, "-header-") } } , [span(key), span(" "), span(unitInfo.unit)]),
             ]
       }))
 

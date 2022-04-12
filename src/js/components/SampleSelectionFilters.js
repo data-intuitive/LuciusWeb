@@ -23,6 +23,7 @@ import {
   view as viewR,
   find,
   whereEq,
+  sum,
 } from "ramda"
 import dropRepeats from "xstream/extra/dropRepeats";
 import flattenConcurrently from 'xstream/extra/flattenConcurrently'
@@ -298,13 +299,15 @@ const composeFilterInfo = (data) => {
     const isAllNumbers = none(isNaN, arr)
     const minValue = isAllNumbers ? apply(Math.min, arr) : 0
     const maxValue = isAllNumbers ? apply(Math.max, arr) : 0
+    const valueOptions = length(keys(counts))
     return {
       unit: unit,
       values: counts,
-      hasRange: isAllNumbers && length(keys(counts)) >= 3,
+      hasRange: isAllNumbers && valueOptions >= 3,
       min: minValue,
       max: maxValue,
       amount: length(arr),
+      valueOptions: valueOptions,
     }
   }
 
@@ -329,6 +332,7 @@ const composeFilterInfo = (data) => {
       const allMaxValue = allHasRange
         ? apply(Math.max, unitValuesArr.map(prop("max")))
         : 0
+      const valueOptions = sum(unitValuesArr.map(prop("valueOptions")))
 
       return [
         dataKey, {
@@ -337,6 +341,7 @@ const composeFilterInfo = (data) => {
           min: allMinValue,
           max: allMaxValue,
           values: unitValuesArr,
+          valueOptions: valueOptions,
         },
       ]
     } else {
@@ -350,12 +355,13 @@ const composeFilterInfo = (data) => {
           min: values.min,
           max: values.max,
           values: [values],
+          valueOptions: values.valueOptions,
         },
       ]
     }
   })
 
-  const result = fromPairs(mappedDataArr)
+  const result = fromPairs(mappedDataArr.filter(([k, v]) => v.valueOptions > 1))
   return result
 }
 

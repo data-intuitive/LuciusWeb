@@ -133,8 +133,15 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$) 
         // any filter value or range set? if so set class so css coloring can be set
         const filterDeselectedValues = filter((d) => d.type == 'value' && d.use == false, filterData ?? [])
         const filterRanges = filter((d) => d.type == 'range' && (d.min != unitInfo.min || d.max != unitInfo.max), filterData ?? [])
-        const hasActiveFilter = filterDeselectedValues.length + filterRanges.length != 0
-        const activeFilterClass = hasActiveFilter ? " .activeFilter" : ""
+        const activeFilterClass = 
+          (filterDeselectedValues.length > 0
+            ? " .activeValueFilter"
+            : ""
+          )
+          + (filterRanges.length > 0
+            ? " .activeRangeFilter"
+            : ""
+          )
         return thisStateData
           ? [
             div(".chip .sampleSelectionFilterHeader .col .s12" + activeFilterClass, { props: { id: serialize(key, unitInfo.unit, "-header-") } } , [span(key), span(" "), span(unitInfo.unit)]),

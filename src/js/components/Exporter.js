@@ -511,7 +511,8 @@ function Exporter(sources) {
 
   const vdom$ = view(state$, model_.dataPresent, model_.exportData, fullConfig, sources.clipboard)
 
-  const fabInit$ = vdom$.mapTo({
+  const fabInit$ = sources.DOM.select('document').events('DOMContentLoaded')
+    .mapTo({
       state: "init",
       element: ".fixed-action-btn",
       options: {
@@ -519,8 +520,6 @@ function Exporter(sources) {
         //   hoverEnabled: false,
       }
     })
-    .compose(dropRepeats(equals)) // run just once
-    .compose(delay(50)) // let the vdom propagate first and next cycle initialize FAB
 
   const fabUpdate$ = model_.dataPresent.signaturePresent$
     .filter(_ => fullConfig.fabSignature == "update")

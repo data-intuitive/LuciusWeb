@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## Version 5.2.0
+
+### Functionality
+
+- Add exporting of report in Markdown format
+- Add browser access to restarting the API
+- Display tooltip for clipboard and download buttons in export menu
+
+### Other
+
+- Filter functionality made dynamic so that new filter groups can be added as needed
+- Improve sturdiness against invalid input
+- Filter a-link references on 'do-not-route' before sending to the router
+
+### Deployment changes
+
+- Requires extra translations for each filter type in `deployments.json`
+
 ## Version 5.1.0
 
 ### Functionality

@@ -215,7 +215,10 @@ function SampleSelection(sources) {
     "settings.form.debug"
   )
 
-  const state$ = sources.onion.state$
+  // Add .drop(0) to force creation of a separate state$ stream
+  // This seems to help with the synchronisation when there are lots of updates
+  // To be confirmed over time whether this actually always works
+  const state$ = sources.onion.state$.drop(0)
 
   const input$ = sources.input
   // .startWith("BRD-K28907958") // REMOVE ME !!!
@@ -240,13 +243,13 @@ function SampleSelection(sources) {
   const emptyState$ = state$
     // .filter(state => state.core.input == null || state.core.input == '')
     .filter((state) => isEmptyState(state))
-    .compose(dropRepeats((x, y) => equals(x, y)))
+    .compose(dropRepeats(equals))
 
   // When the state is cycled because of an internal update
   const modifiedState$ = state$
     // .filter(state => state.core.input != '')
     .filter((state) => !isEmptyState(state))
-    .compose(dropRepeats((x, y) => equals(x, y)))
+    .compose(dropRepeats(equals))
 
   const newInput$ = xs
     .combine(input$, state$)

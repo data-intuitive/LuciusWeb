@@ -131,8 +131,8 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$) 
 
         const thisStateData = stateData[serialize(key, unitInfo.unit, "-header-")] // open (true) or closed (false)
         // any filter value or range set? if so set class so css coloring can be set
-        const filterDeselectedValues = filter((d) => d.type == 'value' && d.use == false, filterData ?? [])
-        const filterRanges = filter((d) => d.type == 'range' && (d.min != unitInfo.min || d.max != unitInfo.max), filterData ?? [])
+        const filterDeselectedValues = filter((d) => d.type == 'value' && d.unit == unitInfo.unit && d.use == false, filterData ?? [])
+        const filterRanges = filter((d) => d.type == 'range' && d.unit == unitInfo.unit && (d.min != unitInfo.min || d.max != unitInfo.max), filterData ?? [])
         const activeFilterClass = 
           (filterDeselectedValues.length > 0
             ? " .activeValueFilter"
@@ -413,7 +413,7 @@ function model(state$, intents, sliderEvents$) {
 
     const filterDataPairs = toPairs(filterInfo).map(([key, value]) => {
       const nestedValues = value.values.map((valuesPerUnit) => keys(valuesPerUnit.values).map((v) => ({ type: 'value', value: v, unit: valuesPerUnit.unit, use: true })))
-      const nestedRange = value.values.map((valuesPerUnit) => valuesPerUnit.hasRange ? [{ type: 'range', min: valuesPerUnit.min, max: value.max, unit: valuesPerUnit.unit }] : [])
+      const nestedRange = value.values.map((valuesPerUnit) => valuesPerUnit.hasRange ? [{ type: 'range', min: valuesPerUnit.min, max: valuesPerUnit.max, unit: valuesPerUnit.unit }] : [])
       const flattenedValues = flatten(nestedValues.concat(nestedRange)) // tag on nestedRange, either empty array or array with single object
 
       return [key, flattenedValues]

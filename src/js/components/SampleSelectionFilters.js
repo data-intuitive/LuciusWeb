@@ -217,6 +217,7 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, 
       const scaledPairs = rangeValues.map((v) => [rescale(v), Number(v)])
       const scaledRange = fromPairs(scaledPairs)
       const pipValues = keys(unitInfo.values).map((v) => Number(v))
+      const format = unitInfo.allIntegers ? wNumb({decimals: 0}) : undefined
 
       return {
         id: serialize(key, unitInfo.unit, '-slider-'),
@@ -226,6 +227,7 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, 
           connect: true,
           orientation: 'horizontal',
           range: scaledRange,
+          format: format,
           pips: {
             mode: 'values',
             values: pipValues,
@@ -252,6 +254,7 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, 
       const scaledPairs = rangeValues.map((v, i) => [rescale(v, i, length(rangeValues)), Number(v)])
       const scaledRange = fromPairs(scaledPairs)
       const pipValues = keys(unitInfo.values).map((v) => Number(v))
+      const format = unitInfo.allIntegers ? wNumb({decimals: 0}) : undefined
 
       return {
         id: serialize(key, unitInfo.unit, '-slider-'),
@@ -261,6 +264,7 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, 
           connect: true,
           orientation: 'horizontal',
           range: scaledRange,
+          format: format,
           pips: {
             mode: 'values',
             values: pipValues,
@@ -332,6 +336,7 @@ const composeFilterInfo = (data) => {
   const getValueStruct = (unit, arr) => {
     const counts = countBy(identity, arr)
     const isAllNumbers = none(isNaN, arr)
+    const allIntegers = any(Number.isInteger, arr)
     const minValue = isAllNumbers ? apply(Math.min, arr) : 0
     const maxValue = isAllNumbers ? apply(Math.max, arr) : 0
     const valueOptions = length(keys(counts))
@@ -339,6 +344,7 @@ const composeFilterInfo = (data) => {
       unit: unit,
       values: counts,
       hasRange: isAllNumbers && valueOptions >= 3,
+      allIntegers: allIntegers,
       min: minValue,
       max: maxValue,
       amount: length(arr),

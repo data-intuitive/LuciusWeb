@@ -24,6 +24,7 @@ import {
   find,
   whereEq,
   sum,
+  any,
 } from "ramda"
 import dropRepeats from "xstream/extra/dropRepeats";
 import flattenConcurrently from 'xstream/extra/flattenConcurrently'
@@ -66,10 +67,11 @@ const deserialize = (str) => {
   return arr
 }
 
-function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$) {
+function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, filterConfig) {
 
     const thisFilterInfo$ = filterInfo$.map((info) => info[key])
     const thisFilterData$ = filterData$.map((data) => data[key])
+    const thisFilterConfig = filterConfig[key]
    
     const valueElements = (key, unitInfo, filterData) => {
 
@@ -122,9 +124,14 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$) 
       return unitInfo.hasRange ? sliderDiv : div()
     }
 
-    const createFilter = (key, info, filterData, stateData) => {
+    const createFilter = (key, info, filterData, stateData, filterConfig) => {
 
       const mappedInfo = flatten(info.values.map((unitInfo) => {
+
+        const showValues = filterConfig?.values != 'hide'
+        const hasRange = any((f) => f?.type == 'range' && f?.unit == unitInfo.unit, filterData ?? [])
+        const showRange = filterConfig?.range != 'hide' && hasRange
+
         const unitValuePairs = toPairs(unitInfo.values)
         const firstDataChunk = { ...unitInfo, values: fromPairs(unitValuePairs.filter((_, i) => i < unitValuePairs.length / 2)) }
         const secondDataChunk = { ...unitInfo, values: fromPairs(unitValuePairs.filter((_, i) => i >= unitValuePairs.length / 2)) }
@@ -142,18 +149,32 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$) 
             ? " .activeRangeFilter"
             : ""
           )
-        return thisStateData
-          ? [
-            div(".chip .sampleSelectionFilterHeader .col .s12" + activeFilterClass, { props: { id: serialize(key, unitInfo.unit, "-header-") } } , [span(key), span(" "), span(unitInfo.unit)]),
-            div(".col .s12", [
-                div(".col.l6.s12", valueElements(key, firstDataChunk, filterData)),
-                div(".col.l6.s12", valueElements(key, secondDataChunk, filterData)),
-                div(".col .s12", sliderElements(key, unitInfo, filterData)),
-              ])
-            ]
-          : [
-            div(".chip .sampleSelectionFilterHeader .col .s12.m4.l2" + activeFilterClass, { props: { id: serialize(key, unitInfo.unit, "-header-") } } , [span(key), span(" "), span(unitInfo.unit)]),
-            ]
+
+        const filterElements = []
+          .concat(
+            showValues
+              ? [
+                  div(".col.l6.s12", valueElements(key, firstDataChunk, filterData)),
+                  div(".col.l6.s12", valueElements(key, secondDataChunk, filterData))
+                ]
+              : []
+          )
+          .concat(
+            showRange
+            ? [div(".col .s12", sliderElements(key, unitInfo, filterData))]
+            : []
+          )
+        
+        return showValues || showRange
+          ? thisStateData
+            ? [
+              div(".chip .sampleSelectionFilterHeader .col .s12" + activeFilterClass, { props: { id: serialize(key, unitInfo.unit, "-header-") } } , [span(key), span(" "), span(unitInfo.unit)]),
+              div(".col .s12", filterElements)
+              ]
+            : [
+              div(".chip .sampleSelectionFilterHeader .col .s12.m4.l2" + activeFilterClass, { props: { id: serialize(key, unitInfo.unit, "-header-") } } , [span(key), span(" "), span(unitInfo.unit)]),
+              ]
+          : []
       }))
 
       return mappedInfo
@@ -165,9 +186,9 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$) 
         thisFilterData$,
         stateData$,
       )
-      .map(([info, filterData, stateData]) => createFilter(key, info, filterData, stateData))
+      .map(([info, filterData, stateData]) => createFilter(key, info, filterData, stateData, thisFilterConfig))
 
-    const createSliderDriverObject = (key, unitInfo, minValue, maxValue) => ({
+    const createSliderDriverObjectBase = (key, unitInfo, minValue, maxValue) => ({
       id: serialize(key, unitInfo.unit, '-slider-'),
       object: {
         start: [minValue, maxValue],
@@ -250,6 +271,8 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$) 
       }
     }
 
+    const createSliderDriverObject = (key, unitInfo, minValue, maxValue) => createSliderDriverObjectStepped(key, unitInfo, minValue, maxValue)
+
     const sliderInfo$ = thisFilterInfo$
       .map((info) => xs.fromArray(info.values))
       .compose(flattenConcurrently)
@@ -258,7 +281,7 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$) 
       .map((dataArr) => find((d) => d.type == "range", dataArr ?? []))
     const sliderObject$ = xs
       .combine(sliderInfo$, sliderData$)
-      .map(([unitInfo, unitData]) => createSliderDriverObjectStepped(key, unitInfo, unitData?.min ?? unitInfo.min, unitData?.max ?? unitInfo.max))
+      .map(([unitInfo, unitData]) => createSliderDriverObject(key, unitInfo, unitData?.min ?? unitInfo.min, unitData?.max ?? unitInfo.max))
 
     const slider$ = stateData$
       .compose(dropRepeats(equals))
@@ -605,10 +628,29 @@ function SampleSelectionFilters(sources) {
   const intent_ = intent(sources.DOM)
   const model_ = model(state$, intent_, sliderEvents$)
 
+  const filterConfig = {
+    significantGenes: {
+      values: 'hide',
+      range: 'show',
+    },
+    inchikey: {
+      values: 'hide',
+      range : 'hide',
+    },
+    smiles: {
+      values: 'hide',
+      range: 'hide',
+    },
+    id: {
+      values: 'hide',
+      range: 'hide',
+    }
+  }
+
   const childrenSinks$ = model_.filterInfo$
     .map((filterInfo) => 
       keys(filterInfo).map((key) => 
-        SingleSampleSelectionFilter(key, model_.filterInfo$, model_.filterData$, model_.stateData$)))
+        SingleSampleSelectionFilter(key, model_.filterInfo$, model_.filterData$, model_.stateData$, filterConfig)))
     .remember()
 
   const vdom$ = view(childrenSinks$)

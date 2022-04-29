@@ -218,6 +218,7 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, 
       const scaledRange = fromPairs(scaledPairs)
       const pipValues = keys(unitInfo.values).map((v) => Number(v))
       const format = unitInfo.allIntegers ? wNumb({decimals: 0}) : undefined
+      const pipFormat = unitInfo.allIntegers ? undefined : wNumb({decimals: 2})
 
       return {
         id: serialize(key, unitInfo.unit, '-slider-'),
@@ -232,7 +233,8 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, 
             mode: 'values',
             values: pipValues,
             density: 4,
-            stepped: true
+            stepped: true,
+            format: pipFormat,
           }
         }
       }
@@ -255,6 +257,7 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, 
       const scaledRange = fromPairs(scaledPairs)
       const pipValues = keys(unitInfo.values).map((v) => Number(v))
       const format = unitInfo.allIntegers ? wNumb({decimals: 0}) : undefined
+      const pipFormat = unitInfo.allIntegers ? [] : wNumb({decimals: 2})
 
       return {
         id: serialize(key, unitInfo.unit, '-slider-'),
@@ -269,7 +272,8 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, 
             mode: 'values',
             values: pipValues,
             density: 4,
-            stepped: true
+            stepped: true,
+            format: pipFormat,
           }
         }
       }

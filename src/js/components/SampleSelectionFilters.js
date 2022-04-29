@@ -257,7 +257,7 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, 
       const scaledRange = fromPairs(scaledPairs)
       const pipValues = keys(unitInfo.values).map((v) => Number(v))
       const format = unitInfo.allIntegers ? wNumb({decimals: 0}) : undefined
-      const pipFormat = unitInfo.allIntegers ? [] : wNumb({decimals: 2})
+      const pipFormat = unitInfo.allIntegers ? undefined : wNumb({decimals: 2})
 
       return {
         id: serialize(key, unitInfo.unit, '-slider-'),

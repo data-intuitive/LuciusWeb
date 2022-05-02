@@ -188,37 +188,38 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, 
       )
       .map(([info, filterData, stateData]) => createFilter(key, info, filterData, stateData, thisFilterConfig))
 
-    const createSliderDriverObjectBase = (key, unitInfo, minValue, maxValue) => ({
-      id: serialize(key, unitInfo.unit, '-slider-'),
-      object: {
-        start: [minValue, maxValue],
-        connect: true,
-        orientation: 'horizontal',
-        range: {
-          'min': unitInfo.min,
-          'max': unitInfo.max
-        },
-      }
-    })
-
-    const createSliderDriverObjectStepped = (key, unitInfo, minValue, maxValue) => {
-
+    const createSliderDriverObject = (key, unitInfo, minValue, maxValue) => {
+      const scale = (v) => (Number(v) - Number(unitInfo.min)) / (Number(unitInfo.max) - Number(unitInfo.min))
       const rescale = (v) => {
         if (v == unitInfo.min)
           return 'min'
         else if (v == unitInfo.max)
           return 'max'
         
-        const scaled = (Number(v) - Number(unitInfo.min)) / (Number(unitInfo.max) - Number(unitInfo.min)) * 100
+        const scaled = scale(v) * 100
         return scaled.toString() + "%"
       }
 
-      const rangeValues = keys(unitInfo.values)
-      const scaledPairs = rangeValues.map((v) => [rescale(v), Number(v)])
-      const scaledRange = fromPairs(scaledPairs)
-      const pipValues = keys(unitInfo.values).map((v) => Number(v))
-      const format = unitInfo.allIntegers ? wNumb({decimals: 0}) : undefined
-      const pipFormat = unitInfo.allIntegers ? undefined : wNumb({decimals: 2})
+      const rangeValues = keys(unitInfo.values).sort((a, b) => Number(a) - Number(b)) // All values numerically sorted
+      const rangeNumberValues = rangeValues.map((v) => Number(v)) // All values as numbers
+      const scaledRange = fromPairs(rangeNumberValues.map((v) => [rescale(v), v])) // All values as dict: scaled -> value
+      const formatLookupDict = fromPairs(rangeValues.map((v) => [Number(v), v])) // All values as dict: Number -> original string
+      
+      const showPipValues = rangeNumberValues.reduce((acc, v, index, arr) => 
+        (index == 0) || ((scale(v) - scale(acc.slice(-1)[0]) >= 0.1) && (scale(v) <= 0.9)) || (index == length(arr) - 1)
+        ? acc.concat(v)
+        : acc,
+        []) // Only values that are either first, far enough from others, or last => Spacy
+      const formatLookupDictPips = fromPairs(rangeValues.map((v) => 
+        [
+          Number(v), 
+          includes(Number(v), showPipValues) ? v : ""
+        ])) // All values as dict: Number -> original string (spacy) or empty string (non-spacy)
+
+      // Formatter to convert all values as original strings, provide fallback
+      const formatLookup = { to: (v) => formatLookupDict[v] ?? v.toFixed(2), from: (v) => v }
+      // Formatter to convert spacy values as original strings, provide fallback
+      const formatLookupPips = { to: (v) => formatLookupDictPips[v] ?? v.toFixed(2), from: (v) => v }
 
       return {
         id: serialize(key, unitInfo.unit, '-slider-'),
@@ -228,58 +229,17 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, 
           connect: true,
           orientation: 'horizontal',
           range: scaledRange,
-          format: format,
+          format: formatLookup,
           pips: {
             mode: 'values',
-            values: pipValues,
-            density: 4,
+            values: rangeNumberValues,
+            density: 100,
             stepped: true,
-            format: pipFormat,
+            format: formatLookupPips,
           }
         }
       }
     }
-
-    const createSliderDriverObjectSteppedUniformSpaced = (key, unitInfo, minValue, maxValue) => {
-
-      const rescale = (v, index, total) => {
-        if (v == unitInfo.min)
-          return 'min'
-        else if (v == unitInfo.max)
-          return 'max'
-        
-        const scaled = (index - 1) / (total - 1) * 100
-        return scaled.toString() + "%"
-      }
-
-      const rangeValues = keys(unitInfo.values)
-      const scaledPairs = rangeValues.map((v, i) => [rescale(v, i, length(rangeValues)), Number(v)])
-      const scaledRange = fromPairs(scaledPairs)
-      const pipValues = keys(unitInfo.values).map((v) => Number(v))
-      const format = unitInfo.allIntegers ? wNumb({decimals: 0}) : undefined
-      const pipFormat = unitInfo.allIntegers ? undefined : wNumb({decimals: 2})
-
-      return {
-        id: serialize(key, unitInfo.unit, '-slider-'),
-        object: {
-          start: [minValue, maxValue],
-          snap: true,
-          connect: true,
-          orientation: 'horizontal',
-          range: scaledRange,
-          format: format,
-          pips: {
-            mode: 'values',
-            values: pipValues,
-            density: 4,
-            stepped: true,
-            format: pipFormat,
-          }
-        }
-      }
-    }
-
-    const createSliderDriverObject = (key, unitInfo, minValue, maxValue) => createSliderDriverObjectStepped(key, unitInfo, minValue, maxValue)
 
     const sliderInfo$ = thisFilterInfo$
       .map((info) => xs.fromArray(info.values))

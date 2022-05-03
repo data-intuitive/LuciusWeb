@@ -67,7 +67,7 @@ const deserialize = (str) => {
   return arr
 }
 
-function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, filterConfig) {
+function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, sliderUpdateRequired$, filterConfig) {
 
     const thisFilterInfo$ = filterInfo$.map((info) => info[key])
     const thisFilterData$ = filterData$.map((data) => data[key])
@@ -107,18 +107,32 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, 
     }
 
     const sliderElements = (key, unitInfo, filterData) => {
-      const sliderData = filter((f) => f?.type == 'range' && f?.unit == unitInfo.unit, filterData ?? [])
-      const sanitizedSliderData = length(sliderData) > 0 ? sliderData[0] : { }
+      const sliderData = find((f) => f?.type == 'range' && f?.unit == unitInfo.unit && f?.id == 0, filterData ?? [])
+      const sliderData2 = find((f) => f?.type == 'range' && f?.unit == unitInfo.unit && f?.id == 1, filterData ?? [])
+      
+      const sliderDivs = 
+        [
+          div([span("min: "), span(sliderData.min)]),
+          div([span("max: "), span(sliderData.max)])
+        ]
+        .concat(
+          sliderData2 != undefined
+            ? [div([span("min2: "), span(sliderData2.min)]),
+              div([span("max2: "), span(sliderData2.max)])]
+            : []
+        )
       
       const sliderDiv = div(".sampleSelectionFilter-" + key + "-sliders", [
         // unitInfo.unit != '' ? span(key + '  - ' + unitInfo.unit) : span(key),
         // span(" "),
         // span("slider"),
         div(".sampleSelectionFilterSlider", { props: { id: serialize(key, unitInfo.unit, '-slider-')}}),
-        div([
-          div([span("min: "), span(sanitizedSliderData.min)]),
-          div([span("max: "), span(sanitizedSliderData.max)]),
-        ])
+        div(sliderDivs),
+        div(
+          unitInfo.allowDoubleRange 
+          ? [span(".sampleSelectionRangeSwitch", { props: { id: serialize(key, unitInfo.unit, '-rangeswitch-')}}, "Switch between 1 or 2 ranges")]
+          : [span("-")]
+        )
       ])
 
       return unitInfo.hasRange ? sliderDiv : div()
@@ -188,7 +202,7 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, 
       )
       .map(([info, filterData, stateData]) => createFilter(key, info, filterData, stateData, thisFilterConfig))
 
-    const createSliderDriverObject = (key, unitInfo, minValue, maxValue) => {
+    const createSliderDriverObject = (key, unitInfo, minValue, maxValue, minValue2, maxValue2) => {
       const scale = (v) => (Number(v) - Number(unitInfo.min)) / (Number(unitInfo.max) - Number(unitInfo.min))
       const rescale = (v) => {
         if (v == unitInfo.min)
@@ -221,12 +235,21 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, 
       // Formatter to convert spacy values as original strings, provide fallback
       const formatLookupPips = { to: (v) => formatLookupDictPips[v] ?? v.toFixed(2), from: (v) => v }
 
+      const doubleRange = minValue2 != undefined && maxValue2 != undefined
+      const minValueWDefault = minValue ?? unitInfo.minValue
+      const maxValueWDefault = maxValue  ?? (doubleRange ? rangeValues[~~(unitInfo.valueOptions/4)] : unitInfo.maxValue)
+      const minValueWDefault2 = minValue2 ?? rangeValues[~~(unitInfo.valueOptions*3/4)]
+      const maxValueWDefault2 = maxValue2 ?? unitInfo.maxValue
+
+      const startRange = doubleRange  ? [minValueWDefault, maxValueWDefault, minValueWDefault2, maxValueWDefault2] : [minValueWDefault, maxValueWDefault]
+      const connect = doubleRange  ? [false, true, false, true, false] : true
+
       return {
         id: serialize(key, unitInfo.unit, '-slider-'),
         object: {
-          start: [minValue, maxValue],
+          start: startRange,//[minValue, maxValue],
           snap: true,
-          connect: true,
+          connect: connect,
           orientation: 'horizontal',
           range: scaledRange,
           format: formatLookup,
@@ -246,13 +269,22 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, 
       .compose(flattenConcurrently)
       .filter((unitInfo) => unitInfo.hasRange)
     const sliderData$ = thisFilterData$
-      .map((dataArr) => find((d) => d.type == "range", dataArr ?? []))
+      .map((dataArr) => find((d) => d.type == "range" && d.id == 0, dataArr ?? []))
+    const sliderData2$ = thisFilterData$
+      .map((dataArr) => find((d) => d.type == "range" && d.id == 1, dataArr ?? []))
     const sliderObject$ = xs
-      .combine(sliderInfo$, sliderData$)
-      .map(([unitInfo, unitData]) => createSliderDriverObject(key, unitInfo, unitData?.min ?? unitInfo.min, unitData?.max ?? unitInfo.max))
+      .combine(sliderInfo$, sliderData$, sliderData2$)
+      .map(([unitInfo, unitData, unitData2]) => createSliderDriverObject(key, unitInfo, unitData?.min, unitData?.max, unitData2?.min, unitData2?.max))
 
-    const slider$ = stateData$
-      .compose(dropRepeats(equals))
+    const slider$ = xs
+      .combine(
+        stateData$.compose(dropRepeats(equals)),
+        sliderUpdateRequired$.filter((id) => {
+          const [key_, unit_, _] = deserialize(id)
+          return key_ == key
+        }).startWith(0) // forces update, actual value is unused
+      )
+      .map(([stateData, _]) => stateData) // strip trigger away
       .compose(SampleCombine(sliderObject$))
       .map(([states, sliderObject]) => {
         const [sliderKey, sliderUnit, _] = deserialize(sliderObject.id)
@@ -308,6 +340,7 @@ const composeFilterInfo = (data) => {
       unit: unit,
       values: counts,
       hasRange: isAllNumbers && valueOptions >= 3,
+      allowDoubleRange: isAllNumbers && valueOptions >= 5,
       allIntegers: allIntegers,
       min: minValue,
       max: maxValue,
@@ -381,9 +414,14 @@ function intent(domSource$) {
     .events("click")
     .map((ev) => ev.ownerTarget.id)
 
+  const switchRangeClick$ = domSource$.select(".sampleSelectionRangeSwitch")
+    .events("click")
+    .map((ev) => ev.ownerTarget.id)
+
   return {
     useValueClick$: useValueClick$,
     headerClick$: headerClick$,
+    switchRangeClick$: switchRangeClick$,
   }
 }
 
@@ -406,7 +444,9 @@ function model(state$, intents, sliderEvents$) {
 
     const filterDataPairs = toPairs(filterInfo).map(([key, value]) => {
       const nestedValues = value.values.map((valuesPerUnit) => keys(valuesPerUnit.values).map((v) => ({ type: 'value', value: v, unit: valuesPerUnit.unit, use: true })))
-      const nestedRange = value.values.map((valuesPerUnit) => valuesPerUnit.hasRange ? [{ type: 'range', min: valuesPerUnit.min, max: valuesPerUnit.max, unit: valuesPerUnit.unit }] : [])
+      const nestedRange = value.values.map((valuesPerUnit) => valuesPerUnit.hasRange 
+        ? [{ type: 'range', min: valuesPerUnit.min, max: valuesPerUnit.max, unit: valuesPerUnit.unit, id: 0 }] 
+        : [])
       const flattenedValues = flatten(nestedValues.concat(nestedRange)) // tag on nestedRange, either empty array or array with single object
 
       return [key, flattenedValues]
@@ -433,13 +473,20 @@ function model(state$, intents, sliderEvents$) {
 
   const updateSliderFilterData = (key, unit, sliderValue, sliderHandle, prevFilterData) => {
     const keyLens = lensProp(key)
-    const matcher = whereEq({ type: 'range', unit: unit })
+    const matcher = whereEq({ type: 'range', unit: unit, id: 0 })
     const changeRanges = (v) => ({ ...v, min: sliderValue[0], max: sliderValue[1] })
     const matchUpdate = (v) => matcher(v) ? changeRanges(v) : v
 
+    // 2nd slider for this key/unit
+    const matcher2 = whereEq({ type: 'range', unit: unit, id: 1 })
+    const changeRanges2 = (v) => ({ ...v, min: sliderValue[2], max: sliderValue[3] })
+    const matchUpdate2 = (v) => matcher2(v) ? changeRanges2(v) : v
+
     const currentFilterDataKey = viewR(keyLens, prevFilterData)
     const currentFilterDataOnlyKeyUpdatedValue = currentFilterDataKey.map((data) => matchUpdate(data))
-    const updatedFilterData = set(keyLens, currentFilterDataOnlyKeyUpdatedValue, prevFilterData)
+    const currentFilterDataOnlyKeyUpdatedValue2 = currentFilterDataOnlyKeyUpdatedValue.map((data) => matchUpdate2(data))
+    const updatedFilterData = set(keyLens, currentFilterDataOnlyKeyUpdatedValue2, prevFilterData)
+
     return updatedFilterData
   }
 
@@ -511,6 +558,59 @@ function model(state$, intents, sliderEvents$) {
     }
   })
 
+  const sliderSwitchRangeReducer$ = intents.switchRangeClick$.map((id) => (prevState) => {
+    const [key, unit, _] = deserialize(id)
+    const prevFilterData = prevState.core.filterData
+    const thisFilterData = prevFilterData[key] ?? []
+    const unitInfo = find((v) => v.unit == unit, prevState.core.filterInfo[key].values)
+    const rangeValues = keys(unitInfo.values).sort((a, b) => Number(a) - Number(b)) // All values numerically sorted
+    const middleValue1 = Number(rangeValues[~~(unitInfo.valueOptions/4)])
+    const middleValue2 = Number(rangeValues[~~(unitInfo.valueOptions*3/4)])
+
+    // const sliderData = find((f) => f?.type == 'range' && f?.unit == unit && f?.id == 0, thisFilterData ?? [])
+    const sliderData2 = find((f) => f?.type == 'range' && f?.unit == unit && f?.id == 1, thisFilterData)
+
+    const thisFilterDataWithoutRanges = filter((f) => f?.type != 'range', thisFilterData)
+
+    let currentFilterDataKeyUpdatedValue
+
+    if (sliderData2 == undefined) {
+      const range = { type: 'range', min: unitInfo.min, max: middleValue1, unit: unit, id: 0 }
+      const range2 = { type: 'range', min: middleValue2, max: unitInfo.max, unit: unit, id: 1 }
+      currentFilterDataKeyUpdatedValue = thisFilterDataWithoutRanges.concat([range, range2])
+    }
+    else {
+      const range = { type: 'range', min: unitInfo.min, max: unitInfo.max, unit: unit, id: 0 }
+      currentFilterDataKeyUpdatedValue = thisFilterDataWithoutRanges.concat([range])
+    }
+
+    const keyLens = lensProp(key)
+    // TODO use this coding style?
+    // const matcher = whereEq({ type: 'range', unit: unit, id: 0 })
+    // const changeRanges = (v) => ({ ...v, min: sliderValue[0], max: sliderValue[1] })
+    // const matchUpdate = (v) => matcher(v) ? changeRanges(v) : v
+
+    // // 2nd slider for this key/unit
+    // const matcher2 = whereEq({ type: 'range', unit: unit, id: 1 })
+    // const changeRanges2 = (v) => ({ ...v, min: sliderValue[2], max: sliderValue[3] })
+    // const matchUpdate2 = (v) => matcher2(v) ? changeRanges2(v) : v
+
+    // const currentFilterDataKey = viewR(keyLens, prevFilterData)
+    // const currentFilterDataOnlyKeyUpdatedValue = currentFilterDataKey.map((data) => matchUpdate(data))
+    // const currentFilterDataOnlyKeyUpdatedValue2 = currentFilterDataOnlyKeyUpdatedValue.map((data) => matchUpdate2(data))
+    const updatedFilterData = set(keyLens, currentFilterDataKeyUpdatedValue, prevFilterData)
+
+    return {
+      ...prevState,
+      core: {
+        ...prevState.core,
+        filterData: updatedFilterData,
+      }
+    }
+  })
+
+  const sliderUpdateRequired$ = intents.switchRangeClick$
+
   const filterRangeChanged = (rangeValue, key, filterInfo) => {
     if (length(keys(filterInfo)) == 0)
       return false
@@ -560,6 +660,7 @@ function model(state$, intents, sliderEvents$) {
     filterData$: filterData$,
     filterOutput$: filterOutput$,
     stateData$: stateData$,
+    sliderUpdateRequired$: sliderUpdateRequired$,
     onion: xs.merge(
       defaultReducer$,
       filterInfoReducer$,
@@ -568,6 +669,7 @@ function model(state$, intents, sliderEvents$) {
       stateDataReducer$,
       filterDataReducer$,
       sliderFilterDataReducer$,
+      sliderSwitchRangeReducer$,
       ),
   }
 }
@@ -620,7 +722,7 @@ function SampleSelectionFilters(sources) {
   const childrenSinks$ = model_.filterInfo$
     .map((filterInfo) => 
       keys(filterInfo).map((key) => 
-        SingleSampleSelectionFilter(key, model_.filterInfo$, model_.filterData$, model_.stateData$, filterConfig)))
+        SingleSampleSelectionFilter(key, model_.filterInfo$, model_.filterData$, model_.stateData$, model_.sliderUpdateRequired$, filterConfig)))
     .remember()
 
   const vdom$ = view(childrenSinks$)

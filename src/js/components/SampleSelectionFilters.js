@@ -30,6 +30,7 @@ import dropRepeats from "xstream/extra/dropRepeats";
 import flattenConcurrently from 'xstream/extra/flattenConcurrently'
 import SampleCombine from 'xstream/extra/sampleCombine'
 import delay from "xstream/extra/delay"
+import debounce from "xstream/extra/debounce"
 
 const SampleSelectionFiltersLens = {
   // get: (state) => ({ ...state }),
@@ -67,7 +68,7 @@ const deserialize = (str) => {
   return arr
 }
 
-function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, sliderUpdateRequired$, filterConfig) {
+function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, filterConfig) {
 
     const thisFilterInfo$ = filterInfo$.map((info) => info[key])
     const thisFilterData$ = filterData$.map((data) => data[key])
@@ -150,7 +151,7 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, 
         const firstDataChunk = { ...unitInfo, values: fromPairs(unitValuePairs.filter((_, i) => i < unitValuePairs.length / 2)) }
         const secondDataChunk = { ...unitInfo, values: fromPairs(unitValuePairs.filter((_, i) => i >= unitValuePairs.length / 2)) }
 
-        const thisStateData = stateData[serialize(key, unitInfo.unit, "-header-")] // open (true) or closed (false)
+        const thisStateData = stateData[serialize(key, unitInfo.unit, "")]?.state // open (true) or closed (false)
         // any filter value or range set? if so set class so css coloring can be set
         const filterDeselectedValues = filter((d) => d.type == 'value' && d.unit == unitInfo.unit && d.use == false, filterData ?? [])
         const filterRange = find((d) => d.type == 'range' && d.unit == unitInfo.unit && d.id == 0, filterData ?? [])
@@ -285,22 +286,16 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, 
       .combine(sliderInfo$, sliderData$, sliderData2$)
       .map(([unitInfo, unitData, unitData2]) => createSliderDriverObject(key, unitInfo, unitData?.min, unitData?.max, unitData2?.min, unitData2?.max))
 
-    const slider$ = xs
-      .combine(
-        stateData$.compose(dropRepeats(equals)),
-        sliderUpdateRequired$.filter((id) => {
-          const [key_, unit_, _] = deserialize(id)
-          return key_ == key
-        }).startWith(0) // forces update, actual value is unused
-      )
-      .map(([stateData, _]) => stateData) // strip trigger away
+    const slider$ = stateData$
+      .compose(debounce(10))
+      .compose(dropRepeats(equals))
       .compose(SampleCombine(sliderObject$))
       .map(([states, sliderObject]) => {
         const [sliderKey, sliderUnit, _] = deserialize(sliderObject.id)
-        const headerId = serialize(sliderKey, sliderUnit, '-header-')
+        const filterId = serialize(sliderKey, sliderUnit, '')
         return {
           ...sliderObject,
-          shown: states[headerId]
+          shown: states[filterId]?.state ?? false
         }
       })
 
@@ -516,9 +511,14 @@ function model(state$, intents, sliderEvents$) {
   }))
 
   const initStateDataReducer$ = initialFilterData$.map((filterData) => (prevState) => {
-    const newStateDataHeaders = uniq(flatten(toPairs(filterData).map(([key, value]) => value.map((v) => serialize(key, v.unit, "-header-")))))
+    const newStateDataHeaders = uniq(flatten(toPairs(filterData).map(([key, value]) => value.map((v) => serialize(key, v.unit, "")))))
     // if already exists, use old state value, otherwise set to false (closed)
-    const updatedStateData = fromPairs(newStateDataHeaders.map((h) => [h, prevState.core.stateData[h] ?? false]))
+    const updatedStateData = fromPairs(newStateDataHeaders.map((h) => [h, 
+      {
+        state: prevState.core.stateData[h]?.state ?? false,
+        mode:  prevState.core.stateData[h]?.mode ?? 1,
+      }
+    ]))
     return {
       ...prevState,
       core: {
@@ -528,16 +528,39 @@ function model(state$, intents, sliderEvents$) {
     }
   })
 
-  const stateDataReducer$ = intents.headerClick$.map((id) => (prevState) => ({
+  const stateDataReducer$ = intents.headerClick$.map((id) => (prevState) => {
+    const [key, unit, _] = deserialize(id)
+    const filterId = serialize(key, unit, '')
+    return {
     ...prevState,
     core: {
       ...prevState.core,
       stateData: {
         ...prevState.core.stateData,
-        [id]: !prevState.core.stateData[id],
+        [filterId]: {
+          state: !prevState.core.stateData[filterId].state,
+          mode: prevState.core.stateData[filterId].mode,
+        }
       }
     }
-  }))
+  }})
+
+  const stateDataSliderReducer$ = intents.switchRangeClick$.map((id) => (prevState) => {
+    const [key, unit, _] = deserialize(id)
+    const filterId = serialize(key, unit, '')
+    return {
+    ...prevState,
+    core: {
+      ...prevState.core,
+      stateData: {
+        ...prevState.core.stateData,
+        [filterId]: {
+          state: prevState.core.stateData[filterId].state,
+          mode: prevState.core.stateData[filterId].mode == 1 ? 2 : 1
+        }
+      }
+    }
+  }})
 
   const stateData$ = state$.map((state) => state.core.stateData)
 
@@ -618,8 +641,6 @@ function model(state$, intents, sliderEvents$) {
     }
   })
 
-  const sliderUpdateRequired$ = intents.switchRangeClick$
-
   const filterUnits = (keyValuePairs, info) => {
     function filterData(data, info) {
       if (info == undefined)
@@ -664,13 +685,13 @@ function model(state$, intents, sliderEvents$) {
     filterData$: filterData$,
     filterOutput$: filterOutput$,
     stateData$: stateData$,
-    sliderUpdateRequired$: sliderUpdateRequired$,
     onion: xs.merge(
       defaultReducer$,
       filterInfoReducer$,
       initFilterDataReducer$,
       initStateDataReducer$,
       stateDataReducer$,
+      stateDataSliderReducer$,
       filterDataReducer$,
       sliderFilterDataReducer$,
       sliderSwitchRangeReducer$,
@@ -726,7 +747,7 @@ function SampleSelectionFilters(sources) {
   const childrenSinks$ = model_.filterInfo$
     .map((filterInfo) => 
       keys(filterInfo).map((key) => 
-        SingleSampleSelectionFilter(key, model_.filterInfo$, model_.filterData$, model_.stateData$, model_.sliderUpdateRequired$, filterConfig)))
+        SingleSampleSelectionFilter(key, model_.filterInfo$, model_.filterData$, model_.stateData$, filterConfig)))
     .remember()
 
   const vdom$ = view(childrenSinks$)

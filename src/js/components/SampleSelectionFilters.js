@@ -620,21 +620,6 @@ function model(state$, intents, sliderEvents$) {
 
   const sliderUpdateRequired$ = intents.switchRangeClick$
 
-  const filterRangeChanged = (rangeValue, key, filterInfo) => {
-    if (length(keys(filterInfo)) == 0)
-      return false
-
-    const thisFilterInfo = find((v) => v.unit == rangeValue.unit, filterInfo[key]?.values ?? [])
-    if (thisFilterInfo == undefined) {
-      console.warn("unexpected result of filtering range information")
-      console.log('rangeValue', rangeValue)
-      console.log('key', key)
-      console.log('filterInfo', filterInfo)
-      return false
-    }
-    return (rangeValue.min != thisFilterInfo.min) || (rangeValue.max != thisFilterInfo.max)
-  }
-
   const filterUnits = (keyValuePairs, info) => {
     function filterData(data, info) {
       if (info == undefined)

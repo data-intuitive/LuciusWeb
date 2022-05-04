@@ -153,13 +153,22 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, 
         const thisStateData = stateData[serialize(key, unitInfo.unit, "-header-")] // open (true) or closed (false)
         // any filter value or range set? if so set class so css coloring can be set
         const filterDeselectedValues = filter((d) => d.type == 'value' && d.unit == unitInfo.unit && d.use == false, filterData ?? [])
-        const filterRanges = filter((d) => d.type == 'range' && d.unit == unitInfo.unit && (d.min != unitInfo.min || d.max != unitInfo.max), filterData ?? [])
+        const filterRange = find((d) => d.type == 'range' && d.unit == unitInfo.unit && d.id == 0, filterData ?? [])
+        const filterRange2 = find((d) => d.type == 'range' && d.unit == unitInfo.unit && d.id == 1, filterData ?? [])
+
+        const hasFilterRange = 
+          filterRange == undefined
+            ? false // no range filters
+            : filterRange2 == undefined // 1 or 2 range filters
+              ? filterRange.min != unitInfo.min || filterRange.max != unitInfo.max
+              : filterRange.min != unitInfo.min || filterRange.max != filterRange2.min || filterRange2.max != unitInfo.max
+
         const activeFilterClass = 
           (filterDeselectedValues.length > 0
             ? " .activeValueFilter"
             : ""
           )
-          + (filterRanges.length > 0
+          + (hasFilterRange
             ? " .activeRangeFilter"
             : ""
           )
@@ -626,20 +635,31 @@ function model(state$, intents, sliderEvents$) {
     return (rangeValue.min != thisFilterInfo.min) || (rangeValue.max != thisFilterInfo.max)
   }
 
-  // per key & unit, either output all values if one or more value was deselected, or pass no values at all when all are still selected
-  // however, still always pass range data
-  const filterUnitsWithAllValuesSelected = (keyValuePairs, info) => {
+  const filterUnits = (keyValuePairs, info) => {
     function filterData(data, info) {
       if (info == undefined)
         return data
-      // array of values per unit
+
       const filteredUnitData = info.values.map((unitInfo) => {
         const unitData = filter((v) => v.unit == unitInfo.unit, data) // get data from only matching unit, still contains both 'value' and 'range' types
         const unitValues = filter((v) => v.type == 'value', unitData).map((v) => v.value) // only keep 'value' type and map to only value type so we have a flat list of values
         const unitInfoValues = keys(unitInfo.values) // get flat list of values from unitInfo
-        const noChangeFound = equals(unitValues, unitInfoValues)
-        return noChangeFound ? unitData.filter((v) => v.type == 'range') : unitData
+        const noChangeInValues = equals(unitValues, unitInfoValues)
+
+        const range = find((v) => v.type == 'range' && v.id == 0, unitData)
+        const range2 = find((v) => v.type == 'range' && v.id == 1, unitData)
+
+        const useRange = range == undefined
+          ? false // no range
+          : range2 == undefined
+            ? range.min != unitInfo.min || range.max != unitInfo.max // single range mode
+            : range.min != unitInfo.min || range.max != range2.min || range2.max != unitInfo.max // double range mode
+        
+        return []
+          .concat(filter((v) => v.type == 'value' && !noChangeInValues, unitData))
+          .concat(filter((v) => v.type == 'range' && useRange, unitData))
       })
+
       return flatten(filteredUnitData)
     }
     const filteredData = keyValuePairs.map(([key, value]) => [ key, filterData(value, info[key]) ])
@@ -650,8 +670,7 @@ function model(state$, intents, sliderEvents$) {
     .combine(filterData$, filterInfo$)
     .map(([dataObject, info]) => [toPairs(dataObject), info]) // split object to an array of key/value pairs
     .map(([arr, info]) => [arr.map(([key, values]) => [ key, filter( (v) => (v?.type != 'value') || v?.use , values) ]), info]) // don't use 'type' == 'value' when 'use' is false
-    .map(([arr, info]) => [arr.map(([key, values]) => [ key, filter( (v) => (v?.type != 'range') || filterRangeChanged(v, key, info) , values) ]), info]) // don't use 'type' == 'range' when min & max are same as in FilterInfo
-    .map(([arr, info]) => [filterUnitsWithAllValuesSelected(arr, info), info]) // remove all values in a unit group that have values selected
+    .map(([arr, info]) => [filterUnits(arr, info), info]) // filter data per key & unit if either it has all values selected or range is full range
     .map(([arr, info]) => [filter(([key, values]) => length(values) != 0, arr), info]) // remove a key if there is no more data left
     .map(([dataPairs, info]) => fromPairs(dataPairs)) // rebuild to an object
 

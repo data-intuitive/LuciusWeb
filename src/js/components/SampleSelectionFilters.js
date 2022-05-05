@@ -133,7 +133,7 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, 
       const mappedInfo = flatten(info.values.map((unitInfo) => {
 
         const showValues = filterConfig?.values != 'hide'
-        const hasRange = any((f) => f?.type == 'range' && f?.unit == unitInfo.unit, filterData ?? [])
+        const hasRange = any(whereEq( { type: 'range', unit: unitInfo.unit } ), filterData ?? [])
         const showRange = filterConfig?.range != 'hide' && hasRange
 
         const unitValuePairs = toPairs(unitInfo.values)
@@ -142,9 +142,9 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, 
 
         const thisStateData = stateData[serialize(key, unitInfo.unit, "")]?.state // open (true) or closed (false)
         // any filter value or range set? if so set class so css coloring can be set
-        const filterDeselectedValues = filter((d) => d.type == 'value' && d.unit == unitInfo.unit && d.use == false, filterData ?? [])
-        const filterRange = find((d) => d.type == 'range' && d.unit == unitInfo.unit && d.id == 0, filterData ?? [])
-        const filterRange2 = find((d) => d.type == 'range' && d.unit == unitInfo.unit && d.id == 1, filterData ?? [])
+        const filterDeselectedValues = filter(whereEq( { type: 'value', unit: unitInfo.unit, use: false } ), filterData ?? [])
+        const filterRange = find(whereEq( { type: 'range', unit: unitInfo.unit, id: 0 } ), filterData ?? [])
+        const filterRange2 = find(whereEq( { type: 'range', unit: unitInfo.unit, id: 1 } ), filterData ?? [])
 
         const hasFilterRange = 
           filterRange == undefined
@@ -268,9 +268,9 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, 
       .compose(flattenConcurrently)
       .filter((unitInfo) => unitInfo.hasRange)
     const sliderData$ = thisFilterData$
-      .map((dataArr) => find((d) => d.type == "range" && d.id == 0, dataArr ?? []))
+      .map((dataArr) => find(whereEq( { type: "range", id: 0 } ), dataArr ?? []))
     const sliderData2$ = thisFilterData$
-      .map((dataArr) => find((d) => d.type == "range" && d.id == 1, dataArr ?? []))
+      .map((dataArr) => find(whereEq( { type: "range", id: 1 } ), dataArr ?? []))
     const sliderObject$ = xs
       .combine(sliderInfo$, sliderData$, sliderData2$)
       .map(([unitInfo, unitData, unitData2]) => createSliderDriverObject(key, unitInfo, unitData?.min, unitData?.max, unitData2?.min, unitData2?.max))
@@ -600,7 +600,7 @@ function model(state$, intents, sliderEvents$) {
     const keyLens = lensProp(key)
     const currentFilterDataKey = viewR(keyLens, prevFilterData)
     
-    const unitInfo = find((v) => v.unit == unit, prevState.core.filterInfo[key].values)
+    const unitInfo = find(whereEq( { unit: unit } ), prevState.core.filterInfo[key].values)
     const rangeValues = keys(unitInfo.values).sort((a, b) => Number(a) - Number(b)) // All values numerically sorted
     const middleValue1 = Number(rangeValues[~~(unitInfo.valueOptions/4)])
     const middleValue2 = Number(rangeValues[~~(unitInfo.valueOptions*3/4)])
@@ -634,13 +634,13 @@ function model(state$, intents, sliderEvents$) {
         return data
 
       const filteredUnitData = info.values.map((unitInfo) => {
-        const unitData = filter((v) => v.unit == unitInfo.unit, data) // get data from only matching unit, still contains both 'value' and 'range' types
-        const unitValues = filter((v) => v.type == 'value', unitData).map((v) => v.value) // only keep 'value' type and map to only value type so we have a flat list of values
+        const unitData = filter(whereEq( { unit: unitInfo.unit } ), data) // get data from only matching unit, still contains both 'value' and 'range' types
+        const unitValues = filter(whereEq( { type: 'value' } ), unitData).map((v) => v.value) // only keep 'value' type and map to only value type so we have a flat list of values
         const unitInfoValues = keys(unitInfo.values) // get flat list of values from unitInfo
         const noChangeInValues = equals(unitValues, unitInfoValues)
 
-        const range = find((v) => v.type == 'range' && v.id == 0, unitData)
-        const range2 = find((v) => v.type == 'range' && v.id == 1, unitData)
+        const range = find(whereEq( { type: 'range', id: 0 } ), unitData)
+        const range2 = find(whereEq( { type: 'range', id: 1 } ), unitData)
 
         const useRange = range == undefined
           ? false // no range

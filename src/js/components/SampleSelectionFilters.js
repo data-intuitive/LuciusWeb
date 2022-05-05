@@ -31,6 +31,7 @@ import flattenConcurrently from 'xstream/extra/flattenConcurrently'
 import SampleCombine from 'xstream/extra/sampleCombine'
 import delay from "xstream/extra/delay"
 import debounce from "xstream/extra/debounce"
+import pairwise from "xstream/extra/pairwise"
 
 const SampleSelectionFiltersLens = {
   // get: (state) => ({ ...state }),
@@ -247,8 +248,8 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, 
 
       const doubleRange = minValue2 != undefined && maxValue2 != undefined
       const minValueWDefault = minValue ?? unitInfo.minValue
-      const maxValueWDefault = maxValue  ?? (doubleRange ? rangeValues[~~(unitInfo.valueOptions/4)] : unitInfo.maxValue)
-      const minValueWDefault2 = minValue2 ?? rangeValues[~~(unitInfo.valueOptions*3/4)]
+      const maxValueWDefault = maxValue  ?? unitInfo.maxValue
+      const minValueWDefault2 = minValue2 ?? unitInfo.maxValue
       const maxValueWDefault2 = maxValue2 ?? unitInfo.maxValue
 
       const startRange = doubleRange  ? [minValueWDefault, maxValueWDefault, minValueWDefault2, maxValueWDefault2] : [minValueWDefault, maxValueWDefault]
@@ -257,7 +258,7 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, 
       return {
         id: serialize(key, unitInfo.unit, '-slider-'),
         object: {
-          start: startRange,//[minValue, maxValue],
+          start: startRange,
           snap: true,
           connect: connect,
           orientation: 'horizontal',
@@ -590,46 +591,44 @@ function model(state$, intents, sliderEvents$) {
     }
   })
 
-  const sliderSwitchRangeReducer$ = intents.switchRangeClick$.map((id) => (prevState) => {
+  /**
+   * Convert stateData object to stream of changes in the mode values
+   * Stream consists of key, value pairs
+   * @const model/sliderSwitchRange$
+   */
+  const sliderSwitchRange$ = stateData$
+    .map((v) => toPairs(v))
+    .map((arr) => arr.map(([k, v]) => [k, v.mode]))
+    .map((arr) => fromPairs(arr))
+    .compose(pairwise)
+    .map(([a, b]) => filter(([k, v]) => v != a[k], toPairs(b)))
+    .map((a) => xs.fromArray(a))
+    .compose(flattenConcurrently)
+
+  const sliderSwitchRangeReducer$ = sliderSwitchRange$.map(([id, mode]) => (prevState) => {
     const [key, unit, _] = deserialize(id)
     const prevFilterData = prevState.core.filterData
-    const thisFilterData = prevFilterData[key] ?? []
+
+    const keyLens = lensProp(key)
+    const currentFilterDataKey = viewR(keyLens, prevFilterData)
+    
     const unitInfo = find((v) => v.unit == unit, prevState.core.filterInfo[key].values)
     const rangeValues = keys(unitInfo.values).sort((a, b) => Number(a) - Number(b)) // All values numerically sorted
     const middleValue1 = Number(rangeValues[~~(unitInfo.valueOptions/4)])
     const middleValue2 = Number(rangeValues[~~(unitInfo.valueOptions*3/4)])
 
-    // const sliderData = find((f) => f?.type == 'range' && f?.unit == unit && f?.id == 0, thisFilterData ?? [])
-    const sliderData2 = find((f) => f?.type == 'range' && f?.unit == unit && f?.id == 1, thisFilterData)
+    const rangesArr = !unitInfo.hasRange
+      ? []
+      : mode == 2 && unitInfo.allowDoubleRange
+        ? [
+            { type: 'range', min: unitInfo.min, max: middleValue1, unit: unit, id: 0 },
+            { type: 'range', min: middleValue2, max: unitInfo.max, unit: unit, id: 1 },
+          ]
+        : [ { type: 'range', min: unitInfo.min, max: unitInfo.max, unit: unit, id: 0 } ]
 
-    const thisFilterDataWithoutRanges = filter((f) => f?.type != 'range', thisFilterData)
+    const thisFilterDataWithoutRanges = filter((f) => f?.type != 'range', currentFilterDataKey)
+    const currentFilterDataKeyUpdatedValue = thisFilterDataWithoutRanges.concat(rangesArr)
 
-    let currentFilterDataKeyUpdatedValue
-
-    if (sliderData2 == undefined) {
-      const range = { type: 'range', min: unitInfo.min, max: middleValue1, unit: unit, id: 0 }
-      const range2 = { type: 'range', min: middleValue2, max: unitInfo.max, unit: unit, id: 1 }
-      currentFilterDataKeyUpdatedValue = thisFilterDataWithoutRanges.concat([range, range2])
-    }
-    else {
-      const range = { type: 'range', min: unitInfo.min, max: unitInfo.max, unit: unit, id: 0 }
-      currentFilterDataKeyUpdatedValue = thisFilterDataWithoutRanges.concat([range])
-    }
-
-    const keyLens = lensProp(key)
-    // TODO use this coding style?
-    // const matcher = whereEq({ type: 'range', unit: unit, id: 0 })
-    // const changeRanges = (v) => ({ ...v, min: sliderValue[0], max: sliderValue[1] })
-    // const matchUpdate = (v) => matcher(v) ? changeRanges(v) : v
-
-    // // 2nd slider for this key/unit
-    // const matcher2 = whereEq({ type: 'range', unit: unit, id: 1 })
-    // const changeRanges2 = (v) => ({ ...v, min: sliderValue[2], max: sliderValue[3] })
-    // const matchUpdate2 = (v) => matcher2(v) ? changeRanges2(v) : v
-
-    // const currentFilterDataKey = viewR(keyLens, prevFilterData)
-    // const currentFilterDataOnlyKeyUpdatedValue = currentFilterDataKey.map((data) => matchUpdate(data))
-    // const currentFilterDataOnlyKeyUpdatedValue2 = currentFilterDataOnlyKeyUpdatedValue.map((data) => matchUpdate2(data))
     const updatedFilterData = set(keyLens, currentFilterDataKeyUpdatedValue, prevFilterData)
 
     return {

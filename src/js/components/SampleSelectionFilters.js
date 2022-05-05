@@ -1,5 +1,5 @@
 import xs from "xstream"
-import { div, label, input, button, span, p, i, ul, li } from "@cycle/dom"
+import { div, label, input, button, span, i } from "@cycle/dom"
 import { pick, mix } from 'cycle-onionify';
 import {
   prop,
@@ -8,7 +8,6 @@ import {
   includes,
   filter,
   uniq,
-  reduce,
   apply,
   countBy,
   identity,
@@ -33,9 +32,11 @@ import delay from "xstream/extra/delay"
 import debounce from "xstream/extra/debounce"
 import pairwise from "xstream/extra/pairwise"
 
+/**
+ * @module components/SampleSelectionFilters
+ */
+
 const SampleSelectionFiltersLens = {
-  // get: (state) => ({ ...state }),
-  // set: (state, childState) => ({ ...state }),
   get: (state) => ({
     core: {
       data: state.core.data,
@@ -96,14 +97,11 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, 
               span(value),
               span(" "),
               span("(" + amount + ")"),
-              // span(" "),
-              // span("use: " + use)
               ]),
         ])
       })
 
       return div(".sampleSelectionFilter-" + key + "-checkboxes", [
-          // unitInfo.unit != '' ? span(key + ' - ' + unitInfo.unit) : span(key),
           div(".collection .selection", list)
       ])
     }
@@ -318,6 +316,11 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, 
 //   }
 // }
 
+/**
+ * Create an object that specifies what filters can be created
+ * @param {Object} data Master data that needs to be analyzed on how it can be filtered
+ * @returns {Object}
+ */
 const composeFilterInfo = (data) => {
   // we need at least 1 data entry to be able to compose the data types that will be present in the data
   if (length(data) == 0) return {}
@@ -433,6 +436,11 @@ function model(state$, intents, sliderEvents$) {
     }
   }))
 
+  /**
+   * Convert incoming filter information (base information) to filter data (how filters are configured)
+   * @const modelInitialFilterData$
+   * @type {Stream}
+   */
   const initialFilterData$ = filterInfo$.map((filterInfo) => {
 
     const filterDataPairs = toPairs(filterInfo).map(([key, value]) => {
@@ -449,6 +457,16 @@ function model(state$, intents, sliderEvents$) {
     return filterData
   })
 
+  /**
+   * Toggle single or all values because user clicked a value without or with the modifier key
+   * @const model/updateFilterData
+   * @param {String} key identifier for what values to update
+   * @param {String} unit identifier for what values to update
+   * @param {String} value identifier for what single value to update or ignored in case modifier is used
+   * @param {Boolean} modifier modifier key being pressed or not (toggle single or all values)
+   * @param {Object} prevFilterData data to be updated
+   * @returns {Object} updated data 
+   */
   const updateFilterData = (key, unit, value, modifier, prevFilterData) => {
     const keyLens = lensProp(key)
     // if modifier key is pressed, toggle all data points that match this key & unit, otherwise toggle single data point matching key, unit and value
@@ -464,6 +482,16 @@ function model(state$, intents, sliderEvents$) {
     return updatedFilterData
   }
 
+  /**
+   * Update range min & max values
+   * @const model/updateSliderFilterData
+   * @param {String} key identifier for what range to update
+   * @param {String} unit identifier for what range to update
+   * @param {Array} sliderValue array of the slider values, either 2 or 4 values
+   * @param {String} sliderHandle id of the DOM slider
+   * @param {Object} prevFilterData data to be updated
+   * @returns {Object} updated data
+   */
   const updateSliderFilterData = (key, unit, sliderValue, sliderHandle, prevFilterData) => {
     const keyLens = lensProp(key)
     const matcher = whereEq({ type: 'range', unit: unit, id: 0 })
@@ -483,6 +511,11 @@ function model(state$, intents, sliderEvents$) {
     return updatedFilterData
   }
 
+  /**
+   * Store incoming (master) data
+   * @const model/filterInfoReducer$
+   * @type {Reducer}
+   */
   const filterInfoReducer$ = filterInfo$.map((filterInfo) => (prevState) => ({
     ...prevState,
     core: {
@@ -491,6 +524,11 @@ function model(state$, intents, sliderEvents$) {
     }
   }))
 
+  /**
+   * Store new filterData when new data arrives
+   * @const model/initFilterDataReducer$
+   * @type {Reducer}
+  */
   const initFilterDataReducer$ = initialFilterData$.map((filterData) => (prevState) => ({
     ...prevState,
     core: {
@@ -499,6 +537,11 @@ function model(state$, intents, sliderEvents$) {
     }
   }))
 
+  /**
+   * Create new stateData (filter open/closed, 1/2 slider mode) from updated (master) filter data
+   * @const model/initStateDataReducer$
+   * @type {Reducer}
+   */
   const initStateDataReducer$ = initialFilterData$.map((filterData) => (prevState) => {
     const newStateDataHeaders = uniq(flatten(toPairs(filterData).map(([key, value]) => value.map((v) => serialize(key, v.unit, "")))))
     // if already exists, use old state value, otherwise set to false (closed)
@@ -517,6 +560,11 @@ function model(state$, intents, sliderEvents$) {
     }
   })
 
+  /**
+   * Get event from DOM and update the filter state being open or closed
+   * @const model/stateDataReducer$
+   * @type {Reducer}
+   */
   const stateDataReducer$ = intents.headerClick$.map((id) => (prevState) => {
     const [key, unit, _] = deserialize(id)
     const filterId = serialize(key, unit, '')
@@ -534,6 +582,11 @@ function model(state$, intents, sliderEvents$) {
     }
   }})
 
+  /**
+   * Get event from DOM and update filter range mode in stateData
+   * @const model/stateDataSliderReducer$
+   * @type {Reducer}
+   */
   const stateDataSliderReducer$ = intents.switchRangeClick$.map((id) => (prevState) => {
     const [key, unit, _] = deserialize(id)
     const filterId = serialize(key, unit, '')
@@ -552,9 +605,13 @@ function model(state$, intents, sliderEvents$) {
   }})
 
   const stateData$ = state$.map((state) => state.core.stateData)
-
   const filterData$ = state$.map((state) => state.core.filterData)
 
+  /**
+   * Get event from DOM and update the filterData with the updated values
+   * @const model/filterDataReducer$
+   * @type {Reducer}
+   */
   const filterDataReducer$ = intents.useValueClick$.map((ev) => (prevState) => {
     const [key, unit, value] = deserialize(ev.id)
     const filterData = updateFilterData(key, unit, value, ev.modifier, prevState.core.filterData)
@@ -567,6 +624,11 @@ function model(state$, intents, sliderEvents$) {
     }
   })
 
+  /**
+   * Get event from DOM and update the filterData with the updated values
+   * @const model/sliderFilterDataReducer$
+   * @type {Reducer}
+   */
   const sliderFilterDataReducer$ = sliderEvents$.map((ev) => (prevState) => {
     const [key, unit, _] = deserialize(ev.id)
     const filterData = updateSliderFilterData(key, unit, ev.value, ev.handle, prevState.core.filterData)
@@ -583,6 +645,7 @@ function model(state$, intents, sliderEvents$) {
    * Convert stateData object to stream of changes in the mode values
    * Stream consists of key, value pairs
    * @const model/sliderSwitchRange$
+   * @type {Stream}
    */
   const sliderSwitchRange$ = stateData$
     .map((v) => toPairs(v))
@@ -593,6 +656,11 @@ function model(state$, intents, sliderEvents$) {
     .map((a) => xs.fromArray(a))
     .compose(flattenConcurrently)
 
+  /**
+   * Starting from an id/mode-value pair, change between 1 or 2 sliders in filterData
+   * @const model/sliderSwitchRangeReducer$
+   * @type {Reducer}
+   */
   const sliderSwitchRangeReducer$ = sliderSwitchRange$.map(([id, mode]) => (prevState) => {
     const [key, unit, _] = deserialize(id)
     const prevFilterData = prevState.core.filterData
@@ -628,6 +696,14 @@ function model(state$, intents, sliderEvents$) {
     }
   })
 
+  /**
+   * Remove data without actual used filters
+   * 
+   * Removes data with either all values are selected or ranges are full range
+   * @param {Array} keyValuePairs 
+   * @param {Object} info 
+   * @returns {Array} array of key/value pairs
+   */
   const filterUnits = (keyValuePairs, info) => {
     function filterData(data, info) {
       if (info == undefined)
@@ -659,6 +735,11 @@ function model(state$, intents, sliderEvents$) {
     return filteredData
   }
 
+  /**
+   * Minimize filters to actually set/changed filters
+   * @const model/filterOutputs$
+   * @type {Stream}
+   */
   const filterOutput$ = xs
     .combine(filterData$, filterInfo$)
     .map(([dataObject, info]) => [toPairs(dataObject), info]) // split object to an array of key/value pairs

@@ -109,31 +109,19 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, 
     }
 
     const sliderElements = (key, unitInfo, filterData) => {
-      const sliderData = find((f) => f?.type == 'range' && f?.unit == unitInfo.unit && f?.id == 0, filterData ?? [])
-      const sliderData2 = find((f) => f?.type == 'range' && f?.unit == unitInfo.unit && f?.id == 1, filterData ?? [])
-      
-      const sliderDivs = 
-        [
-          div([span("min: "), span(sliderData.min)]),
-          div([span("max: "), span(sliderData.max)])
-        ]
-        .concat(
-          sliderData2 != undefined
-            ? [div([span("min2: "), span(sliderData2.min)]),
-              div([span("max2: "), span(sliderData2.max)])]
-            : []
-        )
-      
-      const sliderDiv = div(".sampleSelectionFilter-" + key + "-sliders", [
-        // unitInfo.unit != '' ? span(key + '  - ' + unitInfo.unit) : span(key),
-        // span(" "),
-        // span("slider"),
-        div(".sampleSelectionFilterSlider", { props: { id: serialize(key, unitInfo.unit, '-slider-')}}),
-        div(sliderDivs),
-        div(
+      const slider2Exists = any(whereEq( { type: 'range', unit: unitInfo.unit, id:1 } ), filterData ?? [])
+      const sliderDiv = div(".sampleSelectionFilter-" + key + "-sliders .row", [
+        div(".col.s10 .sampleSelectionFilterSlider", { props: { id: serialize(key, unitInfo.unit, '-slider-')}}),
+        div(".col.s1",
           unitInfo.allowDoubleRange 
-          ? [span(".sampleSelectionRangeSwitch", { props: { id: serialize(key, unitInfo.unit, '-rangeswitch-')}}, "Switch between 1 or 2 ranges")]
-          : [span("-")]
+          ? [button(".btn-flat .sampleSelectionRangeSwitch",
+                { props: { id: serialize(key, unitInfo.unit, '-rangeswitch-')}}, 
+                i(
+                  ".material-icons .grey-text",
+                  slider2Exists ? "remove" : "add"
+                )
+            )]
+          : []
         )
       ])
 

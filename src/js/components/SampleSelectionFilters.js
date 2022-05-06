@@ -24,6 +24,7 @@ import {
   whereEq,
   sum,
   any,
+  reject,
 } from "ramda"
 import dropRepeats from "xstream/extra/dropRepeats";
 import flattenConcurrently from 'xstream/extra/flattenConcurrently'
@@ -682,7 +683,7 @@ function model(state$, intents, sliderEvents$) {
           ]
         : [ { type: 'range', min: unitInfo.min, max: unitInfo.max, unit: unit, id: 0 } ]
 
-    const thisFilterDataWithoutRanges = filter((f) => f?.type != 'range', currentFilterDataKey)
+    const thisFilterDataWithoutRanges = reject(whereEq( { type: 'range', unit: unit } ), currentFilterDataKey)
     const currentFilterDataKeyUpdatedValue = thisFilterDataWithoutRanges.concat(rangesArr)
 
     const updatedFilterData = set(keyLens, currentFilterDataKeyUpdatedValue, prevFilterData)

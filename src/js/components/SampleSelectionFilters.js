@@ -109,7 +109,7 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, 
     const sliderElements = (key, unitInfo, filterData) => {
       const slider2Exists = any(whereEq( { type: 'range', unit: unitInfo.unit, id:1 } ), filterData ?? [])
       const sliderDiv = div(".sampleSelectionFilter-" + key + "-sliders .row", [
-        div(".col.s10 .sampleSelectionFilterSlider", { props: { id: serialize(key, unitInfo.unit, '-slider-')}}),
+        div(".col.s11 .sampleSelectionFilterSlider", { props: { id: serialize(key, unitInfo.unit, '-slider-')}}),
         div(".col.s1",
           unitInfo.allowDoubleRange 
           ? [button(".btn-flat .sampleSelectionRangeSwitch",
@@ -179,11 +179,11 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, 
         return showValues || showRange
           ? thisStateData
             ? [
-              div(".chip .sampleSelectionFilterHeader .col .s12" + activeFilterClass, { props: { id: serialize(key, unitInfo.unit, "-header-") } } , [span(key), span(" "), span(unitInfo.unit)]),
+              div(".col .s12.m4.l2", div(".chip .sampleSelectionFilterHeader" + activeFilterClass, { props: { id: serialize(key, unitInfo.unit, "-header-") } } , [span(key), span(" "), span(unitInfo.unit)])),
               div(".col .s12", filterElements)
               ]
             : [
-              div(".chip .sampleSelectionFilterHeader .col .s12.m4.l2" + activeFilterClass, { props: { id: serialize(key, unitInfo.unit, "-header-") } } , [span(key), span(" "), span(unitInfo.unit)]),
+              div(".col .s12.m4.l2", div(".chip .sampleSelectionFilterHeader" + activeFilterClass, { props: { id: serialize(key, unitInfo.unit, "-header-") } } , [span(key), span(" "), span(unitInfo.unit)])),
               ]
           : []
       }))

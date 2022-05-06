@@ -6,11 +6,17 @@ function makeSliderDriver() {
 
     function sliderDriver(in$) {
 
-        const returnStream$ = xs.create()
+        const producer = {
+            listener: 0,
+            start: (listener) => { this.listener = listener },
+            next: (obj) => { this.listener.next(obj) },
+            stop: () => { },
+          }
+          
+        const returnStream$ = xs.create(producer)
 
-        // TODO analyze code in noUiSlider so we can maybe get a stream-like event emitter instead of callbacks
         const sliderCallback = (id) => (value, handle) => {
-            returnStream$.shamefullySendNext({id: id, value: value, handle: handle})
+            producer.next( {id: id, value: value, handle: handle} )
         }
 
         in$.addListener({

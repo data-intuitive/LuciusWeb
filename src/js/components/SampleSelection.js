@@ -14,12 +14,14 @@ import {
   p,
   i,
 } from "@cycle/dom"
-import { clone, equals, merge, sortWith, prop, ascend, descend } from "ramda"
+import { clone, equals, merge, sortWith, prop, ascend, descend, keys, length, includes, anyPass, allPass, filter } from "ramda"
 import xs from "xstream"
+import isolate from "@cycle/isolate"
 import dropRepeats from "xstream/extra/dropRepeats"
 import debounce from 'xstream/extra/debounce'
 import { loggerFactory } from "../utils/logger"
 import { TreatmentAnnotation } from "./TreatmentAnnotation"
+import { SampleSelectionFilters, SampleSelectionFiltersLens } from "./SampleSelectionFilters"
 import { safeModelToUi } from "../modelTranslations"
 import { dirtyUiReducer, dirtyWrapperStream, busyUiReducer } from "../utils/ui"
 
@@ -51,6 +53,154 @@ const sampleSelectionLens = {
 }
 
 /**
+ * Create function to check value against a single criterion
+ * 
+ * { type: 'range', min: 1, max: 2, unit: 'um' },
+ * { type: 'value', value: 1, unit: 'um' },
+ * 
+ * @param {Object} criterion 
+ * @returns function (sampleEntry) => boolean
+ */
+const createFilterCheck = (filterKey) => (criterion) => {
+  if (criterion.type == 'range') {
+    const minCheck = criterion.min == undefined 
+      ? () => true
+      : (value) => Number(value[filterKey]) >= Number(criterion.min)
+    const maxCheck = criterion.max == undefined 
+      ? () => true
+      : (value) => Number(value[filterKey]) <= Number(criterion.max)
+    const unitCheck = criterion.unit == undefined  || criterion.unit == ''
+      ? () => true
+      : (value) => value[filterKey + "_unit"] == criterion.unit
+
+    return allPass([minCheck, maxCheck, unitCheck])
+  }
+  else if (criterion.type == 'value') {
+    const valueCheck = criterion.value == undefined
+      ? () => true
+      : (value) => value[filterKey] == criterion.value
+    const unitCheck = criterion.unit == undefined || criterion.unit == ''
+      ? () => true
+      : (value) => value[filterKey + "_unit"] == criterion.unit
+    
+    return allPass([valueCheck, unitCheck])
+  }
+
+  console.warn("Criterion type " + criterion.type + " unknown.")
+  return (value) => false
+}
+
+/**
+ * Filter an array of sample data by the specified criteria
+ * 
+ * Criteria object has entries for each property to filter by.
+ * Each entry has an array of object with, each should have a type field
+ * type, string:
+ *  - 'range'
+ *  - 'value'
+ * Depending on the type, the following fields can be added
+ *  - range:
+ *    - min
+ *    - max
+ *    - unit
+ *  - value:
+ *    - value
+ *    - unit
+ * 
+ * In case of multiple properties to be filtered, use AND logic
+ * In case of multiple limits/values for a property, use OR logic
+ * 
+ * {
+ *   dose: [
+ *     { type: 'range', min: 1, max: 2, unit: 'um' },
+ *     { type: 'value', value: 1, unit: 'um' },
+ *     ...
+ *   ]
+ * }
+ * 
+ * @param {Array} data Data to filter
+ * @param {Object} criteria 
+ * @returns Array of filtered data
+ */
+export const filterData = (data, criteria) => {
+  // we need at least 1 data entry to be able to filter
+  // not just as concept but also for our code to work
+  if (length(data) == 0)
+    return data
+
+  const filterKeys = keys(criteria)
+  const dataKeys = keys(data[0])
+  const criteriaArray = []
+
+  for (const filterKey of filterKeys) {
+    if (!includes(filterKey, dataKeys)) {
+      console.warn("Not using '" + filterKey + "' to filter data as it is not found in the data set.")
+      continue
+    }
+
+    if (!Array.isArray(criteria[filterKey])) {
+      console.warn("Not using '" + filterKey+ "' to filter data as it is the wrong data type: " + (typeof criteria[filterKey]) + ".")
+      continue
+    }
+
+    const check = anyPass(criteria[filterKey].map(createFilterCheck(filterKey)))
+    criteriaArray.push(check)
+  }
+
+  const filteredData = filter(allPass(criteriaArray), data)
+  return filteredData
+}
+
+/**
+ * update hide field to earmark the field as filtered
+ * @param {Array} data Data to filter
+ * @param {Object} criteria 
+ * @returns Array of data with the hide field updated
+ */
+const hideFilteredData = (data, criteria) => {
+  const filteredData = filterData(data, criteria)
+  return data.map((v) => ({ ...v, hide: !includes(v, filteredData) }) )
+}
+
+/**
+ * Sorts an array of sample data by the specified property and direction
+ * Dose and time are sorted numerically instead of alphabetically, otherwise 3 > 10
+ * @param {Array} data Data to be sorted
+ * @param {String} sortBy Property name to sort by
+ * @param {Boolean} direction True = descending, False = ascending
+ * @returns Array of sorted data
+ */
+export const sortData = (data, sortBy, direction) => {
+
+  function propSort(prop, descend) {
+    return (a, b) => {
+      const aValue = a[prop]
+      const bValue = b[prop]
+      const multi = descend ? -1 : 1
+
+      if (isNaN(aValue) || isNaN(bValue))
+        // works properly for integers but not for decimal numbers, so only use it as fallback
+        return aValue.localeCompare(bValue, undefined, {numeric: true})
+      else
+        return (Number(aValue) - Number(bValue) > 0 ? 1 : -1) * multi
+    }
+  }
+
+  const dataSortAscend = sortWith([
+    ascend(prop(sortBy)),
+  ]);
+  const dataSortDescend = sortWith([
+    descend(prop(sortBy)),
+  ]);
+
+  return sortBy !== ""
+    ? sortBy == "dose" || sortBy == "time"
+      ? sortWith([propSort(sortBy, direction)])(data)
+      : direction ? dataSortDescend(data) : dataSortAscend(data)
+    : data
+}
+
+/**
  * Based on a (list of) treatment(s), get the samples that correspond to it and allow users to select them.
  *
  * input: treatment(s) (string)
@@ -65,7 +215,10 @@ function SampleSelection(sources) {
     "settings.form.debug"
   )
 
-  const state$ = sources.onion.state$
+  // Add .drop(0) to force creation of a separate state$ stream
+  // This seems to help with the synchronisation when there are lots of updates
+  // To be confirmed over time whether this actually always works
+  const state$ = sources.onion.state$.drop(0)
 
   const input$ = sources.input
   // .startWith("BRD-K28907958") // REMOVE ME !!!
@@ -90,13 +243,13 @@ function SampleSelection(sources) {
   const emptyState$ = state$
     // .filter(state => state.core.input == null || state.core.input == '')
     .filter((state) => isEmptyState(state))
-    .compose(dropRepeats((x, y) => equals(x, y)))
+    .compose(dropRepeats(equals))
 
   // When the state is cycled because of an internal update
   const modifiedState$ = state$
     // .filter(state => state.core.input != '')
     .filter((state) => !isEmptyState(state))
-    .compose(dropRepeats((x, y) => equals(x, y)))
+    .compose(dropRepeats(equals))
 
   const newInput$ = xs
     .combine(input$, state$)
@@ -142,9 +295,11 @@ function SampleSelection(sources) {
     .map((json) => json.result.data)
     .remember()
 
+  const sampleFilters = isolate(SampleSelectionFilters, { onion: SampleSelectionFiltersLens })(sources)
+
   // Helper function for rendering the table, based on the state
   const makeTable = (state, annotation, initialization) => {
-    const data = state.core.data
+    const data = state.core.usageData
     const blurStyle = state.settings.common.blur
       ? {
           style: { filter: "blur(" + state.settings.common.amountBlur + "px)" },
@@ -152,32 +307,9 @@ function SampleSelection(sources) {
       : {}
     const selectedClass = (selected) =>
       selected ? ".sampleSelected" : ".sampleDeselected"
-
-    function propSort(prop, descend) {
-      return (a, b) => {
-        const aValue = a[prop]
-        const bValue = b[prop]
-        const multi = descend ? -1 : 1
-
-        if (isNaN(aValue) || isNaN(bValue))
-          // works properly for integers but not for decimal numbers, so only use it as fallback
-          return aValue.localeCompare(bValue, undefined, {numeric: true})
-        else
-          return (Number(aValue) - Number(bValue) > 0 ? 1 : -1) * multi
-      }
-    }
-
-    const dataSortAscend = sortWith([
-      ascend(prop(state.core.sort)),
-    ]);
-    const dataSortDescend = sortWith([
-      descend(prop(state.core.sort)),
-    ]);
-    const sortedData = state.core.sort !== ""
-      ? state.core.sort == "dose" || state.core.sort == "time"
-        ? sortWith([propSort(state.core.sort, state.core.direction)])(data)
-        : state.core.direction ? dataSortDescend(data) : dataSortAscend(data)
-      : data
+    
+    const filteredData = filter((v) => !v.hide, data)
+    const sortedData = sortData(filteredData, state.core.sort, state.core.direction)
 
     let rows = sortedData.map((entry) => [
       td(".selection", { props: { id: entry.id } }, [
@@ -301,13 +433,20 @@ function SampleSelection(sources) {
     ])
   }
 
+  const makeFiltersAndTable = (state, annotation, initialization, filtersDom, filtersObject) => {
+    return div([
+      filtersDom,
+      makeTable(state, annotation, initialization, filtersObject)
+    ])
+  }
+
   const initVdom$ = emptyState$.mapTo(div())
 
   const loadingVdom$ = request$
-    .compose(sampleCombine(loadingState$))
-    .map(([_, state]) =>
+    .compose(sampleCombine(loadingState$, sampleFilters.DOM))
+    .map(([_, state, filtersDom]) =>
       // Use the same makeTable function, pass a initialization=true parameter and a body DOM with preloading
-      makeTable(
+      makeFiltersAndTable(
         state,
         div(".col.s10.offset-s1.l10.offset-l1", [
           div(
@@ -316,30 +455,48 @@ function SampleSelection(sources) {
             [div(".indeterminate", { style: { "background-color": "white" } })]
           ),
         ]),
-        true
+        true,
+        filtersDom
       )
     )
     .remember()
 
   const loadedVdom$ = xs
-    .combine(modifiedState$, treatmentAnnotations.DOM)
-    .filter(([state, _]) => state.core.busy == false)
-    .map(([state, annotation]) => makeTable(state, annotation, false))
+    .combine(modifiedState$, treatmentAnnotations.DOM, sampleFilters.DOM)
+    .filter(([state, _1, _2]) => state.core.busy == false)
+    .map(([state, annotation, filtersDom]) => makeFiltersAndTable(state, annotation, false, filtersDom))
 
   // Wrap component vdom with an extra div that handles being dirty
   const vdom$ = dirtyWrapperStream( state$, xs.merge(initVdom$, loadingVdom$, loadedVdom$))
 
   const dataReducer$ = data$.map((data) => (prevState) => {
-    const newData = data.map((el) => merge(el, { use: true }))
+    const newData = data.map((el) => merge(el, { use: true, hide: false }))
+    const hiddenData = hideFilteredData(newData, prevState.core.filtersObject)
     return {
       ...prevState,
       core: {
         ...prevState.core,
-        data: newData,
-        output: newData.filter((x) => x.use).map((x) => x.id),
+        data: data,
+        usageData: hiddenData,
+        output: hiddenData.filter((x) => x.use && !x.hide).map((x) => x.id),
       },
     }
   })
+
+  const filtersObjectReducer$ = sampleFilters.output
+    .compose(dropRepeats(equals))
+    .map((filtersObject) => (prevState) => {
+      const hiddenData = hideFilteredData(prevState.core.usageData, filtersObject)
+      return {
+        ...prevState,
+        core: {
+          ...prevState.core,
+          filtersObject: filtersObject,
+          usageData: hiddenData,
+          output: hiddenData.filter((x) => x.use && !x.hide).map((x) => x.id),
+        }
+      }
+    })
 
   const useClick$ = sources.DOM.select(".selection")
     .events("click", { preventDefault: true })
@@ -380,7 +537,7 @@ function SampleSelection(sources) {
     .map(([id, a]) => (prevState) => {
       // a = false is the usual behavior
       if (!a) {
-        const newData = prevState.core.data.map((el) => {
+        const newData = prevState.core.usageData.map((el) => {
           // One sample object
           var newEl = clone(el)
           const switchUse = id === el.id
@@ -393,12 +550,12 @@ function SampleSelection(sources) {
           ...prevState,
           core: {
             ...prevState.core,
-            data: newData,
-            output: newData.filter((x) => x.use).map((x) => x.id),
+            usageData: newData,
+            output: newData.filter((x) => x.use && !x.hide).map((x) => x.id),
           },
         }
       } else {
-        const newData = prevState.core.data.map((el) => {
+        const newData = prevState.core.usageData.map((el) => {
           // One sample object
           var newEl = clone(el)
           newEl.use = !el.use
@@ -408,8 +565,8 @@ function SampleSelection(sources) {
           ...prevState,
           core: {
             ...prevState.core,
-            data: newData,
-            output: newData.filter((x) => x.use).map((x) => x.id),
+            usageData: newData,
+            output: newData.filter((x) => x.use && !x.hide).map((x) => x.id),
           },
         }
       }
@@ -424,7 +581,7 @@ function SampleSelection(sources) {
       .map((_) => (prevState) => {
         const samplesToUse = prevState.search.split(",")
 
-        const newData = prevState.core.data.map((el) => {
+        const newData = prevState.core.usageData.map((el) => {
           // One sample object
           var newEl = clone(el)
           const use = samplesToUse.includes(el.id)//id === el.id
@@ -437,8 +594,8 @@ function SampleSelection(sources) {
           ...prevState,
           core: {
             ...prevState.core,
-            data: newData,
-            output: newData.filter((x) => x.use).map((x) => x.id),
+            usageData: newData,
+            output: newData.filter((x) => x.use && !x.hide).map((x) => x.id),
           },
         }
       })
@@ -450,7 +607,7 @@ function SampleSelection(sources) {
 
   const defaultReducer$ = xs.of((prevState) => ({
     ...prevState,
-    core: { input: "", data: [] },
+    core: { input: "", data: [], usageData: [], filtersObject: {} },
   }))
   const inputReducer$ = input$.map((i) => (prevState) => ({
     ...prevState,
@@ -508,15 +665,18 @@ function SampleSelection(sources) {
       inputReducer$,
       requestReducer$,
       dataReducer$,
+      filtersObjectReducer$,
       selectReducer$,
       autoSelectReducer$,
       busyReducer$,
       sortReducer$,
       hoverReducer$,
       dirtyReducer$,
+      sampleFilters.onion,
     ),
     output: sampleSelection$,
     modal: treatmentAnnotations.modal,
+    slider: sampleFilters.slider,
   }
 }
 

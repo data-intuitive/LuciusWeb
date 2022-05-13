@@ -1,4 +1,5 @@
 import 'materialize-css/dist/css/materialize.css';
+import 'materialize-css/extras/noUiSlider/nouislider.css'
 
 require('../../favicon.ico')
 
@@ -24,6 +25,7 @@ import switchPath from 'switch-path'
 import { makeModalDriver } from './drivers/makeModalDriver'
 import { makeAutocompleteDriver } from './drivers/makeAutocompleteDriver';
 import { makeSidenavDriver } from './drivers/makeSidenavDriver';
+import { makeSliderDriver } from './drivers/makeSliderDriver'
 import { makeFloatingActionButtonDriver } from './drivers/makeFloatingActionButtonDriver';
 import { makeClipboardDriver } from './drivers/makeClipboardDriver'
 import '../sass/main.scss'
@@ -48,6 +50,7 @@ const drivers = {
     modal: makeModalDriver(),
     ac: makeAutocompleteDriver(),
     sidenav: makeSidenavDriver(),
+    slider: makeSliderDriver(),
     fab: makeFloatingActionButtonDriver(),
     clipboard: makeClipboardDriver(),
     deployments: () => xs.fromPromise(fetch('/deployments.json').then(m => m.json()))

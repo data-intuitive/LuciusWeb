@@ -1,0 +1,11 @@
+div.col.sampleSelectionFilterSlider {
+    margin: 20px 0 60px 0; // Needs extra margin, not only for visuals but also because it's somewhat overbearing and captures clicks for other elements
+    padding: 0; // fix .col padding which messes up the internal slider calculations
+}
+
+div.chip.sampleSelectionFilterHeader {
+    width: 100%;
+    &.activeValueFilter, &.activeRangeFilter {
+        background-color: color('yellow', 'lighten-2');
+    }
+}

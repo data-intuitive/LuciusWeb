@@ -73,6 +73,7 @@ function TreatmentForm(sources) {
     output: signature$,
     modal: xs.merge(SignatureGeneratorSink.modal, SampleSelectionSink.modal),
     ac: TreatmentCheckSink.ac,
+    slider: SampleSelectionSink.slider,
   }
 }
 

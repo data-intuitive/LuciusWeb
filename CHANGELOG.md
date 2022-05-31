@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## Version 5.3.0
+
+### Functionality
+
+- Add filters to the sample selection component
+
 ## Version 5.2.0
 
 ### Functionality

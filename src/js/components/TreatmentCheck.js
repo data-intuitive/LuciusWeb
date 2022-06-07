@@ -6,15 +6,23 @@ import dropRepeats from "xstream/extra/dropRepeats"
 import debounce from "xstream/extra/debounce"
 import { loggerFactory } from "../utils/logger"
 import { dirtyUiReducer } from "../utils/ui"
+import { typer } from "../utils/searchUtils"
 
 const checkLens = {
   get: (state) => ({
     core: typeof state.form !== "undefined" ? state.form.check : {},
     settings: state.settings,
+    search: state.params?.treatment,
+    searchAutoRun: state.params?.autorun,
+    searchTyper: state.params?.typer,
   }),
   set: (state, childState) => ({
     ...state,
     form: { ...state.form, check: childState.core },
+    pageState: {
+      ...state.pageState,
+      treatment: childState.core.input,
+    }
   }),
 }
 
@@ -49,6 +57,9 @@ function TreatmentCheck(sources) {
 
   const acInput$ = sources.ac
 
+  // Get input from search query, either slowly typed or in one go
+  const typer$ = typer(state$, "search", "searchTyper")
+
   const input$ = xs.merge(
     sources.DOM.select(".treatmentQuery")
       .events("input")
@@ -58,7 +69,8 @@ function TreatmentCheck(sources) {
     state$
       .filter((state) => typeof state.core.ghostinput !== "undefined")
       .map((state) => state.core.input)
-      .compose(dropRepeats())
+      .compose(dropRepeats()),
+    typer$,
   )
 
   // When the component should not be shown, including empty signature
@@ -117,7 +129,10 @@ function TreatmentCheck(sources) {
     .map((response$) => response$.replaceError(() => xs.of([])))
     .flatten()
 
-  const data$ = response$.map((res) => res.body.result.data).remember()
+  const data$ = response$
+    .map((res) => res.body.result.data)
+    .map((data) => data ?? [])
+    .remember()
 
   const initVdom$ = emptyState$.mapTo(div())
 
@@ -266,12 +281,45 @@ function TreatmentCheck(sources) {
       }
     })
 
+  /**
+   * When there is new input and is validated by the API, validate the output
+   * auto complete only works when there are more than 1 option
+   * @const TreatmentCheck/fullInputValidationReducer$
+   * @type {Reducer}
+   */
+  const fullInputValidationReducer$ = data$.compose(sampleCombine(input$))
+    .filter(([data, input]) => data.length == 1 &&
+      data[0].trtId == input
+    )
+    .map(([data, input]) => (prevState) => ({
+      ...prevState,
+      core: {
+        ...prevState.core,
+        input: input,
+        showSuggestions: false,
+        validated: true,
+        output: input,
+      },
+    }))
+
   // GO!!!
   const run$ = sources.DOM.select(".treatmentCheck").events("click")
+
+  // Auto start query
+  // Only run once, even if query is changed and then reverted to original value
+  const searchAutoRun$ = state$
+    .filter(
+      (state) => state.searchAutoRun == "" || state.searchAutoRun == "yes"
+    )
+    .filter((state) => state.search == state.core.input)
+    .filter((state) => state.core.validated == true)
+    .mapTo(true)
+    .compose(dropRepeats(equals))
 
   const query$ = xs
     .merge(
       run$,
+      searchAutoRun$,
       // Ghost mode
       sources.onion.state$
         .map((state) => state.core.ghostoutput)
@@ -299,6 +347,7 @@ function TreatmentCheck(sources) {
       requestReducer$,
       setDefaultReducer$,
       autocompleteReducer$,
+      fullInputValidationReducer$,
       dirtyReducer$,
     ),
     output: query$,

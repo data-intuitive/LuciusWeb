@@ -11,9 +11,20 @@ import {
   assocPath,
   equals,
   mergeAll,
+  lensProp,
+  view as viewR,
+  ascend,
+  sortWith,
+  none,
+  any,
+  values,
+  identity,
+  replace,
 } from "ramda"
 import { FetchFilters } from "./FetchFilters"
 import debounce from 'xstream/extra/debounce'
+import flattenConcurrently from 'xstream/extra/flattenConcurrently'
+import { safeModelToUi } from '../modelTranslations'
 
 /**
  * @module components/Filter
@@ -27,18 +38,53 @@ import debounce from 'xstream/extra/debounce'
  * @type {Lens}
  */
 export const filterLens = {
-  get: (state) => ({
-    core: state.filter,
-    settings: { filter: state.settings.filter, api: state.settings.api },
-  }),
-  set: (state, childState) => ({
-    ...state,
-    filter: childState.core,
-    settings: {
-      ...state.settings,
-      filter: childState.settings.filter,
-    },
-  }),
+  get: (state) => {
+
+    // Get keys starting with 'filter_' but that is not only 'filter_'
+    const keys_ = keys(state.routerInformation.params)
+      .filter((key) => key.startsWith("filter_") && key != "filter_")
+    const searchArr = keys_.map((key) => {
+      const newKey = replace(/^filter_/, "", key)
+      return {
+        [newKey]: state.routerInformation.params[key]
+      }
+    })
+    const searchObj = mergeAll(searchArr)
+
+    return {
+      core: state.filter,
+      settings: { filter: state.settings.filter, api: state.settings.api, modelTranslations: state.settings.common.modelTranslations},
+      search: searchObj,
+    }
+  },
+  set: (state, childState) => {
+
+    const filter_outputs = childState.core.filter_output
+    const filterStates = keys(filter_outputs)
+      .map((key) => ({ ["filter_" + key] : filter_outputs[key]?.join() }))
+    const mergedFilterState = mergeAll(filterStates)
+    // mergedFilterState is an object with e.g.
+    // {
+    //   filter_dose: "123",
+    //   filter_cell: "abc,def",
+    // }
+
+    return {
+      ...state,
+      filter: childState.core,
+      settings: {
+        ...state.settings,
+        filter: childState.settings.filter,
+      },
+      routerInformation: {
+        ...state.routerInformation,
+        pageState: {
+          ...state.routerInformation.pageState,
+          ...mergedFilterState,
+        }
+      }
+    }
+  },
 }
 
 /**
@@ -67,56 +113,27 @@ const isEmptyState = (state) => {
  * Filter intent, convert events on the dom to actions
  * @function intent
  * @param {Stream} domSource$ events from the dom
+ * @param {Stream} filterNames$ array of top-level filter names
  * @returns {Stream} object with:
  *                    - filterValuesAction$ stream of object where key is filter group (top level) and value is which option is being clicked/modified
  *                    - modifier$: stream of boolean of modifier key being pressed or not
  *                    - filterAction$: stream of object where key is filter group (top level) and value is boolean of the group being clicked open or not
  */
-function intent(domSource$) {
+function intent(domSource$, filterNames$) {
   // const expandAnyGhost$ = ghostChanges$.map(state => state.core.ghost.expand).startWith(false)
 
-  const showDoseUI$ = domSource$
-    .select(".dose")
-    .events("click")
-    .fold((x, _) => ({ dose: !x.dose }), { dose: false })
-    .startWith({ dose: false })
-
-  const showDose$ = xs
-    .merge(
-      showDoseUI$
-      // showAnyGhost$
+  const filterAction$ = filterNames$
+    .map((names) => xs.fromArray(names.map(
+      (name) => domSource$
+          .select("." + name)
+          .events("click")
+          .fold((x, _) => ({ [name]: !x[name] }), { [name]: false })
+          .startWith({ [name]: false })
+      ))
     )
-    .remember()
-
-  const showCellUI$ = domSource$
-    .select(".cell")
-    .events("click")
-    .fold((x, _) => ({ cell: !x.cell }), { cell: false })
-    .startWith({ cell: false })
-
-  const showCell$ = xs
-    .merge(
-      showCellUI$
-      // showAnyGhost$
-    )
-    .remember()
-
-  const showTypeUI$ = domSource$
-    .select(".type")
-    .events("click")
-    .fold((x, _) => ({ trtType: !x.trtType }), { trtType: false })
-    .startWith({ trtType: false })
-
-  const showType$ = xs
-    .merge(
-      showTypeUI$
-      // showAnyGhost$
-    )
-    .remember()
-
-  const filterAction$ = xs
-    .combine(showDose$, showCell$, showType$)
-    .map(mergeAll)
+    .compose(flattenConcurrently)
+    .compose(flattenConcurrently)
+    .fold((acc, new_) => ({...acc, ...new_}), ({}))
 
   // Toggles for filter options
   // const toggledGhost$ =
@@ -125,35 +142,21 @@ function intent(domSource$) {
   //     .map(state => state.core.ghost.deselect)
   //     .compose(dropRepeats(equals))
 
-  const doseToggled$ = domSource$
-    .select(".dose-options")
-    .events("click")
-    .map(function (ev) {
-      ev.preventDefault()
-      return ev
-    })
-    .map((ev) => ev.ownerTarget.id)
-    .map((value) => ({ dose: value }))
-
-  const cellToggled$ = domSource$
-    .select(".cell-options")
-    .events("click")
-    .map(function (ev) {
-      ev.preventDefault()
-      return ev
-    })
-    .map((ev) => ev.ownerTarget.id)
-    .map((value) => ({ cell: value }))
-
-  const typeToggled$ = domSource$
-    .select(".type-options")
-    .events("click")
-    .map(function (ev) {
-      ev.preventDefault()
-      return ev
-    })
-    .map((ev) => ev.ownerTarget.id)
-    .map((value) => ({ trtType: value }))
+  const filterValueAction$ = filterNames$
+    .map((names) => xs.fromArray(names.map(
+      (name) => domSource$
+          .select("." + name + "-options")
+          .events("click")
+          .map(function (ev) {
+            ev.preventDefault()
+            return ev
+          })
+          .map((ev) => ev.ownerTarget.id)
+          .map((value) => ({ [name]: value }))
+      ))
+    )
+    .compose(flattenConcurrently)
+    .compose(flattenConcurrently)
 
   const modDown$ = domSource$
     .select("document")
@@ -176,15 +179,8 @@ function intent(domSource$) {
     .compose(dropRepeats(equals))
     .remember()
 
-  const action$ = xs.merge(
-    doseToggled$,
-    cellToggled$,
-    typeToggled$,
-    // toggledGhost$
-  )
-
   return {
-    filterValuesAction$: action$,
+    filterValuesAction$: filterValueAction$,
     modifier$: modifier$,
     filterAction$: filterAction$,
   }
@@ -199,7 +195,7 @@ function intent(domSource$) {
  * @param {Stream} filterValuesAction$ object where key is filter group (top level; dose, cell, type) and value is which option is being clicked/modified
  * @param {Stream} modifier$ boolean of modifier key being pressed or not
  * @param {Stream} filterAction$ object where key is filter group (top level; dose, cell, type) and value is boolean of the group being clicked open or not
- * @param {Stream} state$ readback of full state object used for comparing committed state vs current state, if not identical means ui is dirty
+ * @param {Stream} search$ search query values for filter settings
  * @returns {Stream} reducers
  */
 export function model(
@@ -208,6 +204,7 @@ export function model(
   filterValuesAction$,
   modifier$,
   filterAction$,
+  search$,
 ) {
 
   /**
@@ -220,7 +217,7 @@ export function model(
     core: {
       output: {},
       filter_output: {},
-      state: {dose: false, cell: false, trtType: false},
+      state: {},
       dirty: false,
     },
   }))
@@ -348,11 +345,51 @@ export function model(
    * @type {Reducer}
    */
   const outputReducer$ = filterAction$
-    .filter((state) => !state.dose && !state.cell && !state.trtType)
+    .filter((state) => none(identity, values(state))) // check all values are false 
     .map(_ => (prevState) => ({
       ...prevState,
       core: { ...prevState.core, filter_output: minimizeFilterOutput(prevState) },
     }))
+
+  /**
+   * Set filter values during page load when search query contains filter values
+   * @const model/searchReducer$
+   * @type {Reducer}
+   */
+  const searchReducer$ = xs.combine(input$, possibleValues$).compose(sampleCombine(search$))
+    .map(([[_, possibleValues], search]) => {
+
+      const matchedFilters = (searchValue, possibleValues) => {
+        const values = searchValue.split(',')
+        return values.filter(v => possibleValues.includes(v))
+      }
+
+      return mergeAll(
+        keys(possibleValues)
+          .map((key) => (
+            { [key] : search[key] == undefined ? undefined : matchedFilters(search[key], possibleValues[key]) }
+          ))
+        )
+    })
+    .filter((output) => any((value) => (value != undefined), values(output))) // any value not undefined?
+    .compose(dropRepeats(equals)) // only do this once. Changes in the WF should not be overwritten
+    .map((output) => (prevState) => {
+      const filter_output = minimizeFilterOutput({
+        ...prevState,
+        core: {
+          ...prevState.core,
+          output: output,
+        }
+      })
+      return {
+        ...prevState,
+        core: {
+          ...prevState.core,
+          output: output,
+          filter_output: filter_output,
+        }
+      }
+    })
 
   /**
    * Dirty state reducer, custom version than in ui.js as more logic is required and otherwise need to loop state$ back into model
@@ -377,6 +414,7 @@ export function model(
     possibleValuesReducer$,
     filterReducer$,
     toggleReducer$,
+    searchReducer$,
     outputReducer$,
     dirtyReducer$,
   )
@@ -435,9 +473,10 @@ function view(state$) {
 
   /**
    * A table of check boxes that is only shown if needed
-   * @param {*} toggle Visible or not?
-   * @param {*} options Array of possible options
-   * @param {*} selection Array of selections (multiple)
+   * @param {String} filter Filter name as specified by the API
+   * @param {Boolean} toggle Visible or not?
+   * @param {Array} possibleOptions Array of possible options
+   * @param {Array} selectedOptions Array of selections (multiple)
    */
   const togglableFilter = (filter, toggle, possibleOptions, selectedOptions) =>
     toggle
@@ -459,78 +498,57 @@ function view(state$) {
             ),
           ]),
         ])
-      : div(".cell .col .s10 .offset-s1", [""])
+      : div(".col .s10 .offset-s1", [""])
 
+  /**
+   * Top level of a filter group.
+   * First part contains the filter name and summary of the selected filters
+   * Second part, if toggled open, lists all filter values with selection boxes
+   * @param {Array} selectedValues All filter values that are currently selected
+   * @param {Array} possibleValues All possible filter values in this group
+   * @param {String} propName Filter name as specified by the API
+   * @param {String} domText Filter name as it should be displayed on the DOM
+   * @param {Boolean} toggle Filter is currently open or not
+   * @returns vdom div containing sub vdom elements
+   */
+  const collapsableFilter = (selectedValues, possibleValues, propName, domText, toggle) =>
+    div(".col .s12", [
+      div(".chip " + "." + propName + ".col .s12", [
+        span("." + propName + " .blue-grey-text", [
+          noFilter(selectedValues, possibleValues)
+            ? "No " + domText + " Filter"
+            : domText + ": " + selectedValues.join(", "),
+        ]),
+      ]),
+      togglableFilter(
+        propName,
+        toggle,
+        possibleValues,
+        selectedValues
+      ),
+    ])
 
   const loadedVdom$ = modifiedState$.map((state) => {
-    const possibleDoses = state.settings.filter.values.dose || [ "Populating filter dialog...", ]
-    const possibleCells = state.settings.filter.values.cell || [ "Populating filter dialog...", ]
-    const possibleTypes = state.settings.filter.values.trtType || [ "Populating filter dialog...", ]
 
-    const selectedDoses =
-      state.core.output.dose == undefined
-        ? possibleDoses
-        : state.core.output.dose
-    const selectedCells =
-      state.core.output.cell == undefined
-        ? possibleCells
-        : state.core.output.cell
-    const selectedTypes =
-      state.core.output.trtType == undefined
-        ? possibleTypes
-        : state.core.output.trtType
+    const propToFilterSection = (propName) => {
+      const lens = lensProp(propName)
+      const possibleValues = viewR(lens, state.settings.filter.values) || [ "Populating filter dialog...", ]
+      const selectedValues = viewR(lens, state.core.output) ?? possibleValues
+      const toggle = viewR(lens, state.core.state)
+      const domText = safeModelToUi(propName, state.settings.modelTranslations)
 
-    return div([
-      // DEBUG -- debugging purposes, remove when no longer necessary !!!
-      // div('.col .s12', [ div('', [ code('', JSON.stringify(fvs)) ] ) ]),
-      // div('.col .s12', [ div('', [ code('', JSON.stringify(state.settings.filter.values)) ] ) ]),
-      // div('.col .s12', [ div('', [ code('', JSON.stringify(state.core.output)) ] ) ]),
-      div(".col .s12", [
-        div(".chip .dose .col .s12", [
-          span(".dose .blue-grey-text", [
-            noFilter(selectedDoses, possibleDoses)
-              ? "No Dose Filter"
-              : "Doses: " + selectedDoses.join(", "),
-          ]),
-        ]),
-        togglableFilter(
-          "dose",
-          state.core.state.dose,
-          possibleDoses,
-          selectedDoses
-        ),
-      ]),
-      div(".col .s12", [
-        div(".chip .cell .col .s12", [
-          span(".cell .blue-grey-text", [
-            noFilter(selectedCells, possibleCells)
-              ? "No Cell Filter"
-              : "Cells: " + selectedCells.join(", "),
-          ]),
-        ]),
-        togglableFilter(
-          "cell",
-          state.core.state.cell,
-          possibleCells,
-          selectedCells
-        ),
-      ]),
-      div(".col .s12", [
-        div(".chip .type .col .s12", [
-          span(".type .blue-grey-text", [
-            noFilter(selectedTypes, possibleTypes)
-              ? "No Type Filter"
-              : "Types: " + selectedTypes.join(", "),
-          ]),
-        ]),
-        togglableFilter(
-          "type",
-          state.core.state.trtType,
-          possibleTypes,
-          selectedTypes
-        ),
-      ]),
-    ])
+      return collapsableFilter(selectedValues, possibleValues, propName, domText, toggle)
+    }
+
+    const filterGroups = keys(state.settings.filter.values)
+    // sort by name that will be shown on the UI
+    const sortedFilterGroups = sortWith([
+        ascend(a => safeModelToUi(a, state.settings.modelTranslations))
+      ])(filterGroups)
+    const domArray = sortedFilterGroups
+      .map(f => propToFilterSection(f))
+
+    return div(domArray)
   })
 
   return xs.merge(
@@ -569,11 +587,15 @@ function Filter(sources) {
   // The debounce is required, else it simply does not work
   const state$ = sources.onion.state$.compose(debounce(100))
 
+  const filterNames$ = state$
+    .map(state => keys(state.settings.filter.values))
+    .compose(dropRepeats(equals))
+
   const input$ = sources.input
 
   const filterQuery = FetchFilters(sources)
 
-  const actions = intent(sources.DOM)
+  const actions = intent(sources.DOM, filterNames$)
 
   const vdom$ = view(state$)
 
@@ -583,6 +605,7 @@ function Filter(sources) {
       actions.filterValuesAction$,
       actions.modifier$,
       actions.filterAction$,
+      state$.map((state) => (state.search)),
   )
 
   const outputTrigger$ = 

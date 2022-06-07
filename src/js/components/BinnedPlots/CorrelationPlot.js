@@ -34,7 +34,7 @@ const isEmptyState = (state) => {
 
 // For this component, when is a API result empty?
 const isEmptyData = (data) => {
-    return data.length == 0
+    return data == undefined || data.length == 0
 }
 
 const makeVega = (elementID) => {

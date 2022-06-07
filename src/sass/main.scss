@@ -1,0 +1,234 @@
+@import 'materialize-css/sass/components/color-variables';
+@import 'materialize-css/sass/components/color-classes';
+
+@import 'variables';
+@import 'compass_svg';
+
+/* Colors for workflows, to be overriden when printed */
+html {
+    font-family: 'Roboto';
+    color: $color-text;
+}
+
+body {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+    height: 100%;
+}
+
+div.homePage {
+    background-size: 25%;
+    background-position-y: 64px;
+    // TODO convert svg to base64: https://stackoverflow.com/a/21626701
+    background-image: $compass_background_svg;
+    main li.home-menu span {
+        font-size: 2rem;
+    }
+  }
+
+main {
+    flex: 1 0 auto;
+}
+
+// helper to signal which svgs need 'fill' set
+$svg-fill: (
+    ligand: 'yes',
+    correlation: 'yes',
+);
+
+@mixin WF-svg($page, $color) {
+    svg {
+        stroke: $color;
+        @if map-has-key($svg-fill, $page) {
+            fill: $color;
+        } @else {
+            fill: $color-header-background;
+        }
+    }
+}
+
+/* Styling of pages/workflows */
+@mixin page-WF-style($page) {
+    $color-name: map-get($colors-WF, $page);
+    $has-color-specific: map-has-key($colors-WF, #{$page}+"-specific");
+    $base-color: color($color-name, "base");
+    @if $has-color-specific {
+        $base-color: map-get($colors-WF, #{$page}+"-specific");
+    }
+    nav a.#{$page} {
+        color: $base-color;
+        @include WF-svg($page, $base-color);
+    }
+    ul.sidenav a.#{$page} {
+        color: $base-color;
+        @include WF-svg($page, $base-color);
+    }
+    main div.#{$page} {
+        background-color: color($color-name, "lighten-5");
+
+        .WF-header {
+            background-color: color($color-name, "darken-4");
+        
+            i {
+                color: $base-color;
+                &.validated {
+                    color:white;
+                }
+            }
+        }
+        .validation {
+            background-color: color($color-name, "lighten-5");
+        }
+        a.home-menu {
+            color: $base-color;
+            @include WF-svg($page, $base-color);
+        }
+    }
+}
+
+@include page-WF-style("compound");
+@include page-WF-style("genetic");
+@include page-WF-style("ligand");
+@include page-WF-style("disease");
+@include page-WF-style("target");
+@include page-WF-style("correlation");
+@include page-WF-style("generic");
+@include page-WF-style("settings");
+
+/* Styling of components */
+nav {
+    background-color: $color-header-background;
+
+    .extraTitle {
+        display: none;
+    }
+
+    /* Left logo */
+    a.brand-logo.left-logo {
+        position: initial;
+        margin: 5px;
+    }
+
+    ul li.active span {
+        border-bottom-width: medium;
+        border-bottom-style: solid;
+        padding-bottom: 0.2em;
+    }
+
+    a.brand-logo svg{
+        vertical-align: middle;
+    }
+
+    img.logo_img {
+        vertical-align: middle;
+    }
+
+    span.version {
+        color: color('grey', 'darken-3');
+    }
+}
+
+li.home-menu div {
+    float: left !important;
+    background-color: transparent;
+}
+
+.sampleSelection {
+    th {
+        color: $color-text;
+    }
+    td.sampleSelected {
+        color: $color-text;
+    }
+
+    td.sampleDeselected{
+        color: color("grey", "lighten-2")
+    }
+}
+
+li.sampleInfo {
+    .entryKey {
+        color: color('grey', 'darken-1');
+    }
+    .sampleHeader {
+        color: color('grey', 'base');
+    }
+    .treatmentHeader {
+        color: color('grey', 'base');
+    }
+    .filterHeader {
+        color: color('grey', 'base');
+    }
+}
+
+img.trt_img {
+    width: 100%;
+    width: -moz-available;          /* WebKit-based browsers will ignore this. */
+    width: -webkit-fill-available;  /* Mozilla-based browsers will ignore this. */
+    width: fill-available;
+}
+
+.page-footer {
+    background-color: $color-footer-background;
+    color: $color-footer-text;
+}
+
+div.fixed-action-btn {
+    bottom: 120px;
+}
+
+@import 'exporter';
+@import 'sample_selection_filters';
+@import 'init';
+
+/* home svg styling and hover */
+
+a:hover #border {
+    fill: white;
+    fill-opacity: 0.5;
+}
+
+div #corrplot {
+    height: 100%
+}
+
+@media print {
+    @page {
+        margin: 40pt 0pt 40pt 0pt
+    }
+    /* no background color for printing */
+    .compound,
+    .disease,
+    .ligand,
+    .genetic,
+    .generic,
+    .correlation,
+    .target {
+        background-color: white !important
+    }
+    /* Don't print header and footer */
+    header,
+    footer {
+        display: none !important;
+    }
+    /* ul and page class to avoid splitting up blocks that belong together */
+    li {
+        page-break-inside: avoid;
+    }
+    ul {
+        page-break-before: avoid;
+    }
+    .pagebreak {
+        page-break-after: always
+    }
+    /* Recuce font size for printing */
+    div,
+    p,
+    a,
+    span {
+        font-size: 9pt
+    }
+}
+
+@import 'main_custom';

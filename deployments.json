@@ -7,9 +7,6 @@
     "services": {
       "filter": {
         "values": {
-          "dose": ["sample_entry"],
-          "cell": ["sample_entry"],
-          "trtType": ["sample_entry"]
         }
       },
       "common": {
@@ -22,22 +19,41 @@
         },
         "ghost": {
           "compound": {
-            "treatment": "BRD-K93645900",
-            "index": 0,
-            "sample": ["A375_6H_BRD_K93645900_10"],
-            "signature": "-CRCP"
+            "params": {
+              "typer": 500,
+              "treatment": "BRD-K93645900",
+              "samples": "A375_6H_BRD_K93645900_10",
+              "trtType": "trt_cp"
+            }
           },
           "ligand": {
-            "treatment": "ANGPT1",
-            "index": 0,
-            "sample": ["HCC515_4H_CMAP_CYT_SRP3007_50"],
-            "signature": "FBXO11 SLC35 F5BAG4 RIF1"
+            "params": {
+              "typer": 500,
+              "treatment": "ANGPT1",
+              "samples": "HCC515_4H_CMAP_CYT_SRP3007_50",
+              "trtType": "trt_cp"
+            }
           },
           "genetic": {
-            "treatment": "PARP2",
-            "index": 0,
-            "sample": ["DER001_HCC515_96H_X1_F1B6_DUO52HI53LO:B03"],
-            "signature": "-COPS7A -KEAP1 -CCNB1 -HMG20B -ELOVL6 -DERA LPL -PLEKHJ1 -TPI1 ST3GAL5 -HAT1 -MLF2 -FOXG1 -STRAP -MRPL4 -EDN1 -PON2 KMT2A FRMD4A -C16orf58"
+            "params": {
+              "typer": 500,
+              "treatment": "PARP2",
+              "samples": "DER001_HCC515_96H_X1_F1B6_DUO52HI53LO",
+              "trtType": "trt_cp"
+            }
+          },
+          "disease": {
+            "params": {
+              "typer": 100,
+              "signature": "HSPA1A DNAJB1 DDIT4 -TSEN2"
+            }
+          },
+          "correlation": {
+            "params": {
+              "typer": 100,
+              "signature1": "HSPA1A DNAJB1 DDIT4 -TSEN2",
+              "signature2": "DNAJB1 DDIT4 -TSEN2"
+            }
           }
         },
         "modelTranslations": [
@@ -50,6 +66,21 @@
             "ui": "Secondary ID",
             "model": "jnjb",
             "comment": ""
+          },
+          {
+            "ui": "Cell",
+            "model": "cell",
+            "comment": "Filter group name"
+          },
+          {
+            "ui": "Dose",
+            "model": "dose",
+            "comment": "Filter group name"
+          },
+          {
+            "ui": "Type",
+            "model": "trtType",
+            "comment": "Filter group name"
           }
         ]
       },
@@ -58,6 +89,10 @@
       },
       "api": {
         "url": "http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&sync=true&timeout=30"
+      },
+      "init": {
+        "url": "http://localhost:8090/",
+        "contextOptions": "context-factory=spark.jobserver.context.SessionContextFactory&spark.scheduler.mode=FAIR&spark.jobserver.context-creation-timeout=60&spark.memory.fraction=0.7&spark.dynamicAllocation.enabled=false&spark.executor.instances=6&spark.executor.cores=4&spark.executor.memory=4g&spark.yarn.executor.memoryOverhead=2g&spark.yarn.am.memory=4G&spark.driver.memory=4G"
       },
       "sourire": {
         "url": "http://localhost:9999/molecule/"

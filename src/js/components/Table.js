@@ -76,13 +76,24 @@ const headTableLens = {
       sourire: state.settings.sourire,
       filter: state.settings.filter,
     },
-    ui: (state.ui??{}).headTable ?? {dirty: false}, // Get state.ui.headTable in a safe way or else get a default
+    ui: state.ui?.headTable ?? {dirty: false}, // Get state.ui.headTable in a safe way or else get a default
+    numEntries: state.routerInformation?.params?.numTableHead,
   }),
-  set: (state, childState) => ({
+  set: (state, childState) => {
+    // don't add value of numEntres to the pageState if it is the default value
+    const numEntries = childState.core.numEntries == parseInt(childState.settings.table.count) ? undefined : childState.core.numEntries
+    return {
     ...state,
     headTable: childState.core,
     settings: { ...state.settings, headTable: childState.settings.table },
-  }),
+    routerInformation: {
+      ...state.routerInformation,
+      pageState: {
+        ...state.routerInformation.pageState,
+        numTableHead: numEntries,
+      }
+    }
+  }},
 }
 
 /**
@@ -105,13 +116,24 @@ const tailTableLens = {
       sourire: state.settings.sourire,
       filter: state.settings.filter,
     },
-    ui: (state.ui??{}).tailTable ?? {dirty: false}, // Get state.ui.tailTable in a safe way or else get a default
+    ui: state.ui?.tailTable ?? {dirty: false}, // Get state.ui.tailTable in a safe way or else get a default
+    numEntries: state.routerInformation?.params?.numTableTail,
   }),
-  set: (state, childState) => ({
+  set: (state, childState) => {
+    // don't add value of numEntres to the pageState if it is the default value
+    const numEntries = childState.core.numEntries == parseInt(childState.settings.table.count) ? undefined : childState.core.numEntries
+    return {
     ...state,
     tailTable: childState.core,
     settings: { ...state.settings, tailTable: childState.settings.table },
-  }),
+    routerInformation: {
+      ...state.routerInformation,
+      pageState: {
+        ...state.routerInformation.pageState,
+        numTableTail: numEntries,
+      }
+    }
+  }},
 }
 
 /**
@@ -134,7 +156,7 @@ const compoundContainerTableLens = {
       sourire: state.settings.sourire,
       filter: state.settings.filter,
     },
-    ui: (state.ui??{}).compoundTable ?? {dirty: false}, // Get state.ui.compoundTable in a safe way or else get a default
+    ui: state.ui?.compoundTable ?? {dirty: false}, // Get state.ui.compoundTable in a safe way or else get a default
   }),
   set: (state, childState) => ({
     ...state,
@@ -336,11 +358,17 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
      * second update  0     5           5
      *
      * pairwise gives us previous and new value but need to make sure that if we only receive 1 value we do get an output, so use .startWith(0)
+     * 
+     * If a value for the amount of entries was passed through the search query, use that as default, otherwise use the standard default setting
      *
      * @const makeTable/Table/defaultAmountToDisplay$
      * @type {Stream}
      */
-    const defaultAmountToDisplay$ = state$.map(state => parseInt(state.settings.table.count))
+    const defaultAmountToDisplay$ = xs.combine(
+      state$.map(state => parseInt(state.settings.table.count)),
+      state$.map(state => state.numEntries),
+    )
+    .map(([default_, searchQuery]) => (isNaN(searchQuery) ? default_ : searchQuery))
       .compose(dropRepeats(equals))
       .startWith(0)
       .compose(pairwise)
@@ -434,7 +462,9 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
      * @const makeTable/Table/data$
      * @type {Stream}
      */
-    const data$ = validResponse$.map((result) => result.body.result.data)
+    const data$ = validResponse$
+      .map((result) => result.body.result.data)
+      .map((data) => data ?? [])
 
     /**
      * Stream of table data converted into TSV format
@@ -599,6 +629,7 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
         ])
       )
       .remember()
+      .compose(delay(100))
 
     /**
      * Full vdom content once request is received
@@ -867,6 +898,20 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
         core: { ...prevState.core, expandOptions: yesorno },
       }))
 
+    /**
+     * Reducer for passing the amount of entries shown in the table to the search query params object
+     * @const makeTable/Table/amountOfDisplayedLinesReducer$
+     * @type {Reducer}
+     */
+    const amountOfDisplayedLinesReducer$ = amountToDisplay$
+    .map((new_) => (prevState) => {
+      const val = max(1, new_)
+      return {
+        ...prevState,
+        core: { ...prevState.core, numEntries: val}
+      }
+    })
+
     return {
       DOM: vdom$,
       HTTP: request$,
@@ -875,7 +920,8 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
         inputReducer$,
         requestReducer$,
         dataReducer$,
-        switchReducer$
+        switchReducer$,
+        amountOfDisplayedLinesReducer$,
       ),
       log: xs.merge(
         logger(modifiedState$, "state$")

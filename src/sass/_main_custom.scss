@@ -1,0 +1,17 @@
+/* Override colors in correlation workflow */
+main div.correlation {
+    .WF-header {
+        background-color: color("blue", "darken-3");
+    }
+
+    .validation {
+        background-color: color("blue", "lighten-3");
+    }
+
+    & > div:first-child {
+        div.validation > div > div {
+            margin-bottom: 0px;
+        }
+        margin-bottom: 20px;
+    }
+}

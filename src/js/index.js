@@ -22,7 +22,7 @@ import {
   span,
   img,
 } from "@cycle/dom"
-import { merge, prop, mergeDeepLeft, mergeDeepRight } from "ramda"
+import { merge, prop, mergeDeepLeft, mergeDeepRight, equals, pickBy, identity } from "ramda"
 import * as R from "ramda"
 
 // Workflows
@@ -40,6 +40,7 @@ import Debug from "./pages/debug"
 import Home from "./pages/home"
 import { IsolatedSettings } from "./pages/settings"
 import { IsolatedAdminSettings } from "./pages/adminSettings"
+import Init from "./pages/init"
 
 // Utilities
 import { initSettings } from "./configuration.js"
@@ -54,6 +55,7 @@ import {
   correlationSVG,
   settingsSVG,
 } from "./svg"
+import sampleCombine from "xstream/extra/sampleCombine"
 
 export default function Index(sources) {
   const { router } = sources
@@ -83,6 +85,7 @@ export default function Index(sources) {
     "/correlation": CorrelationWorkflow,
     "/debug": Debug,
     "/admin": IsolatedAdminSettings,
+    "/init": Init,
     "*": Home,
   })(sources)
 
@@ -408,16 +411,72 @@ export default function Index(sources) {
     }
   )
 
-  const routerReducer$ = router.history$.map((router) => (prevState) => {
+  const ghostModeEnabled$ = state$
+    .map((state) => state.settings.common.ghostMode)
+
+  const routerReducer$ = router.history$
+    .compose(sampleCombine(ghostModeEnabled$))
+    .map(([router, ghostMode]) => (prevState) => {
+
+    function paramsToObject(entries) {
+      const result = {}
+      for(const [key, value] of entries) { // each 'entry' is a [key, value] tupple
+        result[key] = value
+      }
+      return result
+    }
+
+    // we should not apply the same search query values when the page was reloaded
+    // if user refreshes or clicks same WF link, router.type is not set
+    // if we push new state, router.type == "push"
+    // Also, don't allow search queries when ghost mode is enabled
+    let paramsObject = {}
+    if (router?.type == "push" && ghostMode != true) {
+      const params = new URLSearchParams(router.state)
+      paramsObject = paramsToObject(params)
+    }
+
     return {
       ...prevState,
-      routerInformation: router,
+      routerInformation: {
+        ...router,
+        params: paramsObject,
+        pageState: {}
+        }
     }
+  })
+
+  const ghostModeWarning$ = router.history$
+    .compose(sampleCombine(ghostModeEnabled$))
+    .filter(([router, ghostMode]) => (router?.type == "push"))
+    .filter(([router, ghostMode]) => (ghostMode == true))
+    .mapTo({ text: 'Search query ignored as Ghost Mode is enabled', duration: 10000 })
+
+  const pageStateReducer$ = state$.map((state) => state.routerInformation.pageState).compose(dropRepeats(equals))
+  .map((state) => (prevState) => {
+    // Don't output fields with undefined values
+    const filteredState = pickBy(identity, state)
+    const url = new URLSearchParams(filteredState)
+    const urlString = url.toString()
+
+    const fullUrl = urlString.length > 0
+      ? location.protocol + "//" + location.host + prevState.routerInformation.pathname + "?autorun&" + url.toString()
+      : location.protocol + "//" + location.host + prevState.routerInformation.pathname
+
+    return {
+      ...prevState,
+      routerInformation: {
+        ...prevState.routerInformation,
+        pageStateURL: fullUrl,
+      }
+    }
+
   })
 
   // Capture link targets and send to router driver
   const router$ = sources.DOM.select("a")
     .events("click")
+    .filter((ev) => !ev.ownerTarget.classList.contains("do-not-route"))
     .map((ev) => ev.target.pathname)
     .remember()
 
@@ -427,6 +486,14 @@ export default function Index(sources) {
     .filter((ev) => ev.target.pathname == "/debug")
 
   const history$ = sources.onion.state$.fold((acc, x) => acc.concat([x]), [{}])
+
+  const historyDriver$ = router.history$
+    .map((router) => router.search)
+    .filter((search) => search != undefined && search != "" && search != "?")
+    .map((search) => ({
+      type: 'push',
+      state: search,
+    }))
 
   return {
     log: xs.merge(
@@ -441,6 +508,7 @@ export default function Index(sources) {
       defaultReducer$,
       deploymentsReducer$,
       routerReducer$,
+      pageStateReducer$,
       page$.map(prop("onion")).filter(Boolean).flatten()
     ),
     DOM: vdom$,
@@ -454,16 +522,23 @@ export default function Index(sources) {
       prevent$,
       page$.map(prop("preventDefault")).filter(Boolean).flatten()
     ),
-    popup: page$.map(prop("popup")).filter(Boolean).flatten(),
+    popup: xs.merge(
+      ghostModeWarning$,
+      page$.map(prop("popup")).filter(Boolean).flatten(),
+    ),
     modal: page$.map(prop("modal")).filter(Boolean).flatten(),
     ac: page$.map(prop("ac")).filter(Boolean).flatten(),
     sidenav: sidenavEvent$,
+    slider: page$.map(prop("slider")).filter(Boolean).flatten(),
+    fab: page$.map(prop("fab")).filter(Boolean).flatten(),
     storage: page$.map(prop("storage")).filter(Boolean).flatten(),
     deployments: page$
       .map(prop("deployments"))
       .filter(Boolean)
       .flatten()
       .debug("deployments"),
+    history: historyDriver$,
+    clipboard: page$.map(prop("clipboard")).filter(Boolean).flatten(),
   }
 }
 

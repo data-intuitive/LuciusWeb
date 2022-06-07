@@ -22,7 +22,8 @@ function makeVegaDriver() {
                 console.error(m)
             }
         })
-
+        
+        return view$
     }
 
     return vegaDriver

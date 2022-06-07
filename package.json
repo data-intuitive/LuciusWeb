@@ -1,6 +1,6 @@
 {
     "name": "LuciusWeb",
-    "version": "5.0.2",
+    "version": "5.3.0",
     "description": "Web interface for ComPass aka Lucius",
     "repository": {
         "type": "git",

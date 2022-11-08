@@ -23,6 +23,7 @@ import img_ctl_vehicle_cns from "/images/treatmentTypes/CTL_VEHICLE.CNS.png"
 import img_ctl_vector_cns  from "/images/treatmentTypes/CTL_VECTOR.png"
 import img_ctl_untrt_cns   from "/images/treatmentTypes/CTL_UNTRT.CNS.png"
 import img_ctl_untrt       from "/images/treatmentTypes/CTL_UNTRT.png"
+import { maxLengthValueUnit } from "../../utils/utils"
 
 /**
  * @module components/SampleTable/SampleInfo
@@ -340,8 +341,8 @@ export function SampleInfo(sources) {
         p(".col .s12 .sampleHeader", hStyle, "Sample Info:"),
         p(pStyle, entry("Sample ID: ", sample.id)),
         p(pStyle, entry("Cell: ", sample.cell)),
-        p(pStyle, entry("Dose: ", sample.dose !== "N/A" ? sample.dose + " " + (sample?.dose_unit ?? "?") : sample.dose)),
-        p(pStyle, entry("Time: ", sample.time !== "N/A" ? sample.time + " " + (sample?.time_unit ?? "?") : sample.time)),
+        p(pStyle, entry("Dose: ", maxLengthValueUnit(sample.dose, sample?.dose_unit ?? "?", 7))),
+        p(pStyle, entry("Time: ", maxLengthValueUnit(sample.time, sample?.time_unit ?? "?", 7))),
         p(pStyle, entry("Year: ", sample.year)),
         p(pStyle, entry("Plate: ", sample.plate)),
       ]

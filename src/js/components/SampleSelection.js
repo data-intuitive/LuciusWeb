@@ -24,6 +24,7 @@ import { TreatmentAnnotation } from "./TreatmentAnnotation"
 import { SampleSelectionFilters, SampleSelectionFiltersLens } from "./SampleSelectionFilters"
 import { safeModelToUi } from "../modelTranslations"
 import { dirtyUiReducer, dirtyWrapperStream, busyUiReducer } from "../utils/ui"
+import { maxLengthValueUnit } from "../utils/utils"
 
 const emptyData = {
   body: {
@@ -335,20 +336,7 @@ function SampleSelection(sources) {
         entry.id.length > 40 ? entry.id.substring(0, 40) + "..." : entry.id
       ),
       td(selectedClass(entry.use), entry.cell),
-      td(selectedClass(entry.use),
-          ((_) => {
-            const dose = entry.dose !== "N/A" ? entry.dose + " " + entry.dose_unit : entry.dose
-            const maxLength = 7
-            if (dose.length <= maxLength)
-              return dose
-            else if (isNaN(entry.dose) || entry.dose_unit?.length >= 3)
-              return dose.substring(0, maxLength-1) + "..."
-              // adding '...' is quite small on screen (in non-monospaced fonts), so we're ignoring that
-            else
-              return Number(entry.dose).toFixed(maxLength - 3 - entry.dose_unit?.length) + " " + entry.dose_unit
-              // -3 = '0.' and ' '
-          })()
-      ),
+      td(selectedClass(entry.use), maxLengthValueUnit(entry.dose, entry.dose_unit, 7)),
       // td(selectedClass(entry.use), entry.batch),
       // td(selectedClass(entry.use), entry.year),
       td(selectedClass(entry.use), entry.time !== "N/A" ? entry.time + " " + entry.time_unit : entry.time),

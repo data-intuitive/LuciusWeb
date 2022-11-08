@@ -65,3 +65,18 @@ Array.prototype.max = function() {
 Array.prototype.min = function() {
     return Math.min.apply(null, this);
 };
+
+/**
+ * Convert a value with unit to a string with maximum length and with truncations
+ */
+export function maxLengthValueUnit(value, unit, maxLength) {
+    const str = value !== "N/A" ? value + " " + unit : value
+    if (str.length <= maxLength)
+        return str
+    else if (isNaN(value) || unit?.length >= 3)
+        return str.substring(0, maxLength-1) + "..."
+        // adding '...' is quite small on screen (in non-monospaced fonts), so we're ignoring that
+    else
+        return Number(value).toFixed(maxLength - 3 - unit?.length) + " " + unit
+        // -3 = '0.' and ' '
+}

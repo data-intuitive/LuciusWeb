@@ -74,7 +74,9 @@ export function SampleInfo(sources) {
     .map((count) => (count % 2 == 0 ? false : true))
 
   function entry(key, value) {
-    if (value == "Feature not found")
+    // Feature not found => LuciusCore doesn't have the value in the model, so this will never be available. Unlikely string to be present in the normal data.
+    // !value?.trim() => Also don't show empty fields
+    if (value == "Feature not found" || !value?.trim())
       return []
     else
       return [

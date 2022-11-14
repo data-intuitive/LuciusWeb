@@ -74,18 +74,21 @@ export function SampleInfo(sources) {
     .map((count) => (count % 2 == 0 ? false : true))
 
   function entry(key, value) {
-    return [
-      span(
-        ".col .s4 .entryKey",
-        { style: { fontWeight: "lighter", whiteSpace: "nowrap"} },
-        key
-      ),
-      span(
-        ".col .s8 .entryValue",
-        { style: { overflow: "hidden", "text-overflow": "ellipsis" } },
-        value?.length != 0 ? value : ""
-      ),
-    ]
+    if (value == "Feature not found")
+      return []
+    else
+      return [
+        span(
+          ".col .s4 .entryKey",
+          { style: { fontWeight: "lighter", whiteSpace: "nowrap"} },
+          key
+        ),
+        span(
+          ".col .s8 .entryValue",
+          { style: { overflow: "hidden", "text-overflow": "ellipsis" } },
+          value?.length != 0 ? value : ""
+        ),
+      ]
   }
 
   function entrySmall(key, value) {
@@ -336,15 +339,19 @@ export function SampleInfo(sources) {
     let pStylewBlur = { style: merge(blur, { margin: "0px" }) }
     const _filters = sample.filters != undefined ? sample.filters : []
 
+    const origDosePair = _filters.find(e => e.key == "orig_dose") ?? {key: "orig_dose", value: "N/A"}
+    const origDose = origDosePair.value
+
     const samplePart =
       [
         p(".col .s12 .sampleHeader", hStyle, "Sample Info:"),
-        p(pStyle, entry("Sample ID: ", sample.id)),
-        p(pStyle, entry("Cell: ", sample.cell)),
-        p(pStyle, entry("Dose: ", maxLengthValueUnit(sample.dose, sample?.dose_unit ?? "?", 7))),
-        p(pStyle, entry("Time: ", maxLengthValueUnit(sample.time, sample?.time_unit ?? "?", 7))),
-        p(pStyle, entry("Year: ", sample.year)),
-        p(pStyle, entry("Plate: ", sample.plate)),
+        p(".row", pStyle, entry("Sample ID: ", sample.id)),
+        p(".row", pStyle, entry("Cell: ", sample.cell)),
+        p(".row", pStyle, entry("Dose: ", maxLengthValueUnit(origDose, sample?.dose_unit ?? "?", 7))),
+        p(".row", pStyle, entry("Log(dose): ", maxLengthValueUnit(sample.dose, "", 7))),
+        p(".row", pStyle, entry("Time: ", maxLengthValueUnit(sample.time, sample?.time_unit ?? "?", 7))),
+        p(".row", pStyle, entry("Year: ", sample.year)),
+        p(".row", pStyle, entry("Plate: ", sample.plate)),
       ]
 
     const treatmentPart =

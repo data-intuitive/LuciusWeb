@@ -187,6 +187,9 @@ export function SampleInfo(sources) {
           : "",
       ]
 
+    const _filters = sample.filters != undefined ? sample.filters : []
+    const origCell = _filters.find(e => e.key == "orig_cell")?.value ?? "N/A"
+
     return {
       trt_cp: div(".row", { style: { fontWeight: "small" } }, [
         div(".valign-wrapper", [
@@ -195,7 +198,7 @@ export function SampleInfo(sources) {
           ]),
 
           div(".col .l2 .hide-on-med-and-down .truncate", [sample.id]),
-          div(".col .l1 .hide-on-med-and-down", [sample.cell]),
+          div(".col .l1 .hide-on-med-and-down", [origCell]),
           div(".col .l2 .hide-on-med-and-down .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
           div(".col .l3 .hide-on-med-and-down", { style: blur }, [sample.trt_name]),
 
@@ -206,7 +209,7 @@ export function SampleInfo(sources) {
           div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Sample ID"]),
           div(".col .s8 .truncate", [sample.id]),
           div(".col .s4 .m3 .offset-m1", ["Cell"]),
-          div(".col .s8", [sample.cell]),
+          div(".col .s8", [origCell]),
           div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Treatment ID"]),
           div(".col .s8 .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
           div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Treatment Name"]),
@@ -220,7 +223,7 @@ export function SampleInfo(sources) {
           ]),
 
           div(".col .l2 .hide-on-med-and-down .truncate", [sample.id]),
-          div(".col .l1 .hide-on-med-and-down", [sample.cell]),
+          div(".col .l1 .hide-on-med-and-down", [origCell]),
           div(".col .l2 .hide-on-med-and-down .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
           div(".col .l3 .hide-on-med-and-down", { style: blur }, [sample.trt_name]),
 
@@ -231,7 +234,7 @@ export function SampleInfo(sources) {
           div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Sample ID"]),
           div(".col .s8 .truncate", [sample.id]),
           div(".col .s4 .m3 .offset-m1", ["Cell"]),
-          div(".col .s8", [sample.cell]),
+          div(".col .s8", [origCell]),
           div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Treatment ID"]),
           div(".col .s8 .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
           div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Treatment Name"]),
@@ -245,7 +248,7 @@ export function SampleInfo(sources) {
           ]),
 
           div(".col .l2 .hide-on-med-and-down .truncate", [sample.id]),
-          div(".col .l1 .hide-on-med-and-down", [sample.cell]),
+          div(".col .l1 .hide-on-med-and-down", [origCell]),
           div(".col .l2 .hide-on-med-and-down .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
           div(".col .l3 .hide-on-med-and-down", { style: blur }, [sample.trt_name]),
 
@@ -256,7 +259,7 @@ export function SampleInfo(sources) {
           div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Sample ID"]),
           div(".col .s8 .truncate", [sample.id]),
           div(".col .s4 .m3 .offset-m1", ["Cell"]),
-          div(".col .s8", [sample.cell]),
+          div(".col .s8", [origCell]),
           div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Treatment ID"]),
           div(".col .s8 .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
           div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Treatment Name"]),
@@ -270,7 +273,7 @@ export function SampleInfo(sources) {
           ]),
 
           div(".col .l2 .hide-on-med-and-down .truncate", [sample.id]),
-          div(".col .l1 .hide-on-med-and-down", [sample.cell]),
+          div(".col .l1 .hide-on-med-and-down", [origCell]),
           div(".col .l2 .hide-on-med-and-down .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
           div(".col .l3 .hide-on-med-and-down", { style: blur }, [sample.trt_name]),
 
@@ -281,7 +284,7 @@ export function SampleInfo(sources) {
           div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Sample ID"]),
           div(".col .s8 .truncate", [sample.id]),
           div(".col .s4 .m3 .offset-m1", ["Cell"]),
-          div(".col .s8", [sample.cell]),
+          div(".col .s8", [origCell]),
           div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Treatment ID"]),
           div(".col .s8 .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
           div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Treatment Name"]),
@@ -295,7 +298,7 @@ export function SampleInfo(sources) {
           ]),
 
           div(".col .l2 .hide-on-med-and-down .truncate", [sample.id]),
-          div(".col .l1 .hide-on-med-and-down", [sample.cell]),
+          div(".col .l1 .hide-on-med-and-down", [origCell]),
           div(".col .l2 .hide-on-med-and-down .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
           div(".col .l3 .hide-on-med-and-down", { style: blur }, [sample.trt_name]),
 
@@ -306,7 +309,7 @@ export function SampleInfo(sources) {
           div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Sample ID"]),
           div(".col .s8 .truncate", [sample.id]),
           div(".col .s4 .m3 .offset-m1", ["Cell"]),
-          div(".col .s8", [sample.cell]),
+          div(".col .s8", [origCell]),
           div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Treatment ID"]),
           div(".col .s8 .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
           div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Treatment Name"]),
@@ -341,14 +344,14 @@ export function SampleInfo(sources) {
     let pStylewBlur = { style: merge(blur, { margin: "0px" }) }
     const _filters = sample.filters != undefined ? sample.filters : []
 
-    const origDosePair = _filters.find(e => e.key == "orig_dose") ?? {key: "orig_dose", value: "N/A"}
-    const origDose = origDosePair.value
+    const origDose = _filters.find(e => e.key == "orig_dose")?.value ?? "N/A"
+    const origCell = _filters.find(e => e.key == "orig_cell")?.value ?? "N/A"
 
     const samplePart =
       [
         p(".col .s12 .sampleHeader", hStyle, "Sample Info:"),
         p(".row", pStyle, entry("Sample ID: ", sample.id)),
-        p(".row", pStyle, entry("Cell: ", sample.cell)),
+        p(".row", pStyle, entry("Cell: ", origCell)),
         p(".row", pStyle, entry("Dose: ", maxLengthValueUnit(origDose, sample?.dose_unit ?? "?", 7))),
         p(".row", pStyle, entry("Log(dose): ", maxLengthValueUnit(sample.dose, "", 7))),
         p(".row", pStyle, entry("Time: ", maxLengthValueUnit(sample.time, sample?.time_unit ?? "?", 7))),

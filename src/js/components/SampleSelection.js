@@ -291,9 +291,14 @@ function SampleSelection(sources) {
     .map((response$) => response$.replaceError(() => xs.of(emptyData)))
     .flatten()
 
+  const getSingleCell = (input) => input.split('|')[0] ?? "N/A"
+
   const data$ = response$
     .map((res) => res.body)
     .map((json) => json.result.data)
+    .map(array => {
+      return array.map(val => { return { ...val, cell: getSingleCell(val.cell) } })
+    })
     .remember()
 
   const sampleFilters = isolate(SampleSelectionFilters, { onion: SampleSelectionFiltersLens })(sources)

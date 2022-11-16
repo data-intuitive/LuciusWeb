@@ -914,7 +914,10 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
 
     return {
       DOM: vdom$,
-      HTTP: request$,
+      HTTP: xs.merge(
+        request$,
+        tableContent.HTTP
+      ),
       onion: xs.merge(
         defaultReducer$,
         inputReducer$,

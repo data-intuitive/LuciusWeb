@@ -5,6 +5,7 @@ import {
   li,
   span,
   img,
+  i,
 } from "@cycle/dom"
 import { merge } from "ramda"
 import { safeModelToUi } from "../../modelTranslations"
@@ -24,6 +25,7 @@ import img_ctl_vector_cns  from "/images/treatmentTypes/CTL_VECTOR.png"
 import img_ctl_untrt_cns   from "/images/treatmentTypes/CTL_UNTRT.CNS.png"
 import img_ctl_untrt       from "/images/treatmentTypes/CTL_UNTRT.png"
 import { maxLengthValueUnit } from "../../utils/utils"
+import { InformationDetails } from "../InformationDetails"
 
 /**
  * @module components/SampleTable/SampleInfo
@@ -72,6 +74,10 @@ export function SampleInfo(sources) {
   const zoomed$ = click$
     .fold((x, y) => x + y, 0)
     .map((count) => (count % 2 == 0 ? false : true))
+
+  const informationDetailsQuery = InformationDetails(sources)
+  const informationDetailsHTTP$ = informationDetailsQuery.HTTP
+  const informationDetails$ = informationDetailsQuery.informationDetails.map(i => i.body.result.data).startWith({})
 
   function entry(key, value) {
     // Feature not found => LuciusCore doesn't have the value in the model, so this will never be available. Unlikely string to be present in the normal data.
@@ -510,14 +516,26 @@ export function SampleInfo(sources) {
   }
 
   const vdom$ = xs
-    .combine(state$, zoomed$, props$, blur$)
-    .map(([sample, zoom, props, blur]) => {
+    .combine(state$, zoomed$, props$, blur$, informationDetails$)
+    .map(([sample, zoom, props, blur, informationDetails]) => {
       let bgcolor =
         sample.zhang >= 0 ? "rgba(44,123,182, 0.08)" : "rgba(215,25,28, 0.08)"
       const updtProps = { ...props, bgColor: bgcolor }
 
       const thisRow = row(sample, updtProps, blur, zoom)
       const thisRowDetail = rowDetail(sample, updtProps, blur)
+      const thisRowReplicationDetails = [
+        i(".material-icons", "info_outline"), 
+        div([ p("processing level"), p(informationDetails?.processing_level) ]), 
+        div([ p("replicates"), p(informationDetails?.number_of_replicates) ]), 
+        div([ p("cell"), div(informationDetails?.cell_details?.map(c => p(c))) ]), 
+        p("plate"), 
+        p("well"), 
+        p("batch"), 
+        p("year"), 
+        p("extra")
+      ]
+      console.log("informationDetails: " + JSON.stringify(informationDetails))
 
       return li(
         ".collection-item .zoom .sampleInfo",
@@ -531,6 +549,9 @@ export function SampleInfo(sources) {
                   : thisRowDetail["_default"],
               ])
             : div(),
+          zoom
+            ? div(".row", thisRowReplicationDetails)
+            : div(),
         ]
       )
     })
@@ -538,5 +559,6 @@ export function SampleInfo(sources) {
 
   return {
     DOM: vdom$,
+    HTTP: informationDetailsHTTP$,
   }
 }

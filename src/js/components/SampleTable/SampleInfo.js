@@ -70,12 +70,18 @@ export function SampleInfo(sources) {
   const state$ = sources.onion.state$
   const props$ = sources.props
 
-  const click$ = sources.DOM.select(".zoom").events("click").mapTo(1)
+  // don't accept clicks if they came from the click2$ source
+  const click$ = sources.DOM.select(".zoom").events("click").debug("click$").filter(ev => !ev.srcElement.classList.contains("informationDetailsZoom"))
+  const click2$ = sources.DOM.select(".informationDetailsZoom").events("click")
   const zoomed$ = click$
-    .fold((x, y) => x + y, 0)
-    .map((count) => (count % 2 == 0 ? false : true))
+    .fold((acc, _) => !acc, false)
+  
+  // always close second level if primary level is closed
+  const zoomed2$ = xs.combine(zoomed$.startWith(false), click2$.startWith(0))
+    .fold(([prev_zoomed, acc], [zoomed, _]) => [zoomed, prev_zoomed && zoomed && !acc], [false, false])
+    .map(([_, x]) => x)
 
-  const informationDetailsQuery = InformationDetails({...sources, trigger: zoomed$})
+  const informationDetailsQuery = InformationDetails({...sources, trigger: zoomed2$})
   const informationDetailsHTTP$ = informationDetailsQuery.HTTP
   const informationDetails$ = informationDetailsQuery.informationDetails.map(i => i.body.result.data).startWith({})
 
@@ -516,8 +522,8 @@ export function SampleInfo(sources) {
   }
 
   const vdom$ = xs
-    .combine(state$, zoomed$, props$, blur$, informationDetails$)
-    .map(([sample, zoom, props, blur, informationDetails]) => {
+    .combine(state$, zoomed$, zoomed2$, props$, blur$, informationDetails$)
+    .map(([sample, zoom, zoom2, props, blur, informationDetails]) => {
       let bgcolor =
         sample.zhang >= 0 ? "rgba(44,123,182, 0.08)" : "rgba(215,25,28, 0.08)"
       const updtProps = { ...props, bgColor: bgcolor }
@@ -525,9 +531,8 @@ export function SampleInfo(sources) {
       const thisRow = row(sample, updtProps, blur, zoom)
       const thisRowDetail = rowDetail(sample, updtProps, blur)
       const thisRowReplicationDetails = [
-        
         div(".col .s12", [
-          div(".row", i(".material-icons", "info_outline")),
+          div(".row", i(".btn-flat .material-icons  .informationDetailsZoom", "info_outline")),
           div(".row", [ div(".col .s2", "processing level"), div(".col", informationDetails?.processing_level) ]),
           div(".row", [ div(".col .s2", "replicates"), div(".col", informationDetails?.number_of_replicates) ]),
           div(".row", [ div(".col .s2", "cell"), div(informationDetails?.cell_details?.map(c => div(".col", c))) ]),
@@ -536,6 +541,11 @@ export function SampleInfo(sources) {
           div(".row", [ div(".col .s2", "batch"), div(informationDetails?.batch_details?.map(c => div(".col", c))) ]),
           div(".row", [ div(".col .s2", "year"), div(informationDetails?.year_details?.map(c => div(".col", c))) ]),
           div(".row", [ div(".col .s2", "extra"), div(informationDetails?.extra_details?.map(c => div(".col", c))) ]),
+        ])
+      ]
+      const thisRowNoReplicationDetails = [
+        div(".col .s12", [
+          div(".row", i(".btn-flat .material-icons .informationDetailsZoom", "info_outline")),
         ])
       ]
 
@@ -552,7 +562,9 @@ export function SampleInfo(sources) {
               ])
             : div(),
           zoom
-            ? div(".row", thisRowReplicationDetails)
+            ? zoom2
+              ? div(".row", thisRowReplicationDetails)
+              : div(".row", thisRowNoReplicationDetails)
             : div(),
         ]
       )

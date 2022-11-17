@@ -75,15 +75,7 @@ export function SampleInfo(sources) {
     .fold((x, y) => x + y, 0)
     .map((count) => (count % 2 == 0 ? false : true))
 
-  const informationDetailsState$ = xs.combine(state$, zoomed$).filter(([s, z]) => z).map(([s, z]) => s)
-  const informationDetailsSources = {
-    ...sources,
-    onion: {
-      ...sources.onion,
-      state$: informationDetailsState$
-    }
-  }
-  const informationDetailsQuery = InformationDetails(informationDetailsSources)
+  const informationDetailsQuery = InformationDetails({...sources, trigger: zoomed$})
   const informationDetailsHTTP$ = informationDetailsQuery.HTTP
   const informationDetails$ = informationDetailsQuery.informationDetails.map(i => i.body.result.data).startWith({})
 

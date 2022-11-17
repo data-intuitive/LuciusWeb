@@ -1,13 +1,14 @@
 import xs from 'xstream'
-import dropRepeats from 'xstream/extra/dropRepeats'
+import sampleCombine from 'xstream/extra/sampleCombine'
 
 export function InformationDetails(sources) {
 
   const state$ = sources.onion.state$
   const props$ = sources.props
+  const trigger$ = sources.trigger
 
   // Combine with deployments to the up-to-date endpoint config
-  const triggerQuery$ = state$.compose(dropRepeats())
+  const triggerQuery$ = trigger$.filter(t => t).compose(sampleCombine(state$)).map(([t, s]) => s)
 
   const request$ = xs.combine(triggerQuery$, props$)
     .map(([state, props]) => ({

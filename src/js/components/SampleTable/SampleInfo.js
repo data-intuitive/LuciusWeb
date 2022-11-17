@@ -75,7 +75,15 @@ export function SampleInfo(sources) {
     .fold((x, y) => x + y, 0)
     .map((count) => (count % 2 == 0 ? false : true))
 
-  const informationDetailsQuery = InformationDetails(sources)
+  const informationDetailsState$ = xs.combine(state$, zoomed$).filter(([s, z]) => z).map(([s, z]) => s)
+  const informationDetailsSources = {
+    ...sources,
+    onion: {
+      ...sources.onion,
+      state$: informationDetailsState$
+    }
+  }
+  const informationDetailsQuery = InformationDetails(informationDetailsSources)
   const informationDetailsHTTP$ = informationDetailsQuery.HTTP
   const informationDetails$ = informationDetailsQuery.informationDetails.map(i => i.body.result.data).startWith({})
 
@@ -528,17 +536,16 @@ export function SampleInfo(sources) {
         
         div(".col .s12", [
           div(".row", i(".material-icons", "info_outline")),
-          div(".row", [ div(".col", "processing level"), div(".col", informationDetails?.processing_level) ]),
-          div(".row", [ div(".col", "replicates"), div(".col", informationDetails?.number_of_replicates) ]),
-          div(".row", [ div(".col", "cell"), div(informationDetails?.cell_details?.map(c => div(".col", c))) ]),
-          div(".row", [ div(".col", "plate"), div(informationDetails?.plate_details?.map(c => div(".col", c))) ]),
-          div(".row", [ div(".col", "well"), div(informationDetails?.well_details?.map(c => div(".col", c))) ]),
-          div(".row", [ div(".col", "batch"), div(informationDetails?.batch_details?.map(c => div(".col", c))) ]),
-          div(".row", [ div(".col", "year"), div(informationDetails?.year_details?.map(c => div(".col", c))) ]),
-          div(".row", [ div(".col", "extra"), div(informationDetails?.extra_details?.map(c => div(".col", c))) ]),
+          div(".row", [ div(".col .s2", "processing level"), div(".col", informationDetails?.processing_level) ]),
+          div(".row", [ div(".col .s2", "replicates"), div(".col", informationDetails?.number_of_replicates) ]),
+          div(".row", [ div(".col .s2", "cell"), div(informationDetails?.cell_details?.map(c => div(".col", c))) ]),
+          div(".row", [ div(".col .s2", "plate"), div(informationDetails?.plate_details?.map(c => div(".col", c))) ]),
+          div(".row", [ div(".col .s2", "well"), div(informationDetails?.well_details?.map(c => div(".col", c))) ]),
+          div(".row", [ div(".col .s2", "batch"), div(informationDetails?.batch_details?.map(c => div(".col", c))) ]),
+          div(".row", [ div(".col .s2", "year"), div(informationDetails?.year_details?.map(c => div(".col", c))) ]),
+          div(".row", [ div(".col .s2", "extra"), div(informationDetails?.extra_details?.map(c => div(".col", c))) ]),
         ])
       ]
-      console.log("informationDetails: " + JSON.stringify(informationDetails))
 
       return li(
         ".collection-item .zoom .sampleInfo",

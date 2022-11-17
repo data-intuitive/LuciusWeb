@@ -1,13 +1,12 @@
 import xs from 'xstream'
-import delay from 'xstream/extra/delay'
-import debounce from 'xstream/extra/debounce'
+import dropRepeats from 'xstream/extra/dropRepeats'
 
 export function InformationDetails(sources) {
 
   const state$ = sources.onion.state$
 
   // Combine with deployments to the up-to-date endpoint config
-  const triggerQuery$ = state$
+  const triggerQuery$ = state$.compose(dropRepeats())
 
   const request$ = triggerQuery$
     .map(state => ({
@@ -30,12 +29,11 @@ export function InformationDetails(sources) {
       response$.replaceError(_ => xs.of({processing_level: "error"}))
     )
     .flatten()
-    .debug("validResponse$")
 
   return {
     // We don't initialize the stream here so we know exactly when the
     // information is available.
-    informationDetails: validResponse$.compose(debounce(100)),
+    informationDetails: validResponse$,
     HTTP: request$
   }
 }

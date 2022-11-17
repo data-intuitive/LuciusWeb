@@ -535,12 +535,12 @@ export function SampleInfo(sources) {
           div(".row", i(".btn-flat .material-icons  .informationDetailsZoom", "info_outline")),
           div(".row", [ div(".col .s2", "processing level"), div(".col", informationDetails?.processing_level) ]),
           div(".row", [ div(".col .s2", "replicates"), div(".col", informationDetails?.number_of_replicates) ]),
-          div(".row", [ div(".col .s2", "cell"), div(informationDetails?.cell_details?.map(c => div(".col", c))) ]),
-          div(".row", [ div(".col .s2", "plate"), div(informationDetails?.plate_details?.map(c => div(".col", c))) ]),
-          div(".row", [ div(".col .s2", "well"), div(informationDetails?.well_details?.map(c => div(".col", c))) ]),
-          div(".row", [ div(".col .s2", "batch"), div(informationDetails?.batch_details?.map(c => div(".col", c))) ]),
-          div(".row", [ div(".col .s2", "year"), div(informationDetails?.year_details?.map(c => div(".col", c))) ]),
-          div(".row", [ div(".col .s2", "extra"), div(informationDetails?.extra_details?.map(c => div(".col", c))) ]),
+          div(".row", [ div(".col .s2", "cell"),  div(informationDetails?.cell_details?.map(c => div(".col .s2", c))) ]),
+          div(".row", [ div(".col .s2", "plate"), div(informationDetails?.plate_details?.map(c => div(".col .s2", c))) ]),
+          div(".row", [ div(".col .s2", "well"),  div(informationDetails?.well_details?.map(c => div(".col .s2", c))) ]),
+          div(".row", [ div(".col .s2", "batch"), div(informationDetails?.batch_details?.map(c => div(".col .s2", c))) ]),
+          div(".row", [ div(".col .s2", "year"),  div(informationDetails?.year_details?.map(c => div(".col .s2", c))) ]),
+          div(".row", [ div(".col .s2", "extra"), div(informationDetails?.extra_details?.map(c => div(".col .s2", c))) ]),
         ])
       ]
       const thisRowNoReplicationDetails = [

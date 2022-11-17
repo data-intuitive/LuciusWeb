@@ -525,15 +525,18 @@ export function SampleInfo(sources) {
       const thisRow = row(sample, updtProps, blur, zoom)
       const thisRowDetail = rowDetail(sample, updtProps, blur)
       const thisRowReplicationDetails = [
-        i(".material-icons", "info_outline"), 
-        div([ p("processing level"), p(informationDetails?.processing_level) ]), 
-        div([ p("replicates"), p(informationDetails?.number_of_replicates) ]), 
-        div([ p("cell"), div(informationDetails?.cell_details?.map(c => p(c))) ]), 
-        p("plate"), 
-        p("well"), 
-        p("batch"), 
-        p("year"), 
-        p("extra")
+        
+        div(".col .s12", [
+          div(".row", i(".material-icons", "info_outline")),
+          div(".row", [ div(".col", "processing level"), div(".col", informationDetails?.processing_level) ]),
+          div(".row", [ div(".col", "replicates"), div(".col", informationDetails?.number_of_replicates) ]),
+          div(".row", [ div(".col", "cell"), div(informationDetails?.cell_details?.map(c => div(".col", c))) ]),
+          div(".row", [ div(".col", "plate"), div(informationDetails?.plate_details?.map(c => div(".col", c))) ]),
+          div(".row", [ div(".col", "well"), div(informationDetails?.well_details?.map(c => div(".col", c))) ]),
+          div(".row", [ div(".col", "batch"), div(informationDetails?.batch_details?.map(c => div(".col", c))) ]),
+          div(".row", [ div(".col", "year"), div(informationDetails?.year_details?.map(c => div(".col", c))) ]),
+          div(".row", [ div(".col", "extra"), div(informationDetails?.extra_details?.map(c => div(".col", c))) ]),
+        ])
       ]
       console.log("informationDetails: " + JSON.stringify(informationDetails))
 

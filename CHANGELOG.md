@@ -5,6 +5,7 @@
 - Fix table sample info display of dose & time so the text is properly truncated if the value string is long
 - Hide table sample info fields if the API call returned either empty or "Feature not found"
 - Display single cell information in sample selection and table sample info
+- Solve the 3 invalid font warnings on the console
 - Display perturbation information details under the expanded table sample info by clicking the 'i' icon
 
 ## Version 5.3.0

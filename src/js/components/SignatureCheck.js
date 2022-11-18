@@ -8,8 +8,6 @@ import dropRepeats from 'xstream/extra/dropRepeats'
 import debounce from 'xstream/extra/debounce'
 import { loggerFactory } from '../utils/logger'
 
-import { check, flash, play_arrow } from 'webpack-material-design-icons'
-
 const emptyData = {
   body: {
     result: {

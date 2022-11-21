@@ -532,7 +532,7 @@ export function SampleInfo(sources) {
       const thisRowDetail = rowDetail(sample, updtProps, blur)
       const thisRowReplicationDetails = [
         div(".col .s12", [
-          div(".row", i(".btn-flat .material-icons  .informationDetailsZoom", "info_outline")),
+          div(".row", div(".btn-flat", i(".material-icons .informationDetailsZoom", "info_outline"))),
           div(".row", [ div(".col .s2", "processing level"), div(".col", informationDetails?.processing_level) ]),
           div(".row", [ div(".col .s2", "replicates"), div(".col", informationDetails?.number_of_replicates) ]),
           div(".row", [ div(".col .s2", "cell"),  div(informationDetails?.cell_details?.map(c => div(".col .s2", c))) ]),
@@ -545,7 +545,7 @@ export function SampleInfo(sources) {
       ]
       const thisRowNoReplicationDetails = [
         div(".col .s12", [
-          div(".row", i(".btn-flat .material-icons .informationDetailsZoom", "info_outline")),
+          div(".row", div(".btn-flat", i(".material-icons .informationDetailsZoom", "info_outline"))),
         ])
       ]
 

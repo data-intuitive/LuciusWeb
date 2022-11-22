@@ -357,7 +357,7 @@ export function SampleInfo(sources) {
    * @param {style} blur component style to contain blur settings
    * @return {object} object with members for each treatment type, each has wrapping div with vdom elements
    */
-  const rowDetail = (sample, props, blur) => {
+  const rowDetail = (sample, props, blur, informationDetails, zoom2) => {
     let hStyle = { style: { margin: "0px", fontWeight: "bold" } }
     let pStyle = { style: { margin: "0px" } }
     let pStylewBlur = { style: merge(blur, { margin: "0px" }) }
@@ -427,7 +427,28 @@ export function SampleInfo(sources) {
     const filtersPart = 
       [ p(".col .s12.filterHeader", hStyle, "Filter Info:") ]
       .concat(
-        _filters.map((x) => p(pStyle, entrySmall(x.key, x.value)))
+        _filters.map((x) => p(pStyle, entrySmall(x.key+":", x.value)))
+      )
+
+    const replicationPart =
+      [
+        div(".btn-flat", { style: { padding: "0 0" } }, i(".material-icons .informationDetailsZoom", "info_outline")),
+      ]
+      .concat(
+        zoom2
+          ? [
+            p(".col .s12 .replicateHeader", hStyle, "Perturbation replicate information:"),
+            div(".row", pStyle, entryArray("processing level:", [informationDetails?.processing_level]) ),
+            div(".row", pStyle, entryArray("replicates:", [informationDetails?.number_of_replicates]) ),
+            div(".row", pStyle, entryArray("cell:", informationDetails?.cell_details) ),
+            div(".row", pStyle, entryArray("plate:", informationDetails?.plate_details) ),
+            div(".row", pStyle, entryArray("well:",  informationDetails?.well_details) ),
+            div(".row", pStyle, entryArray("batch:", informationDetails?.batch_details) ),
+            div(".row", pStyle, entryArray("year:",  informationDetails?.year_details) ),
+            div(".row", pStyle, entryArray("extra:", informationDetails?.extra_details) ),
+          ]
+          :
+          []
       )
 
     return {
@@ -439,6 +460,7 @@ export function SampleInfo(sources) {
           visualizeSmilesPart
         ),
         div(".col .s12 .l12", { style: { margin: "15px 0px 0px 0px" } }, filtersPart),
+        div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, replicationPart),
       ]),
       trt_sh: div([
         div(".row", [
@@ -450,6 +472,7 @@ export function SampleInfo(sources) {
         ),
         ]),
         div(".row", { style: { margin: "15px 0px 0px 0px" } }, filtersPart),
+        div(".row", { style: { margin: "15px 0px 0px 0px" } }, replicationPart),
       ]),
       trt_oe: div([
         div(".row", [
@@ -461,6 +484,7 @@ export function SampleInfo(sources) {
         ),
         ]),
         div(".row", { style: { margin: "15px 0px 0px 0px" } }, filtersPart),
+        div(".row", { style: { margin: "15px 0px 0px 0px" } }, replicationPart),
       ]),
       trt_lig: div([
         div(".row", [
@@ -472,6 +496,7 @@ export function SampleInfo(sources) {
         ),
         ]),
         div(".row", { style: { margin: "15px 0px 0px 0px" } }, filtersPart),
+        div(".row", { style: { margin: "15px 0px 0px 0px" } }, replicationPart),
       ]),
       ctl_vector: div([
         div(".row", [
@@ -483,6 +508,7 @@ export function SampleInfo(sources) {
           ),
         ]),
         div(".row", { style: { margin: "15px 0px 0px 0px" } }, filtersPart),
+        div(".row", { style: { margin: "15px 0px 0px 0px" } }, replicationPart),
       ]),
       _default: div(".row", { style: { fontWeight: "small" } }, [
         div(".col .s12", [
@@ -493,6 +519,7 @@ export function SampleInfo(sources) {
             visualizeSmilesPart
           ),
           div(".col .s12 .l12", { style: { margin: "15px 0px 0px 0px" } }, filtersPart),
+          div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, replicationPart),
         ]),
       ]),
     }
@@ -506,30 +533,7 @@ export function SampleInfo(sources) {
       const updtProps = { ...props, bgColor: bgcolor }
 
       const thisRow = row(sample, updtProps, blur, zoom)
-      const thisRowDetail = rowDetail(sample, updtProps, blur)
-      const thisRowReplicationDetails = [
-        div(".col .s12", [
-          div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, [
-            div(".row", { style: { margin: "15px 0px 0px 0px" } }, div(".btn-flat", { style: { padding: "0 0" } }, i(".material-icons .informationDetailsZoom", "info_outline"))),
-            div(".row", { style: { margin: "15px 0px 0px 0px" } }, [ p(".col .s12 .replicateHeader", { style: { margin: "0px", fontWeight: "bold" } }, "Perturbation replicate information:") ]),
-            div(".row", { style: { margin: "15px 0px 0px 0px" } }, entryArray("processing level:", [informationDetails?.processing_level]) ),
-            div(".row", { style: { margin: "15px 0px 0px 0px" } }, entryArray("replicates:", [informationDetails?.number_of_replicates]) ),
-            div(".row", { style: { margin: "15px 0px 0px 0px" } }, entryArray("cell:", informationDetails?.cell_details) ),
-            div(".row", { style: { margin: "15px 0px 0px 0px" } }, entryArray("plate:", informationDetails?.plate_details) ),
-            div(".row", { style: { margin: "15px 0px 0px 0px" } }, entryArray("well:",  informationDetails?.well_details) ),
-            div(".row", { style: { margin: "15px 0px 0px 0px" } }, entryArray("batch:", informationDetails?.batch_details) ),
-            div(".row", { style: { margin: "15px 0px 0px 0px" } }, entryArray("year:",  informationDetails?.year_details) ),
-            div(".row", { style: { margin: "15px 0px 0px 0px" } }, entryArray("extra:", informationDetails?.extra_details) ),
-          ])
-        ])
-      ]
-      const thisRowNoReplicationDetails = [
-        div(".col .s12", [
-          div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, [
-            div(".row", { style: { margin: "15px 0px 0px 0px" } }, div(".btn-flat", { style: { padding: "0 0" } }, i(".material-icons .informationDetailsZoom", "info_outline"))),
-          ])
-        ])
-      ]
+      const thisRowDetail = rowDetail(sample, updtProps, blur, informationDetails, zoom2)
 
       return li(
         ".collection-item .zoom .sampleInfo",
@@ -542,11 +546,6 @@ export function SampleInfo(sources) {
                   ? thisRowDetail[sample.trt]
                   : thisRowDetail["_default"],
               ])
-            : div(),
-          zoom
-            ? zoom2
-              ? div(".row", thisRowReplicationDetails)
-              : div(".row", thisRowNoReplicationDetails)
             : div(),
         ]
       )

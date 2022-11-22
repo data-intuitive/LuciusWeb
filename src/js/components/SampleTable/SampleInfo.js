@@ -424,6 +424,12 @@ export function SampleInfo(sources) {
           : "",
       ]
 
+    const filtersPart = 
+      [ p(".col .s12.filterHeader", hStyle, "Filter Info:") ]
+      .concat(
+        _filters.map((x) => p(pStyle, entrySmall(x.key, x.value)))
+      )
+
     return {
       trt_cp: div(".col .s12", [
         div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
@@ -432,13 +438,7 @@ export function SampleInfo(sources) {
           {style: merge(blur, { margin: "20px 0px 0px 0px" }) },
           visualizeSmilesPart
         ),
-        div(
-          ".col .s12 .l12",
-          { style: { margin: "15px 0px 0px 0px" } },
-          [p(".col .s12 .filterHeader", hStyle, "Filter Info:")].concat(
-            _filters.map((x) => p(pStyle, entrySmall(x.key, x.value)))
-          )
-        ),
+        div(".col .s12 .l12", { style: { margin: "15px 0px 0px 0px" } }, filtersPart),
       ]),
       trt_sh: div([
         div(".row", [
@@ -449,13 +449,7 @@ export function SampleInfo(sources) {
           visualizeTextPart
         ),
         ]),
-        div(
-          ".row",
-          { style: { margin: "15px 0px 0px 0px" } },
-          [p(".col .s12.filterHeader", hStyle, "Filter Info:")].concat(
-            _filters.map((x) => p(pStyle, entrySmall(x.key, x.value)))
-          )
-        ),
+        div(".row", { style: { margin: "15px 0px 0px 0px" } }, filtersPart),
       ]),
       trt_oe: div([
         div(".row", [
@@ -466,13 +460,7 @@ export function SampleInfo(sources) {
           visualizeTextPart
         ),
         ]),
-        div(
-          ".row",
-          { style: { margin: "15px 0px 0px 0px" } },
-          [p(".col .s12.filterHeader", hStyle, "Filter Info:")].concat(
-            _filters.map((x) => p(pStyle, entrySmall(x.key, x.value)))
-          )
-        ),
+        div(".row", { style: { margin: "15px 0px 0px 0px" } }, filtersPart),
       ]),
       trt_lig: div([
         div(".row", [
@@ -483,13 +471,7 @@ export function SampleInfo(sources) {
           visualizeTextPart
         ),
         ]),
-        div(
-          ".row",
-          { style: { margin: "15px 0px 0px 0px" } },
-          [p(".col .s12 .filterHeader", hStyle, "Filter Info:")].concat(
-            _filters.map((x) => p(pStyle, entrySmall(x.key, x.value)))
-          )
-        ),
+        div(".row", { style: { margin: "15px 0px 0px 0px" } }, filtersPart),
       ]),
       ctl_vector: div([
         div(".row", [
@@ -500,13 +482,7 @@ export function SampleInfo(sources) {
             visualizeTextPart
           ),
         ]),
-        div(
-          ".row",
-          { style: { margin: "15px 0px 0px 0px" } },
-          [p(".col .s12 .filterHeader", hStyle, "Filter Info:")].concat(
-            _filters.map((x) => p(pStyle, entrySmall(x.key, x.value)))
-          )
-        ),
+        div(".row", { style: { margin: "15px 0px 0px 0px" } }, filtersPart),
       ]),
       _default: div(".row", { style: { fontWeight: "small" } }, [
         div(".col .s12", [
@@ -516,13 +492,7 @@ export function SampleInfo(sources) {
             { style: merge(blur, { margin: "20px 0px 0px 0px" }) },
             visualizeSmilesPart
           ),
-          div(
-            ".col .s12 .l12",
-            { style: { margin: "15px 0px 0px 0px" } },
-            [p(".col .s12 .filterHeader", hStyle, "Filter Info:")].concat(
-              _filters.map((x) => p(pStyle, entrySmall(x.key, x.value)))
-            )
-          ),
+          div(".col .s12 .l12", { style: { margin: "15px 0px 0px 0px" } }, filtersPart),
         ]),
       ]),
     }

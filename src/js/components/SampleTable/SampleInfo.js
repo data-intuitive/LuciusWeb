@@ -107,9 +107,16 @@ export function SampleInfo(sources) {
 
   function entrySmall(key, value) {
     return [
-      span(".col .s4 .m2", { style: { fontWeight: "lighter" } }, key),
-      span(".col .s8 .m4", value?.length != 0 ? value : ""),
+      span(".col .s4 .m2 .entryKey", { style: { fontWeight: "lighter" } }, key),
+      span(".col .s8 .m4 .entryValue", value?.length != 0 ? value : ""),
     ]
+  }
+
+  function entryArray(key, values) {
+    return [
+      span(".col .s2 .entryKey", key)
+    ]
+    .concat( values?.map(c => span(".col .s2 .entryValue", c)) )
   }
 
   const blur$ = props$
@@ -532,20 +539,25 @@ export function SampleInfo(sources) {
       const thisRowDetail = rowDetail(sample, updtProps, blur)
       const thisRowReplicationDetails = [
         div(".col .s12", [
-          div(".row", div(".btn-flat", i(".material-icons .informationDetailsZoom", "info_outline"))),
-          div(".row", [ div(".col .s2", "processing level"), div(".col", informationDetails?.processing_level) ]),
-          div(".row", [ div(".col .s2", "replicates"), div(".col", informationDetails?.number_of_replicates) ]),
-          div(".row", [ div(".col .s2", "cell"),  div(informationDetails?.cell_details?.map(c => div(".col .s2", c))) ]),
-          div(".row", [ div(".col .s2", "plate"), div(informationDetails?.plate_details?.map(c => div(".col .s2", c))) ]),
-          div(".row", [ div(".col .s2", "well"),  div(informationDetails?.well_details?.map(c => div(".col .s2", c))) ]),
-          div(".row", [ div(".col .s2", "batch"), div(informationDetails?.batch_details?.map(c => div(".col .s2", c))) ]),
-          div(".row", [ div(".col .s2", "year"),  div(informationDetails?.year_details?.map(c => div(".col .s2", c))) ]),
-          div(".row", [ div(".col .s2", "extra"), div(informationDetails?.extra_details?.map(c => div(".col .s2", c))) ]),
+          div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, [
+            div(".row", { style: { margin: "15px 0px 0px 0px" } }, div(".btn-flat", { style: { padding: "0 0" } }, i(".material-icons .informationDetailsZoom", "info_outline"))),
+            div(".row", { style: { margin: "15px 0px 0px 0px" } }, [ p(".col .s12 .replicateHeader", { style: { margin: "0px", fontWeight: "bold" } }, "Perturbation replicate information:") ]),
+            div(".row", { style: { margin: "15px 0px 0px 0px" } }, entryArray("processing level:", [informationDetails?.processing_level]) ),
+            div(".row", { style: { margin: "15px 0px 0px 0px" } }, entryArray("replicates:", [informationDetails?.number_of_replicates]) ),
+            div(".row", { style: { margin: "15px 0px 0px 0px" } }, entryArray("cell:", informationDetails?.cell_details) ),
+            div(".row", { style: { margin: "15px 0px 0px 0px" } }, entryArray("plate:", informationDetails?.plate_details) ),
+            div(".row", { style: { margin: "15px 0px 0px 0px" } }, entryArray("well:",  informationDetails?.well_details) ),
+            div(".row", { style: { margin: "15px 0px 0px 0px" } }, entryArray("batch:", informationDetails?.batch_details) ),
+            div(".row", { style: { margin: "15px 0px 0px 0px" } }, entryArray("year:",  informationDetails?.year_details) ),
+            div(".row", { style: { margin: "15px 0px 0px 0px" } }, entryArray("extra:", informationDetails?.extra_details) ),
+          ])
         ])
       ]
       const thisRowNoReplicationDetails = [
         div(".col .s12", [
-          div(".row", div(".btn-flat", i(".material-icons .informationDetailsZoom", "info_outline"))),
+          div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, [
+            div(".row", { style: { margin: "15px 0px 0px 0px" } }, div(".btn-flat", { style: { padding: "0 0" } }, i(".material-icons .informationDetailsZoom", "info_outline"))),
+          ])
         ])
       ]
 

@@ -71,17 +71,39 @@ export function SampleInfo(sources) {
   const props$ = sources.props
 
   // don't accept clicks if they came from the click2$ source
-  const click$ = sources.DOM.select(".zoom").events("click").debug("click$").filter(ev => !ev.srcElement.classList.contains("informationDetailsZoom"))
-  const click2$ = sources.DOM.select(".informationDetailsZoom").events("click")
-  const zoomed$ = click$
-    .fold((acc, _) => !acc, false)
-  
-  // always close second level if primary level is closed
-  const zoomed2$ = xs.combine(zoomed$.startWith(false), click2$.startWith(0))
-    .fold(([prev_zoomed, acc], [zoomed, _]) => [zoomed, prev_zoomed && zoomed && !acc], [false, false])
-    .map(([_, x]) => x)
+  const clickRow$ = sources.DOM.select(".zoom").events("click")
+    .filter(ev => !ev.srcElement.classList.contains("informationDetailsZoom"))
+    .filter(ev => !ev.srcElement.classList.contains("filtersZoom"))
+    .mapTo("row")
+  const clickFilters$ = sources.DOM.select(".filtersZoom").events("click").mapTo("filters")
+  const clickInfoDetails$ = sources.DOM.select(".informationDetailsZoom").events("click").mapTo("infoDetails")
 
-  const informationDetailsQuery = InformationDetails({...sources, trigger: zoomed2$})
+  const zoomInfo$ = xs.merge(clickRow$, clickFilters$, clickInfoDetails$)
+    .fold((acc, ev) => 
+      {
+        if (ev == "row")
+          return {
+            row: !acc.row,
+            filters: false,
+            infoDetails: false,
+          }
+        else if (ev == "filters")
+          return {
+            ...acc,
+            filters: !acc.filters
+          }
+        else if (ev = "infoDetails")
+          return {
+            ...acc,
+            infoDetails: !acc.infoDetails
+          }
+      }
+      ,
+      { row: false, filters: false, infoDetails: false }
+    )
+
+  const zoomedInfoDetails$ = zoomInfo$.map(z => z.infoDetails)
+  const informationDetailsQuery = InformationDetails({...sources, trigger: zoomedInfoDetails$})
   const informationDetailsHTTP$ = informationDetailsQuery.HTTP
   const informationDetails$ = informationDetailsQuery.informationDetails.map(i => i.body.result.data).startWith({})
 
@@ -355,9 +377,11 @@ export function SampleInfo(sources) {
    * @param {object} sample the data to be displayed
    * @param {object} props static settings for ie. sourire url or background colors
    * @param {style} blur component style to contain blur settings
+   * @param {object} informationDetails
+   * @param {boolean} zoomInfo
    * @return {object} object with members for each treatment type, each has wrapping div with vdom elements
    */
-  const rowDetail = (sample, props, blur, informationDetails, zoom2) => {
+  const rowDetail = (sample, props, blur, informationDetails, zoomInfo) => {
     let hStyle = { style: { margin: "0px", fontWeight: "bold" } }
     let pStyle = { style: { margin: "0px" } }
     let pStylewBlur = { style: merge(blur, { margin: "0px" }) }
@@ -424,10 +448,19 @@ export function SampleInfo(sources) {
           : "",
       ]
 
-    const filtersPart = 
-      [ p(".col .s12.filterHeader", hStyle, "Filter Info:") ]
+    const filtersPart =
+      [
+        div(".btn-flat", { style: { padding: "0 0" } }, i(".material-icons .filtersZoom", "filter_list")),
+      ]
       .concat(
-        _filters.map((x) => p(pStyle, entrySmall(x.key+":", x.value)))
+        zoomInfo.filters
+        ? [
+          p(".col .s12.filterHeader", hStyle, "Filter Info:") ]
+          .concat(
+            _filters.map((x) => p(pStyle, entrySmall(x.key+":", x.value)))
+          )
+        :
+        []
       )
 
     const replicationPart =
@@ -435,7 +468,7 @@ export function SampleInfo(sources) {
         div(".btn-flat", { style: { padding: "0 0" } }, i(".material-icons .informationDetailsZoom", "info_outline")),
       ]
       .concat(
-        zoom2
+        zoomInfo.infoDetails
           ? [
             p(".col .s12 .replicateHeader", hStyle, "Perturbation replicate information:"),
             div(".row", pStyle, entryArray("processing level:", [informationDetails?.processing_level]) ),
@@ -526,21 +559,21 @@ export function SampleInfo(sources) {
   }
 
   const vdom$ = xs
-    .combine(state$, zoomed$, zoomed2$, props$, blur$, informationDetails$)
-    .map(([sample, zoom, zoom2, props, blur, informationDetails]) => {
+    .combine(state$, zoomInfo$, props$, blur$, informationDetails$)
+    .map(([sample, zoomInfo, props, blur, informationDetails]) => {
       let bgcolor =
         sample.zhang >= 0 ? "rgba(44,123,182, 0.08)" : "rgba(215,25,28, 0.08)"
       const updtProps = { ...props, bgColor: bgcolor }
 
-      const thisRow = row(sample, updtProps, blur, zoom)
-      const thisRowDetail = rowDetail(sample, updtProps, blur, informationDetails, zoom2)
+      const thisRow = row(sample, updtProps, blur, zoomInfo.row)
+      const thisRowDetail = rowDetail(sample, updtProps, blur, informationDetails, zoomInfo)
 
       return li(
         ".collection-item .zoom .sampleInfo",
         { style: { "background-color": bgcolor } },
         [
           thisRow[sample.trt] ? thisRow[sample.trt] : thisRow["_default"],
-          zoom
+          zoomInfo.row
             ? div(".row", [
                 thisRowDetail[sample.trt]
                   ? thisRowDetail[sample.trt]

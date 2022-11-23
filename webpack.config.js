@@ -13,7 +13,7 @@ module.exports = {
   devtool: 'inline-source-map',
   devServer: {
     static: {
-      directory: './',
+      directory: './public/',
     },
     //inline: true, // removed
     historyApiFallback: true,

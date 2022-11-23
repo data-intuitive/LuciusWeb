@@ -18,6 +18,9 @@ RUN npm install -g node-gyp
 RUN npm install
 RUN npm run build
 
+# Copy the dist folder to the public folder so that it's available without exposing the root of the server data
+RUN mv dist public
+
 # Port to expose
 EXPOSE 80
 

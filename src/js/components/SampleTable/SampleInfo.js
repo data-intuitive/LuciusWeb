@@ -449,111 +449,101 @@ export function SampleInfo(sources) {
       ]
 
     const filtersPart =
-      [
-        div(".btn-flat", { style: { padding: "0 0" } }, i(".material-icons .filtersZoom", "filter_list")),
-      ]
-      .concat(
-        zoomInfo.filters
-        ? [
-          p(".col .s12.filterHeader", hStyle, "Filter Info:") ]
-          .concat(
-            _filters.map((x) => p(pStyle, entrySmall(x.key+":", x.value)))
-          )
-        :
-        []
+      div(".col .s12", { style: { padding: "0px" } },
+        [ p(".col .s12.filterHeader", hStyle, "Filter Info:") ]
+        .concat(
+          _filters.map((x) => p(pStyle, entrySmall(x.key+":", x.value)))
+        )
       )
 
     const replicationPart =
-      [
-        div(".btn-flat", { style: { padding: "0 0" } }, i(".material-icons .informationDetailsZoom", "info_outline")),
-      ]
+      div(".col .s12", { style: { padding: "0px" } }, [
+        p(".col .s12 .replicateHeader", hStyle, "Perturbation Replicate Information:"),
+        div(".row", pStyle, entryArray("Processing Level:", [informationDetails?.processing_level]) ),
+        div(".row", pStyle, entryArray("Replicates:", [informationDetails?.number_of_replicates]) ),
+        div(".row", pStyle, entryArray("Cell:", informationDetails?.cell_details) ),
+        div(".row", pStyle, entryArray("Plate:", informationDetails?.plate_details) ),
+        div(".row", pStyle, entryArray("Well:",  informationDetails?.well_details) ),
+        div(".row", pStyle, entryArray("Batch:", informationDetails?.batch_details) ),
+        div(".row", pStyle, entryArray("Year:",  informationDetails?.year_details) ),
+        div(".row", pStyle, entryArray("Extra:", informationDetails?.extra_details) ),
+      ])
+
+    const expandingFiltersAndReplicationPart = 
+      [ div(".btn-flat", { style: { margin: "0 0 0 10px", padding: "0 0" } }, i(".material-icons .filtersZoom", "filter_list")) ]
+      .concat(
+        zoomInfo.filters
+        ? filtersPart
+        : []
+      )
+      .concat(
+        zoomInfo.filters || zoomInfo.infoDetails
+        ? [ div(".row") ]
+        : []
+      )
+      .concat(
+        [ div(".btn-flat", { style: { margin: "0 0 0 10px", padding: "0 0" } }, i(".material-icons .informationDetailsZoom", "info_outline")) ]
+      )
       .concat(
         zoomInfo.infoDetails
-          ? [
-            p(".col .s12 .replicateHeader", hStyle, "Perturbation replicate information:"),
-            div(".row", pStyle, entryArray("processing level:", [informationDetails?.processing_level]) ),
-            div(".row", pStyle, entryArray("replicates:", [informationDetails?.number_of_replicates]) ),
-            div(".row", pStyle, entryArray("cell:", informationDetails?.cell_details) ),
-            div(".row", pStyle, entryArray("plate:", informationDetails?.plate_details) ),
-            div(".row", pStyle, entryArray("well:",  informationDetails?.well_details) ),
-            div(".row", pStyle, entryArray("batch:", informationDetails?.batch_details) ),
-            div(".row", pStyle, entryArray("year:",  informationDetails?.year_details) ),
-            div(".row", pStyle, entryArray("extra:", informationDetails?.extra_details) ),
-          ]
-          :
-          []
+        ? replicationPart
+        : []
       )
 
     return {
-      trt_cp: div(".col .s12", [
+      trt_cp: div(".row", [
         div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
         div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
         div(".col .s12 .offset-s8 .offset-m8 .l4",
           {style: merge(blur, { margin: "20px 0px 0px 0px" }) },
           visualizeSmilesPart
         ),
-        div(".col .s12 .l12", { style: { margin: "15px 0px 0px 0px" } }, filtersPart),
-        div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, replicationPart),
+        div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, expandingFiltersAndReplicationPart),
       ]),
-      trt_sh: div([
-        div(".row", [
-          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
-          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
-          div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
+      trt_sh: div(".row", [
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
+        div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
           { style: merge(blur, { height: "100%", "margin-top": "30px"}) },
           visualizeTextPart
         ),
-        ]),
-        div(".row", { style: { margin: "15px 0px 0px 0px" } }, filtersPart),
-        div(".row", { style: { margin: "15px 0px 0px 0px" } }, replicationPart),
+        div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, expandingFiltersAndReplicationPart),
       ]),
-      trt_oe: div([
-        div(".row", [
-          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
-          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
-          div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
+      trt_oe: div(".row", [
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
+        div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
           { style: merge(blur, { height: "100%", "margin-top": "30px"}) },
           visualizeTextPart
         ),
-        ]),
-        div(".row", { style: { margin: "15px 0px 0px 0px" } }, filtersPart),
-        div(".row", { style: { margin: "15px 0px 0px 0px" } }, replicationPart),
+        div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, expandingFiltersAndReplicationPart),
       ]),
-      trt_lig: div([
-        div(".row", [
-          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
-          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
-          div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
+      trt_lig: div(".row", [
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
+        div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
           { style: merge(blur, { height: "100%", "margin-top": "30px"}) },
           visualizeTextPart
         ),
-        ]),
-        div(".row", { style: { margin: "15px 0px 0px 0px" } }, filtersPart),
-        div(".row", { style: { margin: "15px 0px 0px 0px" } }, replicationPart),
+        div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, expandingFiltersAndReplicationPart),
       ]),
-      ctl_vector: div([
-        div(".row", [
-          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
-          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
-          div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
-            { style: merge(blur, { height: "100%", "margin-top": "30px"}) },
-            visualizeTextPart
-          ),
-        ]),
-        div(".row", { style: { margin: "15px 0px 0px 0px" } }, filtersPart),
-        div(".row", { style: { margin: "15px 0px 0px 0px" } }, replicationPart),
+      ctl_vector: div(".row", [
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
+        div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
+          { style: merge(blur, { height: "100%", "margin-top": "30px"}) },
+          visualizeTextPart
+        ),
+        div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, expandingFiltersAndReplicationPart),
       ]),
-      _default: div(".row", { style: { fontWeight: "small" } }, [
-        div(".col .s12", [
-          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
-          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
-          div(".col .s12 .offset-s8 .offset-m8 .l4",
-            { style: merge(blur, { margin: "20px 0px 0px 0px" }) },
-            visualizeSmilesPart
-          ),
-          div(".col .s12 .l12", { style: { margin: "15px 0px 0px 0px" } }, filtersPart),
-          div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, replicationPart),
-        ]),
+      _default: div(".row", [
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
+        div(".col .s12 .offset-s8 .offset-m8 .l4",
+          {style: merge(blur, { margin: "20px 0px 0px 0px" }) },
+          visualizeSmilesPart
+        ),
+        div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, expandingFiltersAndReplicationPart),
       ]),
     }
   }

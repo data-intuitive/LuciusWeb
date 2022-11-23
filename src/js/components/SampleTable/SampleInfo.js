@@ -70,15 +70,25 @@ export function SampleInfo(sources) {
   const state$ = sources.onion.state$
   const props$ = sources.props
 
-  // don't accept clicks if they came from the click2$ source
+  // click events to open or close parts of the SampleInfo
   const clickRow$ = sources.DOM.select(".zoom").events("click")
-    .filter(ev => !ev.srcElement.classList.contains("informationDetailsZoom"))
-    .filter(ev => !ev.srcElement.classList.contains("filtersZoom"))
-    .mapTo("row")
-  const clickFilters$ = sources.DOM.select(".filtersZoom").events("click").mapTo("filters")
-  const clickInfoDetails$ = sources.DOM.select(".informationDetailsZoom").events("click").mapTo("infoDetails")
+  const clickFilters$ = sources.DOM.select(".filtersZoom").events("click")
+  const clickInfoDetails$ = sources.DOM.select(".informationDetailsZoom").events("click")
 
-  const zoomInfo$ = xs.merge(clickRow$, clickFilters$, clickInfoDetails$)
+  // Don't allow propagation of the event when the click is on .filtersZoom or .informationDetailsZoom
+  // Otherwise it will propagate to .zoom and close the row details instead of opening/closing .filtersZoom or .informationDetailsZoom
+  // This code doesn't quite follow the cycle.js dogma
+  xs.merge(clickFilters$, clickInfoDetails$)
+    .addListener({
+      next: (ev) => { ev.stopPropagation() },
+      error: () => {}
+    })
+
+  const zoomInfo$ = xs.merge(
+    clickRow$.mapTo("row"),
+    clickFilters$.mapTo("filters"),
+    clickInfoDetails$.mapTo("infoDetails")
+    )
     .fold((acc, ev) => 
       {
         if (ev == "row")

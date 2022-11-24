@@ -8,6 +8,9 @@ var app = express();
 //Serving the files on the dist folder
 app.use(express.static(DIST_DIR));
 
+//Remove header to improve security
+app.disable('x-powered-by');
+
 //Send index.html when the user access the web
 app.get("*", function (req, res) {
   res.sendFile(path.join(DIST_DIR, "index.html"));

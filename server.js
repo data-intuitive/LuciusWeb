@@ -1,15 +1,31 @@
-var path = require("path");
-var express = require("express");
+const path = require("path");
+const express = require("express");
+const helmet = require("helmet");
 
-var DIST_DIR = __dirname;
-var PORT = 80;
-var app = express();
+const DIST_DIR = __dirname;
+const PORT = 80;
+const app = express();
 
 //Serving the files on the dist folder
 app.use(express.static(DIST_DIR));
 
-//Remove header to improve security
-app.disable('x-powered-by');
+// Tweak rules so that it allows off-site logo & sourire images
+// app.use(helmet.contentSecurityPolicy());
+// app.use(helmet.crossOriginEmbedderPolicy());
+// app.use(helmet.crossOriginOpenerPolicy());
+app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
+app.use(helmet.dnsPrefetchControl());
+app.use(helmet.expectCt());
+app.use(helmet.frameguard());
+app.use(helmet.hidePoweredBy());
+app.use(helmet.hsts());
+app.use(helmet.ieNoOpen());
+app.use(helmet.noSniff());
+app.use(helmet.originAgentCluster());
+app.use(helmet.permittedCrossDomainPolicies());
+app.use(helmet.referrerPolicy());
+app.use(helmet.xssFilter());
+
 
 //Send index.html when the user access the web
 app.get("*", function (req, res) {

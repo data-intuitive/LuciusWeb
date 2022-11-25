@@ -9,6 +9,16 @@
 - Display single cell information in sample selection and table sample info
 - Solve the 3 invalid font warnings on the console
 
+### Other
+
+- Restructured the folder structure slightly to introduce a `public` folder
+  This prevents exposing server configuration files
+- `dist/bundle.js` now compiles towards the public folder too
+
+### Deployment changes
+
+- `deployments.json` should now be placed in the `public` folder instead of the project root
+
 ## Version 5.3.0
 
 ### Functionality

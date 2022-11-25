@@ -1,7 +1,7 @@
 var path = require("path");
 var express = require("express");
 
-var DIST_DIR = __dirname;
+var DIST_DIR = path.join(__dirname, "public");
 var PORT = 80;
 var app = express();
 

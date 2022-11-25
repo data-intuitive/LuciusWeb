@@ -1,7 +1,7 @@
 import 'materialize-css/dist/css/materialize.css';
 import 'materialize-css/extras/noUiSlider/nouislider.css'
 
-require('../../favicon.ico')
+require('../../public/favicon.ico')
 
 import { run } from '@cycle/run';
 import { makeDOMDriver } from '@cycle/dom';

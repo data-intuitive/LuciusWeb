@@ -2,10 +2,22 @@
 
 ## Version 5.4.0
 
+### Minor changes
+
 - Fix table sample info display of dose & time so the text is properly truncated if the value string is long
 - Hide table sample info fields if the API call returned either empty or "Feature not found"
 - Display single cell information in sample selection and table sample info
 - Solve the 3 invalid font warnings on the console
+
+### Other
+
+- Restructured the folder structure slightly to introduce a `public` folder
+  This prevents exposing server configuration files
+- `dist/bundle.js` now compiles towards the public folder too
+
+### Deployment changes
+
+- `deployments.json` should now be placed in the `public` folder instead of the project root
 
 ## Version 5.3.0
 

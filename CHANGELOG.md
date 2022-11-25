@@ -2,6 +2,11 @@
 
 ## Version 5.4.0
 
+### Functionality
+
+- Display a Sample Information Details section in top tables
+- Change filter and sample information details to be collapsable (collapsed by default)
+
 ### Minor changes
 
 - Fix table sample info display of dose & time so the text is properly truncated if the value string is long

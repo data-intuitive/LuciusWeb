@@ -9,6 +9,12 @@
 - Display single cell information in sample selection and table sample info
 - Solve the 3 invalid font warnings on the console
 
+### Other
+
+- Updated required node version in Dockerfile
+- Updated some pinned package versions
+- Use the helmet package to set/tweak server html headers
+
 ## Version 5.3.0
 
 ### Functionality

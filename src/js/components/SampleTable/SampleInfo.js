@@ -474,7 +474,7 @@ export function SampleInfo(sources) {
         div(".row", pStyle, entryArray("Cell:", informationDetails?.cell_details) ),
         div(".row", pStyle, entryArray("Plate:", informationDetails?.plate_details) ),
         div(".row", pStyle, entryArray("Well:",  informationDetails?.well_details) ),
-        div(".row", pStyle, entryArray("Batch:", informationDetails?.batch_details) ),
+        // div(".row", pStyle, entryArray("Batch:", informationDetails?.batch_details) ),
         // div(".row", pStyle, entryArray("Year:",  informationDetails?.year_details) ),
         // div(".row", pStyle, entryArray("Extra:", informationDetails?.extra_details) ),
       ])

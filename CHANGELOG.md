@@ -15,6 +15,19 @@
 - Solve the 3 invalid font warnings on the console
 - Display perturbation information details under the expanded table sample info by clicking the 'i' icon
 
+### Other
+
+- Updated required node version in Dockerfile
+- Updated some pinned package versions
+- Use the helmet package to set/tweak server html headers
+- Restructured the folder structure slightly to introduce a `public` folder
+  This prevents exposing server configuration files
+- `dist/bundle.js` now compiles towards the public folder too
+
+### Deployment changes
+
+- `deployments.json` should now be placed in the `public` folder instead of the project root
+
 ## Version 5.3.0
 
 ### Functionality

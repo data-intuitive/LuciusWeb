@@ -2,7 +2,7 @@ const path = require("path");
 const express = require("express");
 const helmet = require("helmet");
 
-const DIST_DIR = __dirname;
+const DIST_DIR = path.join(__dirname, "public");
 const PORT = 80;
 const app = express();
 

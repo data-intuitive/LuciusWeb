@@ -5,6 +5,7 @@ import {
   li,
   span,
   img,
+  i,
 } from "@cycle/dom"
 import { merge } from "ramda"
 import { safeModelToUi } from "../../modelTranslations"
@@ -24,6 +25,7 @@ import img_ctl_vector_cns  from "/images/treatmentTypes/CTL_VECTOR.png"
 import img_ctl_untrt_cns   from "/images/treatmentTypes/CTL_UNTRT.CNS.png"
 import img_ctl_untrt       from "/images/treatmentTypes/CTL_UNTRT.png"
 import { maxLengthValueUnit } from "../../utils/utils"
+import { InformationDetails } from "../InformationDetails"
 
 /**
  * @module components/SampleTable/SampleInfo
@@ -68,10 +70,52 @@ export function SampleInfo(sources) {
   const state$ = sources.onion.state$
   const props$ = sources.props
 
-  const click$ = sources.DOM.select(".zoom").events("click").mapTo(1)
-  const zoomed$ = click$
-    .fold((x, y) => x + y, 0)
-    .map((count) => (count % 2 == 0 ? false : true))
+  // click events to open or close parts of the SampleInfo
+  const clickRow$ = sources.DOM.select(".zoom").events("click")
+  const clickFilters$ = sources.DOM.select(".filtersZoom").events("click")
+  const clickInfoDetails$ = sources.DOM.select(".informationDetailsZoom").events("click")
+
+  // Don't allow propagation of the event when the click is on .filtersZoom or .informationDetailsZoom
+  // Otherwise it will propagate to .zoom and close the row details instead of opening/closing .filtersZoom or .informationDetailsZoom
+  // This code doesn't quite follow the cycle.js dogma
+  xs.merge(clickFilters$, clickInfoDetails$)
+    .addListener({
+      next: (ev) => { ev.stopPropagation() },
+      error: () => {}
+    })
+
+  const zoomInfo$ = xs.merge(
+    clickRow$.mapTo("row"),
+    clickFilters$.mapTo("filters"),
+    clickInfoDetails$.mapTo("infoDetails")
+    )
+    .fold((acc, ev) => 
+      {
+        if (ev == "row")
+          return {
+            row: !acc.row,
+            filters: false,
+            infoDetails: false,
+          }
+        else if (ev == "filters")
+          return {
+            ...acc,
+            filters: !acc.filters
+          }
+        else if (ev = "infoDetails")
+          return {
+            ...acc,
+            infoDetails: !acc.infoDetails
+          }
+      }
+      ,
+      { row: false, filters: false, infoDetails: false }
+    )
+
+  const zoomedInfoDetails$ = zoomInfo$.map(z => z.infoDetails)
+  const informationDetailsQuery = InformationDetails({...sources, trigger: zoomedInfoDetails$})
+  const informationDetailsHTTP$ = informationDetailsQuery.HTTP
+  const informationDetails$ = informationDetailsQuery.informationDetails.map(i => i.body.result.data).startWith({})
 
   function entry(key, value) {
     // Feature not found => LuciusCore doesn't have the value in the model, so this will never be available. Unlikely string to be present in the normal data.
@@ -95,9 +139,16 @@ export function SampleInfo(sources) {
 
   function entrySmall(key, value) {
     return [
-      span(".col .s4 .m2", { style: { fontWeight: "lighter" } }, key),
-      span(".col .s8 .m4", value?.length != 0 ? value : ""),
+      span(".col .s4 .m2 .entryKey", { style: { fontWeight: "lighter" } }, key),
+      span(".col .s8 .m4 .entryValue", value?.length != 0 ? value : ""),
     ]
+  }
+
+  function entryArray(key, values) {
+    return [
+      span(".col .s2 .entryKey", key)
+    ]
+    .concat( values?.map(c => span(".col .s2 .entryValue", c)) )
   }
 
   const blur$ = props$
@@ -336,9 +387,11 @@ export function SampleInfo(sources) {
    * @param {object} sample the data to be displayed
    * @param {object} props static settings for ie. sourire url or background colors
    * @param {style} blur component style to contain blur settings
+   * @param {object} informationDetails
+   * @param {boolean} zoomInfo
    * @return {object} object with members for each treatment type, each has wrapping div with vdom elements
    */
-  const rowDetail = (sample, props, blur) => {
+  const rowDetail = (sample, props, blur, informationDetails, zoomInfo) => {
     let hStyle = { style: { margin: "0px", fontWeight: "bold" } }
     let pStyle = { style: { margin: "0px" } }
     let pStylewBlur = { style: merge(blur, { margin: "0px" }) }
@@ -405,126 +458,122 @@ export function SampleInfo(sources) {
           : "",
       ]
 
+    const filtersPart =
+      div(".col .s12", { style: { padding: "0px" } },
+        [ p(".col .s12.filterHeader", hStyle, "Filter Info:") ]
+        .concat(
+          _filters.map((x) => p(pStyle, entrySmall(x.key+":", x.value)))
+        )
+      )
+
+    const replicationPart =
+      div(".col .s12", { style: { padding: "0px" } }, [
+        p(".col .s12 .replicateHeader", hStyle, "Perturbation Replicate Information:"),
+        div(".row", pStyle, entryArray("Processing Level:", [informationDetails?.processing_level]) ),
+        div(".row", pStyle, entryArray("Replicates:", [informationDetails?.number_of_replicates]) ),
+        div(".row", pStyle, entryArray("Cell:", informationDetails?.cell_details) ),
+        div(".row", pStyle, entryArray("Plate:", informationDetails?.plate_details) ),
+        div(".row", pStyle, entryArray("Well:",  informationDetails?.well_details) ),
+        // div(".row", pStyle, entryArray("Batch:", informationDetails?.batch_details) ),
+        // div(".row", pStyle, entryArray("Year:",  informationDetails?.year_details) ),
+        // div(".row", pStyle, entryArray("Extra:", informationDetails?.extra_details) ),
+      ])
+
+    const expandingFiltersAndReplicationPart = 
+      [ div(".btn-flat", { style: { margin: "0 0 0 10px", padding: "0 0" } }, i(".material-icons .filtersZoom", "filter_list")) ]
+      .concat(
+        zoomInfo.filters
+        ? filtersPart
+        : []
+      )
+      .concat(
+        zoomInfo.filters || zoomInfo.infoDetails
+        ? [ div(".row") ]
+        : []
+      )
+      .concat(
+        [ div(".btn-flat", { style: { margin: "0 0 0 10px", padding: "0 0" } }, i(".material-icons .informationDetailsZoom", "info_outline")) ]
+      )
+      .concat(
+        zoomInfo.infoDetails
+        ? replicationPart
+        : []
+      )
+
     return {
-      trt_cp: div(".col .s12", [
+      trt_cp: div(".row", [
         div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
         div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
         div(".col .s12 .offset-s8 .offset-m8 .l4",
           {style: merge(blur, { margin: "20px 0px 0px 0px" }) },
           visualizeSmilesPart
         ),
-        div(
-          ".col .s12 .l12",
-          { style: { margin: "15px 0px 0px 0px" } },
-          [p(".col .s12 .filterHeader", hStyle, "Filter Info:")].concat(
-            _filters.map((x) => p(pStyle, entrySmall(x.key, x.value)))
-          )
-        ),
+        div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, expandingFiltersAndReplicationPart),
       ]),
-      trt_sh: div([
-        div(".row", [
-          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
-          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
-          div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
+      trt_sh: div(".row", [
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
+        div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
           { style: merge(blur, { height: "100%", "margin-top": "30px"}) },
           visualizeTextPart
         ),
-        ]),
-        div(
-          ".row",
-          { style: { margin: "15px 0px 0px 0px" } },
-          [p(".col .s12.filterHeader", hStyle, "Filter Info:")].concat(
-            _filters.map((x) => p(pStyle, entrySmall(x.key, x.value)))
-          )
-        ),
+        div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, expandingFiltersAndReplicationPart),
       ]),
-      trt_oe: div([
-        div(".row", [
-          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
-          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
-          div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
+      trt_oe: div(".row", [
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
+        div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
           { style: merge(blur, { height: "100%", "margin-top": "30px"}) },
           visualizeTextPart
         ),
-        ]),
-        div(
-          ".row",
-          { style: { margin: "15px 0px 0px 0px" } },
-          [p(".col .s12.filterHeader", hStyle, "Filter Info:")].concat(
-            _filters.map((x) => p(pStyle, entrySmall(x.key, x.value)))
-          )
-        ),
+        div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, expandingFiltersAndReplicationPart),
       ]),
-      trt_lig: div([
-        div(".row", [
-          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
-          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
-          div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
+      trt_lig: div(".row", [
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
+        div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
           { style: merge(blur, { height: "100%", "margin-top": "30px"}) },
           visualizeTextPart
         ),
-        ]),
-        div(
-          ".row",
-          { style: { margin: "15px 0px 0px 0px" } },
-          [p(".col .s12 .filterHeader", hStyle, "Filter Info:")].concat(
-            _filters.map((x) => p(pStyle, entrySmall(x.key, x.value)))
-          )
-        ),
+        div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, expandingFiltersAndReplicationPart),
       ]),
-      ctl_vector: div([
-        div(".row", [
-          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
-          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
-          div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
-            { style: merge(blur, { height: "100%", "margin-top": "30px"}) },
-            visualizeTextPart
-          ),
-        ]),
-        div(
-          ".row",
-          { style: { margin: "15px 0px 0px 0px" } },
-          [p(".col .s12 .filterHeader", hStyle, "Filter Info:")].concat(
-            _filters.map((x) => p(pStyle, entrySmall(x.key, x.value)))
-          )
+      ctl_vector: div(".row", [
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
+        div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
+          { style: merge(blur, { height: "100%", "margin-top": "30px"}) },
+          visualizeTextPart
         ),
+        div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, expandingFiltersAndReplicationPart),
       ]),
-      _default: div(".row", { style: { fontWeight: "small" } }, [
-        div(".col .s12", [
-          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
-          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
-          div(".col .s12 .offset-s8 .offset-m8 .l4",
-            { style: merge(blur, { margin: "20px 0px 0px 0px" }) },
-            visualizeSmilesPart
-          ),
-          div(
-            ".col .s12 .l12",
-            { style: { margin: "15px 0px 0px 0px" } },
-            [p(".col .s12 .filterHeader", hStyle, "Filter Info:")].concat(
-              _filters.map((x) => p(pStyle, entrySmall(x.key, x.value)))
-            )
-          ),
-        ]),
+      _default: div(".row", [
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
+        div(".col .s12 .offset-s8 .offset-m8 .l4",
+          {style: merge(blur, { margin: "20px 0px 0px 0px" }) },
+          visualizeSmilesPart
+        ),
+        div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, expandingFiltersAndReplicationPart),
       ]),
     }
   }
 
   const vdom$ = xs
-    .combine(state$, zoomed$, props$, blur$)
-    .map(([sample, zoom, props, blur]) => {
+    .combine(state$, zoomInfo$, props$, blur$, informationDetails$)
+    .map(([sample, zoomInfo, props, blur, informationDetails]) => {
       let bgcolor =
         sample.zhang >= 0 ? "rgba(44,123,182, 0.08)" : "rgba(215,25,28, 0.08)"
       const updtProps = { ...props, bgColor: bgcolor }
 
-      const thisRow = row(sample, updtProps, blur, zoom)
-      const thisRowDetail = rowDetail(sample, updtProps, blur)
+      const thisRow = row(sample, updtProps, blur, zoomInfo.row)
+      const thisRowDetail = rowDetail(sample, updtProps, blur, informationDetails, zoomInfo)
 
       return li(
         ".collection-item .zoom .sampleInfo",
         { style: { "background-color": bgcolor } },
         [
           thisRow[sample.trt] ? thisRow[sample.trt] : thisRow["_default"],
-          zoom
+          zoomInfo.row
             ? div(".row", [
                 thisRowDetail[sample.trt]
                   ? thisRowDetail[sample.trt]
@@ -538,5 +587,6 @@ export function SampleInfo(sources) {
 
   return {
     DOM: vdom$,
+    HTTP: informationDetailsHTTP$,
   }
 }

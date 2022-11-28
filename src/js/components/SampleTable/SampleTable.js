@@ -35,7 +35,7 @@ function SampleTable(sources) {
   // isolate each line so that it separates clicks
   const childrenSinks$ = array$.map(array => {
       return array.map((_, index) => isolate(SampleInfo, index)(sources))
-  });
+  })
 
   const listStyle = {style : {'margin-top' : '0px', 'margin-bottom':'0px'}}
 
@@ -51,9 +51,10 @@ function SampleTable(sources) {
    * @const SampleTable/composedChildrenSinks$
    * @type {Stream}
    */
-  const composedChildrenSinks$ = childrenSinks$.compose(pick('DOM')).compose(mix(xs.combine))
+  const composedChildrenDOMSinks$ = childrenSinks$.compose(pick('DOM')).compose(mix(xs.combine))
+  const composedChildrenHttpSinks$ = childrenSinks$.compose(pick('HTTP')).compose(mix(xs.merge))
 
-  const vdom$ = xs.combine(sampleInfoHeader$, composedChildrenSinks$)
+  const vdom$ = xs.combine(sampleInfoHeader$, composedChildrenDOMSinks$)
                   .map(([header, itemVNodes]) => 
                     ul(
                       '.collection',
@@ -70,6 +71,7 @@ function SampleTable(sources) {
 
   return {
     DOM: vdom$,
+    HTTP: composedChildrenHttpSinks$,
   };
 
 }

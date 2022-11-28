@@ -44,7 +44,7 @@ import Init from "./pages/init"
 
 // Utilities
 import { initSettings } from "./configuration.js"
-import initDeployments from "../../deployments.json"
+import initDeployments from "../../public/deployments.json"
 import { loggerFactory } from "./utils/logger"
 
 import {

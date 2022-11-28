@@ -6,14 +6,14 @@ module.exports = {
   watch: false,
   entry: ['./src/js/main'],
   output: {
-    path: path.join(__dirname, 'dist'),
+    path: path.join(__dirname, 'public/dist'),
     publicPath: '/dist/',
     filename: 'bundle.js',
   },
   devtool: 'inline-source-map',
   devServer: {
     static: {
-      directory: './',
+      directory: './public/',
     },
     //inline: true, // removed
     historyApiFallback: true,

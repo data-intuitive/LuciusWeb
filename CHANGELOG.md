@@ -11,6 +11,9 @@
 
 ### Other
 
+- Updated required node version in Dockerfile
+- Updated some pinned package versions
+- Use the helmet package to set/tweak server html headers
 - Restructured the folder structure slightly to introduce a `public` folder
   This prevents exposing server configuration files
 - `dist/bundle.js` now compiles towards the public folder too

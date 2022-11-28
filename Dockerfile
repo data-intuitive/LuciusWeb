@@ -1,9 +1,11 @@
-FROM node:14.3.0
+FROM node:14.21.1
 USER root
 
 WORKDIR /app
 
 RUN apt-get install -y gcc make
+
+RUN npm install -g node-gyp
 
 # Get sources
 # Make sure the correct branch/release is used here!
@@ -11,8 +13,6 @@ RUN apt-get install -y gcc make
 COPY . /app/LuciusWeb/
 
 WORKDIR /app/LuciusWeb
-
-RUN npm install -g node-gyp
 
 # LuciusWeb
 RUN npm install

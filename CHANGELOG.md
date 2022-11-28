@@ -1,5 +1,33 @@
 # CHANGELOG
 
+## Version 5.4.0
+
+### Functionality
+
+- Display a Sample Information Details section in top tables
+- Change filter and sample information details to be collapsable (collapsed by default)
+
+### Minor changes
+
+- Fix table sample info display of dose & time so the text is properly truncated if the value string is long
+- Hide table sample info fields if the API call returned either empty or "Feature not found"
+- Display single cell information in sample selection and table sample info
+- Solve the 3 invalid font warnings on the console
+- Display perturbation information details under the expanded table sample info by clicking the 'i' icon
+
+### Other
+
+- Updated required node version in Dockerfile
+- Updated some pinned package versions
+- Use the helmet package to set/tweak server html headers
+- Restructured the folder structure slightly to introduce a `public` folder
+  This prevents exposing server configuration files
+- `dist/bundle.js` now compiles towards the public folder too
+
+### Deployment changes
+
+- `deployments.json` should now be placed in the `public` folder instead of the project root
+
 ## Version 5.3.0
 
 ### Functionality

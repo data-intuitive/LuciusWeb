@@ -5,6 +5,7 @@ import {
   li,
   span,
   img,
+  i,
 } from "@cycle/dom"
 import { merge } from "ramda"
 import { safeModelToUi } from "../../modelTranslations"
@@ -23,6 +24,8 @@ import img_ctl_vehicle_cns from "/images/treatmentTypes/CTL_VEHICLE.CNS.png"
 import img_ctl_vector_cns  from "/images/treatmentTypes/CTL_VECTOR.png"
 import img_ctl_untrt_cns   from "/images/treatmentTypes/CTL_UNTRT.CNS.png"
 import img_ctl_untrt       from "/images/treatmentTypes/CTL_UNTRT.png"
+import { maxLengthValueUnit } from "../../utils/utils"
+import { InformationDetails } from "../InformationDetails"
 
 /**
  * @module components/SampleTable/SampleInfo
@@ -67,31 +70,85 @@ export function SampleInfo(sources) {
   const state$ = sources.onion.state$
   const props$ = sources.props
 
-  const click$ = sources.DOM.select(".zoom").events("click").mapTo(1)
-  const zoomed$ = click$
-    .fold((x, y) => x + y, 0)
-    .map((count) => (count % 2 == 0 ? false : true))
+  // click events to open or close parts of the SampleInfo
+  const clickRow$ = sources.DOM.select(".zoom").events("click")
+  const clickFilters$ = sources.DOM.select(".filtersZoom").events("click")
+  const clickInfoDetails$ = sources.DOM.select(".informationDetailsZoom").events("click")
+
+  // Don't allow propagation of the event when the click is on .filtersZoom or .informationDetailsZoom
+  // Otherwise it will propagate to .zoom and close the row details instead of opening/closing .filtersZoom or .informationDetailsZoom
+  // This code doesn't quite follow the cycle.js dogma
+  xs.merge(clickFilters$, clickInfoDetails$)
+    .addListener({
+      next: (ev) => { ev.stopPropagation() },
+      error: () => {}
+    })
+
+  const zoomInfo$ = xs.merge(
+    clickRow$.mapTo("row"),
+    clickFilters$.mapTo("filters"),
+    clickInfoDetails$.mapTo("infoDetails")
+    )
+    .fold((acc, ev) => 
+      {
+        if (ev == "row")
+          return {
+            row: !acc.row,
+            filters: false,
+            infoDetails: false,
+          }
+        else if (ev == "filters")
+          return {
+            ...acc,
+            filters: !acc.filters
+          }
+        else if (ev = "infoDetails")
+          return {
+            ...acc,
+            infoDetails: !acc.infoDetails
+          }
+      }
+      ,
+      { row: false, filters: false, infoDetails: false }
+    )
+
+  const zoomedInfoDetails$ = zoomInfo$.map(z => z.infoDetails)
+  const informationDetailsQuery = InformationDetails({...sources, trigger: zoomedInfoDetails$})
+  const informationDetailsHTTP$ = informationDetailsQuery.HTTP
+  const informationDetails$ = informationDetailsQuery.informationDetails.map(i => i.body.result.data).startWith({})
 
   function entry(key, value) {
-    return [
-      span(
-        ".col .s4 .entryKey",
-        { style: { fontWeight: "lighter", whiteSpace: "nowrap"} },
-        key
-      ),
-      span(
-        ".col .s8 .entryValue",
-        { style: { overflow: "hidden", "text-overflow": "ellipsis" } },
-        value?.length != 0 ? value : ""
-      ),
-    ]
+    // Feature not found => LuciusCore doesn't have the value in the model, so this will never be available. Unlikely string to be present in the normal data.
+    // !value?.trim() => Also don't show empty fields
+    if (value == "Feature not found" || !value?.trim())
+      return []
+    else
+      return [
+        span(
+          ".col .s4 .entryKey",
+          { style: { fontWeight: "lighter", whiteSpace: "nowrap"} },
+          key
+        ),
+        span(
+          ".col .s8 .entryValue",
+          { style: { overflow: "hidden", "text-overflow": "ellipsis" } },
+          value?.length != 0 ? value : ""
+        ),
+      ]
   }
 
   function entrySmall(key, value) {
     return [
-      span(".col .s4 .m2", { style: { fontWeight: "lighter" } }, key),
-      span(".col .s8 .m4", value?.length != 0 ? value : ""),
+      span(".col .s4 .m2 .entryKey", { style: { fontWeight: "lighter" } }, key),
+      span(".col .s8 .m4 .entryValue", value?.length != 0 ? value : ""),
     ]
+  }
+
+  function entryArray(key, values) {
+    return [
+      span(".col .s2 .entryKey", key)
+    ]
+    .concat( values?.map(c => span(".col .s2 .entryValue", c)) )
   }
 
   const blur$ = props$
@@ -181,6 +238,9 @@ export function SampleInfo(sources) {
           : "",
       ]
 
+    const _filters = sample.filters != undefined ? sample.filters : []
+    const origCell = _filters.find(e => e.key == "orig_cell")?.value ?? "N/A"
+
     return {
       trt_cp: div(".row", { style: { fontWeight: "small" } }, [
         div(".valign-wrapper", [
@@ -189,7 +249,7 @@ export function SampleInfo(sources) {
           ]),
 
           div(".col .l2 .hide-on-med-and-down .truncate", [sample.id]),
-          div(".col .l1 .hide-on-med-and-down", [sample.cell]),
+          div(".col .l1 .hide-on-med-and-down", [origCell]),
           div(".col .l2 .hide-on-med-and-down .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
           div(".col .l3 .hide-on-med-and-down", { style: blur }, [sample.trt_name]),
 
@@ -200,7 +260,7 @@ export function SampleInfo(sources) {
           div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Sample ID"]),
           div(".col .s8 .truncate", [sample.id]),
           div(".col .s4 .m3 .offset-m1", ["Cell"]),
-          div(".col .s8", [sample.cell]),
+          div(".col .s8", [origCell]),
           div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Treatment ID"]),
           div(".col .s8 .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
           div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Treatment Name"]),
@@ -214,7 +274,7 @@ export function SampleInfo(sources) {
           ]),
 
           div(".col .l2 .hide-on-med-and-down .truncate", [sample.id]),
-          div(".col .l1 .hide-on-med-and-down", [sample.cell]),
+          div(".col .l1 .hide-on-med-and-down", [origCell]),
           div(".col .l2 .hide-on-med-and-down .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
           div(".col .l3 .hide-on-med-and-down", { style: blur }, [sample.trt_name]),
 
@@ -225,7 +285,7 @@ export function SampleInfo(sources) {
           div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Sample ID"]),
           div(".col .s8 .truncate", [sample.id]),
           div(".col .s4 .m3 .offset-m1", ["Cell"]),
-          div(".col .s8", [sample.cell]),
+          div(".col .s8", [origCell]),
           div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Treatment ID"]),
           div(".col .s8 .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
           div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Treatment Name"]),
@@ -239,7 +299,7 @@ export function SampleInfo(sources) {
           ]),
 
           div(".col .l2 .hide-on-med-and-down .truncate", [sample.id]),
-          div(".col .l1 .hide-on-med-and-down", [sample.cell]),
+          div(".col .l1 .hide-on-med-and-down", [origCell]),
           div(".col .l2 .hide-on-med-and-down .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
           div(".col .l3 .hide-on-med-and-down", { style: blur }, [sample.trt_name]),
 
@@ -250,7 +310,7 @@ export function SampleInfo(sources) {
           div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Sample ID"]),
           div(".col .s8 .truncate", [sample.id]),
           div(".col .s4 .m3 .offset-m1", ["Cell"]),
-          div(".col .s8", [sample.cell]),
+          div(".col .s8", [origCell]),
           div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Treatment ID"]),
           div(".col .s8 .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
           div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Treatment Name"]),
@@ -264,7 +324,7 @@ export function SampleInfo(sources) {
           ]),
 
           div(".col .l2 .hide-on-med-and-down .truncate", [sample.id]),
-          div(".col .l1 .hide-on-med-and-down", [sample.cell]),
+          div(".col .l1 .hide-on-med-and-down", [origCell]),
           div(".col .l2 .hide-on-med-and-down .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
           div(".col .l3 .hide-on-med-and-down", { style: blur }, [sample.trt_name]),
 
@@ -275,7 +335,7 @@ export function SampleInfo(sources) {
           div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Sample ID"]),
           div(".col .s8 .truncate", [sample.id]),
           div(".col .s4 .m3 .offset-m1", ["Cell"]),
-          div(".col .s8", [sample.cell]),
+          div(".col .s8", [origCell]),
           div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Treatment ID"]),
           div(".col .s8 .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
           div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Treatment Name"]),
@@ -289,7 +349,7 @@ export function SampleInfo(sources) {
           ]),
 
           div(".col .l2 .hide-on-med-and-down .truncate", [sample.id]),
-          div(".col .l1 .hide-on-med-and-down", [sample.cell]),
+          div(".col .l1 .hide-on-med-and-down", [origCell]),
           div(".col .l2 .hide-on-med-and-down .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
           div(".col .l3 .hide-on-med-and-down", { style: blur }, [sample.trt_name]),
 
@@ -300,7 +360,7 @@ export function SampleInfo(sources) {
           div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Sample ID"]),
           div(".col .s8 .truncate", [sample.id]),
           div(".col .s4 .m3 .offset-m1", ["Cell"]),
-          div(".col .s8", [sample.cell]),
+          div(".col .s8", [origCell]),
           div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Treatment ID"]),
           div(".col .s8 .truncate", { style: blur }, [ sample.trt_id != "NA" ? sample.trt_id : "" ]),
           div(".col .s4 .m3 .offset-m1", {style: {whiteSpace: "nowrap"}}, ["Treatment Name"]),
@@ -327,23 +387,29 @@ export function SampleInfo(sources) {
    * @param {object} sample the data to be displayed
    * @param {object} props static settings for ie. sourire url or background colors
    * @param {style} blur component style to contain blur settings
+   * @param {object} informationDetails
+   * @param {boolean} zoomInfo
    * @return {object} object with members for each treatment type, each has wrapping div with vdom elements
    */
-  const rowDetail = (sample, props, blur) => {
+  const rowDetail = (sample, props, blur, informationDetails, zoomInfo) => {
     let hStyle = { style: { margin: "0px", fontWeight: "bold" } }
     let pStyle = { style: { margin: "0px" } }
     let pStylewBlur = { style: merge(blur, { margin: "0px" }) }
     const _filters = sample.filters != undefined ? sample.filters : []
 
+    const origDose = _filters.find(e => e.key == "orig_dose")?.value ?? "N/A"
+    const origCell = _filters.find(e => e.key == "orig_cell")?.value ?? "N/A"
+
     const samplePart =
       [
         p(".col .s12 .sampleHeader", hStyle, "Sample Info:"),
-        p(pStyle, entry("Sample ID: ", sample.id)),
-        p(pStyle, entry("Cell: ", sample.cell)),
-        p(pStyle, entry("Dose: ", sample.dose !== "N/A" ? sample.dose + " " + (sample?.dose_unit ?? "?") : sample.dose)),
-        p(pStyle, entry("Time: ", sample.time !== "N/A" ? sample.time + " " + (sample?.time_unit ?? "?") : sample.time)),
-        p(pStyle, entry("Year: ", sample.year)),
-        p(pStyle, entry("Plate: ", sample.plate)),
+        p(".row", pStyle, entry("Sample ID: ", sample.id)),
+        p(".row", pStyle, entry("Cell: ", origCell)),
+        p(".row", pStyle, entry("Dose: ", maxLengthValueUnit(origDose, sample?.dose_unit ?? "?", 7))),
+        p(".row", pStyle, entry("Log(dose): ", maxLengthValueUnit(sample.dose, "", 7))),
+        p(".row", pStyle, entry("Time: ", maxLengthValueUnit(sample.time, sample?.time_unit ?? "?", 7))),
+        p(".row", pStyle, entry("Year: ", sample.year)),
+        p(".row", pStyle, entry("Plate: ", sample.plate)),
       ]
 
     const treatmentPart =
@@ -392,126 +458,122 @@ export function SampleInfo(sources) {
           : "",
       ]
 
+    const filtersPart =
+      div(".col .s12", { style: { padding: "0px" } },
+        [ p(".col .s12.filterHeader", hStyle, "Filter Info:") ]
+        .concat(
+          _filters.map((x) => p(pStyle, entrySmall(x.key+":", x.value)))
+        )
+      )
+
+    const replicationPart =
+      div(".col .s12", { style: { padding: "0px" } }, [
+        p(".col .s12 .replicateHeader", hStyle, "Perturbation Replicate Information:"),
+        div(".row", pStyle, entryArray("Processing Level:", [informationDetails?.processing_level]) ),
+        div(".row", pStyle, entryArray("Replicates:", [informationDetails?.number_of_replicates]) ),
+        div(".row", pStyle, entryArray("Cell:", informationDetails?.cell_details) ),
+        div(".row", pStyle, entryArray("Plate:", informationDetails?.plate_details) ),
+        div(".row", pStyle, entryArray("Well:",  informationDetails?.well_details) ),
+        // div(".row", pStyle, entryArray("Batch:", informationDetails?.batch_details) ),
+        // div(".row", pStyle, entryArray("Year:",  informationDetails?.year_details) ),
+        // div(".row", pStyle, entryArray("Extra:", informationDetails?.extra_details) ),
+      ])
+
+    const expandingFiltersAndReplicationPart = 
+      [ div(".btn-flat", { style: { margin: "0 0 0 10px", padding: "0 0" } }, i(".material-icons .filtersZoom", "filter_list")) ]
+      .concat(
+        zoomInfo.filters
+        ? filtersPart
+        : []
+      )
+      .concat(
+        zoomInfo.filters || zoomInfo.infoDetails
+        ? [ div(".row") ]
+        : []
+      )
+      .concat(
+        [ div(".btn-flat", { style: { margin: "0 0 0 10px", padding: "0 0" } }, i(".material-icons .informationDetailsZoom", "info_outline")) ]
+      )
+      .concat(
+        zoomInfo.infoDetails
+        ? replicationPart
+        : []
+      )
+
     return {
-      trt_cp: div(".col .s12", [
+      trt_cp: div(".row", [
         div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
         div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
         div(".col .s12 .offset-s8 .offset-m8 .l4",
           {style: merge(blur, { margin: "20px 0px 0px 0px" }) },
           visualizeSmilesPart
         ),
-        div(
-          ".col .s12 .l12",
-          { style: { margin: "15px 0px 0px 0px" } },
-          [p(".col .s12 .filterHeader", hStyle, "Filter Info:")].concat(
-            _filters.map((x) => p(pStyle, entrySmall(x.key, x.value)))
-          )
-        ),
+        div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, expandingFiltersAndReplicationPart),
       ]),
-      trt_sh: div([
-        div(".row", [
-          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
-          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
-          div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
+      trt_sh: div(".row", [
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
+        div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
           { style: merge(blur, { height: "100%", "margin-top": "30px"}) },
           visualizeTextPart
         ),
-        ]),
-        div(
-          ".row",
-          { style: { margin: "15px 0px 0px 0px" } },
-          [p(".col .s12.filterHeader", hStyle, "Filter Info:")].concat(
-            _filters.map((x) => p(pStyle, entrySmall(x.key, x.value)))
-          )
-        ),
+        div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, expandingFiltersAndReplicationPart),
       ]),
-      trt_oe: div([
-        div(".row", [
-          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
-          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
-          div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
+      trt_oe: div(".row", [
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
+        div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
           { style: merge(blur, { height: "100%", "margin-top": "30px"}) },
           visualizeTextPart
         ),
-        ]),
-        div(
-          ".row",
-          { style: { margin: "15px 0px 0px 0px" } },
-          [p(".col .s12.filterHeader", hStyle, "Filter Info:")].concat(
-            _filters.map((x) => p(pStyle, entrySmall(x.key, x.value)))
-          )
-        ),
+        div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, expandingFiltersAndReplicationPart),
       ]),
-      trt_lig: div([
-        div(".row", [
-          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
-          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
-          div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
+      trt_lig: div(".row", [
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
+        div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
           { style: merge(blur, { height: "100%", "margin-top": "30px"}) },
           visualizeTextPart
         ),
-        ]),
-        div(
-          ".row",
-          { style: { margin: "15px 0px 0px 0px" } },
-          [p(".col .s12 .filterHeader", hStyle, "Filter Info:")].concat(
-            _filters.map((x) => p(pStyle, entrySmall(x.key, x.value)))
-          )
-        ),
+        div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, expandingFiltersAndReplicationPart),
       ]),
-      ctl_vector: div([
-        div(".row", [
-          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
-          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
-          div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
-            { style: merge(blur, { height: "100%", "margin-top": "30px"}) },
-            visualizeTextPart
-          ),
-        ]),
-        div(
-          ".row",
-          { style: { margin: "15px 0px 0px 0px" } },
-          [p(".col .s12 .filterHeader", hStyle, "Filter Info:")].concat(
-            _filters.map((x) => p(pStyle, entrySmall(x.key, x.value)))
-          )
+      ctl_vector: div(".row", [
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
+        div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
+          { style: merge(blur, { height: "100%", "margin-top": "30px"}) },
+          visualizeTextPart
         ),
+        div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, expandingFiltersAndReplicationPart),
       ]),
-      _default: div(".row", { style: { fontWeight: "small" } }, [
-        div(".col .s12", [
-          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
-          div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
-          div(".col .s12 .offset-s8 .offset-m8 .l4",
-            { style: merge(blur, { margin: "20px 0px 0px 0px" }) },
-            visualizeSmilesPart
-          ),
-          div(
-            ".col .s12 .l12",
-            { style: { margin: "15px 0px 0px 0px" } },
-            [p(".col .s12 .filterHeader", hStyle, "Filter Info:")].concat(
-              _filters.map((x) => p(pStyle, entrySmall(x.key, x.value)))
-            )
-          ),
-        ]),
+      _default: div(".row", [
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
+        div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
+        div(".col .s12 .offset-s8 .offset-m8 .l4",
+          {style: merge(blur, { margin: "20px 0px 0px 0px" }) },
+          visualizeSmilesPart
+        ),
+        div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, expandingFiltersAndReplicationPart),
       ]),
     }
   }
 
   const vdom$ = xs
-    .combine(state$, zoomed$, props$, blur$)
-    .map(([sample, zoom, props, blur]) => {
+    .combine(state$, zoomInfo$, props$, blur$, informationDetails$)
+    .map(([sample, zoomInfo, props, blur, informationDetails]) => {
       let bgcolor =
         sample.zhang >= 0 ? "rgba(44,123,182, 0.08)" : "rgba(215,25,28, 0.08)"
       const updtProps = { ...props, bgColor: bgcolor }
 
-      const thisRow = row(sample, updtProps, blur, zoom)
-      const thisRowDetail = rowDetail(sample, updtProps, blur)
+      const thisRow = row(sample, updtProps, blur, zoomInfo.row)
+      const thisRowDetail = rowDetail(sample, updtProps, blur, informationDetails, zoomInfo)
 
       return li(
         ".collection-item .zoom .sampleInfo",
         { style: { "background-color": bgcolor } },
         [
           thisRow[sample.trt] ? thisRow[sample.trt] : thisRow["_default"],
-          zoom
+          zoomInfo.row
             ? div(".row", [
                 thisRowDetail[sample.trt]
                   ? thisRowDetail[sample.trt]
@@ -525,5 +587,6 @@ export function SampleInfo(sources) {
 
   return {
     DOM: vdom$,
+    HTTP: informationDetailsHTTP$,
   }
 }

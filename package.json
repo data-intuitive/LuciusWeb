@@ -1,6 +1,6 @@
 {
     "name": "LuciusWeb",
-    "version": "5.4.0",
+    "version": "5.4.1-alpha1",
     "description": "Web interface for ComPass aka Lucius",
     "repository": {
         "type": "git",
@@ -25,14 +25,12 @@
     "author": "Toni Verbeiren",
     "license": "Apache v2",
     "devDependencies": {
-        "@babel/cli": "^7.19.3",
         "@babel/core": "^7.20.2",
         "@babel/preset-env": "^7.20.2",
         "@babel/register": "^7.18.9",
         "css-loader": "^6.7.2",
         "file-loader": "^5.0.2",
         "jquery": "^3.6.1",
-        "materialize-loader": "^3.0.1",
         "mini-css-extract-plugin": "^0.8.0",
         "mocha": "^10.1.0",
         "sass": "^1.56.1",
@@ -40,9 +38,8 @@
         "style-loader": "^1.0.1",
         "url-loader": "^3.0.0",
         "webpack": "^5.75.0",
-        "webpack-cli": "^4.10.0",
-        "webpack-dev-server": "^4.11.1",
-        "webpack-material-design-icons": "^0.1.0"
+        "webpack-cli": "^5.0.0",
+        "webpack-dev-server": "^4.11.1"
     },
     "dependencies": {
         "@cycle/dom": "^23.1.0",
@@ -55,7 +52,6 @@
         "cycle-onionify": "^3.3.0",
         "cycle-storageify": "^3.2.0",
         "cyclic-router": "^6.0.0",
-        "datalib": "^1.9.3",
         "helmet": "^6.0.0",
         "materialize-css": "^1.0.0",
         "ramda": "^0.27.2",

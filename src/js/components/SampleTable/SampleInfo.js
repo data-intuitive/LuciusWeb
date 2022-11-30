@@ -77,36 +77,36 @@ export function SampleInfo(sources) {
 
   // Don't allow propagation of the event when the click is on .filtersZoom or .informationDetailsZoom
   // Otherwise it will propagate to .zoom and close the row details instead of opening/closing .filtersZoom or .informationDetailsZoom
-  // This code doesn't quite follow the cycle.js dogma
-  xs.merge(clickFilters$, clickInfoDetails$)
-    .addListener({
-      next: (ev) => { ev.stopPropagation() },
-      error: () => {}
-    })
-
+  // Calling ev.stopPropagation() this way doesn't quite follow the cycle.js dogma
   const zoomInfo$ = xs.merge(
-    clickRow$.mapTo("row"),
-    clickFilters$.mapTo("filters"),
-    clickInfoDetails$.mapTo("infoDetails")
+    clickRow$.map(ev => [ev, "row"]),
+    clickFilters$.map(ev => [ev, "filters"]),
+    clickInfoDetails$.map(ev => [ev, "infoDetails"])
     )
-    .fold((acc, ev) => 
+    .fold((acc, [ev, id]) => 
       {
-        if (ev == "row")
+        if (id == "row") {
           return {
             row: !acc.row,
             filters: false,
             infoDetails: false,
           }
-        else if (ev == "filters")
+        }
+        else if (id == "filters") {
+          ev.stopPropagation()
           return {
             ...acc,
             filters: !acc.filters
           }
-        else if (ev = "infoDetails")
+        }
+        else if (id == "infoDetails") {
+          ev.stopPropagation()
           return {
             ...acc,
             infoDetails: !acc.infoDetails
           }
+        }
+        else return acc
       }
       ,
       { row: false, filters: false, infoDetails: false }

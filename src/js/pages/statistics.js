@@ -1,8 +1,7 @@
 import { a, div, br, label, input, p, button, code, pre } from '@cycle/dom'
 import xs from 'xstream'
 import isolate from '@cycle/isolate'
-import { mergeWith, merge } from 'ramda'
-import { clone, equal, equals, mergeAll, prop, props } from 'ramda';
+import { equals, mergeRight, mergeAll, prop, props } from 'ramda';
 import dropRepeats from 'xstream/extra/dropRepeats'
 
 import { initSettings } from '../configuration.js'
@@ -35,7 +34,7 @@ function StatisticsWorkflow(sources) {
 
   // Add properties to the child component, based on what we need
   const statsProps$ = selectKeysFromSettings(state$, ['stats', 'api'])
-  const statsSinks = isolate(Statistics, 'stats')(merge(sources, { props: statsProps$ }));
+  const statsSinks = isolate(Statistics, 'stats')(mergeRight(sources, { props: statsProps$ }));
 
   const pageStyle = {
     style:

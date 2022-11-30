@@ -1,22 +1,13 @@
 import xs from 'xstream';
 import { div, nav, a, h3, p, ul, li, h1, h2, i, footer, header, main, svg, g, path, input, span } from '@cycle/dom';
-import { merge, prop, equals, mergeAll, mergeWith, mergeDeepRight } from 'ramda';
 
-// import { mockDOMSource } from '@cycle/dom'
-
-import { Check } from '../components/Check'
-import { IsolatedSettings } from './settings'
 import { TargetForm } from '../components/TargetForm'
 import { makeTable, compoundContainerTableLens } from '../components/Table'
 
-import { SampleTable, sampleTableLens } from '../components/SampleTable/SampleTable'
 import { CompoundTable, compoundTableLens } from '../components/CompoundTable/CompoundTable'
 import { Histogram, histLens } from '../components/Histogram/Histogram'
 
-import { pick, mix } from 'cycle-onionify';
 import { initSettings } from '../configuration.js'
-import debounce from 'xstream/extra/debounce'
-import dropRepeats from 'xstream/extra/dropRepeats'
 import { loggerFactory } from '../utils/logger'
 import isolate from '@cycle/isolate'
 import { SignatureForm, formLens } from '../components/SignatureForm'

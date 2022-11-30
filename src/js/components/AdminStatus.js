@@ -1,11 +1,8 @@
-import { a, div, br, label, input, p, button, code, pre, i, span } from '@cycle/dom'
+import { i, span } from '@cycle/dom'
 import xs from 'xstream'
-import isolate from '@cycle/isolate'
-import { mergeWith, merge } from 'ramda'
-import { clone, equal, equals, mergeAll, omit } from 'ramda';
+import { equals, omit } from 'ramda';
 import dropRepeats from 'xstream/extra/dropRepeats'
 import debounce from 'xstream/extra/debounce'
-import sampleCombine from 'xstream/extra/sampleCombine'
 
 // Alert the user when last response time is 1.5 times higher than the minimum
 // over the history of the jobserver.

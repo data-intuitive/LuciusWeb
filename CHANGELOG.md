@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## Version 5.4.1
+
+### Minor changes
+
+- Update npm packages and create package-loc.json from scratch, solving many remaining open audit hits
+
 ## Version 5.4.0
 
 ### Functionality

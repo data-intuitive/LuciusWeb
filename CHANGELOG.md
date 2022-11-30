@@ -2,6 +2,10 @@
 
 ## Version 5.4.1
 
+### Bug fixes
+
+- Fix issue when a sample selection filter is removed triggering an update on unavailable data
+
 ### Minor changes
 
 - Update npm packages and create package-loc.json from scratch, solving many remaining open audit hits

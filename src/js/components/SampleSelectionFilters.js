@@ -666,6 +666,12 @@ function model(state$, intents, sliderEvents$) {
     const [key, unit, _] = deserialize(id)
     const prevFilterData = prevState.core.filterData
 
+    // Check the data we'll be working with is even available, if not it's probably because a filter element was removed
+    // By returning prevState, we're effectively returning a new state without any invalid data
+    if (prevState.core.filterInfo[key] == undefined || prevFilterData[key] == undefined) {
+      return prevState
+    }
+
     const keyLens = lensProp(key)
     const currentFilterDataKey = viewR(keyLens, prevFilterData)
     

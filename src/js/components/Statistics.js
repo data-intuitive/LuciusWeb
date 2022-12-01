@@ -1,8 +1,6 @@
 import { a, div, br, label, input, p, button, code, pre, span, h5 } from '@cycle/dom'
 import xs from 'xstream'
-import isolate from '@cycle/isolate'
-import { mergeWith, merge } from 'ramda'
-import { clone, equal, equals, mergeAll, omit } from 'ramda';
+import { equals, mergeRight, omit } from 'ramda';
 import dropRepeats from 'xstream/extra/dropRepeats'
 import debounce from 'xstream/extra/debounce'
 
@@ -127,7 +125,7 @@ function Statistics(sources) {
     });
 
     // Add the result to the state
-    const stateReducer$ = data$.map(data => prevState => merge(prevState, { result: data }))
+    const stateReducer$ = data$.map(data => prevState => mergeRight(prevState, { result: data }))
 
     return {
         DOM: vdom$,

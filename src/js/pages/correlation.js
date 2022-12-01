@@ -1,18 +1,13 @@
 import { a, div, br, label, input, p, button, code, pre } from '@cycle/dom'
 import xs from 'xstream'
 import isolate from '@cycle/isolate'
-import { mergeWith, merge } from 'ramda'
-import { clone, equal, equals, mergeAll } from 'ramda';
-import dropRepeats from 'xstream/extra/dropRepeats'
 
 // Components
 import { CorrelationForm, formLens } from '../components/CorrelationForm'
 import { CorrelationPlot, correlationPlotsLens } from '../components/BinnedPlots/CorrelationPlot'
-import { makeTable, headTableLens, tailTableLens } from '../components/Table'
 import { initSettings } from '../configuration.js'
 import { Filter, filterLens } from '../components/Filter'
 import { loggerFactory } from '../utils/logger'
-import { SampleTable, sampleTableLens } from '../components/SampleTable/SampleTable'
 import { Exporter } from "../components/Exporter"
 
 // Support for ghost mode

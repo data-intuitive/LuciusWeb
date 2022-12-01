@@ -54,7 +54,7 @@
         "cyclic-router": "^6.0.0",
         "helmet": "^6.0.0",
         "materialize-css": "^1.0.0",
-        "ramda": "^0.27.2",
+        "ramda": "^0.28.0",
         "switch-path": "^1.2.0",
         "vega": "^5.22.1",
         "vega-parser": "^6.1.3",

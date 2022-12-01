@@ -1,7 +1,7 @@
 import xs from "xstream"
 import { div, p, span, button, textarea, input, a } from "@cycle/dom"
 import isolate from "@cycle/isolate"
-import { merge, prop, equals } from "ramda"
+import { prop, equals } from "ramda"
 
 import { initSettings } from "../configuration"
 import { SettingsEditor } from "../components/SettingsEditor"

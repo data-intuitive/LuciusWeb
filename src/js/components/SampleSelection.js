@@ -14,11 +14,10 @@ import {
   p,
   i,
 } from "@cycle/dom"
-import { clone, equals, merge, sortWith, prop, ascend, descend, keys, length, includes, anyPass, allPass, filter } from "ramda"
+import { clone, equals, mergeRight, sortWith, prop, ascend, descend, keys, length, includes, anyPass, allPass, filter } from "ramda"
 import xs from "xstream"
 import isolate from "@cycle/isolate"
 import dropRepeats from "xstream/extra/dropRepeats"
-import debounce from 'xstream/extra/debounce'
 import { loggerFactory } from "../utils/logger"
 import { TreatmentAnnotation } from "./TreatmentAnnotation"
 import { SampleSelectionFilters, SampleSelectionFiltersLens } from "./SampleSelectionFilters"
@@ -463,7 +462,7 @@ function SampleSelection(sources) {
   const vdom$ = dirtyWrapperStream( state$, xs.merge(initVdom$, loadingVdom$, loadedVdom$))
 
   const dataReducer$ = data$.map((data) => (prevState) => {
-    const newData = data.map((el) => merge(el, { use: true, hide: false }))
+    const newData = data.map((el) => mergeRight(el, { use: true, hide: false }))
     const hiddenData = hideFilteredData(newData, prevState.core.filtersObject)
     return {
       ...prevState,

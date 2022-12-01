@@ -4,6 +4,7 @@
 
 ### Bug fixes
 
+- Fix an issue where data refresh causes the top table expansion functionality locking up caused by added listeners and streams getting interrupted
 - Fix issue when a sample selection filter is removed triggering an update on unavailable data
 
 ### Minor changes

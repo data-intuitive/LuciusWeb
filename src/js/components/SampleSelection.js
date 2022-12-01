@@ -268,7 +268,7 @@ function SampleSelection(sources) {
   const loadingState$ = state$
     .map((state) => ({
       ...state,
-      core: { ...state.core, data: []}
+      core: { ...state.core, data: [], usageData: [] }
     }))
 
   const request$ = newInput$.map((state) => {
@@ -435,8 +435,8 @@ function SampleSelection(sources) {
   const initVdom$ = emptyState$.mapTo(div())
 
   const loadingVdom$ = request$
-    .compose(sampleCombine(loadingState$, sampleFilters.DOM))
-    .map(([_, state, filtersDom]) =>
+    .compose(sampleCombine(loadingState$))
+    .map(([_, state]) =>
       // Use the same makeTable function, pass a initialization=true parameter and a body DOM with preloading
       makeFiltersAndTable(
         state,
@@ -448,7 +448,7 @@ function SampleSelection(sources) {
           ),
         ]),
         true,
-        filtersDom
+        div()
       )
     )
     .remember()

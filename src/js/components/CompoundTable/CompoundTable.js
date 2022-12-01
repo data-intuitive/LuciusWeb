@@ -1,11 +1,6 @@
 import xs from 'xstream';
-import sampleCombine from 'xstream/extra/sampleCombine';
 import { a, h, p, div, br, label, input, code, table, tr, td, b, h2, button, svg, h1, th, thead, tbody, ul, li } from '@cycle/dom';
-import { clone } from 'ramda';
-import { log } from '../../utils/logger'
-import { ENTER_KEYCODE } from '../../utils/keycodes.js'
-import { keys, filter, head } from 'ramda'
-import { pick, mix } from 'cycle-onionify';
+import { pick, mix } from "../../utils/pickmix"
 import isolate from '@cycle/isolate'
 import { CompoundInfo } from './CompoundInfo'
 

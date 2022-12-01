@@ -41,7 +41,7 @@ export const filterLens = {
   get: (state) => {
 
     // Get keys starting with 'filter_' but that is not only 'filter_'
-    const keys_ = keys(state.routerInformation.params)
+    const keys_ = keys(state.routerInformation?.params)
       .filter((key) => key.startsWith("filter_") && key != "filter_")
     const searchArr = keys_.map((key) => {
       const newKey = replace(/^filter_/, "", key)

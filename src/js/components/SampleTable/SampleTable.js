@@ -1,6 +1,6 @@
 import xs from 'xstream';
 import { ul, li } from '@cycle/dom';
-import { pick, mix } from 'cycle-onionify';
+import { pick, mix } from "../../utils/pickmix"
 import isolate from '@cycle/isolate'
 import { SampleInfoHeader, SampleInfo } from './SampleInfo'
 
@@ -13,7 +13,7 @@ import { SampleInfoHeader, SampleInfo } from './SampleInfo'
  * @const samplTableLens
  */
 const sampleTableLens = {
-    get: state => state.core.data,
+    get: state => state.core?.data,
     set: (state, _) => state
 }
 

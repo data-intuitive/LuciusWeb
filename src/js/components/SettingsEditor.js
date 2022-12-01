@@ -10,7 +10,7 @@ import {
   import xs from "xstream"
   import isolate from "@cycle/isolate"
   import { mergeRight } from "ramda"
-  import { pick, mix } from "cycle-onionify"
+  import { pick, mix } from "../utils/pickmix"
 
 /**
  * @module components/SettingsEditor

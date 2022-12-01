@@ -73,7 +73,7 @@ export default function GenericTreatmentWorkflow(sources) {
         treatmentLike: workflowTreatmentType,
       },
       ui: state.ui?.form ?? {},
-      params: state.routerInformation.params,
+      params: state.routerInformation?.params,
     }),
     set: (state, childState) => ({
       ...state, 
@@ -81,7 +81,7 @@ export default function GenericTreatmentWorkflow(sources) {
       routerInformation: {
         ...state.routerInformation,
         pageState: {
-          ...state.routerInformation.pageState,
+          ...state.routerInformation?.pageState,
           ...childState.pageState,
         }
       }
@@ -108,11 +108,11 @@ export default function GenericTreatmentWorkflow(sources) {
   })
 
   const dirtyBusyStates$ = state$.map((state) => ({
-    dirtyCheck: state.form.check.dirty,
-    busySampleSelection: state.form.sampleSelection.busy,
-    dirtySampleSelection: state.form.sampleSelection.dirty,
-    busySignature: state.form.signature.busy,
-    dirtyFilter: state.filter.dirty,
+    dirtyCheck: state.form?.check?.dirty,
+    busySampleSelection: state.form?.sampleSelection?.busy,
+    dirtySampleSelection: state.form?.sampleSelection?.dirty,
+    busySignature: state.form?.signature?.busy,
+    dirtyFilter: state.filter?.dirty,
   }))
   .compose(dropRepeats(equals))
   .compose(debounce(10))

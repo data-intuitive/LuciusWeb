@@ -22,7 +22,7 @@ import {
   span,
   img,
 } from "@cycle/dom"
-import { merge, prop, mergeDeepLeft, mergeDeepRight, equals, pickBy, identity } from "ramda"
+import { mergeRight, prop, mergeDeepLeft, mergeDeepRight, equals, pickBy, identity } from "ramda"
 import * as R from "ramda"
 
 // Workflows
@@ -327,7 +327,7 @@ export default function Index(sources) {
       desiredDeployment
     )
     // Merge the updated deployment with the settings, by key.
-    const updatedSettings = merge(initSettings, {
+    const updatedSettings = mergeRight(initSettings, {
       deployment: updatedDeployment,
     })
     // Do the same with the administrative settings
@@ -346,7 +346,7 @@ export default function Index(sources) {
       const valueKeys = Object.keys(value)
 
       const present = keys.map((key) => {
-        if (!R.contains(key, valueKeys)) return false
+        if (!R.includes(key, valueKeys)) return false
         if (typeof obj[key] === "object")
           return allPresent(obj[key], value[key])
         return true
@@ -398,7 +398,7 @@ export default function Index(sources) {
         desiredDeployment
       )
       // Merge the updated deployment with the settings, by key.
-      const updatedSettings = merge(prevState.settings, {
+      const updatedSettings = mergeRight(prevState.settings, {
         deployment: updatedDeployment,
       })
       // Do the same with the administrative settings, keep value in settings if exist - only add from deployments if value is missing

@@ -1,4 +1,4 @@
-import { merge, prop, equals, path } from 'ramda'
+import { equals, path } from 'ramda'
 import xs from 'xstream'
 import dropRepeats from 'xstream/extra/dropRepeats'
 

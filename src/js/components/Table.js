@@ -29,15 +29,11 @@ import { log } from "../utils/logger"
 import { ENTER_KEYCODE } from "../utils/keycodes.js"
 import {
   keys,
-  values,
   filter,
-  head,
   equals,
   map,
   prop,
-  clone,
-  omit,
-  merge,
+  mergeRight,
   intersection,
   difference,
   max,
@@ -48,7 +44,6 @@ import dropRepeats from "xstream/extra/dropRepeats"
 import { loggerFactory } from "../utils/logger"
 import { convertToCSV } from "../utils/export"
 import delay from "xstream/extra/delay"
-import debounce from "xstream/extra/debounce"
 import pairwise from "xstream/extra/pairwise"
 import { dirtyWrapperStream } from "../utils/ui"
 
@@ -410,7 +405,7 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
      * @type {Stream}
      */
     const request$ = triggerRequest$.map((state) => ({
-      send: merge(state.core.count, {
+      send: mergeRight(state.core.count, {
         query: state.core.input.query,
         version: "v2",
         // filter: (typeof state.core.input.filter !== 'undefined') ? state.core.input.filter : '',

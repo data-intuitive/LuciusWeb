@@ -1,15 +1,7 @@
-import sampleCombine from 'xstream/extra/sampleCombine'
 import isolate from '@cycle/isolate'
 import { i, p, div, br, label, input, code, table, tr, td, b, h2, button, textarea, a, ul, li, span } from '@cycle/dom';
-import { clone, equals } from 'ramda';
 import xs from 'xstream';
-import { logThis, log } from '../utils/logger'
-import { ENTER_KEYCODE } from '../utils/keycodes.js'
 import { TargetCheck, checkLens } from './TargetCheck'
-import { SampleSelection, sampleSelectionLens } from './SampleSelection'
-import { mergeWith, merge } from 'ramda'
-import { SignatureGenerator, signatureLens } from './SignatureGenerator'
-import { stateDebug } from '../utils/utils'
 import { loggerFactory } from '../utils/logger'
 
 function TargetForm(sources) {

@@ -5,10 +5,12 @@
 ### Bug fixes
 
 - Fix an issue where data refresh causes the top table expansion functionality locking up caused by added listeners and streams getting interrupted
+- Fix issue when a sample selection filter is removed triggering an update on unavailable data
 
 ### Minor changes
 
 - Update npm packages and create package-loc.json from scratch, solving many remaining open audit hits
+- Update Ramda to 0.28.0, fix `merge` being removed in favour of `mergeRight` and `contains` in favour of `includes`
 
 ## Version 5.4.0
 

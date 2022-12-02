@@ -284,7 +284,7 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
      * @type {Stream}
      */
     const expandOptions$ = state$
-      .map((state) => state.core?.expandOptions)
+      .map((state) => state.core.expandOptions)
       .compose(dropRepeats(equals))
 
     /**

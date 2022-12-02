@@ -40,7 +40,7 @@ import pairwise from "xstream/extra/pairwise"
 const SampleSelectionFiltersLens = {
   get: (state) => ({
     core: {
-      data: state.core?.data,
+      data: state.core.data ?? [],
       filterData: state.core?.sampleSelectionFilters?.filterData,
       filterInfo: state.core?.sampleSelectionFilters?.filterInfo,
       stateData: state.core?.sampleSelectionFilters?.stateData,
@@ -73,8 +73,8 @@ const deserialize = (str) => {
 
 function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, filterConfig) {
 
-    const thisFilterInfo$ = filterInfo$?.map((info) => info[key])
-    const thisFilterData$ = filterData$?.map((data) => data[key])
+    const thisFilterInfo$ = filterInfo$.map((info) => info[key])
+    const thisFilterData$ = filterData$.map((data) => data[key])
     const thisFilterConfig = filterConfig[key]
    
     const valueElements = (key, unitInfo, filterData) => {
@@ -324,7 +324,7 @@ function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, 
  */
 const composeFilterInfo = (data) => {
   // we need at least 1 data entry to be able to compose the data types that will be present in the data
-  if (data == undefined || length(data) == 0) return {}
+  if (length(data) == 0) return {}
 
   const getValueStruct = (unit, arr) => {
     const counts = countBy(identity, arr)
@@ -548,8 +548,8 @@ function model(state$, intents, sliderEvents$) {
     // if already exists, use old state value, otherwise set to false (closed)
     const updatedStateData = fromPairs(newStateDataHeaders.map((h) => [h, 
       {
-        state: prevState.core?.stateData[h]?.state ?? false,
-        mode:  prevState.core?.stateData[h]?.mode ?? 1,
+        state: prevState.core.stateData[h]?.state ?? false,
+        mode:  prevState.core.stateData[h]?.mode ?? 1,
       }
     ]))
     return {

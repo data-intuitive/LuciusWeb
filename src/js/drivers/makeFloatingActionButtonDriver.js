@@ -24,7 +24,7 @@ function makeFloatingActionButtonDriver() {
                         else
                             fab = M.FloatingActionButton.init(elem, ev.options);
                     }
-                    fab.close()
+                    fab?.close()
                 }
                 else if (ev.state == 'update') {
                     const currentlyOpen = fab?.isOpen

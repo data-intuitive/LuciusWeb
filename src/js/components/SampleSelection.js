@@ -634,19 +634,19 @@ function SampleSelection(sources) {
       sources.DOM.select(".doSelect").events("click"),
       // Ghost mode
       sources.state.stream
-        .map((state) => state.core?.ghostoutput)
+        .map((state) => state.core.ghostoutput)
         .filter((ghost) => ghost)
         .compose(dropRepeats()),
       autoRun$,
     )
     .compose(sampleCombine(state$))
-    .map(([ev, state]) => state.core?.output)
+    .map(([ev, state]) => state.core.output)
 
   // Logic and reducer stream that monitors if this component is busy
   const busyReducer$ = busyUiReducer(newInput$, data$)
 
   // Logic and reducer stream that monitors if this component became dirty
-  const dirtyReducer$ = dirtyUiReducer(sampleSelection$, state$.map(state => state.core?.output))
+  const dirtyReducer$ = dirtyUiReducer(sampleSelection$, state$.map(state => state.core.output))
 
   return {
     log: xs.merge(logger(state$, "state$")),

@@ -21,7 +21,7 @@ const emptyData = {
 }
 
 const signatureLens = {
-    get: state => ({ core: state.form?.signature, settings: state.settings,
+    get: state => ({ core: state.form.signature, settings: state.settings,
         ui: (state.ui??{}).signature ?? {dirty: false}, // Get state.ui.signature in a safe way or else get a default
      }),
     set: (state, childState) => ({ ...state, form: { ...state.form, signature: childState.core } })
@@ -111,8 +111,8 @@ function view(state$, request$, response$, geneAnnotationQuery) {
      * @type {Stream}
      */
     const signatureLimit$ = state$.map((state) => ({
-        showMore: state.core?.showMore,
-        showLimit: state.core?.showLimit
+        showMore: state.core.showMore,
+        showLimit: state.core.showLimit
     }))
     .compose(dropRepeats(equals))
 

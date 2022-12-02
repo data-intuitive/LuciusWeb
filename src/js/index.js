@@ -100,7 +100,7 @@ export default function Index(sources) {
 
   const nav$ = state$.map((state) => {
     const makeLink = (path, label, options) => {
-      const highlight = state.routerInformation?.pathname === path
+      const highlight = state.routerInformation.pathname === path
 
       return li(highlight ? ".active" : "", [
         a(options, { props: { href: path } }, label),
@@ -282,7 +282,7 @@ export default function Index(sources) {
   const view$ = page$.map(prop("DOM")).flatten().remember()
 
   const pageName$ = state$.map((state) => {
-      const pageName = state.routerInformation?.pathname?.substr(1)
+      const pageName = state.routerInformation.pathname.substr(1)
       if (pageName == "")
         return ".homePage"
       else
@@ -454,7 +454,7 @@ export default function Index(sources) {
     .filter(([router, ghostMode]) => (ghostMode == true))
     .mapTo({ text: 'Search query ignored as Ghost Mode is enabled', duration: 10000 })
 
-  const pageStateReducer$ = state$.map((state) => state.routerInformation?.pageState).compose(dropRepeats(equals))
+  const pageStateReducer$ = state$.map((state) => state.routerInformation.pageState).compose(dropRepeats(equals))
   .map((state) => (prevState) => {
     // Don't output fields with undefined values
     const filteredState = pickBy(identity, state)
@@ -462,8 +462,8 @@ export default function Index(sources) {
     const urlString = url.toString()
 
     const fullUrl = urlString.length > 0
-      ? location.protocol + "//" + location.host + prevState.routerInformation?.pathname + "?autorun&" + url.toString()
-      : location.protocol + "//" + location.host + prevState.routerInformation?.pathname
+      ? location.protocol + "//" + location.host + prevState.routerInformation.pathname + "?autorun&" + url.toString()
+      : location.protocol + "//" + location.host + prevState.routerInformation.pathname
 
     return {
       ...prevState,

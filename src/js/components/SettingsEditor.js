@@ -20,7 +20,7 @@ import {
    * Generate a component to display and edit settings
    * @function SettingsEditor
    * @param {*} sources 
-   *          - onion.state$: default onion atom
+   *          - state.state$: default state atom
    *          - DOM: DOM events
    *          - settings$: Stream containing top level object array containing group and field information
    *            - 'group' has to match to the member name in state$ -> settings.'group'
@@ -33,7 +33,7 @@ import {
    *              - 'options' possible values for a multiple choice field
    *              - 'props'   extra properties to pass to the input field
    * @returns  
-   *          - onion: reducers to update the field values to the newly set values
+   *          - state: reducers to update the field values to the newly set values
    *          - DOM: vdom stream of ul and sub-elements
    */
 export function SettingsEditor(sources) {
@@ -50,7 +50,7 @@ export function SettingsEditor(sources) {
    *    'options' possible values for a multiple choice field
    *    'props'   extra properties to pass to the input field
    * @returns Object with
-   *            - onion: reducer to update the value to the new set value
+   *            - state: reducer to update the value to the new set value
    *            - DOM: vdom stream of li and sub-elements
    * @type {Object}
    */
@@ -151,7 +151,7 @@ export function SettingsEditor(sources) {
 
     return {
       DOM: vdom$,
-      onion: updateReducer$,
+      state: updateReducer$,
     }
   }
 
@@ -172,7 +172,7 @@ export function SettingsEditor(sources) {
    *    'props'   extra properties to pass to the input field
    * @param {Stream} sources onionified state for the group this setting is in, and to be further onionified
    * @returns Stream of Object with
-   *            - onion: reducer to update the value to the newly set value
+   *            - state: reducer to update the value to the newly set value
    *            - DOM: vdom stream of li and sub-elements
    * @type {Stream(Object)}
    */
@@ -182,7 +182,7 @@ export function SettingsEditor(sources) {
      * Minimalistic vdom to be displayed when a field can't be found in the sources
      * Mimics same member values as MakeSettings so they can be combined later
      *    - DOM:   stream of fixed vdom li
-     *    - onion: empty stream instead of reducers
+     *    - state: empty stream instead of reducers
      * @const SettingsEditor/safelyMakeSetting$/missingFieldVdom
      * @type {Object}
      */
@@ -194,7 +194,7 @@ export function SettingsEditor(sources) {
               span(".col .s6 .red-text", ["No value '" + config.field + "' in configuration"]),
             ])
           )),
-        onion: xs.empty()
+        state: xs.empty()
       }
 
     /**
@@ -219,7 +219,7 @@ export function SettingsEditor(sources) {
    *            - title: Name to be displayed
    *            - settings: Array of Objects for fields to be displayed
    * @returns Object with
-   *            - onion: reducers to update the field values to the newly set values
+   *            - state: reducers to update the field values to the newly set values
    *            - DOM: vdom stream of ul and sub-elements
    */
   const makeSettingsGroup = (settingsGroupObj) => (sources) => {
@@ -260,10 +260,10 @@ export function SettingsEditor(sources) {
      * @const SettingsEditor/settingsGroupObj/reducer$
      * @type {Stream}
      */
-    const reducer$ = components$.compose(pick("onion")).compose(mix(xs.merge))
+    const reducer$ = components$.compose(pick("state")).compose(mix(xs.merge))
 
     return {
-      onion: reducer$,
+      state: reducer$,
       DOM: vdom$,
     }
   }
@@ -282,7 +282,7 @@ export function SettingsEditor(sources) {
    *            - 'settings' contains information for each nested field
    * @param {Stream} sources onionified state of settings, and to be further onionified
    * @returns Stream of Object with
-   *            - onion: reducers to update the field values to the newly set values
+   *            - state: reducers to update the field values to the newly set values
    *            - DOM: vdom stream of ul and sub-elements
    * @type {Stream(Object)}
    */
@@ -291,7 +291,7 @@ export function SettingsEditor(sources) {
      * Minimalistic vdom to be displayed when a group can't be found in the sources
      * Mimics same member values as MakeSettingsGroup so they can be combined later
      *    - DOM:   stream of fixed vdom ul
-     *    - onion: empty stream instead of reducers
+     *    - state: empty stream instead of reducers
      * @const SettingsEditor/safelyMakeSettingsGroup$/missingGroupVdom
      * @type {Object}
      */
@@ -304,7 +304,7 @@ export function SettingsEditor(sources) {
               span(".col .s6 .red-text", ["No value '" + group.group + "' in configuration"]),
             ]
           )),
-        onion: xs.empty()
+        state: xs.empty()
       }
 
     /**
@@ -355,12 +355,13 @@ export function SettingsEditor(sources) {
    * @type {MemoryStream}
    */
   const reducer$ = groups$
-      .compose(pick("onion"))
+      .compose(pick("state"))
       .compose(mix(xs.merge))
       .remember()
+      .debug("reducer$")
 
   return {
-    onion: reducer$,
+    state: reducer$,
     DOM: vdom$,
   }
   

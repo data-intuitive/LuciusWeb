@@ -15,18 +15,18 @@ function TreatmentForm(sources) {
 
   const state$ = sources.state.stream
 
-  const TreatmentCheckSink = isolate(TreatmentCheck, { onion: checkLens })(
+  const TreatmentCheckSink = isolate(TreatmentCheck, { state: checkLens })(
     sources
   )
   const treatmentQuery$ = TreatmentCheckSink.output.remember()
 
   const SampleSelectionSink = isolate(SampleSelection, {
-    onion: sampleSelectionLens,
+    state: sampleSelectionLens,
   })({ ...sources, input: treatmentQuery$ })
   const sampleSelection$ = SampleSelectionSink.output.remember()
 
   const SignatureGeneratorSink = isolate(SignatureGenerator, {
-    onion: signatureLens,
+    state: signatureLens,
   })({ ...sources, input: sampleSelection$ })
   const signature$ = SignatureGeneratorSink.output.remember()
 
@@ -59,11 +59,11 @@ function TreatmentForm(sources) {
       SignatureGeneratorSink.log
     ),
     DOM: vdom$,
-    onion: xs.merge(
+    state: xs.merge(
       defaultReducer$,
-      TreatmentCheckSink.onion,
-      SampleSelectionSink.onion,
-      SignatureGeneratorSink.onion
+      TreatmentCheckSink.state,
+      SampleSelectionSink.state,
+      SignatureGeneratorSink.state
     ),
     HTTP: xs.merge(
       TreatmentCheckSink.HTTP,

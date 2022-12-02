@@ -760,7 +760,7 @@ function model(state$, intents, sliderEvents$) {
     filterData$: filterData$,
     filterOutput$: filterOutput$,
     stateData$: stateData$,
-    onion: xs.merge(
+    state: xs.merge(
       defaultReducer$,
       filterInfoReducer$,
       initFilterDataReducer$,
@@ -832,7 +832,7 @@ function SampleSelectionFilters(sources) {
   return {
     log: xs.empty(),
     DOM: vdom$,
-    onion: model_.onion,
+    state: model_.state,
     slider: sliderDriver$.compose(delay(10)),
     output: model_.filterOutput$,
   }

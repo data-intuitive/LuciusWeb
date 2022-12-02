@@ -219,7 +219,7 @@ function SimilarityPlot(sources) {
         DOM: vdom$,
         HTTP: request$,
         vega: vegaRuntime$.compose(debounce(20)),
-        onion: xs.merge(
+        state: xs.merge(
             defaultReducer$,
             inputReducer$,
             requestReducer$,

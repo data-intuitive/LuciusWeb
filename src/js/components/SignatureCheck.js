@@ -195,7 +195,7 @@ function SignatureCheck(sources) {
     ),
     HTTP: request$,
     DOM: vdom$,
-    onion: xs.merge(
+    state: xs.merge(
       collapseUpdateReducer$, 
     ),
     validated : validated$

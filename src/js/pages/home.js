@@ -71,7 +71,7 @@ function Home(sources) {
     return {
         DOM: vdom$,
         HTTP: CheckSink.HTTP,
-        onion: CheckSink.onion,
+        state: CheckSink.state,
         alert: CheckSink.alert,
         popup: CheckSink.popup
     };

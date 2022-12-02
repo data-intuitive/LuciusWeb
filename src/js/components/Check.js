@@ -143,7 +143,7 @@ function Check(sources) {
     const alert$ = invalidResponse$
         .remember()
 
-    // This is needed in order to get the onion stream active!
+    // This is needed in order to get the state stream active!
     const defaultReducer$ = xs.of(prevState => {
         if (typeof prevState === 'undefined') {
             return {}
@@ -155,7 +155,7 @@ function Check(sources) {
     return {
         DOM: vdom$,
         HTTP: xs.merge(request$, requestJobs$),
-        onion: xs.merge(
+        state: xs.merge(
             defaultReducer$,
         ),
         alert: alert$,

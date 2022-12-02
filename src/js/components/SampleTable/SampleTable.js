@@ -22,7 +22,7 @@ const sampleTableLens = {
  * Requires all data to be present and ready to be displayed
  * @function SampleTable
  * @param {*} sources 
- *          - onion.state$: default onion atom containing the input data
+ *          - state.state$: default state atom containing the input data
  *          - DOM: user click events
  *          - props: settings for e.g. background and foreground colors
  * @returns {object} - DOM: vdom stream

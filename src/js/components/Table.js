@@ -181,7 +181,7 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
    * The lens that defines the rendering of the data is injected using the makeTable function.
    * @function makeTable/Table
    * @param {*} sources
-   *          - onion.state$: default onion atom containing the input data
+   *          - state.state$: default state atom containing the input data
    *          - input: trigger data from the previous component
    *          - HTTP: HTTP responses stream
    *          - DOM: user click events
@@ -220,7 +220,7 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
 
     /**
      * Provides a stream that updates when state.core.input is updated or there is a new input
-     * Combines the default onion atom with the extra input stream
+     * Combines the default state atom with the extra input stream
      * @const makeTable/Table/newInput$
      * @type {Stream}
      */
@@ -235,7 +235,7 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
     /**
      * When the component should not be shown, including empty query
      * @function makeTable/Table/isEmptyState
-     * @param {*} state default onion atom containing the input data
+     * @param {*} state default state atom containing the input data
      * @returns {boolean} state.core.input is empty or undefined
      */
     const isEmptyState = (state) => {
@@ -491,7 +491,7 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
      * @type {Isolated(Component)}
      */
     const tableContent = isolate(tableComponent, {
-      onion: tableLens,
+      state: tableLens,
       "*": scope,
     })({ ...sources, props: props$ })
 
@@ -913,7 +913,7 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
         request$,
         tableContent.HTTP
       ),
-      onion: xs.merge(
+      state: xs.merge(
         defaultReducer$,
         inputReducer$,
         requestReducer$,

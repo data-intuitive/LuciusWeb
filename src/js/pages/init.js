@@ -280,7 +280,7 @@ function Init(sources) {
     const vdom$ = view(model_.requests$, responses$, statusDisplay$, Settings.DOM, model_.jarFile$, model_.configFile$, apiUrl$)
 
 
-  // This is needed in order to get the onion stream active!
+  // This is needed in order to get the state stream active!
   const defaultReducer$ = xs.of((prevState) => {
     if (typeof prevState === "undefined") {
       return defaultState
@@ -294,12 +294,12 @@ function Init(sources) {
   //   core: { ...prevState.core, state: 1 },
   // }))
 
-  const settingsReducer$ = Settings.onion.compose(debounce(200))
+  const settingsReducer$ = Settings.state.compose(debounce(200))
 
   return {
     DOM: vdom$,
     HTTP: xs.merge(statusRequest$, model_.requests$),
-    onion: xs.merge(defaultReducer$, /*responseReducer$,*/ settingsReducer$),
+    state: xs.merge(defaultReducer$, /*responseReducer$,*/ settingsReducer$),
   }
 }
 

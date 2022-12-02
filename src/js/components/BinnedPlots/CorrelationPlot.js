@@ -245,7 +245,7 @@ function CorrelationPlot(sources) {
         DOM: vdom$,
         HTTP: request$,
         vega: runtime$,
-        onion: xs.merge(
+        state: xs.merge(
             defaultReducer$,
             inputReducer$,
             requestReducer$,

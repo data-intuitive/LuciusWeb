@@ -225,7 +225,7 @@ function Histogram(sources) {
         DOM: vdom$,
         HTTP: request$,
         vega: vegaRuntime$.compose(debounce(10)),  // Debounce necessary for driver not to get confused !!!
-        onion: xs.merge(
+        state: xs.merge(
             defaultReducer$,
             inputReducer$,
             requestReducer$,

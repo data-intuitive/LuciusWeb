@@ -10,7 +10,7 @@ function TargetForm(sources) {
 
     const state$ = sources.state.stream
 
-    const TargetCheckSink = isolate(TargetCheck, {onion: checkLens, DOM: 'check'} )(sources)
+    const TargetCheckSink = isolate(TargetCheck, {state: checkLens, DOM: 'check'} )(sources)
     const targetQuery$ = TargetCheckSink.output.remember()
 
     const vdom$ = xs.combine(
@@ -35,9 +35,9 @@ function TargetForm(sources) {
            TargetCheckSink.log,
         ),
         DOM: vdom$,
-        onion: xs.merge(
+        state: xs.merge(
             defaultReducer$,
-            TargetCheckSink.onion,
+            TargetCheckSink.state,
         ),
         HTTP: xs.merge(
             TargetCheckSink.HTTP,

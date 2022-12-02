@@ -511,7 +511,7 @@ export default function Index(sources) {
       deploymentsReducer$,
       routerReducer$,
       pageStateReducer$,
-      page$.map(prop("onion")).filter(Boolean).flatten()
+      page$.map(prop("state")).filter(Boolean).flatten()
     ),
     DOM: vdom$,
     router: xs

@@ -568,12 +568,12 @@ function view(state$) {
  * 
  * @function Filter
  * @param {*} sources 
- *          - onion.state$: default onion atom
+ *          - state.state$: default state atom
  *          - input$: signature used as trigger for empty or not empty
  * @returns - log: logger stream,
  *          - DOM: vdom stream,
  *          - HTTP: HTTP stream,
- *          - onion: reducers stream,
+ *          - state: reducers stream,
  *          - output: minimized filter selection
  */
 function Filter(sources) {
@@ -617,7 +617,7 @@ function Filter(sources) {
     log: xs.merge(logger(state$, "state$")),
     DOM: vdom$,
     HTTP: filterQuery.HTTP,
-    onion: reducers$,
+    state: reducers$,
     output: outputTrigger$
   }
 }

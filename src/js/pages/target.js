@@ -91,14 +91,14 @@ function TargetWorkflow(sources) {
         .flatten()
         .startWith({ text: 'Welcome to Target Workflow', duration: 4000 })
 
-    const TargetFormSink = isolate(TargetForm, { onion: formLens, DOM: 'form' })(sources)
+    const TargetFormSink = isolate(TargetForm, { state: formLens, DOM: 'form' })(sources)
     // TODO: Check if this is not better moved to the targetform component itself
     // Especially after the change in autocomplete behavior.
     const target$ = TargetFormSink.output.map(t => t.split(" (")[0])
 
     const TableContainer = makeTable(CompoundTable, compoundTableLens)
 
-    const Table = isolate(TableContainer, { onion: compoundContainerTableLens })
+    const Table = isolate(TableContainer, { state: compoundContainerTableLens })
         ({...sources, input: target$.map((t) => ({ query: t}) ).remember() });
 
     // Granular access to global state and parts of settings
@@ -107,7 +107,7 @@ function TargetWorkflow(sources) {
         set: (state, childState) => ({...state, sform: childState.form })
     };
 
-    const signatureForm = isolate(SignatureForm, { onion: thisFormLens })(sources)
+    const signatureForm = isolate(SignatureForm, { state: thisFormLens })(sources)
         // only show signature form when a target has been selected !!!
     const signatureMessage$ = xs.of('Optional Signature:')
     const signatureFormVdom$ = xs.combine(signatureForm.DOM, signatureMessage$, target$).map(([s, m, t]) =>
@@ -119,11 +119,11 @@ function TargetWorkflow(sources) {
     const signature$ = signatureForm.output
 
     // Filter Form
-    const filterForm = isolate(Filter, { onion: filterLens })({...sources, input: signature$ })
+    const filterForm = isolate(Filter, { state: filterLens })({...sources, input: signature$ })
     const filter$ = filterForm.output
 
     // Histogram plot component
-    const histogram = isolate(Histogram, { onion: histLens })
+    const histogram = isolate(Histogram, { state: histLens })
         ({...sources, input: xs.combine(signature$, filter$, target$).map(([s, f, t]) => ({ signature: s, filter: f, target: t })).remember() });
 
     const pageStyle = {
@@ -177,13 +177,13 @@ function TargetWorkflow(sources) {
             // logger(popup$, 'popup$')
         ),
         DOM: vdom$.remember(),
-        onion: xs.merge(
+        state: xs.merge(
             defaultReducer$,
-            TargetFormSink.onion,
-            Table.onion,
-            signatureForm.onion,
-            filterForm.onion,
-            histogram.onion,
+            TargetFormSink.state,
+            Table.state,
+            signatureForm.state,
+            filterForm.state,
+            histogram.state,
             // ghost mode
             scenarioReducer$
         ),

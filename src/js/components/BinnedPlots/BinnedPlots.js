@@ -290,7 +290,7 @@ function BinnedPlots(sources) {
         DOM: vdom$,
         HTTP: request$,
         vega: runtimes$,
-        onion: xs.merge(
+        state: xs.merge(
             defaultReducer$,
             inputReducer$,
             requestReducer$,

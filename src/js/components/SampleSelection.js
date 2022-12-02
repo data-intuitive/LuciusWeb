@@ -300,7 +300,7 @@ function SampleSelection(sources) {
     })
     .remember()
 
-  const sampleFilters = isolate(SampleSelectionFilters, { onion: SampleSelectionFiltersLens })(sources)
+  const sampleFilters = isolate(SampleSelectionFilters, { state: SampleSelectionFiltersLens })(sources)
 
   // Helper function for rendering the table, based on the state
   const makeTable = (state, annotation, initialization) => {
@@ -652,7 +652,7 @@ function SampleSelection(sources) {
     log: xs.merge(logger(state$, "state$")),
     DOM: vdom$,
     HTTP: xs.merge(request$, treatmentAnnotations.HTTP),
-    onion: xs.merge(
+    state: xs.merge(
       defaultReducer$,
       inputReducer$,
       requestReducer$,
@@ -664,7 +664,7 @@ function SampleSelection(sources) {
       sortReducer$,
       hoverReducer$,
       dirtyReducer$,
-      sampleFilters.onion,
+      sampleFilters.state,
     ),
     output: sampleSelection$,
     modal: treatmentAnnotations.modal,

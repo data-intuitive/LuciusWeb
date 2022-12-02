@@ -247,7 +247,7 @@ function TargetCheck(sources) {
       // logger(inputReducer$, 'inputReducer$')
     ),
     DOM: vdom$,
-    onion: xs.merge(
+    state: xs.merge(
       defaultReducer$,
       inputReducer$,
       dataReducer$,

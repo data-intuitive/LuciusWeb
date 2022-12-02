@@ -115,7 +115,7 @@ function Statistics(sources) {
         errorVdom$,
     )
 
-    // This is needed in order to get the onion stream active!
+    // This is needed in order to get the state stream active!
     const defaultReducer$ = xs.of(prevState => {
         if (typeof prevState === 'undefined') {
             return {}
@@ -130,7 +130,7 @@ function Statistics(sources) {
     return {
         DOM: vdom$,
         HTTP: request$,
-        onion: xs.merge(
+        state: xs.merge(
             defaultReducer$,
             stateReducer$
         )

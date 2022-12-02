@@ -48,7 +48,7 @@ function DiseaseWorkflow(sources) {
    * const feedback$ = domSource$.select('.SignatureCheck').events('click').mapTo('click !').startWith(null);
    */
 
-  const signatureForm = isolate(SignatureForm, { onion: formLens })(sources)
+  const signatureForm = isolate(SignatureForm, { state: formLens })(sources)
   const signature$ = signatureForm.output
 
   // default Reducer, initialization
@@ -90,7 +90,7 @@ function DiseaseWorkflow(sources) {
    )
 
   // Filter Form
-  const filterForm = isolate(Filter, { onion: filterLens })({
+  const filterForm = isolate(Filter, { state: filterLens })({
     ...sources,
     input: signature$,
   })
@@ -124,7 +124,7 @@ function DiseaseWorkflow(sources) {
    * @const binnedPlots
    * @type {Isolated(Component)}
    */
-  const binnedPlots = isolate(BinnedPlots, { onion: plotsLens })({
+  const binnedPlots = isolate(BinnedPlots, { state: plotsLens })({
     ...sources,
     input: xs
       .combine(signature$, filter$, displayPlots$)
@@ -162,7 +162,7 @@ function DiseaseWorkflow(sources) {
    * @const headTable
    * @type {Isolated(Component)}
    */
-  const headTable = isolate(headTableContainer, { onion: headTableLens })({
+  const headTable = isolate(headTableContainer, { state: headTableLens })({
     ...sources,
     input: xs
       .combine(signature$, filter$)
@@ -179,7 +179,7 @@ function DiseaseWorkflow(sources) {
    * @const headTable
    * @type {Isolated(Component)}
    */
-  const tailTable = isolate(tailTableContainer, { onion: tailTableLens })({
+  const tailTable = isolate(tailTableContainer, { state: tailTableLens })({
     ...sources,
     input: xs
       .combine(signature$, filter$)
@@ -254,14 +254,14 @@ function DiseaseWorkflow(sources) {
       exporter.log,
     ),
     DOM: vdom$,
-    onion: xs.merge(
+    state: xs.merge(
       defaultReducer$,
-      signatureForm.onion,
-      filterForm.onion,
-      binnedPlots.onion,
-      headTable.onion,
-      tailTable.onion,
-      exporter.onion,
+      signatureForm.state,
+      filterForm.state,
+      binnedPlots.state,
+      headTable.state,
+      tailTable.state,
+      exporter.state,
       scenarioReducer$,
       uiReducer$,
     ),

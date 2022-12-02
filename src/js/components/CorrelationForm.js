@@ -54,8 +54,8 @@ function CorrelationForm(sources) {
     const state$ = sources.state.stream
 
     // Check Signature subcomponent, via isolation
-    const signatureCheck1 = isolate(SignatureCheck, { onion: checkLens1 })(sources)
-    const signatureCheck2 = isolate(SignatureCheck, { onion: checkLens2 })(sources)
+    const signatureCheck1 = isolate(SignatureCheck, { state: checkLens1 })(sources)
+    const signatureCheck2 = isolate(SignatureCheck, { state: checkLens2 })(sources)
 
     // Valid query?
     const validated1$ = state$.map(state => state.core.validated1)
@@ -210,9 +210,9 @@ function CorrelationForm(sources) {
             return newState
         })
 
-    // When update is clicked, update the query. Onionify does the rest
-    const childReducer1$ = signatureCheck1.onion
-    const childReducer2$ = signatureCheck2.onion
+    // When update is clicked, update the query. stateify does the rest
+    const childReducer1$ = signatureCheck1.state
+    const childReducer2$ = signatureCheck2.state
 
     // Auto start query
     // Only run once, even if query is changed and then reverted to original value
@@ -243,7 +243,7 @@ function CorrelationForm(sources) {
             // logger(state$, 'state$'),
         ),
         DOM: vdom$,
-        onion: xs.merge(
+        state: xs.merge(
             defaultReducer$,
             setDefaultReducer1$,
             setDefaultReducer2$,

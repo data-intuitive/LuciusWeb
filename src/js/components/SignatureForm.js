@@ -101,7 +101,7 @@ function model(newQuery$, state$, sources, signatureCheckSink, actions$) {
     })
 
   // When update is clicked, update the query. Onionify does the rest
-  const childReducer$ = signatureCheckSink.onion
+  const childReducer$ = signatureCheckSink.state
 
   // Auto start query
   // Only run once, even if query is changed and then reverted to original value
@@ -195,10 +195,10 @@ function SignatureForm(sources) {
   const props$ = sources.props;
 
   // Check Signature subcomponent, via isolation
-  const signatureCheckSink = isolate(SignatureCheck, { onion: checkLens })(sources)
+  const signatureCheckSink = isolate(SignatureCheck, { state: checkLens })(sources)
   const signatureCheckDom$ = signatureCheckSink.DOM;
   const signatureCheckHTTP$ = signatureCheckSink.HTTP;
-  const signatureCheckReducer$ = signatureCheckSink.onion;
+  const signatureCheckReducer$ = signatureCheckSink.state;
 
   const typer$ = typer(state$, 'search', 'searchTyper')
 
@@ -222,7 +222,7 @@ function SignatureForm(sources) {
       signatureCheckSink.log
     ),
     DOM: vdom$,
-    onion: reducers$,
+    state: reducers$,
     HTTP: signatureCheckHTTP$,
     output: query$
   };

@@ -31,7 +31,7 @@ function CorrelationWorkflow(sources) {
     .flatten()
     .startWith({ text: "Welcome to Correlation Workflow", duration: 4000 })
 
-    const correlationForm = isolate(CorrelationForm, { onion: formLens })(sources)
+    const correlationForm = isolate(CorrelationForm, { state: formLens })(sources)
     const queries$ = correlationForm.output
 
     const doubleSignature$ = queries$
@@ -39,7 +39,7 @@ function CorrelationWorkflow(sources) {
         .filter((queries) => (queries.query2 != undefined && queries.query2 != ""))
         .map((queries) => (queries.query1 + " + " + queries.query2))
     // Filter Form
-    const filterForm = isolate(Filter, { onion: filterLens })({
+    const filterForm = isolate(Filter, { state: filterLens })({
         ...sources,
         input: doubleSignature$
     })
@@ -63,7 +63,7 @@ function CorrelationWorkflow(sources) {
     })
 
     // Binned Plots Component
-    const correlationPlot = isolate(CorrelationPlot, { onion: correlationPlotsLens })({
+    const correlationPlot = isolate(CorrelationPlot, { state: correlationPlotsLens })({
         ...sources, 
         input: xs
             .combine(queries$, filter$)
@@ -81,9 +81,9 @@ function CorrelationWorkflow(sources) {
     // const tailTableContainer = makeTable(SampleTable, sampleTableLens)
 
     // Join settings from api and sourire into props
-    // const headTable = isolate(headTableContainer, { onion: headTableLens })
+    // const headTable = isolate(headTableContainer, { state: headTableLens })
     //     ({...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ query: s, filter: f })).remember() });
-    // const tailTable = isolate(tailTableContainer, { onion: tailTableLens })
+    // const tailTable = isolate(tailTableContainer, { state: tailTableLens })
     //     ({...sources, input: xs.combine(signature$, filter$).map(([s, f]) => ({ query: s, filter: f })).remember() });
 
     const exporter = Exporter({
@@ -145,14 +145,14 @@ function CorrelationWorkflow(sources) {
             exporter.log,
         ),
         DOM: vdom$,
-        onion: xs.merge(
+        state: xs.merge(
             defaultReducer$,
-            correlationForm.onion,
-            filterForm.onion,
-            correlationPlot.onion,
-            // headTable.onion,
-            // tailTable.onion,
-            exporter.onion,
+            correlationForm.state,
+            filterForm.state,
+            correlationPlot.state,
+            // headTable.state,
+            // tailTable.state,
+            exporter.state,
             scenarioReducer$
         ),
         vega: xs.merge(

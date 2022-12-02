@@ -349,9 +349,9 @@ export function AdminSettings(sources) {
 
   return {
     DOM: vdom$,
-    onion: xs.merge(
+    state: xs.merge(
       deploymentReducer$.compose(debounce(50)),
-      AdminSettings.onion.compose(debounce(200))
+      AdminSettings.state.compose(debounce(200))
     ),
     router: router$,
     storage: resetStorage$,

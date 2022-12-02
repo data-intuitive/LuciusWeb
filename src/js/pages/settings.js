@@ -233,7 +233,7 @@ export function Settings(sources) {
 
   return {
     DOM: vdom$,
-    onion: Settings.onion.compose(debounce(200)),
+    state: Settings.state.compose(debounce(200)),
     router: xs.merge(resetRouter$, adminRouter$),
     storage: resetStorage$,
   }

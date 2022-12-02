@@ -340,7 +340,7 @@ function TreatmentCheck(sources) {
     ),
     HTTP: request$,
     DOM: vdom$,
-    onion: xs.merge(
+    state: xs.merge(
       defaultReducer$,
       inputReducer$,
       dataReducer$,

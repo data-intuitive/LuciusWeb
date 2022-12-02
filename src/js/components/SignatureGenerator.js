@@ -342,7 +342,7 @@ function SignatureGenerator(sources) {
             request$,
             geneAnnotationQuery.HTTP
         ),
-        onion: reducers$,
+        state: reducers$,
         modal: geneAnnotationQuery.modal
     }
 

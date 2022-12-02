@@ -537,7 +537,7 @@ function Exporter(sources) {
   return {
     log: xs.merge(logger(state$, "state$")),
     DOM: vdom$,
-    onion: model_.reducers$,
+    state: model_.reducers$,
     fab: xs.merge(fabInit$, fabUpdate$),
     modal: model_.modal$,
     clipboard: model_.clipboard$,

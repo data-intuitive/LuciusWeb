@@ -149,7 +149,7 @@ export default function GenericTreatmentWorkflow(sources) {
    * @const TreatmentFormSink
    * @type {Isolated(Component)}
    */
-  const TreatmentFormSink = isolate(TreatmentForm, { onion: formLens })(sources)
+  const TreatmentFormSink = isolate(TreatmentForm, { state: formLens })(sources)
 
   /**
    * Memory stream from TreatmentFormSink output
@@ -166,7 +166,7 @@ export default function GenericTreatmentWorkflow(sources) {
    * @const filterForm
    * @type {Isolated(Component)}
    */
-  const filterForm = isolate(Filter, { onion: filterLens })({
+  const filterForm = isolate(Filter, { state: filterLens })({
     ...sources,
     input: signature$,
   })
@@ -200,7 +200,7 @@ export default function GenericTreatmentWorkflow(sources) {
    * @const binnedPlots
    * @type {Isolated(Component)}
    */
-  const binnedPlots = isolate(BinnedPlots, { onion: plotsLens })({
+  const binnedPlots = isolate(BinnedPlots, { state: plotsLens })({
     ...sources,
     input: xs
       .combine(signature$, filter$, displayPlots$)
@@ -238,7 +238,7 @@ export default function GenericTreatmentWorkflow(sources) {
    * @const headTable
    * @type {Isolated(Component)}
    */
-  const headTable = isolate(headTableContainer, { onion: headTableLens })({
+  const headTable = isolate(headTableContainer, { state: headTableLens })({
     ...sources,
     input: xs
       .combine(signature$, filter$)
@@ -255,7 +255,7 @@ export default function GenericTreatmentWorkflow(sources) {
    * @const headTable
    * @type {Isolated(Component)}
    */
-  const tailTable = isolate(tailTableContainer, { onion: tailTableLens })({
+  const tailTable = isolate(tailTableContainer, { state: tailTableLens })({
     ...sources,
     input: xs
       .combine(signature$, filter$)
@@ -320,14 +320,14 @@ export default function GenericTreatmentWorkflow(sources) {
       exporter.log,
     ),
     DOM: vdom$,//.startWith(div()),
-    onion: xs.merge(
+    state: xs.merge(
       defaultReducer$,
-      TreatmentFormSink.onion,
-      binnedPlots.onion,
-      filterForm.onion,
-      headTable.onion,
-      tailTable.onion,
-      exporter.onion,
+      TreatmentFormSink.state,
+      binnedPlots.state,
+      filterForm.state,
+      headTable.state,
+      tailTable.state,
+      exporter.state,
       scenarioReducer$,
       uiReducer$,
     ),

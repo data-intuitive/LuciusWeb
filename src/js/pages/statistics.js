@@ -63,9 +63,9 @@ function StatisticsWorkflow(sources) {
 
   return {
     DOM: vdom$,
-    onion: xs.merge(
+    state: xs.merge(
       defaultReducer$,
-      statsSinks.onion,
+      statsSinks.state,
     ),
     HTTP: xs.merge(
       statsSinks.HTTP,

@@ -11,7 +11,8 @@ import storageDriver from '@cycle/storage';
 // import { makeRouterDriver } from 'cyclic-router';
 import {routerify} from 'cyclic-router'
 import {withState} from '@cycle/state'
-import storageify from "cycle-storageify";
+// import storageify from "cycle-storageify";
+import storageify from "./storageify.js"
 import delay from 'xstream/extra/delay'
 
 import Index from './index';
@@ -56,5 +57,5 @@ const drivers = {
     deployments: () => xs.fromPromise(fetch('/deployments.json').then(m => m.json()))
 };
 
-let StatifiedMain = withState(/*storageify(*/routerify(Index, switchPath, {omitHistory: false})/*, { key: 'ComPass' })*/);
+let StatifiedMain = withState(storageify(routerify(Index, switchPath, {omitHistory: false}), { key: 'ComPass' }));
 run(StatifiedMain, drivers);

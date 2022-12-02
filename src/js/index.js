@@ -68,23 +68,23 @@ export default function Index(sources) {
     "settings.common.debug"
   )
 
-  const state$ = sources.state.stream.debug("state$")
+  const state$ = sources.state.stream
 
   const page$ = router.routedComponent({
     "/": Home,
-    // "/disease": DiseaseWorkflow,
+    "/disease": DiseaseWorkflow,
     // '/disease': {
     //   '/': DiseaseWorkflow,
     //   // '/:id': id => sources => DiseaseWorkflow({props$: id, ...sources})
     // },
-    // "/compound": CompoundWorkflow,
-    // "/target": TargetWorkflow,
-    // "/genetic": GeneticWorkflow,
-    // "/ligand": LigandWorkflow,
-    // "/generic": GenericTreatmentWorkflow,
+    "/compound": CompoundWorkflow,
+    "/target": TargetWorkflow,
+    "/genetic": GeneticWorkflow,
+    "/ligand": LigandWorkflow,
+    "/generic": GenericTreatmentWorkflow,
     "/statistics": StatisticsWorkflow,
     "/settings": IsolatedSettings,
-    // "/correlation": CorrelationWorkflow,
+    "/correlation": CorrelationWorkflow,
     "/debug": Debug,
     "/admin": IsolatedAdminSettings,
     "/init": Init,

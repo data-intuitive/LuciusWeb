@@ -55,9 +55,9 @@ const makeVega = () => {
  */
 function Histogram(sources) {
 
-    const logger = loggerFactory('histogram', sources.onion.state$, 'settings.hist.debug')
+    const logger = loggerFactory('histogram', sources.state.stream, 'settings.hist.debug')
 
-    const state$ = sources.onion.state$
+    const state$ = sources.state.stream
     const input$ = sources.input
 
     const visible$ = sources.DOM.select(elementID)

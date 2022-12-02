@@ -17,7 +17,7 @@ const appear = {
 
 function Home(sources) {
 
-    const checkProps$ = sources.onion.state$
+    const checkProps$ = sources.state.stream
         .compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
         .map(state => mergeRight(state.settings.form, state.settings.api))
     const CheckSink = Check(mergeRight(sources, { props: checkProps$ }))

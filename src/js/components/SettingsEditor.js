@@ -55,7 +55,7 @@ export function SettingsEditor(sources) {
    * @type {Object}
    */
   const makeSetting = (config) => (sources) => {
-    const state$ = sources.onion.state$
+    const state$ = sources.state.stream
 
     /**
      * Stream of DOM updates, clicks for checkboxes or the new value for other input types
@@ -202,7 +202,7 @@ export function SettingsEditor(sources) {
      * @const SettingsEditor/safelyMakeSetting$/vdom$
      * @type {Stream(Object)}
      */
-    const vdom$ = sources.onion.state$
+    const vdom$ = sources.state.stream
       .map((state) => (
           (config.field in state) ?
             isolate(makeSetting(config), config.field)(sources) :
@@ -312,7 +312,7 @@ export function SettingsEditor(sources) {
      * @const SettingsEditor/safelyMakeSettingsGroup$/vdom$
      * @type {Stream(Object)}
      */
-    const vdom$ = sources.onion.state$
+    const vdom$ = sources.state.stream
       .map((state) => (
         (group.group in state) ?
           isolate(makeSettingsGroup(group), group.group)(sources) :

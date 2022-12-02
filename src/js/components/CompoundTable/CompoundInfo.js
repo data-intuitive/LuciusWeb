@@ -5,7 +5,7 @@ import { safeModelToUi } from '../../modelTranslations'
 
 export function CompoundInfo(sources) {
 
-    const state$ = sources.onion.state$
+    const state$ = sources.state.stream
     const props$ = sources.props
 
     const click$ = sources.DOM.select('.zoom').events('click').mapTo(1)

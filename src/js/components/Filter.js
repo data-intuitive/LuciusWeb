@@ -580,12 +580,12 @@ function Filter(sources) {
 
   const logger = loggerFactory(
     "filter",
-    sources.onion.state$,
+    sources.state.stream,
     "settings.filter.debug"
   )
 
   // The debounce is required, else it simply does not work
-  const state$ = sources.onion.state$.compose(debounce(100))
+  const state$ = sources.state.stream.compose(debounce(100))
 
   const filterNames$ = state$
     .map(state => keys(state.settings.filter.values))

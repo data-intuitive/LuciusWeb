@@ -12,8 +12,8 @@ import sampleCombine from 'xstream/extra/sampleCombine'
  */
 function GeneAnnotationQuery(sources, id = ".genePopup") {
 
-    const logger = loggerFactory('geneAnnotationQuery', sources.onion.state$, 'settings.geneAnnotations.debug')
-    const state$ = sources.onion.state$
+    const logger = loggerFactory('geneAnnotationQuery', sources.state.stream, 'settings.geneAnnotations.debug')
+    const state$ = sources.state.stream
 
     const trigger$ = sources.DOM.select(id).events('click').map(x => x.target.textContent)
 

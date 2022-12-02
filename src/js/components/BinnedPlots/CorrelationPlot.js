@@ -43,9 +43,9 @@ const makeVega = (elementID) => {
 
 function CorrelationPlot(sources) {
 
-    const logger = loggerFactory('plots', sources.onion.state$, 'settings.plots.debug')
+    const logger = loggerFactory('plots', sources.state.stream, 'settings.plots.debug')
 
-    const state$ = sources.onion.state$
+    const state$ = sources.state.stream
     const input$ = sources.input
 
     const visibility$ = (el) => sources.DOM.select(el)

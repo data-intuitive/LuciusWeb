@@ -29,7 +29,7 @@ const sampleTableLens = {
  */
 function SampleTable(sources) {
 
-  const array$ = sources.onion.state$
+  const array$ = sources.state.stream
   const props$ = sources.props
 
   // isolate each line so that it separates clicks

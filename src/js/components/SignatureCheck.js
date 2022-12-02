@@ -59,11 +59,11 @@ const checkLens2 = {
 
 function SignatureCheck(sources) {
 
-  const logger = loggerFactory('signatureCheck', sources.onion.state$, 'settings.form.debug')
+  const logger = loggerFactory('signatureCheck', sources.state.stream, 'settings.form.debug')
 
   const domSource$ = sources.DOM;
   const httpSource$ = sources.HTTP;
-  const state$ = sources.onion.state$
+  const state$ = sources.state.stream
 
   const request$ = state$
     .filter((state) => state.query !== '')
@@ -162,7 +162,7 @@ function SignatureCheck(sources) {
     .mapTo(true)
     .compose(dropRepeats(equals))
 
-  const ghostUpdate$ = sources.onion.state$
+  const ghostUpdate$ = sources.state.stream
     .map((state) => state.ghostUpdate)
     .filter((ghost) => ghost)
     .compose(dropRepeats())

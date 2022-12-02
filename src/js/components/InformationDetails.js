@@ -3,7 +3,7 @@ import sampleCombine from 'xstream/extra/sampleCombine'
 
 export function InformationDetails(sources) {
 
-  const state$ = sources.onion.state$
+  const state$ = sources.state.stream
   const props$ = sources.props
   const trigger$ = sources.trigger
 

@@ -49,11 +49,11 @@ function TreatmentCheck(sources) {
 
   const logger = loggerFactory(
     "treatmentCheck",
-    sources.onion.state$,
+    sources.state.stream,
     "settings.form.debug"
   )
 
-  const state$ = sources.onion.state$
+  const state$ = sources.state.stream
 
   const acInput$ = sources.ac
 
@@ -321,7 +321,7 @@ function TreatmentCheck(sources) {
       run$,
       searchAutoRun$,
       // Ghost mode
-      sources.onion.state$
+      sources.state.stream
         .map((state) => state.core.ghostoutput)
         .filter((ghost) => ghost)
         .compose(dropRepeats())

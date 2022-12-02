@@ -45,7 +45,7 @@ function TargetWorkflow(sources) {
 
     // sources = { ...sources, DOM: mergeDeepRight(sources.DOM, domSource) }
 
-    const logger = loggerFactory('target', sources.onion.state$, 'settings.common.debug')
+    const logger = loggerFactory('target', sources.state.stream, 'settings.common.debug')
 
     const formLens = {
         get: state => ({ form: state.form, settings: { form: state.settings.form, api: state.settings.api, common: state.settings.common} }),
@@ -79,13 +79,13 @@ function TargetWorkflow(sources) {
 
     // Scenario for ghost mode
     const scenarioReducer$ =
-        sources.onion.state$.take(1)
+        sources.state.stream.take(1)
         .filter(state => state.settings.common.ghostMode)
         .mapTo(runScenario(scenario).scenarioReducer$)
         .flatten()
         .startWith(prevState => prevState)
     const scenarioPopup$ =
-        sources.onion.state$.take(1)
+        sources.state.stream.take(1)
         .filter(state => state.settings.common.ghostMode)
         .mapTo(runScenario(scenario).scenarioPopup$)
         .flatten()

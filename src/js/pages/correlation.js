@@ -16,12 +16,12 @@ import { runScenario } from '../utils/scenario'
 
 function CorrelationWorkflow(sources) {
 
-    const logger = loggerFactory('correlation', sources.onion.state$, 'settings.common.debug')
+    const logger = loggerFactory('correlation', sources.state.stream, 'settings.common.debug')
 
-    const state$ = sources.onion.state$
+    const state$ = sources.state.stream
 
     // Scenario for ghost mode
-    const scenarios$ = sources.onion.state$
+    const scenarios$ = sources.state.stream
     .take(1)
     .filter((state) => state.settings.common.ghostMode)
     .map(state => runScenario(scenario(state.settings.common.ghost.correlation), state$))

@@ -29,7 +29,7 @@ export function IsolatedSettings(sources) {
  * @returns Settings component/page
  */
 export function Settings(sources) {
-  const settings$ = sources.onion.state$
+  const settings$ = sources.state.stream
 
   /**
    * Settings to display on the page

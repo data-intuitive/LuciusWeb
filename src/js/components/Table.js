@@ -191,11 +191,11 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
   return function Table(sources) {
     const logger = loggerFactory(
       "table",
-      sources.onion.state$,
+      sources.state.stream,
       "settings.table.debug"
     )
 
-    const state$ = sources.onion.state$
+    const state$ = sources.state.stream
 
     // Input handling
     const input$ = xs.merge(

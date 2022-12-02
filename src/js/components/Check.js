@@ -10,7 +10,7 @@ const LATENCY_FACTOR = 1.5
 
 function Check(sources) {
 
-    const state$ = sources.onion.state$
+    const state$ = sources.state.stream
 
     const props$ = sources.props
         .compose(dropRepeats((x, y) => equals(x, y)))

@@ -490,7 +490,7 @@ function Exporter(sources) {
 
   const logger = loggerFactory(
     "exporter",
-    sources.onion.state$,
+    sources.state.stream,
     "settings.common.debug"
   )
 
@@ -503,7 +503,7 @@ function Exporter(sources) {
   }
   const fullConfig = mergeLeft(sources.config, defaultConfig)
 
-  const state$ = sources.onion.state$
+  const state$ = sources.state.stream
 
   const actions = intent(sources.DOM)
 

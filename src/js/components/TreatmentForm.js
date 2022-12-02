@@ -9,11 +9,11 @@ import { loggerFactory } from "../utils/logger"
 function TreatmentForm(sources) {
   const logger = loggerFactory(
     "treatmentForm",
-    sources.onion.state$,
+    sources.state.stream,
     "settings.debug"
   )
 
-  const state$ = sources.onion.state$
+  const state$ = sources.state.stream
 
   const TreatmentCheckSink = isolate(TreatmentCheck, { onion: checkLens })(
     sources

@@ -39,14 +39,14 @@ export default function GenericTreatmentWorkflow(sources) {
 
   const logger = loggerFactory(
     workflowLoggerName,
-    sources.onion.state$,
+    sources.state.stream,
     "settings.common.debug"
   )
 
-  const state$ = sources.onion.state$
+  const state$ = sources.state.stream
 
   // Scenario for ghost mode
-  const scenarios$ = sources.onion.state$
+  const scenarios$ = sources.state.stream
     .take(1)
     .filter((state) => state.settings.common.ghostMode)
     .map(state => runScenario(scenario( workflowGhostModeScenarioSelector(state) ), state$))

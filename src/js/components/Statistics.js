@@ -6,7 +6,7 @@ import debounce from 'xstream/extra/debounce'
 
 function Statistics(sources) {
 
-    const state$ = sources.onion.state$
+    const state$ = sources.state.stream
 
     // Check when the state has changed, omit the result key
     const modifiedState$ = state$

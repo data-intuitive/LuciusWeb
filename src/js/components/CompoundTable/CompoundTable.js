@@ -11,14 +11,14 @@ const compoundTableLens = {
 
 function CompoundTable(sources) {
 
-    const state$ = sources.onion.state$;
+    const state$ = sources.state.stream;
     const domSource$ = sources.DOM;
 
     // This component is active only when the signature is validated
     // const active$ = state$.map(state => state.validated).startWith(false).debug(log)
 
     // This will become an object representing the JSON table
-    const array$ = sources.onion.state$
+    const array$ = sources.state.stream
 
     const childrenSinks$ = array$.map(array => {
         return array.map((_, index) => isolate(CompoundInfo, index)(sources))

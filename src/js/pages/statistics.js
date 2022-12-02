@@ -11,7 +11,7 @@ import { Statistics } from '../components/Statistics'
 
 function StatisticsWorkflow(sources) {
 
-  const state$ = sources.onion.state$
+  const state$ = sources.state.stream
 
   // Initialize if not yet done in parent (i.e. router) component (useful for testing)
   const defaultReducer$ = xs.of(prevState => {

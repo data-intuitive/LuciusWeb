@@ -5,7 +5,7 @@ import dropRepeats from 'xstream/extra/dropRepeats'
 /**
  * 
  * @param {*} elementID: String identifier for the component
- * @param {*} thisState$: Pass sources.onion.state$ in order to pick up the debug settings
+ * @param {*} thisState$: Pass sources.state.stream in order to pick up the debug settings
  * @param {*} location: Path to the debug key in settings, using dots as delimiter
  */
 const loggerFactory = (elementID, thisState$, location = 'settings.debug') => (stream$, streamID, prefix = '== ', infix = ' > ', suffix = ' ==') => {

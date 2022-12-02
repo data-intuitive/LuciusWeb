@@ -58,31 +58,33 @@ import {
 import sampleCombine from "xstream/extra/sampleCombine"
 
 export default function Index(sources) {
+  console.log("sources")
+  console.log(sources)
   const { router } = sources
 
   const logger = loggerFactory(
     "index",
-    sources.onion.state$,
+    sources.state.stream,
     "settings.common.debug"
   )
 
-  const state$ = sources.onion.state$
+  const state$ = sources.state.stream.debug("state$")
 
   const page$ = router.routedComponent({
     "/": Home,
-    "/disease": DiseaseWorkflow,
+    // "/disease": DiseaseWorkflow,
     // '/disease': {
     //   '/': DiseaseWorkflow,
     //   // '/:id': id => sources => DiseaseWorkflow({props$: id, ...sources})
     // },
-    "/compound": CompoundWorkflow,
-    "/target": TargetWorkflow,
-    "/genetic": GeneticWorkflow,
-    "/ligand": LigandWorkflow,
-    "/generic": GenericTreatmentWorkflow,
+    // "/compound": CompoundWorkflow,
+    // "/target": TargetWorkflow,
+    // "/genetic": GeneticWorkflow,
+    // "/ligand": LigandWorkflow,
+    // "/generic": GenericTreatmentWorkflow,
     "/statistics": StatisticsWorkflow,
     "/settings": IsolatedSettings,
-    "/correlation": CorrelationWorkflow,
+    // "/correlation": CorrelationWorkflow,
     "/debug": Debug,
     "/admin": IsolatedAdminSettings,
     "/init": Init,
@@ -485,7 +487,7 @@ export default function Index(sources) {
     .events("click")
     .filter((ev) => ev.target.pathname == "/debug")
 
-  const history$ = sources.onion.state$.fold((acc, x) => acc.concat([x]), [{}])
+  const history$ = sources.state.stream.fold((acc, x) => acc.concat([x]), [{}])
 
   const historyDriver$ = router.history$
     .map((router) => router.search)
@@ -504,7 +506,7 @@ export default function Index(sources) {
       // logger(prevent$, 'prevent$'),
       page$.map(prop("log")).filter(Boolean).flatten()
     ),
-    onion: xs.merge(
+    state: xs.merge(
       defaultReducer$,
       deploymentsReducer$,
       routerReducer$,

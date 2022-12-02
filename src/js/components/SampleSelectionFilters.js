@@ -794,7 +794,7 @@ function view(childrenSinks$) {
 }
 
 function SampleSelectionFilters(sources) {
-  const state$ = sources.onion.state$
+  const state$ = sources.state.stream
   const sliderEvents$ = sources.slider
 
   const intent_ = intent(sources.DOM)

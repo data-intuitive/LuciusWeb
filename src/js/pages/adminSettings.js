@@ -16,7 +16,7 @@ export function IsolatedAdminSettings(sources) {
 }
 
 export function AdminSettings(sources) {
-  const settings$ = sources.onion.state$
+  const settings$ = sources.state.stream
 
   const settingsConfig$ = sources.deployments.map((deployments) => [
     {

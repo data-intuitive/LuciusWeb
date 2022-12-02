@@ -213,7 +213,7 @@ function view(requests$, responses$, statusDisplay$, settingsDOM$, jarFile$, con
  * and other operational aspects of managing LuciusAPI.
  */
 function Init(sources) {
-  const state$ = sources.onion.state$
+  const state$ = sources.state.stream
     .compose(dropRepeats(equals))
     .startWith({ core: defaultState, settings: initSettings })
   // .map(state => merge(state, state.settings.admin, state.settings.api))

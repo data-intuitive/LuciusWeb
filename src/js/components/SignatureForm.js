@@ -120,7 +120,7 @@ function model(newQuery$, state$, sources, signatureCheckSink, actions$) {
     actions$.update$,
     searchAutoRun$,
     // Ghost mode
-    sources.onion.state$.map(state => state.core.ghost).filter(ghost => ghost).compose(dropRepeats())
+    sources.state.stream.map(state => state.core.ghost).filter(ghost => ghost).compose(dropRepeats())
     )
     .compose(sampleCombine(state$))
     .map(([_, state]) => state.core.query)
@@ -188,9 +188,9 @@ function intent(domSource$) {
 
 function SignatureForm(sources) {
 
-  const logger = loggerFactory('signatureForm', sources.onion.state$, 'settings.form.debug')
+  const logger = loggerFactory('signatureForm', sources.state.stream, 'settings.form.debug')
 
-  const state$ = sources.onion.state$
+  const state$ = sources.state.stream
   const domSource$ = sources.DOM;
   const props$ = sources.props;
 

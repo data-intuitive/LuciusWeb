@@ -12,8 +12,8 @@ import sampleCombine from 'xstream/extra/sampleCombine'
  */
 function TreatmentAnnotation(sources, id = ".treatmentPopup") {
 
-  const logger = loggerFactory('treatmentAnnotation', sources.onion.state$, 'settings.treatmentAnnotations.debug')
-  const state$ = sources.onion.state$
+  const logger = loggerFactory('treatmentAnnotation', sources.state.stream, 'settings.treatmentAnnotations.debug')
+  const state$ = sources.state.stream
 
   const trigger$ =
     sources.DOM

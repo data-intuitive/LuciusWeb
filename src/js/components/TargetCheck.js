@@ -26,9 +26,9 @@ function TargetCheck(sources) {
   // - The suggestions appear again whenever something changes in the input...
 
 
-  const logger = loggerFactory('TargetCheck', sources.onion.state$, 'settings.form.debug')
+  const logger = loggerFactory('TargetCheck', sources.state.stream, 'settings.form.debug')
 
-  const state$ = sources.onion.state$
+  const state$ = sources.state.stream
 
   const acInput$ = sources.ac
 
@@ -233,7 +233,7 @@ function TargetCheck(sources) {
   const query$ = xs.merge(
     run$,
     // Ghost mode
-    sources.onion.state$.map(state => state.core.ghostoutput).filter(ghost => ghost).compose(dropRepeats())
+    sources.state.stream.map(state => state.core.ghostoutput).filter(ghost => ghost).compose(dropRepeats())
   )
     .compose(sampleCombine(state$))
     .map(([_, state]) => state.core.input)

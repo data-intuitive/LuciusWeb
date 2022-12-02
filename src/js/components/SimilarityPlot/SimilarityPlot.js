@@ -49,9 +49,9 @@ const makeVega = () => {
 
 function SimilarityPlot(sources) {
 
-    const logger = loggerFactory('similarityPlot', sources.onion.state$, 'settings.sim.debug')
+    const logger = loggerFactory('similarityPlot', sources.state.stream, 'settings.sim.debug')
 
-    const state$ = sources.onion.state$
+    const state$ = sources.state.stream
     const input$ = sources.input
 
     const visible$ = sources.DOM.select(elementID)

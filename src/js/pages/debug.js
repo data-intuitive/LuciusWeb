@@ -5,13 +5,13 @@ import { loggerFactory } from '../utils/logger'
 
 function Debug(sources) {
 
-    const logger = loggerFactory('debug', sources.onion.state$, 'settings.common.debug')
+    const logger = loggerFactory('debug', sources.state.stream, 'settings.common.debug')
 
-    const stringData$ = sources.onion.state$.map(state => {
+    const stringData$ = sources.state.stream.map(state => {
         return "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state))
     })
 
-    const vdom$ = xs.combine(sources.onion.state$, stringData$) 
+    const vdom$ = xs.combine(sources.state.stream, stringData$) 
         .map(([state, mime]) => div('.row', [
                             div('.col .s10 .offset-s1',[
                                 div('.card .grey .lighten-4 .z-shadow-4', [

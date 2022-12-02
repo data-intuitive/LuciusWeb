@@ -3,7 +3,7 @@ import delay from 'xstream/extra/delay'
 
 function FetchFilters(sources) {
 
-  const state$ = sources.onion.state$
+  const state$ = sources.state.stream
 
   // Combine with deployments to the up-to-date endpoint config
   const triggerQuery$ = state$.take(1)

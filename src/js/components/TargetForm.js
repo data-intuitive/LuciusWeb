@@ -6,9 +6,9 @@ import { loggerFactory } from '../utils/logger'
 
 function TargetForm(sources) {
 
-    const logger = loggerFactory('targetForm', sources.onion.state$, 'settings.debug.form')
+    const logger = loggerFactory('targetForm', sources.state.stream, 'settings.debug.form')
 
-    const state$ = sources.onion.state$
+    const state$ = sources.state.stream
 
     const TargetCheckSink = isolate(TargetCheck, {onion: checkLens, DOM: 'check'} )(sources)
     const targetQuery$ = TargetCheckSink.output.remember()

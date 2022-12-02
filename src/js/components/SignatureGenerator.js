@@ -285,9 +285,9 @@ function SignatureGenerator(sources) {
     // Plug-in annotations for genes
     const geneAnnotationQuery = GeneAnnotationQuery(sources)
 
-    const logger = loggerFactory('signatureGenerator', sources.onion.state$, 'settings.form.debug')
+    const logger = loggerFactory('signatureGenerator', sources.state.stream, 'settings.form.debug')
 
-    const state$ = sources.onion.state$
+    const state$ = sources.state.stream
 
     const input$ = sources.input
 

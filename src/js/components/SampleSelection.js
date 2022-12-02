@@ -211,14 +211,14 @@ function SampleSelection(sources) {
 
   const logger = loggerFactory(
     "sampleSelection",
-    sources.onion.state$,
+    sources.state.stream,
     "settings.form.debug"
   )
 
   // Add .drop(0) to force creation of a separate state$ stream
   // This seems to help with the synchronisation when there are lots of updates
   // To be confirmed over time whether this actually always works
-  const state$ = sources.onion.state$.drop(0)
+  const state$ = sources.state.stream.drop(0)
 
   const input$ = sources.input
   // .startWith("BRD-K28907958") // REMOVE ME !!!
@@ -633,7 +633,7 @@ function SampleSelection(sources) {
     .merge(
       sources.DOM.select(".doSelect").events("click"),
       // Ghost mode
-      sources.onion.state$
+      sources.state.stream
         .map((state) => state.core?.ghostoutput)
         .filter((ghost) => ghost)
         .compose(dropRepeats()),

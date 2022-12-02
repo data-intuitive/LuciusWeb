@@ -61,13 +61,13 @@ export function SampleInfoHeader(bgcolor, color) {
  * Depending on the width displays basic information in one line or multiple lines
  * When clicked, adds more information in a separate div
  * @function SampleInfo
- * @param {stream} sources.onion.state$ stream of sample data to be displayed
+ * @param {stream} sources.state.stream stream of sample data to be displayed
  * @param sources.DOM user click events
  * @param sources.props semi-static settings
  * @returns {object} - DOM: VNode stream containing sample information
  */
 export function SampleInfo(sources) {
-  const state$ = sources.onion.state$
+  const state$ = sources.state.stream
   const props$ = sources.props
 
   // click events to open or close parts of the SampleInfo

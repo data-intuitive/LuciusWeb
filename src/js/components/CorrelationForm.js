@@ -49,9 +49,9 @@ const formLens = {
 
 function CorrelationForm(sources) {
 
-    const logger = loggerFactory('correlationForm', sources.onion.state$, 'settings.form.debug')
+    const logger = loggerFactory('correlationForm', sources.state.stream, 'settings.form.debug')
 
-    const state$ = sources.onion.state$
+    const state$ = sources.state.stream
 
     // Check Signature subcomponent, via isolation
     const signatureCheck1 = isolate(SignatureCheck, { onion: checkLens1 })(sources)
@@ -231,7 +231,7 @@ function CorrelationForm(sources) {
     const query$ = xs.merge(
         update$,
         // Ghost mode
-        sources.onion.state$.map(state => state.core.ghost).filter(ghost => ghost).compose(dropRepeats()),
+        sources.state.stream.map(state => state.core.ghost).filter(ghost => ghost).compose(dropRepeats()),
         searchAutoRun$,
     )
         .compose(sampleCombine(state$))

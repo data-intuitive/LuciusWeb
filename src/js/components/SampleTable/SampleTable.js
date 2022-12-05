@@ -13,7 +13,7 @@ import { SampleInfoHeader, SampleInfo } from './SampleInfo'
  * @const samplTableLens
  */
 const sampleTableLens = {
-    get: state => state.core.data,
+    get: state => state.core?.data,
     set: (state, _) => state
 }
 

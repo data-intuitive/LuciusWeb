@@ -108,11 +108,11 @@ export default function GenericTreatmentWorkflow(sources) {
   })
 
   const dirtyBusyStates$ = state$.map((state) => ({
-    dirtyCheck: state.form.check.dirty,
-    busySampleSelection: state.form.sampleSelection.busy,
-    dirtySampleSelection: state.form.sampleSelection.dirty,
-    busySignature: state.form.signature.busy,
-    dirtyFilter: state.filter.dirty,
+    dirtyCheck: state.form?.check?.dirty,
+    busySampleSelection: state.form?.sampleSelection?.busy,
+    dirtySampleSelection: state.form?.sampleSelection?.dirty,
+    busySignature: state.form?.signature?.busy,
+    dirtyFilter: state.filter?.dirty,
   }))
   .compose(dropRepeats(equals))
   .compose(debounce(10))

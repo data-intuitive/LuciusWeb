@@ -78,8 +78,8 @@ function model(actions, state$, vega$, config) {
     return data != undefined && !isEmpty(data)
   }
 
-  const signaturePresent$ = state$.map((state) => notEmptyOrUndefined(state.form.signature?.output)).startWith(false)
-  const plotsPresent$ = state$.map((state) => notEmptyOrUndefined(state.plots.data)).startWith(false)
+  const signaturePresent$ = state$.map((state) => notEmptyOrUndefined(state.form?.signature?.output)).startWith(false)
+  const plotsPresent$ = state$.map((state) => notEmptyOrUndefined(state.plots?.data)).startWith(false)
   const headTablePresent$ = state$.map((state) => notEmptyOrUndefined(state.headTable?.data)).startWith(false)
   const tailTablePresent$ = state$.map((state) => notEmptyOrUndefined(state.tailTable?.data)).startWith(false)
 
@@ -96,7 +96,7 @@ function model(actions, state$, vega$, config) {
   const mdReportPresent$ = (mdPresentSelector[toUpper(config.workflowName)] ?? mdPresentSelector[""])
 
   const url$ = state$.map((state) => state.routerInformation.pageStateURL).startWith("")
-  const signature$ = state$.map((state) => state.form.signature?.output).startWith("")
+  const signature$ = state$.map((state) => state.form?.signature?.output).startWith("")
   // result already contains 'data:image/png;base64,'
   const plotFile$ = vega$
     .filter(vega => vega.el == config.plotId)
@@ -116,16 +116,16 @@ function model(actions, state$, vega$, config) {
 
   const urlMd$ = url$.map((url) => "["+url+"]("+url+")").startWith("")
 
-  const treatmentQueryMd$ = state$.map((state) => state.form.check?.output) // generic treatment WF
-  const signatureQueryMd$ = state$.map((state) => state.form.query) // disease WF
-  const signatureQuery1Md$ = state$.map((state) => state.form.query1) // correlation WF
-  const signatureQuery2Md$ = state$.map((state) => state.form.query2) // correlation WF
+  const treatmentQueryMd$ = state$.map((state) => state.form?.check?.output) // generic treatment WF
+  const signatureQueryMd$ = state$.map((state) => state.form?.query) // disease WF
+  const signatureQuery1Md$ = state$.map((state) => state.form?.query1) // correlation WF
+  const signatureQuery2Md$ = state$.map((state) => state.form?.query2) // correlation WF
 
   // present in generic treatment WFs
-  const samplesMd$ = state$.map((state) => convertSelectedSamplesToMd(state.form.sampleSelection?.data)).startWith("")
+  const samplesMd$ = state$.map((state) => convertSelectedSamplesToMd(state.form?.sampleSelection?.data)).startWith("")
   const signatureMd$ = signature$
 
-  const filterMd$ = state$.map((state) => convertFilterToMd(state.filter.filter_output, state.settings.filter.values))
+  const filterMd$ = state$.map((state) => convertFilterToMd(state.filter?.filter_output, state.settings.filter.values))
     .startWith("")
 
   const plotMd$ = plotFile$

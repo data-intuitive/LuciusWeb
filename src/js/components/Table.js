@@ -63,7 +63,7 @@ import { dirtyWrapperStream } from "../utils/ui"
  */
 const headTableLens = {
   get: (state) => ({
-    core: state.headTable,
+    core: state.headTable ?? { expandOptions: false },
     settings: {
       table: state.settings.headTable,
       api: state.settings.api,
@@ -103,7 +103,7 @@ const headTableLens = {
  */
 const tailTableLens = {
   get: (state) => ({
-    core: state.tailTable,
+    core: state.tailTable ?? { expandOptions: false },
     settings: {
       table: state.settings.tailTable,
       api: state.settings.api,

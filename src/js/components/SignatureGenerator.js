@@ -21,8 +21,10 @@ const emptyData = {
 }
 
 const signatureLens = {
-    get: state => ({ core: state.form.signature, settings: state.settings,
-        ui: (state.ui??{}).signature ?? {dirty: false}, // Get state.ui.signature in a safe way or else get a default
+    get: state => ({
+        core: state.form?.signature ?? { showMore: false, showLimit: 100 },
+        settings: state.settings,
+        ui: state.ui?.signature ?? { dirty: false }, // Get state.ui.signature in a safe way or else get a default
      }),
     set: (state, childState) => ({ ...state, form: { ...state.form, signature: childState.core } })
 };
@@ -30,7 +32,7 @@ const signatureLens = {
 function model(newInput$, request$, data$, showMore$) {
 
     // Initialization
-    const defaultReducer$ = xs.of(prevState => ({ ...prevState, core: { input: '' } }))
+    const defaultReducer$ = xs.of(prevState => ({ ...prevState, core: { input: '', showMore: false, showLimit: 100 } }))
     // Add input to state
     const inputReducer$ = newInput$.map(i => prevState => ({ ...prevState, core: { ...prevState.core, input: i.core.input } }))
     // Add request body to state

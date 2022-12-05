@@ -23,36 +23,36 @@ const stateTemplate = {
 
 const checkLens = { 
   get: state => ({
-    query: state.core.query,
-    ghostUpdate: state.core.ghostUpdate,
+    query: state.core?.query,
+    ghostUpdate: state.core?.ghostUpdate,
     settings: state.settings,
     search: state.search,
     searchAutoRun: state.searchAutoRun,
-    validated: state.core.validated
+    validated: state.core?.validated
   }),
   set: (state, childState) => ({...state, core : {...state.core, query: childState.query}})
 };
 
 const checkLens1 = { 
   get: state => ({
-    query: state.core.query1,
-    ghostUpdate: state.core.ghostUpdate1,
+    query: state.core?.query1,
+    ghostUpdate: state.core?.ghostUpdate1,
     settings: state.settings,
     search: state.search1,
     searchAutoRun: state.searchAutoRun,
-    validated: state.core.validated1
+    validated: state.core?.validated1
   }),
   set: (state, childState) => ({...state, core : {...state.core, query1: childState.query}})
 };
 
 const checkLens2 = { 
   get: state => ({
-    query: state.core.query2,
-    ghostUpdate: state.core.ghostUpdate2,
+    query: state.core?.query2,
+    ghostUpdate: state.core?.ghostUpdate2,
     settings: state.settings,
     search: state.search2,
     searchAutoRun: state.searchAutoRun,
-    validated: state.core.validated2
+    validated: state.core?.validated2
   }),
   set: (state, childState) => ({...state, core : {...state.core, query2: childState.query}})
 };

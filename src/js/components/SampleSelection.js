@@ -35,7 +35,7 @@ const emptyData = {
 
 const sampleSelectionLens = {
   get: (state) => ({
-    core: typeof state.form !== "undefined" ? state.form.sampleSelection : {},
+    core: state.form?.sampleSelection ?? { ghostoutput: false },
     settings: state.settings,
     ui: (state.ui??{}).sampleSelection ?? {dirty: false}, // Get state.ui.sampleSelection in a safe way or else get a default
     search: state.params?.samples,

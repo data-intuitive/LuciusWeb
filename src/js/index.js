@@ -58,8 +58,6 @@ import {
 import sampleCombine from "xstream/extra/sampleCombine"
 
 export default function Index(sources) {
-  console.log("sources")
-  console.log(sources)
   const { router } = sources
 
   const logger = loggerFactory(
@@ -363,6 +361,7 @@ export default function Index(sources) {
       console.log("prevState = undefined")
       return {
         settings: distributedAdminSettings,
+        routerInformation: { pathname: '', ...prevState.routerInformation }
       }
     } else {
       // Pre-existing state information.
@@ -381,8 +380,8 @@ export default function Index(sources) {
         )
       // If stored settings are different version or are invalid, use default settings.
       return sameVersionInSettings && allPresentInSettings
-        ? { settings: prevState.settings }
-        : { settings: distributedAdminSettings }
+        ? { settings: prevState.settings, routerInformation: { pathname: '', ...prevState.routerInformation } }
+        : { settings: distributedAdminSettings, routerInformation: { pathname: '', ...prevState.routerInformation } }
     }
   })
 

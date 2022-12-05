@@ -74,7 +74,7 @@ const deserialize = (str) => {
 function SingleSampleSelectionFilter(key, filterInfo$, filterData$, stateData$, filterConfig) {
 
     const thisFilterInfo$ = filterInfo$.map((info) => info[key])
-    const thisFilterData$ = filterData$.map((data) => data[key])
+    const thisFilterData$ = filterData$.map((data) => data != undefined && includes(key, data) ? data[key] : undefined)
     const thisFilterConfig = filterConfig[key]
    
     const valueElements = (key, unitInfo, filterData) => {

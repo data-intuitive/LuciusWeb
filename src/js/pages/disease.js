@@ -57,11 +57,15 @@ function DiseaseWorkflow(sources) {
     if (typeof prevState === "undefined") {
       return {
         settings: initSettings,
+        form: { dirty: false },
+        filter: { dirty: false }
       }
     } else {
       return {
         ...prevState,
         settings: prevState.settings,
+        form: { ...prevState.form, dirty: false },
+        filter: { ...prevState.filter, dirty: false },
       }
     }
   })

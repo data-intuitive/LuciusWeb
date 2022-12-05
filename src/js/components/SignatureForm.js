@@ -14,7 +14,7 @@ import { typer } from '../utils/searchUtils'
 // Granular access to global state and parts of settings
 const formLens = {
   get: (state) => ({
-    core: state.form,
+    core: state.form ?? {},
     settings: {
       form: state.settings.form,
       api: state.settings.api,

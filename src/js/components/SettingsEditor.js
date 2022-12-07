@@ -9,7 +9,7 @@ import {
   } from "@cycle/dom"
   import xs from "xstream"
   import isolate from "@cycle/isolate"
-  import { merge } from "ramda"
+  import { mergeRight } from "ramda"
   import { pick, mix } from "cycle-onionify"
 
 /**
@@ -82,13 +82,13 @@ export function SettingsEditor(sources) {
       if (config.type == "checkbox") {
         return [
           label(".active", [
-            input({ props: merge(config.props, { checked: _state }) }),
+            input({ props: mergeRight(config.props, { checked: _state }) }),
             span(".lever"),
           ]),
         ]
       }
       if (config.type == "text" || config.type == "range") {
-        return [input({ props: merge(config.props, { value: _state }) })]
+        return [input({ props: mergeRight(config.props, { value: _state }) })]
       }
       if (config.type == "select") {
         const options = config.options
@@ -102,7 +102,7 @@ export function SettingsEditor(sources) {
             { style: { "border-style": "solid", margin: "2px" } },
             [
               label(selectedOption(o), [
-                input("", { props: merge(config.props, { value: o }) }, ""),
+                input("", { props: mergeRight(config.props, { value: o }) }, ""),
                 o,
               ]),
             ]

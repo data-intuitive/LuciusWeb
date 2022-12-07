@@ -1,15 +1,5 @@
 import xs from 'xstream';
 import { div, nav, a, h3, p, ul, li, h1, h2, i, footer, header, main, svg, g, path, code, pre } from '@cycle/dom';
-import { merge, prop, equals } from 'ramda';
-
-import { Check } from '../components/Check'
-import { IsolatedSettings } from './settings'
-
-import flattenSequentially from 'xstream/extra/flattenSequentially'
-import { pick, mix } from 'cycle-onionify';
-import { initSettings } from './settings'
-import debounce from 'xstream/extra/debounce'
-import dropRepeats from 'xstream/extra/dropRepeats'
 
 import { loggerFactory } from '../utils/logger'
 

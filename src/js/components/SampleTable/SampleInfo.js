@@ -7,7 +7,7 @@ import {
   img,
   i,
 } from "@cycle/dom"
-import { merge } from "ramda"
+import { mergeRight } from "ramda"
 import { safeModelToUi } from "../../modelTranslations"
 
 import img_trt_cp          from "/images/treatmentTypes/TRT_CP.png"
@@ -77,36 +77,36 @@ export function SampleInfo(sources) {
 
   // Don't allow propagation of the event when the click is on .filtersZoom or .informationDetailsZoom
   // Otherwise it will propagate to .zoom and close the row details instead of opening/closing .filtersZoom or .informationDetailsZoom
-  // This code doesn't quite follow the cycle.js dogma
-  xs.merge(clickFilters$, clickInfoDetails$)
-    .addListener({
-      next: (ev) => { ev.stopPropagation() },
-      error: () => {}
-    })
-
+  // Calling ev.stopPropagation() this way doesn't quite follow the cycle.js dogma
   const zoomInfo$ = xs.merge(
-    clickRow$.mapTo("row"),
-    clickFilters$.mapTo("filters"),
-    clickInfoDetails$.mapTo("infoDetails")
+    clickRow$.map(ev => [ev, "row"]),
+    clickFilters$.map(ev => [ev, "filters"]),
+    clickInfoDetails$.map(ev => [ev, "infoDetails"])
     )
-    .fold((acc, ev) => 
+    .fold((acc, [ev, id]) => 
       {
-        if (ev == "row")
+        if (id == "row") {
           return {
             row: !acc.row,
             filters: false,
             infoDetails: false,
           }
-        else if (ev == "filters")
+        }
+        else if (id == "filters") {
+          ev.stopPropagation()
           return {
             ...acc,
             filters: !acc.filters
           }
-        else if (ev = "infoDetails")
+        }
+        else if (id == "infoDetails") {
+          ev.stopPropagation()
           return {
             ...acc,
             infoDetails: !acc.infoDetails
           }
+        }
+        else return acc
       }
       ,
       { row: false, filters: false, infoDetails: false }
@@ -394,7 +394,7 @@ export function SampleInfo(sources) {
   const rowDetail = (sample, props, blur, informationDetails, zoomInfo) => {
     let hStyle = { style: { margin: "0px", fontWeight: "bold" } }
     let pStyle = { style: { margin: "0px" } }
-    let pStylewBlur = { style: merge(blur, { margin: "0px" }) }
+    let pStylewBlur = { style: mergeRight(blur, { margin: "0px" }) }
     const _filters = sample.filters != undefined ? sample.filters : []
 
     const origDose = _filters.find(e => e.key == "orig_dose")?.value ?? "N/A"
@@ -505,7 +505,7 @@ export function SampleInfo(sources) {
         div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
         div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
         div(".col .s12 .offset-s8 .offset-m8 .l4",
-          {style: merge(blur, { margin: "20px 0px 0px 0px" }) },
+          {style: mergeRight(blur, { margin: "20px 0px 0px 0px" }) },
           visualizeSmilesPart
         ),
         div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, expandingFiltersAndReplicationPart),
@@ -514,7 +514,7 @@ export function SampleInfo(sources) {
         div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
         div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
         div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
-          { style: merge(blur, { height: "100%", "margin-top": "30px"}) },
+          { style: mergeRight(blur, { height: "100%", "margin-top": "30px"}) },
           visualizeTextPart
         ),
         div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, expandingFiltersAndReplicationPart),
@@ -523,7 +523,7 @@ export function SampleInfo(sources) {
         div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
         div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
         div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
-          { style: merge(blur, { height: "100%", "margin-top": "30px"}) },
+          { style: mergeRight(blur, { height: "100%", "margin-top": "30px"}) },
           visualizeTextPart
         ),
         div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, expandingFiltersAndReplicationPart),
@@ -532,7 +532,7 @@ export function SampleInfo(sources) {
         div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
         div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
         div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
-          { style: merge(blur, { height: "100%", "margin-top": "30px"}) },
+          { style: mergeRight(blur, { height: "100%", "margin-top": "30px"}) },
           visualizeTextPart
         ),
         div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, expandingFiltersAndReplicationPart),
@@ -541,7 +541,7 @@ export function SampleInfo(sources) {
         div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
         div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
         div(".col .s12 .m12 .l2 .push-l2 .hide-on-med-and-down .center-align",
-          { style: merge(blur, { height: "100%", "margin-top": "30px"}) },
+          { style: mergeRight(blur, { height: "100%", "margin-top": "30px"}) },
           visualizeTextPart
         ),
         div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, expandingFiltersAndReplicationPart),
@@ -550,7 +550,7 @@ export function SampleInfo(sources) {
         div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, samplePart),
         div(".col .s12 .m6 .l4", { style: { margin: "15px 0px 0px 0px" } }, treatmentPart),
         div(".col .s12 .offset-s8 .offset-m8 .l4",
-          {style: merge(blur, { margin: "20px 0px 0px 0px" }) },
+          {style: mergeRight(blur, { margin: "20px 0px 0px 0px" }) },
           visualizeSmilesPart
         ),
         div(".col .s12", { style: { margin: "15px 0px 0px 0px" } }, expandingFiltersAndReplicationPart),

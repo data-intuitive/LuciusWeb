@@ -1,14 +1,9 @@
 import sampleCombine from 'xstream/extra/sampleCombine'
-import isolate from '@cycle/isolate'
 import { i, p, div, br, label, input, code, table, tr, td, b, h2, button, textarea, a, ul, li, span, th, thead, tbody, h3 } from '@cycle/dom';
-import { clone, equals, merge, isEmpty } from 'ramda';
+import { clone, equals, isEmpty } from 'ramda';
 import xs from 'xstream';
-// import { logThis, log } from '../utils/logger'
-// import { ENTER_KEYCODE } from '../utils/keycodes.js'
 import dropRepeats from 'xstream/extra/dropRepeats'
-// import delay from 'xstream/extra/delay'
 import { loggerFactory } from '../utils/logger'
-// import { stringify } from 'querystring';
 import { GeneAnnotationQuery } from './GeneAnnotationQuery'
 import { absGene } from '../utils/utils'
 import { busyUiReducer, dirtyWrapperStream } from "../utils/ui"

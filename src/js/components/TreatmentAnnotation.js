@@ -1,11 +1,8 @@
 import { loggerFactory } from '../utils/logger'
 import xs from 'xstream'
-import { keys, values, filter, head, equals, map, prop, clone, omit, merge } from 'ramda'
-import dropRepeats from 'xstream/extra/dropRepeats'
 import { i, em, p, div, br, label, input, code, table, tr, td, b, h2, button, textarea, a, ul, li, span, th, thead, tbody, h3, h4 } from '@cycle/dom';
 import { titleCase } from '../utils/utils'
 import sampleCombine from 'xstream/extra/sampleCombine'
-import delay from 'xstream/extra/delay'
 
 /**
  * This components checks if an elements is clicked and shows a modal when so.

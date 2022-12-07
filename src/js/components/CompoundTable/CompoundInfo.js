@@ -1,9 +1,6 @@
 import xs from 'xstream'
 import { i, a, h, p, div, br, label, input, code, table, tr, td, b, h2, button, svg, h1, th, thead, tbody, li, span, img, em } from '@cycle/dom'
-import { log } from '../../utils/logger'
-import { merge } from 'ramda'
-import dropRepeats from 'xstream/extra/dropRepeats'
-import { stateDebug } from '../../utils/utils'
+import { mergeRight } from 'ramda'
 import { safeModelToUi } from '../../modelTranslations'
 
 export function CompoundInfo(sources) {
@@ -32,8 +29,8 @@ export function CompoundInfo(sources) {
     const detail = (sample, props, blur) => {
         let hStyle = { style: { margin: '0px', fontWeight: 'bold' } }
         let pStyle = { style: { margin: '0px' } }
-        let hStylewBlur = { style: merge(blur, { margin: '0px', fontWeight: 'bold' }) }
-        let pStylewBlur = { style: merge(blur, { margin: '0px' }) }
+        let hStylewBlur = { style: mergeRight(blur, { margin: '0px', fontWeight: 'bold' }) }
+        let pStylewBlur = { style: mergeRight(blur, { margin: '0px' }) }
         let urlSourire = props.sourire.url
         let url = urlSourire + encodeURIComponent(sample.compound_smiles).replace(/%20/g, '+')
         return div('.col .s12', [
@@ -46,7 +43,7 @@ export function CompoundInfo(sources) {
                 p('.s12', pStylewBlur, entry('InchiKey: ', sample.compound_inchikey)),
                 p('.s12', pStylewBlur, entry('Targets: ', sample.compound_targets.join(', ')))
             ]),
-            div('.col .s4 .offset-s8 .l4', { style: merge(blur, { margin: '20px 0px 0px 0px' }) }, [
+            div('.col .s4 .offset-s8 .l4', { style: mergeRight(blur, { margin: '20px 0px 0px 0px' }) }, [
                 (sample.compound_smiles != null && sample.compound_smiles != 'NA' && sample.compound_smiles != 'No Smiles') ?
                 img('.col .s12 .valign', { props: { src: url } }) :
                 ''

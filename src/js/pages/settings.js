@@ -4,8 +4,6 @@ import {
 } from "@cycle/dom"
 import xs from "xstream"
 import isolate from "@cycle/isolate"
-import { mergeWith, merge, mergeAll } from "ramda"
-import { pick, mix } from "cycle-onionify"
 import debounce from "xstream/extra/debounce"
 
 import { SettingsEditor } from "../components/SettingsEditor"

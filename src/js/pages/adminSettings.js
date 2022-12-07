@@ -336,7 +336,7 @@ export function AdminSettings(sources) {
         prevState.deployment,
         desiredDeployment
       )
-      const updatedSettings = R.merge(prevState, {
+      const updatedSettings = R.mergeRight(prevState, {
         deployment: updatedDeployment,
       })
       const distributedAdminSettings = R.mergeDeepRight(

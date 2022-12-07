@@ -1,6 +1,6 @@
 import xs from 'xstream';
 import { div, nav, a, h3, p, ul, li, h1, h2, i, footer, header, main, svg, g, path, img, map, area, use, span } from '@cycle/dom'
-import { merge, prop, equals } from 'ramda';
+import { mergeRight, prop, equals } from 'ramda';
 
 import { Check } from '../components/Check'
 import dropRepeats from 'xstream/extra/dropRepeats'
@@ -19,8 +19,8 @@ function Home(sources) {
 
     const checkProps$ = sources.onion.state$
         .compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
-        .map(state => merge(state.settings.form, state.settings.api))
-    const CheckSink = Check(merge(sources, { props: checkProps$ }))
+        .map(state => mergeRight(state.settings.form, state.settings.api))
+    const CheckSink = Check(mergeRight(sources, { props: checkProps$ }))
 
     const makeLink = (path, label, selector) => {
         return li(".home-menu .row",

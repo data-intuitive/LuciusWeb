@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## Version 5.4.2
+
+### Other
+
+- Set the contentSecurityPolicy option in helmet to improve cross-site scripting security
+
+### Deployment changes
+
+- `serverConfiguration.js` should contain valid information matching the deployment infrastructure
+
 ## Version 5.4.1
 
 ### Bug fixes

@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## Version 5.4.2
+
+## Minor changes
+
+- On index/landing page, the server responsiveness is checked by retrieving the filters instead of the statistics.
+  The filters API endpoint is fully cached while the statistics are only semi-cached.
+  This also removes the spark jobserver call and calculations on the average job duration.
+
 ## Version 5.4.1
 
 ### Bug fixes

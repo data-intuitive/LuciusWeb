@@ -1,3 +1,6 @@
+// Own module to contain deployment-specific server.js information
+const serverConfiguration = require("./serverConfiguration.js");
+
 const path = require("path");
 const express = require("express");
 const helmet = require("helmet");
@@ -10,7 +13,7 @@ const app = express();
 app.use(express.static(DIST_DIR));
 
 // Tweak rules so that it allows off-site logo & sourire images
-// app.use(helmet.contentSecurityPolicy());
+app.use(helmet.contentSecurityPolicy( serverConfiguration.contentSecurityPolicy ));
 // app.use(helmet.crossOriginEmbedderPolicy());
 // app.use(helmet.crossOriginOpenerPolicy());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));

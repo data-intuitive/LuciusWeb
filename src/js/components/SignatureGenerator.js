@@ -310,7 +310,7 @@ function SignatureGenerator(sources) {
 
     const logger = loggerFactory('signatureGenerator', sources.onion.state$, 'settings.form.debug')
 
-    const state$ = sources.onion.state$.debug("state$")
+    const state$ = sources.onion.state$
 
     const input$ = sources.input
 
@@ -371,7 +371,6 @@ function SignatureGenerator(sources) {
 
     const data$ = responseGet$
         .map(r => r.body.result)
-        .debug("data$")
 
     const actions = intent(sources.DOM)
 
@@ -392,7 +391,6 @@ function SignatureGenerator(sources) {
             response$.replaceError(() => xs.of(emptyData))
         )
         .flatten()
-        .debug("responseDelete$")
 
     const jobStatus$ = xs.merge(responsePost$, responseGet$, responseDelete$)
         .map(r => r.body.status)

@@ -323,12 +323,10 @@ function SignatureGenerator(sources) {
 
     const triggerRequest$ = newInput$
 
-    const apiUri = "http://localhost:8090/jobs?context=luciusapi&appName=luciusapi"
-
     const requestPost$ = triggerRequest$
         .map(state => {
             return {
-                url: apiUri + '&classPath=com.dataintuitive.luciusapi.generateSignature',
+                url: state.settings.api.asyncUrlStart + '&classPath=com.dataintuitive.luciusapi.generateSignature',
                 method: 'POST',
                 send: {
                     version: 'v2',
@@ -354,12 +352,10 @@ function SignatureGenerator(sources) {
         .map(([_, status]) => status)
         .filter(s => s.core.jobStatus == "STARTED" || s.core.jobStatus == "RUNNING")
 
-    const apiUriGet = "http://localhost:8090/jobs/"
-
     const requestGet$ = pollTimerStatus$
         .map(state => {
             return {
-                url: apiUriGet + state.core?.jobId,
+                url: state.settings.api.asyncUrlStatus + state.core?.jobId,
                 method: 'GET',
                 'category': 'generateSignatureGet'
             }
@@ -384,7 +380,7 @@ function SignatureGenerator(sources) {
         .map(([_, state]) => state)
         .map(state => {
             return {
-                url: apiUriGet + state.core?.jobId,
+                url: state.settings.api.asyncUrlStatus + state.core?.jobId,
                 method: 'DELETE',
                 'category': 'generateSignatureDelete'
             }

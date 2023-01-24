@@ -77,7 +77,7 @@ function model(newInput$, request$, jobId$, jobStatus$, data$, showMore$) {
  *          - vdom$: VNodes object
  *          - signature$: stream of the processed signature
  */
-function view(state$, request$, response$, geneAnnotationQuery) {
+function view(state$, request$, response$, delete$, geneAnnotationQuery) {
 
     const validSignature$ = response$
         .map(r => r.body.result.join(" "))
@@ -233,14 +233,24 @@ function view(state$, request$, response$, geneAnnotationQuery) {
                 span('.card-title', 'Signature:'),
                 div('.progress.orange.lighten-3.yellow-text', { style: { margin: '2px 0px 2px 0px'} }, [
                     div('.indeterminate', {style : { "background-color" : 'orange' }})
-                ])
+                ]),
+                div(".delete .btn-flat .orange-text .text-darken-4 .left", "DELETE")
                 ])
             ]))
         .startWith(div('.card .orange .lighten-3', []))
         .remember()
 
+    const deleteVdom$ = delete$
+        .mapTo(
+            div('.card .orange .lighten-3', [
+                div('.card-content .orange-text .text-darken-4', [
+                    span('.card-title', 'JOB KILLED'),
+                ])
+            ]))
+        .remember()
+
     // Wrap component vdom with an extra div that handles being dirty
-    const vdom$ = dirtyWrapperStream( state$, xs.merge(loadingVdom$, invalidVdom$, validVdom$) )
+    const vdom$ = dirtyWrapperStream( state$, xs.merge(loadingVdom$, invalidVdom$, validVdom$, deleteVdom$) )
 
     return {
         vdom$: vdom$,
@@ -268,8 +278,14 @@ function intent(domSource$) {
         .startWith(false)
         .remember()
 
+    const delete$ = domSource$
+        .select(".delete")
+        .events("click")
+        .debug("delete$")
+
     return {
         showMore$: showMore$,
+        delete$: delete$,
     }
 }
 
@@ -294,7 +310,7 @@ function SignatureGenerator(sources) {
 
     const logger = loggerFactory('signatureGenerator', sources.onion.state$, 'settings.form.debug')
 
-    const state$ = sources.onion.state$
+    const state$ = sources.onion.state$.debug("state$")
 
     const input$ = sources.input
 
@@ -357,18 +373,38 @@ function SignatureGenerator(sources) {
         .flatten()
         .filter(r => r.body.status != "STARTED" && r.body.status != "RUNNING")
 
-    const jobStatus$ = xs.merge(responsePost$, responseGet$)
-        .map(r => r.body.status)
-        .startWith("idle")
-
     const data$ = responseGet$
         .map(r => r.body.result)
+        .debug("data$")
 
     const actions = intent(sources.DOM)
 
+    const requestDelete$ = actions.delete$
+        .compose(sampleCombine(state$))
+        .map(([_, state]) => state)
+        .map(state => {
+            return {
+                url: apiUriGet + state.core?.jobId,
+                method: 'DELETE',
+                'category': 'generateSignatureDelete'
+            }
+        })
+
+    const responseDelete$ = sources.HTTP
+        .select('generateSignatureDelete')
+        .map((response$) =>
+            response$.replaceError(() => xs.of(emptyData))
+        )
+        .flatten()
+        .debug("responseDelete$")
+
+    const jobStatus$ = xs.merge(responsePost$, responseGet$, responseDelete$)
+        .map(r => r.body.status)
+        .startWith("idle")
+
     const reducers$ = model(newInput$, requestPost$, jobId$, jobStatus$, data$, actions.showMore$)
 
-    const views = view(state$, requestPost$, responseGet$, geneAnnotationQuery)
+    const views = view(state$, requestPost$, responseGet$, requestDelete$, geneAnnotationQuery)
 
 
     return {
@@ -381,6 +417,7 @@ function SignatureGenerator(sources) {
         HTTP: xs.merge(
             requestPost$,
             requestGet$,
+            requestDelete$,
             geneAnnotationQuery.HTTP
         ),
         onion: reducers$,

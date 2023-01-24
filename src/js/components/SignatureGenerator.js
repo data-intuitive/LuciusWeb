@@ -16,7 +16,8 @@ const emptyData = {
     body: {
         result: {
             data: []
-        }
+        },
+        status: "error"
     }
 }
 
@@ -27,7 +28,7 @@ const signatureLens = {
     set: (state, childState) => ({ ...state, form: { ...state.form, signature: childState.core } })
 };
 
-function model(newInput$, request$, data$, showMore$) {
+function model(newInput$, request$, jobId$, jobStatus$, data$, showMore$) {
 
     // Initialization
     const defaultReducer$ = xs.of(prevState => ({ ...prevState, core: { input: '' } }))
@@ -35,6 +36,10 @@ function model(newInput$, request$, data$, showMore$) {
     const inputReducer$ = newInput$.map(i => prevState => ({ ...prevState, core: { ...prevState.core, input: i.core.input } }))
     // Add request body to state
     const requestReducer$ = request$.map(req => prevState => ({ ...prevState, core: { ...prevState.core, request: req } }))
+    // Add jobId from request response
+    const jobIdReducer$ = jobId$.map(id => prevState => ({ ...prevState, core: { ...prevState.core, jobId: id } }))
+    // Add jobStatus from job response
+    const jobStatusReducer$ = jobStatus$.map(status => prevState => ({ ...prevState, core: { ...prevState.core, jobStatus: status } }))
     // Add data from API to state, update output key when relevant
     const dataReducer$ = data$.map(newData => prevState => ({ ...prevState, core: { ...prevState.core, data: newData, output: newData.join(" ") } }))
     // Logic and reducer stream that monitors if this component is busy
@@ -54,6 +59,8 @@ function model(newInput$, request$, data$, showMore$) {
         inputReducer$,
         dataReducer$,
         requestReducer$,
+        jobIdReducer$,
+        jobStatusReducer$,
         busyReducer$,
         limitReducer$,
     )
@@ -300,35 +307,68 @@ function SignatureGenerator(sources) {
 
     const triggerRequest$ = newInput$
 
-    const request$ = triggerRequest$
+    const apiUri = "http://localhost:8090/jobs?context=luciusapi&appName=luciusapi"
+
+    const requestPost$ = triggerRequest$
         .map(state => {
             return {
-                url: state.settings.api.url + '&classPath=com.dataintuitive.luciusapi.generateSignature',
+                url: apiUri + '&classPath=com.dataintuitive.luciusapi.generateSignature',
                 method: 'POST',
                 send: {
                     version: 'v2',
                     samples: state.core.input.join(" "),
                     pvalue: state.settings.common.pvalue
                 },
-                'category': 'generateSignature'
+                'category': 'generateSignaturePost'
             }
         })
 
-    const response$ = sources.HTTP
-        .select('generateSignature')
+    const responsePost$ = sources.HTTP
+        .select('generateSignaturePost')
         .map((response$) =>
             response$.replaceError(() => xs.of(emptyData))
         )
         .flatten()
 
-    const data$ = response$
+    const jobId$ = responsePost$
+        .map(r => r.body.jobId)
+
+    const pollTimer$ = xs.periodic(200)
+    const pollTimerStatus$ = pollTimer$.compose(sampleCombine(state$))
+        .map(([_, status]) => status)
+        .filter(s => s.core.jobStatus == "STARTED" || s.core.jobStatus == "RUNNING")
+
+    const apiUriGet = "http://localhost:8090/jobs/"
+
+    const requestGet$ = pollTimerStatus$
+        .map(state => {
+            return {
+                url: apiUriGet + state.core?.jobId,
+                method: 'GET',
+                'category': 'generateSignatureGet'
+            }
+        })
+
+    const responseGet$ = sources.HTTP
+        .select('generateSignatureGet')
+        .map((response$) =>
+            response$.replaceError(() => xs.of(emptyData))
+        )
+        .flatten()
+        .filter(r => r.body.status != "STARTED" && r.body.status != "RUNNING")
+
+    const jobStatus$ = xs.merge(responsePost$, responseGet$)
+        .map(r => r.body.status)
+        .startWith("idle")
+
+    const data$ = responseGet$
         .map(r => r.body.result)
 
     const actions = intent(sources.DOM)
 
-    const reducers$ = model(newInput$, request$, data$, actions.showMore$)
+    const reducers$ = model(newInput$, requestPost$, jobId$, jobStatus$, data$, actions.showMore$)
 
-    const views = view(state$, request$, response$, geneAnnotationQuery)
+    const views = view(state$, requestPost$, responseGet$, geneAnnotationQuery)
 
 
     return {
@@ -339,7 +379,8 @@ function SignatureGenerator(sources) {
         DOM: views.vdom$,
         output: views.signature$,
         HTTP: xs.merge(
-            request$,
+            requestPost$,
+            requestGet$,
             geneAnnotationQuery.HTTP
         ),
         onion: reducers$,

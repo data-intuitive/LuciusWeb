@@ -24,6 +24,7 @@ const emptyData = {
 const signatureLens = {
     get: state => ({ core: state.form.signature, settings: state.settings,
         ui: (state.ui??{}).signature ?? {dirty: false}, // Get state.ui.signature in a safe way or else get a default
+        kill: state.kill
      }),
     set: (state, childState) => ({ ...state, form: { ...state.form, signature: childState.core } })
 };
@@ -374,9 +375,14 @@ function SignatureGenerator(sources) {
 
     const actions = intent(sources.DOM)
 
-    const requestDelete$ = actions.delete$
+    const kill$ = state$
+        .map(s => s.kill)
+        .filter(b => b)
+
+    const requestDelete$ = xs.merge(actions.delete$, kill$)
         .compose(sampleCombine(state$))
         .map(([_, state]) => state)
+        .filter(state => state.core?.jobId != undefined && ( state.core?.jobStatus == "STARTED" || state.core?.jobStatus == "RUNNING" ))
         .map(state => {
             return {
                 url: state.settings.api.asyncUrlStatus + state.core?.jobId,

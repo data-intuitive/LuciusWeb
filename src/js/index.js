@@ -474,16 +474,37 @@ export default function Index(sources) {
   })
 
   // Capture link targets and send to router driver
-  const router$ = sources.DOM.select("a")
+  const routerPre$ = sources.DOM.select("a")
     .events("click")
     .filter((ev) => !ev.ownerTarget.classList.contains("do-not-route"))
-    .map((ev) => ev.target.pathname)
+    .map((ev) => {
+      var target = ev.target
+      while (target != undefined && target.pathname == undefined) {
+        target = target.parentElement
+      }
+      return target?.pathname
+    })
     .remember()
+    .debug("router$")
+
+  const router$ = routerPre$
+    .compose(delay(1000))
+
+  const forcefulRouting$ = routerPre$
+    .compose(delay(500))
+    .map((url) => { window.location.href = url; return url} )
+    .addListener({ })
+
+  const killStart$ = routerPre$.mapTo(true)
+  const killStop$ = routerPre$.compose(delay(100)).mapTo(false)
+  const kill$ = xs.merge(killStart$, killStop$).startWith(false).debug("kill$")
+  const killReducer$ = kill$.map((kill) => (prevState) => ({ ...prevState, kill: kill }))
 
   // All clicks on links should be sent to the preventDefault driver
   const prevent$ = sources.DOM.select("a")
     .events("click")
-    .filter((ev) => ev.target.pathname == "/debug")
+    .debug("prevent$")
+    // .filter((ev) => ev.target.pathname == "/debug")
 
   const history$ = sources.onion.state$.fold((acc, x) => acc.concat([x]), [{}])
 
@@ -509,7 +530,8 @@ export default function Index(sources) {
       deploymentsReducer$,
       routerReducer$,
       pageStateReducer$,
-      page$.map(prop("onion")).filter(Boolean).flatten()
+      page$.map(prop("onion")).filter(Boolean).flatten(),
+      killReducer$
     ),
     DOM: vdom$,
     router: xs

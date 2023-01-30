@@ -33,6 +33,7 @@ import GeneticWorkflow from "./pages/genetic"
 import GenericTreatmentWorkflow from "./pages/genericTreatment"
 import TargetWorkflow from "./pages/target"
 import CorrelationWorkflow from "./pages/correlation"
+import AsyncWorkflow from "./pages/async"
 
 // Pages
 import StatisticsWorkflow from "./pages/statistics"
@@ -75,6 +76,7 @@ export default function Index(sources) {
     //   '/': DiseaseWorkflow,
     //   // '/:id': id => sources => DiseaseWorkflow({props$: id, ...sources})
     // },
+    "/async": AsyncWorkflow,
     "/compound": CompoundWorkflow,
     "/target": TargetWorkflow,
     "/genetic": GeneticWorkflow,

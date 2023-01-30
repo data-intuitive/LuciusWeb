@@ -7,7 +7,7 @@ import { loggerFactory } from '../utils/logger'
 import { GeneAnnotationQuery } from './GeneAnnotationQuery'
 import { absGene } from '../utils/utils'
 import { busyUiReducer, dirtyWrapperStream } from "../utils/ui"
-import { asyncQuery } from '../utils/asyncQuery';
+import { asyncQuery, SignatureGeneratorQuery } from '../utils/asyncQuery';
 
 /**
  * @module components/SignatureGenerator
@@ -321,8 +321,8 @@ function SignatureGenerator(sources) {
 
     const kill$ = xs.merge(killState$, actions.delete$)
 
-    const asyncData = asyncQuery('&classPath=com.dataintuitive.luciusapi.generateSignature', 'generateSignature', sources, state$, triggerObject$, kill$)
-    const data$ = asyncData.data$
+    const queryData = SignatureGeneratorQuery(triggerObject$, kill$)(sources)
+    const data$ = queryData.data$
 
     const reducers$ = model(newInput$, data$, actions.showMore$)
 
@@ -337,12 +337,12 @@ function SignatureGenerator(sources) {
         DOM: views.vdom$,
         output: views.signature$,
         HTTP: xs.merge(
-            asyncData.HTTP,
+            queryData.HTTP,
             geneAnnotationQuery.HTTP
         ),
         onion: xs.merge(
             reducers$,
-            asyncData.reducers$,
+            queryData.reducers$,
         ),
         modal: geneAnnotationQuery.modal
     }

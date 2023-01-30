@@ -7,19 +7,11 @@ import { loggerFactory } from '../utils/logger'
 import { GeneAnnotationQuery } from './GeneAnnotationQuery'
 import { absGene } from '../utils/utils'
 import { busyUiReducer, dirtyWrapperStream } from "../utils/ui"
+import { asyncQuery } from '../utils/asyncQuery';
 
 /**
  * @module components/SignatureGenerator
  */
-
-const emptyData = {
-    body: {
-        result: {
-            data: []
-        },
-        status: "error"
-    }
-}
 
 const signatureLens = {
     get: state => ({ core: state.form.signature, settings: state.settings,
@@ -29,18 +21,12 @@ const signatureLens = {
     set: (state, childState) => ({ ...state, form: { ...state.form, signature: childState.core } })
 };
 
-function model(newInput$, request$, jobId$, jobStatus$, data$, showMore$) {
+function model(newInput$, data$, showMore$) {
 
     // Initialization
     const defaultReducer$ = xs.of(prevState => ({ ...prevState, core: { input: '' } }))
     // Add input to state
     const inputReducer$ = newInput$.map(i => prevState => ({ ...prevState, core: { ...prevState.core, input: i.core.input } }))
-    // Add request body to state
-    const requestReducer$ = request$.map(req => prevState => ({ ...prevState, core: { ...prevState.core, request: req } }))
-    // Add jobId from request response
-    const jobIdReducer$ = jobId$.map(id => prevState => ({ ...prevState, core: { ...prevState.core, jobId: id } }))
-    // Add jobStatus from job response
-    const jobStatusReducer$ = jobStatus$.map(status => prevState => ({ ...prevState, core: { ...prevState.core, jobStatus: status } }))
     // Add data from API to state, update output key when relevant
     const dataReducer$ = data$.map(newData => prevState => ({ ...prevState, core: { ...prevState.core, data: newData, output: newData.join(" ") } }))
     // Logic and reducer stream that monitors if this component is busy
@@ -59,9 +45,6 @@ function model(newInput$, request$, jobId$, jobStatus$, data$, showMore$) {
         defaultReducer$,
         inputReducer$,
         dataReducer$,
-        requestReducer$,
-        jobIdReducer$,
-        jobStatusReducer$,
         busyReducer$,
         limitReducer$,
     )
@@ -78,14 +61,14 @@ function model(newInput$, request$, jobId$, jobStatus$, data$, showMore$) {
  *          - vdom$: VNodes object
  *          - signature$: stream of the processed signature
  */
-function view(state$, request$, response$, delete$, geneAnnotationQuery) {
+function view(state$, data$, request$, delete$, geneAnnotationQuery) {
 
-    const validSignature$ = response$
-        .map(r => r.body.result.join(" "))
+    const validSignature$ = data$
+        .map(d => d.join(" "))
         .filter(s => s != '')
 
-    const invalidSignature$ = response$
-        .map(r => r.body.result.join(" "))
+    const invalidSignature$ = data$
+        .map(d => d.join(" "))
         .filter(s => s == '')
 
     const amountOfInputs$ = state$.map((state) => (state.core?.input?.length)).compose(dropRepeats(equals)).remember()
@@ -227,7 +210,7 @@ function view(state$, request$, response$, delete$, geneAnnotationQuery) {
         ]))
         .startWith(div('.card .orange .lighten-3', []))
 
-    const loadingVdom$ = request$.compose(sampleCombine(state$))
+    const loadingVdom$ = request$
         .mapTo(
             div('.card .orange .lighten-3', [
                 div('.card-content .orange-text .text-darken-4', [
@@ -311,7 +294,7 @@ function SignatureGenerator(sources) {
 
     const logger = loggerFactory('signatureGenerator', sources.onion.state$, 'settings.form.debug')
 
-    const state$ = sources.onion.state$
+    const state$ = sources.onion.state$.debug("SignatureGenerator-state$")
 
     const input$ = sources.input
 
@@ -322,89 +305,28 @@ function SignatureGenerator(sources) {
         .map(([newinput, state]) => ({ ...state, core: { ...state.core, input: newinput } }))
         .compose(dropRepeats((x, y) => equals(x.core.input, y.core.input)))
 
-    const triggerRequest$ = newInput$
-
-    const requestPost$ = triggerRequest$
-        .map(state => {
-            return {
-                url: state.settings.api.asyncUrlStart + '&classPath=com.dataintuitive.luciusapi.generateSignature',
-                method: 'POST',
-                send: {
-                    version: 'v2',
-                    samples: state.core.input.join(" "),
-                    pvalue: state.settings.common.pvalue
-                },
-                'category': 'generateSignaturePost'
-            }
+    const triggerObject$ = newInput$.map((state) =>
+        ({
+            version: 'v2',
+            samples: state.core.input.join(" "),
+            pvalue: state.settings.common.pvalue
         })
-
-    const responsePost$ = sources.HTTP
-        .select('generateSignaturePost')
-        .map((response$) =>
-            response$.replaceError(() => xs.of(emptyData))
-        )
-        .flatten()
-
-    const jobId$ = responsePost$
-        .map(r => r.body.jobId)
-
-    const pollTimer$ = xs.periodic(200)
-    const pollTimerStatus$ = pollTimer$.compose(sampleCombine(state$))
-        .map(([_, status]) => status)
-        .filter(s => s.core.jobStatus == "STARTED" || s.core.jobStatus == "RUNNING")
-
-    const requestGet$ = pollTimerStatus$
-        .map(state => {
-            return {
-                url: state.settings.api.asyncUrlStatus + state.core?.jobId,
-                method: 'GET',
-                'category': 'generateSignatureGet'
-            }
-        })
-
-    const responseGet$ = sources.HTTP
-        .select('generateSignatureGet')
-        .map((response$) =>
-            response$.replaceError(() => xs.of(emptyData))
-        )
-        .flatten()
-        .filter(r => r.body.status != "STARTED" && r.body.status != "RUNNING")
-
-    const data$ = responseGet$
-        .map(r => r.body.result)
+    )
 
     const actions = intent(sources.DOM)
 
-    const kill$ = state$
+    const killState$ = state$
         .map(s => s.kill)
         .filter(b => b)
 
-    const requestDelete$ = xs.merge(actions.delete$, kill$)
-        .compose(sampleCombine(state$))
-        .map(([_, state]) => state)
-        .filter(state => state.core?.jobId != undefined && ( state.core?.jobStatus == "STARTED" || state.core?.jobStatus == "RUNNING" ))
-        .map(state => {
-            return {
-                url: state.settings.api.asyncUrlStatus + state.core?.jobId,
-                method: 'DELETE',
-                'category': 'generateSignatureDelete'
-            }
-        })
+    const kill$ = xs.merge(killState$, actions.delete$)
 
-    const responseDelete$ = sources.HTTP
-        .select('generateSignatureDelete')
-        .map((response$) =>
-            response$.replaceError(() => xs.of(emptyData))
-        )
-        .flatten()
+    const asyncData = asyncQuery('&classPath=com.dataintuitive.luciusapi.generateSignature', 'generateSignature', sources, state$, triggerObject$, kill$)
+    const data$ = asyncData.data$
 
-    const jobStatus$ = xs.merge(responsePost$, responseGet$, responseDelete$)
-        .map(r => r.body.status)
-        .startWith("idle")
+    const reducers$ = model(newInput$, data$, actions.showMore$)
 
-    const reducers$ = model(newInput$, requestPost$, jobId$, jobStatus$, data$, actions.showMore$)
-
-    const views = view(state$, requestPost$, responseGet$, requestDelete$, geneAnnotationQuery)
+    const views = view(state$, data$, triggerObject$, kill$, geneAnnotationQuery)
 
 
     return {
@@ -415,12 +337,13 @@ function SignatureGenerator(sources) {
         DOM: views.vdom$,
         output: views.signature$,
         HTTP: xs.merge(
-            requestPost$,
-            requestGet$,
-            requestDelete$,
+            asyncData.HTTP,
             geneAnnotationQuery.HTTP
         ),
-        onion: reducers$,
+        onion: xs.merge(
+            reducers$,
+            asyncData.reducers$,
+        ),
         modal: geneAnnotationQuery.modal
     }
 

@@ -1,10 +1,9 @@
-import { div, p, h2, code } from "@cycle/dom"
+import { i, div, p, h2, code } from "@cycle/dom"
 import xs from "xstream"
-import debounce from "xstream/extra/debounce"
+import debounce from 'xstream/extra/debounce'
+import sampleCombine from 'xstream/extra/sampleCombine'
 
 function AsyncWorkflow(sources) {
-
-  const state$ = sources.onion.state$
 
   // const request$ = xs.of(1).mapTo({
   //   send: {
@@ -41,7 +40,9 @@ function AsyncWorkflow(sources) {
 
   // const response = asyncRequestProcess(sources)
 
-  const request$ = xs.of(1).mapTo({
+  const trigger$ = sources.DOM.select('.trigger').events('click').startWith("push")
+
+  const request$ = trigger$.mapTo(({
     send: {
       query: "HSPA1A DNAJB1 DDIT4 -TSEN2"
     },
@@ -49,7 +50,7 @@ function AsyncWorkflow(sources) {
     url:
       "http://localhost:8090/jobs?context=luciusapi&appName=luciusapi&classPath=com.dataintuitive.luciusapi.binnedZhang",
     category: "async"
-  })
+  })).debug("trigger")
 
   const response$$ = sources.HTTP.select("async")
 
@@ -93,7 +94,9 @@ function AsyncWorkflow(sources) {
   const readyResponse$ = validPollResponse$
     .filter(j => j.status == "FINISHED")
 
-  const response = { valid: readyResponse$, invalid: invalidPollResponse$ }
+  const weirdResponse$ = validPollResponse$
+    .filter(j => j.status != "RUNNING" && j.status != "FINISHED")
+
 
   /**
    * Logic for counter and timeout timer
@@ -106,33 +109,42 @@ function AsyncWorkflow(sources) {
    */
   const delta = 500
   // When to show a warning, this will be shown each time timeoutWarning has passed - should be taken up in settings
-  const timeoutWarning = 15
+  const timeoutWarning = 5
   // When to show an error - should be taken up in settings
-  const timeoutError = 60
+  const timeoutError = 10
+
+  const response = { valid: readyResponse$, invalid: xs.merge(invalidPollResponse$, invalidAsyncResponse$, weirdResponse$) }
+
   const timer$ =
-    xs.periodic(delta)
-      .map(i => (i * delta) / 1000)
-      .endWhen(xs.merge(response.valid, response.invalid))
+    validAsyncResponse$.map(_ => 
+      xs.periodic(delta)
+        .map(i => (i * delta) / 1000)
+        .endWhen(xs.merge(response.valid, response.invalid))
+      )
+      .flatten()
+
   const secTimer$ = timer$.filter(i => i % 1 == 0)
-  // Trigger warning every 15 seconds
+
+  // Trigger warning after warning timeout
   const warningTrigger$ =
     secTimer$
       .filter(i => i >= timeoutWarning)
       .drop(1).map(i => ({ level: "warning", q: "query1", t: i }))
   const errorTrigger$ =
     secTimer$
-      .filter(i => i % timeoutError == 0)
-      .drop(1)
+      .filter(i => i % timeoutError == 0 && i > 0)
       .map(i => ({ level: "error", q: "query1", t: i }))
+      .debug("errorTrigger")
+
   // A combined stream with warnings and errors, to be merged with other such streams.
   const watchdog$ = xs.merge(warningTrigger$, errorTrigger$)
 
-  const poll$ = xs.combine(timer$, jobId$).map(([_, id]) => ({
+  const poll$ = xs.combine(timer$, jobId$).compose(debounce(50)).map(([_, id]) => ({
     method: "GET",
     url:
       "http://localhost:8090/jobs/" + id,
     category: "async-poll"
-  })).endWhen(readyResponse$)
+  }))
 
   // This warning currently gets added to the vdom but should probably be a modal
   const warningVdom$ = watchdog$.map(j => "Waiting for " + j.t + " seconds already - " + j.level).startWith("")
@@ -140,10 +152,13 @@ function AsyncWorkflow(sources) {
   const vdom$ = xs.combine(secTimer$, warningVdom$, request$, validPollResponse$.startWith({}))
     .map(
       ([
-        i, warning, request, response
+        t, warning, request, response
       ]) =>
         div(".row .disease", { style: { margin: "0px 0px 0px 0px" } }, [
-          p('', "count: " + i),
+          div('.trigger .waves-effect .col .s1 .center-align', [
+            i('.large  .center-align .material-icons', { style: { fontSize: '45px', fontColor: 'gray' } }, 'search'),
+          ]),
+          p('', "count: " + t),
           h2("Request:"),
           code(JSON.stringify(request)),
           h2("Response:"),
@@ -151,7 +166,23 @@ function AsyncWorkflow(sources) {
           h2("Warning"),
           warning
         ])
-    ).startWith(div())
+    ).startWith(
+      div(".row .disease", { style: { margin: "0px 0px 0px 0px" } }, [
+        div('.trigger .waves-effect .col .s1 .center-align', [
+          i('.large  .center-align .material-icons', { style: { fontSize: '45px', fontColor: 'gray' } }, 'search'),
+        ]),
+      ]))
+
+  // The kill has to be sent when a query is running (busy) AND a new query is launched
+  const restart$ = trigger$.drop(1).compose(sampleCombine(busyResponse$)).debug("restart")
+  const kill$ = xs.merge(errorTrigger$, restart$)
+
+  const killRequest$ = kill$.compose(sampleCombine(jobId$)).map(([_, id]) => ({
+    method: "DELETE",
+    url:
+      "http://localhost:8090/jobs/" + id,
+    category: "async-delete"
+  })).debug("triggerKill")
 
   /**
  * Vdom sync
@@ -184,7 +215,7 @@ function AsyncWorkflow(sources) {
   return {
     DOM: vdom$,//.debug("vdom"),
     onion: defaultReducer$.debug("reducer"),
-    HTTP: xs.merge(request$, poll$).debug("http"),
+    HTTP: xs.merge(request$, poll$, killRequest$).debug("http"),
   }
 }
 

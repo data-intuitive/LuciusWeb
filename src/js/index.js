@@ -495,9 +495,13 @@ export default function Index(sources) {
     .map((url) => { window.location.href = url; return url} )
     .addListener({ })
 
-  const killStart$ = routerPre$.mapTo(true)
-  const killStop$ = routerPre$.compose(delay(100)).mapTo(false)
-  const kill$ = xs.merge(killStart$, killStop$).startWith(false).debug("kill$")
+  const killUser$ = sources.DOM.select(".kill-switch")
+    .events("click")
+
+  const killQueries$ = xs.merge(routerPre$, killUser$)
+  const killStart$ = killQueries$.mapTo(true)
+  const killStop$ = killQueries$.compose(delay(100)).mapTo(false)
+  const kill$ = xs.merge(killStart$, killStop$).startWith(false)
   const killReducer$ = kill$.map((kill) => (prevState) => ({ ...prevState, kill: kill }))
 
   // All clicks on links should be sent to the preventDefault driver

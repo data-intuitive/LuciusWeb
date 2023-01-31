@@ -104,6 +104,7 @@ function asyncQuery(classPath, category, errorResult, sources, trigger$, kill$) 
             'category': category + 'DELETE'
         }
     })
+    .debug('delete$-' + category)
 
   const responseDelete$ = sources.HTTP
     .select(category + 'DELETE')

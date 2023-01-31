@@ -211,11 +211,10 @@ function view(state$, data$, invalidData$, request$, delete$, geneAnnotationQuer
         .mapTo(
             div('.card .orange .lighten-3', [
                 div('.card-content .orange-text .text-darken-4', [
-                span('.card-title', 'Signature:'),
-                div('.progress.orange.lighten-3.yellow-text', { style: { margin: '2px 0px 2px 0px'} }, [
-                    div('.indeterminate', {style : { "background-color" : 'orange' }})
-                ]),
-                div(".delete .btn-flat .orange-text .text-darken-4 .left", "DELETE")
+                    span('.card-title', 'Signature:'),
+                    div('.progress.orange.lighten-3.yellow-text', { style: { margin: '2px 0px 2px 0px'} }, [
+                        div('.indeterminate', {style : { "background-color" : 'orange' }})
+                    ]),
                 ])
             ]))
         .startWith(div('.card .orange .lighten-3', []))
@@ -291,7 +290,7 @@ function SignatureGenerator(sources) {
 
     const logger = loggerFactory('signatureGenerator', sources.onion.state$, 'settings.form.debug')
 
-    const state$ = sources.onion.state$.debug("SignatureGenerator-state$")
+    const state$ = sources.onion.state$
 
     const input$ = sources.input
 
@@ -312,11 +311,10 @@ function SignatureGenerator(sources) {
 
     const actions = intent(sources.DOM)
 
-    const killState$ = state$
+    const kill$ = state$
         .map(s => s.kill)
+        .compose(dropRepeats())
         .filter(b => b)
-
-    const kill$ = xs.merge(killState$, actions.delete$)
 
     const queryData = SignatureGeneratorQuery(triggerObject$, kill$)(sources)
 

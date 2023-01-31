@@ -272,15 +272,10 @@ function SampleSelection(sources) {
       pvalue: state.settings.common.pvalue,
     }))
 
-  const delete$ = sources.DOM
-    .select(".delete")
-    .events("click")
-
-  const killState$ = state$
+  const kill$ = state$
     .map(s => s.kill)
+    .compose(dropRepeats())
     .filter(b => b)
-
-  const kill$ = xs.merge(killState$, delete$)
 
   const queryData = treatmentToPerturbationsQuery(triggerObject$, kill$)(sources)
 
@@ -434,7 +429,6 @@ function SampleSelection(sources) {
       makeFiltersAndTable(
         state,
         div(".col.s10.offset-s1.l10.offset-l1", [
-          div(".delete .btn-flat .orange-text .text-darken-4 .left", "DELETE"),
           div(
             ".progress.orange.lighten-3",
             { style: { margin: "2px 0px 2px 0px" } },

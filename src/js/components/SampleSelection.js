@@ -24,14 +24,7 @@ import { SampleSelectionFilters, SampleSelectionFiltersLens } from "./SampleSele
 import { safeModelToUi } from "../modelTranslations"
 import { dirtyUiReducer, dirtyWrapperStream, busyUiReducer } from "../utils/ui"
 import { maxLengthValueUnit } from "../utils/utils"
-
-const emptyData = {
-  body: {
-    result: {
-      data: [],
-    },
-  },
-}
+import { treatmentToPerturbationsQuery } from "../utils/asyncQuery"
 
 const sampleSelectionLens = {
   get: (state) => ({
@@ -40,6 +33,7 @@ const sampleSelectionLens = {
     ui: (state.ui??{}).sampleSelection ?? {dirty: false}, // Get state.ui.sampleSelection in a safe way or else get a default
     search: state.params?.samples,
     searchAutoRun: state.params?.autorun,
+    kill: state.kill,
   }),
   // get: state => ({core: state.form.sampleSelection, settings: state.settings}),
   set: (state, childState) => ({
@@ -271,30 +265,29 @@ function SampleSelection(sources) {
       core: { ...state.core, data: [], usageData: [] }
     }))
 
-  const request$ = newInput$.map((state) => {
-    return {
-      url:
-        state.settings.api.url +
-        "&classPath=com.dataintuitive.luciusapi.treatmentToPerturbations",
-      method: "POST",
-      send: {
-        version: "v2",
-        query: state.core.input,
-        pvalue: state.settings.common.pvalue,
-      },
-      category: "samples",
-    }
-  })
+  const triggerObject$ = newInput$
+    .map((state) => ({
+      version: "v2",
+      query: state.core.input,
+      pvalue: state.settings.common.pvalue,
+    }))
 
-  const response$ = sources.HTTP.select("samples")
-    .map((response$) => response$.replaceError(() => xs.of(emptyData)))
-    .flatten()
+  const delete$ = sources.DOM
+    .select(".delete")
+    .events("click")
+
+  const killState$ = state$
+    .map(s => s.kill)
+    .filter(b => b)
+
+  const kill$ = xs.merge(killState$, delete$)
+
+  const queryData = treatmentToPerturbationsQuery(triggerObject$, kill$)(sources)
 
   const getSingleCell = (input) => input.split('|')[0] ?? "N/A"
 
-  const data$ = response$
-    .map((res) => res.body)
-    .map((json) => json.result.data)
+  const data$ = queryData.data$
+    .map(result => result.data)
     .map(array => {
       return array.map(val => { return { ...val, cell: getSingleCell(val.cell) } })
     })
@@ -434,13 +427,14 @@ function SampleSelection(sources) {
 
   const initVdom$ = emptyState$.mapTo(div())
 
-  const loadingVdom$ = request$
+  const loadingVdom$ = triggerObject$
     .compose(sampleCombine(loadingState$))
     .map(([_, state]) =>
       // Use the same makeTable function, pass a initialization=true parameter and a body DOM with preloading
       makeFiltersAndTable(
         state,
         div(".col.s10.offset-s1.l10.offset-l1", [
+          div(".delete .btn-flat .orange-text .text-darken-4 .left", "DELETE"),
           div(
             ".progress.orange.lighten-3",
             { style: { margin: "2px 0px 2px 0px" } },
@@ -458,8 +452,30 @@ function SampleSelection(sources) {
     .filter(([state, _1, _2]) => state.core.busy == false)
     .map(([state, annotation, filtersDom]) => makeFiltersAndTable(state, annotation, false, filtersDom))
 
+  const invalidVdom$ = queryData.invalidData$
+    .mapTo(
+      div(".col.s10.offset-s1.l10.offset-l1", [
+        div('.card .orange .lighten-3', [
+          div('.card-content .orange-text .text-darken-4', [
+            span('.card-title', 'No Valid Data Received'),
+          ])
+        ])])
+    )
+    .remember()
+
+  const deleteVdom$ = kill$
+    .mapTo(
+      div(".col.s10.offset-s1.l10.offset-l1", [
+        div('.card .orange .lighten-3', [
+          div('.card-content .orange-text .text-darken-4', [
+            span('.card-title', 'JOB KILLED'),
+          ])
+        ])])
+    )
+    .remember()
+
   // Wrap component vdom with an extra div that handles being dirty
-  const vdom$ = dirtyWrapperStream( state$, xs.merge(initVdom$, loadingVdom$, loadedVdom$))
+  const vdom$ = dirtyWrapperStream( state$, xs.merge(initVdom$, loadingVdom$, loadedVdom$, invalidVdom$, deleteVdom$))
 
   const dataReducer$ = data$.map((data) => (prevState) => {
     const newData = data.map((el) => mergeRight(el, { use: true, hide: false }))
@@ -605,10 +621,6 @@ function SampleSelection(sources) {
     ...prevState,
     core: { ...prevState.core, input: i },
   }))
-  const requestReducer$ = request$.map((req) => (prevState) => ({
-    ...prevState,
-    core: { ...prevState.core, request: req },
-  }))
 
   const sortReducer$ = sortClick$.map((sort) => (prevState) => ({
     ...prevState,
@@ -651,11 +663,10 @@ function SampleSelection(sources) {
   return {
     log: xs.merge(logger(state$, "state$")),
     DOM: vdom$,
-    HTTP: xs.merge(request$, treatmentAnnotations.HTTP),
+    HTTP: xs.merge(queryData.HTTP, treatmentAnnotations.HTTP),
     onion: xs.merge(
       defaultReducer$,
       inputReducer$,
-      requestReducer$,
       dataReducer$,
       filtersObjectReducer$,
       selectReducer$,
@@ -665,6 +676,7 @@ function SampleSelection(sources) {
       hoverReducer$,
       dirtyReducer$,
       sampleFilters.onion,
+      queryData.reducers$,
     ),
     output: sampleSelection$,
     modal: treatmentAnnotations.modal,

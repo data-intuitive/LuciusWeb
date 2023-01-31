@@ -7,7 +7,7 @@ import { loggerFactory } from '../utils/logger'
 import { GeneAnnotationQuery } from './GeneAnnotationQuery'
 import { absGene } from '../utils/utils'
 import { busyUiReducer, dirtyWrapperStream } from "../utils/ui"
-import { asyncQuery, SignatureGeneratorQuery } from '../utils/asyncQuery';
+import { SignatureGeneratorQuery } from '../utils/asyncQuery';
 
 /**
  * @module components/SignatureGenerator
@@ -61,15 +61,12 @@ function model(newInput$, data$, showMore$) {
  *          - vdom$: VNodes object
  *          - signature$: stream of the processed signature
  */
-function view(state$, data$, request$, delete$, geneAnnotationQuery) {
+function view(state$, data$, invalidData$, request$, delete$, geneAnnotationQuery) {
 
     const validSignature$ = data$
         .map(d => d.join(" "))
-        .filter(s => s != '')
 
-    const invalidSignature$ = data$
-        .map(d => d.join(" "))
-        .filter(s => s == '')
+    const invalidSignature$ = invalidData$.mapTo('')
 
     const amountOfInputs$ = state$.map((state) => (state.core?.input?.length)).compose(dropRepeats(equals)).remember()
 
@@ -322,11 +319,10 @@ function SignatureGenerator(sources) {
     const kill$ = xs.merge(killState$, actions.delete$)
 
     const queryData = SignatureGeneratorQuery(triggerObject$, kill$)(sources)
-    const data$ = queryData.data$
 
-    const reducers$ = model(newInput$, data$, actions.showMore$)
+    const reducers$ = model(newInput$, queryData.data$, actions.showMore$)
 
-    const views = view(state$, data$, triggerObject$, kill$, geneAnnotationQuery)
+    const views = view(state$, queryData.data$, queryData.invalidData$, triggerObject$, kill$, geneAnnotationQuery)
 
 
     return {

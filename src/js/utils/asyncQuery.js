@@ -1,25 +1,30 @@
-import { s } from "@cycle/dom"
 import xs from "xstream"
 import fromDiagram from "xstream/extra/fromDiagram"
 import sampleCombine from "xstream/extra/sampleCombine"
 
 
-export function SignatureGeneratorQuery(trigger$, kill$) {
+export function treatmentToPerturbationsQuery(trigger$, kill$) {
+  const errorResult = { data: [] }
   return function (sources) {
-    return asyncQuery('&classPath=com.dataintuitive.luciusapi.generateSignature', 'generateSignature', sources, trigger$, kill$)
+    return asyncQuery('&classPath=com.dataintuitive.luciusapi.treatmentToPerturbations', 'treatmentToPerturbations', errorResult, sources, trigger$, kill$)
+  }
+}
+
+export function SignatureGeneratorQuery(trigger$, kill$) {
+  const errorResult = []
+  return function (sources) {
+    return asyncQuery('&classPath=com.dataintuitive.luciusapi.generateSignature', 'generateSignature', errorResult, sources, trigger$, kill$)
   }
 }
 
 
-export function asyncQuery(classPath, category, sources, trigger$, kill$) {
+function asyncQuery(classPath, category, errorResult, sources, trigger$, kill$) {
 
   const state$ = sources.onion.state$
 
   const emptyData = {
     body: {
-        result: {
-            data: []
-        },
+        result: errorResult,
         status: "error"
     }
   }
@@ -75,7 +80,6 @@ export function asyncQuery(classPath, category, sources, trigger$, kill$) {
         response$.replaceError(() => xs.of(emptyData))
     )
     .flatten()
-    .debug("responseGet$")
   
   // Poll after initial POST reply was received or after a GET reply indicated that the code is still running
   const pollTimer2$ = xs
@@ -83,15 +87,11 @@ export function asyncQuery(classPath, category, sources, trigger$, kill$) {
     .filter(r => r.body.status == "STARTED" || r.body.status == "RUNNING")
     .map(_ => fromDiagram("---------1"))
     .flatten()
-    .debug("pollTimer2$")
   
   pollTimer$.imitate(pollTimer2$)
 
   const responseGetDone$ = responseGet$
     .filter(r => r.body.status != "STARTED" && r.body.status != "RUNNING")
-
-  const data$ = responseGetDone$
-    .map(r => r.body.result)
 
   const requestDelete$ = kill$
     .compose(sampleCombine(state$))
@@ -116,11 +116,15 @@ export function asyncQuery(classPath, category, sources, trigger$, kill$) {
     .map(r => r.body.status)
     .startWith("idle")
 
-  const error$ = xs.merge(responsePost$, responseGetDone$, responseDelete$)
+  const data$ = responseGetDone$
+    .filter(r => r.body.status != "error")
+    .map(r => r.body.result)
+
+  const invalidData$ = xs.merge(responsePost$, responseGetDone$, responseDelete$)
     .filter((r) => r.body.status == "error")
+
+  const error$ = invalidData$
     .mapTo(generateError("Generic HTTP error", 0, 0))
-    .debug("error$")
-    .addListener({ })
 
   // Add request body to state
   const requestReducer$ = requestPost$.map(req => prevState => ({ ...prevState, core: { ...prevState.core, request: req } }))
@@ -133,6 +137,7 @@ export function asyncQuery(classPath, category, sources, trigger$, kill$) {
     HTTP: xs.merge(requestPost$, requestGet$, requestDelete$),
     reducers$: xs.merge(requestReducer$, jobIdReducer$, jobStatusReducer$),
     data$: data$,
+    invalidData$: invalidData$,
     error$: error$
   }
 }

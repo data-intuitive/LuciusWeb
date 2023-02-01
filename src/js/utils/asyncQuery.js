@@ -17,6 +17,72 @@ export function SignatureGeneratorQuery(trigger$, kill$) {
   }
 }
 
+export function BinnedZhangQuery(trigger$, kill$) {
+  const errorResult = { data: [] }
+  return function (sources) {
+    return asyncQuery('&classPath=com.dataintuitive.luciusapi.binnedZhang', 'binnedZhang', errorResult, sources, trigger$, kill$)
+  }
+}
+
+export function TopTableQuery(trigger$, kill$) {
+  const errorResult = { data: [] }
+  return function (sources) {
+    return asyncQuery('&classPath=com.dataintuitive.luciusapi.topTable', 'topTable', errorResult, sources, trigger$, kill$)
+  }
+}
+
+export function TargetToCompoundsQuery(trigger$, kill$) {
+  const errorResult = { data: [] }
+  return function (sources) {
+    return asyncQuery('&classPath=com.dataintuitive.luciusapi.targetToCompounds', 'targetToCompounds', errorResult, sources, trigger$, kill$)
+  }
+}
+
+
+// Which API to use is stuck in the state stream, to we must get it there and somehow convert
+// the stream to an object of streams, so we need to add an additional abstraction layer here.
+// However, I don't like how this code is set up, but unless we want to rewrite the Table component,
+// this is more or less needed to be compatible with the designed interface.
+// Perhaps there is a cleaner way to do this though; I don't like this piece of code. At. All.
+export function AutoSelectTable(nameStream$) {
+
+  var tableObject = (a, b) => (c) => {}
+    
+  var tableWrapper = {
+    HTTP: xs.create(),
+    reducers$: xs.create(),
+    data$: xs.create(),
+    invalidData$: xs.create(),
+    error$: xs.create()
+  }
+
+  return function (trigger$, kill$) {
+    return function (sources) {
+
+      const tableNameListener = {
+        next: (value) => {
+          console.log("tableNameListener next value: " + value)
+          if (value == "topTable") {
+            tableObject = TopTableQuery(trigger$, kill$)(sources)
+          }
+          else if (value == "targetToCompounds") {
+            tableObject = TargetToCompoundsQuery(trigger$, kill$)(sources)
+          }
+          tableWrapper.HTTP.imitate(tableObject.HTTP)
+          tableWrapper.reducers$.imitate(tableObject.reducers$)
+          tableWrapper.data$.imitate(tableObject.data$)
+          tableWrapper.invalidData$.imitate(tableObject.invalidData$)
+          tableWrapper.error$.imitate(tableObject.error$)
+        },
+        error: (err) => {},
+        complete: () => {}
+      }
+      nameStream$.addListener(tableNameListener)
+
+      return tableWrapper
+    }
+  }
+}
 
 function asyncQuery(classPath, category, errorResult, sources, trigger$, kill$) {
 

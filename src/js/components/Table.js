@@ -46,6 +46,7 @@ import { convertToCSV } from "../utils/export"
 import delay from "xstream/extra/delay"
 import pairwise from "xstream/extra/pairwise"
 import { dirtyWrapperStream } from "../utils/ui"
+import { AutoSelectTable } from "../utils/asyncQuery"
 
 /**
  * @module components/Table
@@ -72,6 +73,7 @@ const headTableLens = {
       filter: state.settings.filter,
     },
     ui: state.ui?.headTable ?? {dirty: false}, // Get state.ui.headTable in a safe way or else get a default
+    kill: state.kill,
     numEntries: state.routerInformation?.params?.numTableHead,
   }),
   set: (state, childState) => {
@@ -112,6 +114,7 @@ const tailTableLens = {
       filter: state.settings.filter,
     },
     ui: state.ui?.tailTable ?? {dirty: false}, // Get state.ui.tailTable in a safe way or else get a default
+    kill: state.kill,
     numEntries: state.routerInformation?.params?.numTableTail,
   }),
   set: (state, childState) => {
@@ -152,6 +155,7 @@ const compoundContainerTableLens = {
       filter: state.settings.filter,
     },
     ui: state.ui?.compoundTable ?? {dirty: false}, // Get state.ui.compoundTable in a safe way or else get a default
+    kill: state.kill,
   }),
   set: (state, childState) => ({
     ...state,
@@ -398,58 +402,31 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
       .compose(dropRepeats((x, y) => equals(x.core, y.core)))
       .filter((state) => state.core.input.query)
 
-    
-    /**
-     * Makes a HTTP request to the API
-     * @const makeTable/Table/request$
-     * @type {Stream}
-     */
-    const request$ = triggerRequest$.map((state) => ({
-      send: mergeRight(state.core.count, {
+    const triggerObject$ = triggerRequest$.map((state) => mergeRight(
+      state.core.count,
+      {
         query: state.core.input.query,
         version: "v2",
         // filter: (typeof state.core.input.filter !== 'undefined') ? state.core.input.filter : '',
         filter: state.core.input.filter,
-      }),
-      method: "POST",
-      url:
-        state.settings.api.url +
-        "&classPath=com.dataintuitive.luciusapi." +
-        state.settings.table.apiClass,
-      category: "table",
-    }))
+      }
+    ))
+    
+    const kill$ = state$
+      .map(s => s.kill)
+      .compose(dropRepeats())
+      .filter(b => b)
 
-    /**
-     * Get HTTP answer of the HTTP request made to the API
-     * Is stream of streams
-     * @const makeTable/Table/response$$
-     * @type {Stream}
-     */
-    const response$$ = sources.HTTP.select("table")
+    // Which API to use is stuck in the state stream, to we must get it there and somehow convert
+    // the stream to an object of streams, so we need to add an additional abstraction layer here.
+    // However, I don't like how this code is set up, but unless we want to rewrite the Table component,
+    // this is more or less needed to be compatible with the designed interface.
+    const tableName$ = triggerRequest$
+      .map((state) => state.settings.table.apiClass)
+      .compose(dropRepeats())
 
-    /**
-     * Split off invalid responses from the HTTP answers and create a stream of errors
-     * @const makeTable/Table/invalidResponse$
-     * @type {Stream}
-     */
-    const invalidResponse$ = response$$
-      .map(
-        (response$) =>
-          response$
-            .filter((response) => false) // ignore regular event
-            .replaceError((error) => xs.of(error)) // emit error
-      )
-      .flatten()
-
-    /**
-     * Split off valid responses from the HTTP answers and create a stream of valid responses
-     * @const makeTable/Table/validResponse$
-     * @type {Stream}
-     */
-    const validResponse$ = response$$
-      .map((response$) => response$.replaceError((error) => xs.empty()))
-      .flatten()
-
+    const queryData = AutoSelectTable(tableName$)(triggerObject$, kill$)(sources)
+        
     // ========================================================================
 
     /**
@@ -457,8 +434,8 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
      * @const makeTable/Table/data$
      * @type {Stream}
      */
-    const data$ = validResponse$
-      .map((result) => result.body.result.data)
+    const data$ = queryData.data$
+      .map((result) => result.data)
       .map((data) => data ?? [])
 
     /**
@@ -599,7 +576,7 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
      * @const makeTable/Table/loadingVdom$
      * @type {Stream}
      */
-    const loadingVdom$ = request$
+    const loadingVdom$ = triggerObject$
       .compose(sampleCombine(filterDom$, modifiedState$))
       .map(([r, filterText, state]) =>
         div([
@@ -821,8 +798,12 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
      * @const makeTable/Table/errorVdom$
      * @type {Stream}
      */
-    const errorVdom$ = invalidResponse$.mapTo(
+    const errorVdom$ = queryData.invalidData$.mapTo(
       div(".red .white-text", [p("An error occured !!!")])
+    )
+
+    const killedVdom$ = kill$.mapTo(
+      div('.orange .lighten-3 .orange-text .text-darken-4', [p('JOB KILLED')])
     )
 
     /**
@@ -830,7 +811,7 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
      * @const makeTable/Table/vdom$
      * @type {Stream}
      */
-    const vdom$ = dirtyWrapperStream(state$, xs.merge(initVdom$, errorVdom$, loadingVdom$.remember(), loadedVdom$) )
+    const vdom$ = dirtyWrapperStream(state$, xs.merge(initVdom$, errorVdom$, loadingVdom$.remember(), loadedVdom$, killedVdom$) )
 
     // ========================================================================
 
@@ -858,16 +839,6 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
         // inputReducer
         ({ ...prevState, core: { ...prevState.core, input: i } })
       )
-
-    /**
-     * Add request body to state
-     * @const makeTable/Table/requestReducer$
-     * @type {Reducer}
-     */
-    const requestReducer$ = request$.map((req) => (prevState) => ({
-      ...prevState,
-      core: { ...prevState.core, request: req },
-    }))
 
     /**
      * Add reply data to state
@@ -910,16 +881,16 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
     return {
       DOM: vdom$,
       HTTP: xs.merge(
-        request$,
+        queryData.HTTP,
         tableContent.HTTP
       ),
       onion: xs.merge(
         defaultReducer$,
         inputReducer$,
-        requestReducer$,
         dataReducer$,
         switchReducer$,
         amountOfDisplayedLinesReducer$,
+        queryData.reducers$,
       ),
       log: xs.merge(
         logger(modifiedState$, "state$")

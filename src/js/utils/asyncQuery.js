@@ -65,6 +65,13 @@ export function StatisticsQuery(trigger$, kill$) {
   }
 }
 
+export function CheckSignatureQuery(trigger$, kill$) {
+  const errorResult = { data: {} }
+  return function (sources) {
+    return asyncQuery('&classPath=com.dataintuitive.luciusapi.checkSignature', 'checkSignature', errorResult, sources, trigger$, kill$)
+  }
+}
+
 // Which API to use is stuck in the state stream, to we must get it there and somehow convert
 // the stream to an object of streams, so we need to add an additional abstraction layer here.
 // However, I don't like how this code is set up, but unless we want to rewrite the Table component,

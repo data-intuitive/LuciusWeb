@@ -51,11 +51,17 @@ export function TargetToCompoundsQuery(trigger$, kill$) {
   }
 }
 
-
-export function perturbationInformationDetailsQuery(trigger$, kill$) {
+export function PerturbationInformationDetailsQuery(trigger$, kill$) {
   const errorResult = { data: [] }
   return function (sources) {
     return asyncQuery('&classPath=com.dataintuitive.luciusapi.perturbationInformationDetails', 'perturbationInformationDetails', errorResult, sources, trigger$, kill$)
+  }
+}
+
+export function StatisticsQuery(trigger$, kill$) {
+  const errorResult = { data: {} }
+  return function (sources) {
+    return asyncQuery('&classPath=com.dataintuitive.luciusapi.statistics', 'statistics', errorResult, sources, trigger$, kill$)
   }
 }
 

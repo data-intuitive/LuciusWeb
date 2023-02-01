@@ -336,7 +336,7 @@ function SignatureGenerator(sources) {
         ),
         onion: xs.merge(
             reducers$,
-            queryData.reducers$,
+            queryData.onion,
         ),
         modal: geneAnnotationQuery.modal
     }

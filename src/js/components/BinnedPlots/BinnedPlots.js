@@ -104,7 +104,7 @@ function BinnedPlots(sources) {
         .compose(dropRepeats())
         .filter(b => b)
 
-    const dataQuery = BinnedZhangQuery(triggerObject$, kill$)(sources)
+    const queryData = BinnedZhangQuery(triggerObject$, kill$)(sources)
 
     // ========================================================================
 
@@ -124,10 +124,10 @@ function BinnedPlots(sources) {
 
     // Split the data$ stream in a stream of empty result sets and non-empty
     // Note: We only pad the zero-counts when the data is non-empty!
-    const emptyData$ = dataQuery.data$
+    const emptyData$ = queryData.data$
         .map(data => data.data)
         .filter(data => isEmptyData(data))
-    const nonEmptyData$ = dataQuery.data$
+    const nonEmptyData$ = queryData.data$
         .map(data => data.data)
         .filter(data => !isEmptyData(data))
         .compose(sampleCombine(baseGrid$))
@@ -227,7 +227,7 @@ function BinnedPlots(sources) {
             div('.orange .lighten-3 .orange-text .text-darken-4', [p('JOB KILLED')])))
 
     // In case of error, show this
-    const errorVdom$ = dataQuery.invalidData$
+    const errorVdom$ = queryData.invalidData$
         .mapTo(plotsContainerDifferent(
             div('.red .white-text', [p('An error occured !!!')]),
             div('.red .white-text', [p('An error occured !!!')])))
@@ -273,14 +273,14 @@ function BinnedPlots(sources) {
             logger(baseGrid$, 'padding grid$')
         ),
         DOM: vdom$,
-        HTTP: dataQuery.HTTP,
+        HTTP: queryData.HTTP,
         vega: runtimes$,
         onion: xs.merge(
             defaultReducer$,
             inputReducer$,
             dataReducer$,
             specReducer$,
-            dataQuery.reducers$,
+            queryData.onion,
         )
     };
 

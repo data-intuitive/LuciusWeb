@@ -2,6 +2,19 @@ import xs from "xstream"
 import fromDiagram from "xstream/extra/fromDiagram"
 import sampleCombine from "xstream/extra/sampleCombine"
 
+export function filtersQuery(trigger$, kill$) {
+  const errorResult = { data: {} }
+  return function (sources) {
+    return asyncQuery('&classPath=com.dataintuitive.luciusapi.filters', 'filters', errorResult, sources, trigger$, kill$)
+  }
+}
+
+export function treatmentsQuery(trigger$, kill$) {
+  const errorResult = { data: [] }
+  return function (sources) {
+    return asyncQuery('&classPath=com.dataintuitive.luciusapi.treatments', 'treatments', errorResult, sources, trigger$, kill$)
+  }
+}
 
 export function treatmentToPerturbationsQuery(trigger$, kill$) {
   const errorResult = { data: [] }
@@ -39,6 +52,13 @@ export function TargetToCompoundsQuery(trigger$, kill$) {
 }
 
 
+export function perturbationInformationDetailsQuery(trigger$, kill$) {
+  const errorResult = { data: [] }
+  return function (sources) {
+    return asyncQuery('&classPath=com.dataintuitive.luciusapi.perturbationInformationDetails', 'perturbationInformationDetails', errorResult, sources, trigger$, kill$)
+  }
+}
+
 // Which API to use is stuck in the state stream, to we must get it there and somehow convert
 // the stream to an object of streams, so we need to add an additional abstraction layer here.
 // However, I don't like how this code is set up, but unless we want to rewrite the Table component,
@@ -50,7 +70,7 @@ export function AutoSelectTable(nameStream$) {
     
   var tableWrapper = {
     HTTP: xs.create(),
-    reducers$: xs.create(),
+    onion: xs.create(),
     data$: xs.create(),
     invalidData$: xs.create(),
     error$: xs.create()
@@ -69,7 +89,7 @@ export function AutoSelectTable(nameStream$) {
             tableObject = TargetToCompoundsQuery(trigger$, kill$)(sources)
           }
           tableWrapper.HTTP.imitate(tableObject.HTTP)
-          tableWrapper.reducers$.imitate(tableObject.reducers$)
+          tableWrapper.onion.imitate(tableObject.onion)
           tableWrapper.data$.imitate(tableObject.data$)
           tableWrapper.invalidData$.imitate(tableObject.invalidData$)
           tableWrapper.error$.imitate(tableObject.error$)
@@ -202,7 +222,7 @@ function asyncQuery(classPath, category, errorResult, sources, trigger$, kill$) 
 
   return {
     HTTP: xs.merge(requestPost$, requestGet$, requestDelete$),
-    reducers$: xs.merge(requestReducer$, jobIdReducer$, jobStatusReducer$),
+    onion: xs.merge(requestReducer$, jobIdReducer$, jobStatusReducer$),
     data$: data$,
     invalidData$: invalidData$,
     error$: error$

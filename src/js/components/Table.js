@@ -890,7 +890,7 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
         dataReducer$,
         switchReducer$,
         amountOfDisplayedLinesReducer$,
-        queryData.reducers$,
+        queryData.onion,
       ),
       log: xs.merge(
         logger(modifiedState$, "state$")

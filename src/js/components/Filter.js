@@ -55,6 +55,7 @@ export const filterLens = {
       core: state.filter,
       settings: { filter: state.settings.filter, api: state.settings.api, modelTranslations: state.settings.common.modelTranslations},
       search: searchObj,
+      kill: state.kill
     }
   },
   set: (state, childState) => {
@@ -617,7 +618,7 @@ function Filter(sources) {
     log: xs.merge(logger(state$, "state$")),
     DOM: vdom$,
     HTTP: filterQuery.HTTP,
-    onion: reducers$,
+    onion: xs.merge(reducers$, filterQuery.onion),
     output: outputTrigger$
   }
 }

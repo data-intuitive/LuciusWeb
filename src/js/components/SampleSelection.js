@@ -670,7 +670,7 @@ function SampleSelection(sources) {
       hoverReducer$,
       dirtyReducer$,
       sampleFilters.onion,
-      queryData.reducers$,
+      queryData.onion,
     ),
     output: sampleSelection$,
     modal: treatmentAnnotations.modal,

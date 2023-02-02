@@ -46,7 +46,7 @@ import { convertToCSV } from "../utils/export"
 import delay from "xstream/extra/delay"
 import pairwise from "xstream/extra/pairwise"
 import { dirtyWrapperStream } from "../utils/ui"
-import { AutoSelectTable } from "../utils/asyncQuery"
+import { TargetToCompoundsQuery, TopTableQuery } from "../utils/asyncQuery"
 
 /**
  * @module components/Table
@@ -173,9 +173,10 @@ const compoundContainerTableLens = {
  * @param {Component} tableComponent Inner table component
  * @param {Lens} tableLens Lens used in the inner table component
  * @param {*} scope
+ * @param {String} tableApiName API entry name to use for querying the data
  * @returns a component getter function
  */
-function makeTable(tableComponent, tableLens, scope = "scope1") {
+function makeTable(tableComponent, tableLens, scope = "scope1", tableApiName = "topTable") {
   /**
    * This is a general table container: a post query is sent to the endpoint (configured via settings).
    * The resulting array is stored in the state and a dedicated component with onion scope is used to render the effective table.
@@ -417,15 +418,13 @@ function makeTable(tableComponent, tableLens, scope = "scope1") {
       .compose(dropRepeats())
       .filter(b => b)
 
-    // Which API to use is stuck in the state stream, to we must get it there and somehow convert
-    // the stream to an object of streams, so we need to add an additional abstraction layer here.
-    // However, I don't like how this code is set up, but unless we want to rewrite the Table component,
-    // this is more or less needed to be compatible with the designed interface.
-    const tableName$ = triggerRequest$
-      .map((state) => state.settings.table.apiClass)
-      .compose(dropRepeats())
-
-    const queryData = AutoSelectTable(tableName$)(triggerObject$, kill$)(sources)
+    const tableQuery = ((name) => {
+      if (name == "topTable")
+        return TopTableQuery
+      else if (name == "targetToCompounds")
+        return TargetToCompoundsQuery
+    })(tableApiName)
+    const queryData = tableQuery(triggerObject$, kill$)(sources)
         
     // ========================================================================
 

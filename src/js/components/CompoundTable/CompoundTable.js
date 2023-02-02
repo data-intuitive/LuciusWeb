@@ -39,6 +39,7 @@ function CompoundTable(sources) {
                     .startWith(ul('.collection', [li('.collection-item .center-align .grey-text','no query yet...')]))
 
     return { 
+            HTTP: xs.empty(),
             DOM: vdom$,
     };
 

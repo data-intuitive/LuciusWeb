@@ -96,16 +96,43 @@ function TargetWorkflow(sources) {
     // Especially after the change in autocomplete behavior.
     const target$ = TargetFormSink.output.map(t => t.split(" (")[0])
 
-    const TableContainer = makeTable(CompoundTable, compoundTableLens)
+    const TableContainer = makeTable(CompoundTable, compoundTableLens, "*", "targetToCompounds")
 
     const Table = isolate(TableContainer, { onion: compoundContainerTableLens })
         ({...sources, input: target$.map((t) => ({ query: t}) ).remember() });
 
     // Granular access to global state and parts of settings
+    // const thisFormLens = {
+    //     get: state => ({ form: state.sform, settings: { form: state.settings.form, api: state.settings.api, common: state.settings.common } }),
+    //     set: (state, childState) => ({...state, sform: childState.form })
+    // };
+
     const thisFormLens = {
-        get: state => ({ form: state.sform, settings: { form: state.settings.form, api: state.settings.api, common: state.settings.common } }),
-        set: (state, childState) => ({...state, sform: childState.form })
-    };
+        get: (state) => ({
+          core: state.sform,
+          settings: {
+            form: state.settings.form,
+            api: state.settings.api,
+            common: state.settings.common,
+          },
+          ui: state.ui?.form ?? {},
+          search: state.routerInformation.params?.signature,
+          searchAutoRun: state.routerInformation.params?.autorun,
+          searchTyper: state.routerInformation.params?.typer,
+          kill: state.kill,
+        }),
+        set: (state, childState) => ({
+          ...state,
+          sform: {...childState.core },
+          routerInformation: {
+            ...state.routerInformation,
+            pageState: {
+              ...state.routerInformation.pageState,
+              signature: childState.core.query,
+            }
+          }
+        }),
+      }
 
     const signatureForm = isolate(SignatureForm, { onion: thisFormLens })(sources)
         // only show signature form when a target has been selected !!!

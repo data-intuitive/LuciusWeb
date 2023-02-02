@@ -4,56 +4,20 @@ import { equals } from 'ramda';
 import dropRepeats from 'xstream/extra/dropRepeats'
 import debounce from 'xstream/extra/debounce'
 import sampleCombine from 'xstream/extra/sampleCombine';
+import { filtersQuery } from '../utils/asyncQuery';
 
 function Check(sources) {
 
     const state$ = sources.onion.state$
 
-    const props$ = sources.props
-      .compose(dropRepeats((x, y) => equals(x, y)))
-      .remember()
+    const triggerObject$ = sources.deployments.mapTo({ })
 
-    // Combine with deployments to the up-to-date endpoint config
-    const modifiedState$ = xs.combine(state$, sources.deployments)
-      .map(([state, _]) => state)
+    const kill$ = state$
+      .map(s => s.kill)
+      .compose(dropRepeats())
+      .filter(b => b)
 
-    const request$ = xs.combine(modifiedState$, props$)
-      .map(([_, props]) => {
-        return {
-            url: props.url + '&classPath=com.dataintuitive.luciusapi.filters',
-            method: 'POST',
-            send: {},
-            'category': 'server-status-check'
-        }
-      })
-      .remember()
-
-    const response$$ = sources.HTTP
-      .select('server-status-check')
-
-    const invalidResponse$ = response$$
-      .map(response$ =>
-        response$
-        .filter(response => false) // ignore regular event
-        .replaceError(error => xs.of(error)) // emit error
-      )
-      .flatten()
-      .remember()
-
-    /**
-     * Parse the successful results only.
-     *
-     * We add a little wait time (`debounce`) in order for the jobserver
-     * to be up-to-date with the actual jobs. Otherwize, we measure the
-     * wrong job times.
-     */
-    const validResponse$ = response$$
-      .map(response$ =>
-        response$
-        .replaceError(error => xs.empty())
-      )
-      .flatten()
-      .compose(debounce(500))
+    const queryData = filtersQuery(triggerObject$, kill$)(sources)
 
     /** 
      * An indicator of the data loading...
@@ -64,11 +28,10 @@ function Check(sources) {
         span(".grey-text .testing", ".".repeat(i)), 
         span(".grey-text .text-lighten-4 .testing2", ".".repeat(3-i))
       ])
-      .endWhen(response$$)
+      .endWhen(xs.merge(queryData.data$, queryData.invalidData$))
 
-
-    const requestTime$ = request$.mapTo(new Date().getTime())
-    const responseTime$ = validResponse$.mapTo(new Date().getTime())
+    const requestTime$ = triggerObject$.mapTo(new Date().getTime())
+    const responseTime$ = queryData.data$.mapTo(new Date().getTime())
 
     const timeDifference$ = responseTime$.compose(sampleCombine(requestTime$))
       .map(([request, response]) => (response - request) / 1000 )
@@ -87,16 +50,18 @@ function Check(sources) {
         i('.material-icons .red-text .medium .result-busy', 'done')
       )
 
-    const errorVdom$ = invalidResponse$.mapTo(i('.material-icons .red-text .medium .result-down', 'trending_down'))
+    const errorVdom$ = queryData.invalidData$.mapTo(i('.material-icons .red-text .medium .result-down', 'trending_down'))
+    const killedVdom$ = kill$.mapTo(i('.material-icons .orange-text .medium .result-down', 'cancel'))
 
     const vdom$ = xs.merge(
       initVdom$,
       // loadingVdom$,
       loadedVdom$,
       errorVdom$,
+      killedVdom$,
     ).remember()
 
-    const alert$ = invalidResponse$
+    const alert$ = queryData.invalidData$
       .remember()
 
     // This is needed in order to get the onion stream active!
@@ -110,9 +75,10 @@ function Check(sources) {
 
     return {
         DOM: vdom$,
-        HTTP: xs.merge(request$),
+        HTTP: queryData.HTTP,
         onion: xs.merge(
             defaultReducer$,
+            queryData.onion,
         ),
         alert: alert$,
         popup: delay$

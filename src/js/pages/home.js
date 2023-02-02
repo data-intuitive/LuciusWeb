@@ -17,10 +17,7 @@ const appear = {
 
 function Home(sources) {
 
-    const checkProps$ = sources.onion.state$
-        .compose(dropRepeats((x, y) => equals(x.settings, y.settings)))
-        .map(state => mergeRight(state.settings.form, state.settings.api))
-    const CheckSink = Check(mergeRight(sources, { props: checkProps$ }))
+    const CheckSink = Check(sources)
 
     const makeLink = (path, label, selector) => {
         return li(".home-menu .row",

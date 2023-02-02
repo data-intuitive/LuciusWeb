@@ -72,6 +72,13 @@ export function CheckSignatureQuery(trigger$, kill$) {
   }
 }
 
+export function CorrelationQuery(trigger$, kill$) {
+  const errorResult = { data: [] }
+  return function (sources) {
+    return asyncQuery('&classPath=com.dataintuitive.luciusapi.correlation', 'correlation', errorResult, sources, trigger$, kill$)
+  }
+}
+
 function asyncQuery(classPath, category, errorResult, sources, trigger$, kill$) {
 
   const state$ = sources.onion.state$

@@ -99,12 +99,7 @@ function BinnedPlots(sources) {
             filter: (typeof state.core.input.filter !== 'undefined') ? state.core.input.filter : ''
         }))
 
-    const kill$ = state$
-        .map(s => s.kill)
-        .compose(dropRepeats())
-        .filter(b => b)
-
-    const queryData = BinnedZhangQuery(triggerObject$, kill$)(sources)
+    const queryData = BinnedZhangQuery(triggerObject$)(sources)
 
     // ========================================================================
 
@@ -274,6 +269,7 @@ function BinnedPlots(sources) {
         ),
         DOM: vdom$,
         HTTP: queryData.HTTP,
+        asyncQueryStatus: queryData.asyncQueryStatus,
         vega: runtimes$,
         onion: xs.merge(
             defaultReducer$,

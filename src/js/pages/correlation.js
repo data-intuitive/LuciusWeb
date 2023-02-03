@@ -165,6 +165,11 @@ function CorrelationWorkflow(sources) {
             // headTable.HTTP,
             // tailTable.HTTP
         ),
+        asyncQueryStatus: xs.merge(
+            correlationForm.asyncQueryStatus,
+            filterForm.asyncQueryStatus,
+            correlationPlot.asyncQueryStatus,  
+        ),
         popup: scenarioPopup$,
         modal: exporter.modal,
         fab: exporter.fab,

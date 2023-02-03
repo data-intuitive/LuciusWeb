@@ -196,10 +196,7 @@ function SignatureForm(sources) {
   const props$ = sources.props;
 
   // Check Signature subcomponent, via isolation
-  const signatureCheckSink = isolate(SignatureCheck, { onion: checkLens })(sources)
-  const signatureCheckDom$ = signatureCheckSink.DOM;
-  const signatureCheckHTTP$ = signatureCheckSink.HTTP;
-  const signatureCheckReducer$ = signatureCheckSink.onion;
+  const signatureCheck = isolate(SignatureCheck, { onion: checkLens })(sources)
 
   const typer$ = typer(state$, 'search', 'searchTyper')
 
@@ -213,18 +210,22 @@ function SignatureForm(sources) {
 
   const actions$ = intent(domSource$)
 
-  const [reducers$, query$] = model(newQuery$, state$, sources, signatureCheckSink, actions$)
+  const [reducers$, query$] = model(newQuery$, state$, sources, signatureCheck, actions$)
 
-  const vdom$ = view(state$, signatureCheckDom$)
+  const vdom$ = view(state$, signatureCheck.DOM)
 
   return {
     log: xs.merge(
       logger(state$, 'state$'),
-      signatureCheckSink.log
+      signatureCheck.log
     ),
     DOM: vdom$,
-    onion: reducers$,
-    HTTP: signatureCheckHTTP$,
+    onion: xs.merge(
+      reducers$,
+      signatureCheck.onion,
+    ),
+    HTTP: signatureCheck.HTTP,
+    asyncQueryStatus: signatureCheck.asyncQueryStatus,
     output: query$
   };
 

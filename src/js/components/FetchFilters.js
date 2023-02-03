@@ -12,12 +12,7 @@ function FetchFilters(sources) {
 
   const triggerObject$ = triggerQuery$.mapTo({})
 
-  const kill$ = state$
-    .map(s => s.kill)
-    .compose(dropRepeats())
-    .filter(b => b)
-
-  const queryData = filtersQuery(triggerObject$, kill$)(sources)
+  const queryData = filtersQuery(triggerObject$)(sources)
 
   const validResponse$ = queryData.data$
     .map((result) => result.data)
@@ -27,6 +22,7 @@ function FetchFilters(sources) {
     // information is available.
     filters: validResponse$.compose(delay(2000)),
     HTTP: queryData.HTTP,
+    asyncQueryStatus: queryData.asyncQueryStatus,
     onion: queryData.onion,
   }
 }

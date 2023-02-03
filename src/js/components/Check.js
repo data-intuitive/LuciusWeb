@@ -12,12 +12,7 @@ function Check(sources) {
 
     const triggerObject$ = sources.deployments.mapTo({ })
 
-    const kill$ = state$
-      .map(s => s.kill)
-      .compose(dropRepeats())
-      .filter(b => b)
-
-    const queryData = filtersQuery(triggerObject$, kill$)(sources)
+    const queryData = filtersQuery(triggerObject$)(sources)
 
     /** 
      * An indicator of the data loading...
@@ -30,11 +25,11 @@ function Check(sources) {
       ])
       .endWhen(xs.merge(queryData.data$, queryData.invalidData$))
 
-    const requestTime$ = triggerObject$.mapTo(new Date().getTime())
-    const responseTime$ = queryData.data$.mapTo(new Date().getTime())
+    const requestTime$ = triggerObject$.map(_ => new Date().getTime())
+    const responseTime$ = queryData.data$.map(_ => new Date().getTime())
 
     const timeDifference$ = responseTime$.compose(sampleCombine(requestTime$))
-      .map(([request, response]) => (response - request) / 1000 )
+      .map(([response, request]) => (response - request) / 1000 )
 
     const maxNormalTime$ = state$.map((state) => state.settings.config.normalStatisticsResponseTime)
 
@@ -76,6 +71,7 @@ function Check(sources) {
     return {
         DOM: vdom$,
         HTTP: queryData.HTTP,
+        asyncQueryStatus: queryData.asyncQueryStatus,
         onion: xs.merge(
             defaultReducer$,
             queryData.onion,

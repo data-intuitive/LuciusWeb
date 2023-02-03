@@ -413,18 +413,13 @@ function makeTable(tableComponent, tableLens, scope = "scope1", tableApiName = "
       }
     ))
     
-    const kill$ = state$
-      .map(s => s.kill)
-      .compose(dropRepeats())
-      .filter(b => b)
-
     const tableQuery = ((name) => {
       if (name == "topTable")
         return TopTableQuery
       else if (name == "targetToCompounds")
         return TargetToCompoundsQuery
     })(tableApiName)
-    const queryData = tableQuery(triggerObject$, kill$)(sources)
+    const queryData = tableQuery(triggerObject$)(sources)
         
     // ========================================================================
 
@@ -882,6 +877,10 @@ function makeTable(tableComponent, tableLens, scope = "scope1", tableApiName = "
       HTTP: xs.merge(
         queryData.HTTP,
         tableContent.HTTP
+      ),
+      asyncQueryStatus: xs.merge(
+        queryData.asyncQueryStatus,
+        tableContent.asyncQueryStatus,
       ),
       onion: xs.merge(
         defaultReducer$,

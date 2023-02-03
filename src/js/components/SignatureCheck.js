@@ -79,12 +79,7 @@ function SignatureCheck(sources) {
     }))
     .compose(dropRepeats(equals))
 
-  const kill$ = state$
-    .map(s => s.kill)
-    .compose(dropRepeats())
-    .filter(b => b)
-
-  const queryData = CheckSignatureQuery(triggerObject$, kill$)(sources)
+  const queryData = CheckSignatureQuery(triggerObject$)(sources)
 
   const data$ = queryData.data$.map((result) => result.data)
 
@@ -188,6 +183,7 @@ function SignatureCheck(sources) {
       // logger(response$, 'response$')
     ),
     HTTP: queryData.HTTP,
+    asyncQueryStatus: queryData.asyncQueryStatus,
     DOM: vdom$,
     onion: xs.merge(
       collapseUpdateReducer$,

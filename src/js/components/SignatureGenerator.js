@@ -311,12 +311,7 @@ function SignatureGenerator(sources) {
 
     const actions = intent(sources.DOM)
 
-    const kill$ = state$
-        .map(s => s.kill)
-        .compose(dropRepeats())
-        .filter(b => b)
-
-    const queryData = SignatureGeneratorQuery(triggerObject$, kill$)(sources)
+    const queryData = SignatureGeneratorQuery(triggerObject$)(sources)
 
     const reducers$ = model(newInput$, queryData.data$, actions.showMore$)
 
@@ -334,6 +329,7 @@ function SignatureGenerator(sources) {
             queryData.HTTP,
             geneAnnotationQuery.HTTP
         ),
+        asyncQueryStatus: queryData.asyncQueryStatus,
         onion: xs.merge(
             reducers$,
             queryData.onion,

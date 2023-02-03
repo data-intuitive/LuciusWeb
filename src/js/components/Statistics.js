@@ -20,12 +20,7 @@ function Statistics(sources) {
         .mapTo({ })
         .compose(delay(100))
 
-    const kill$ = state$
-        .map(s => s.kill)
-        .compose(dropRepeats())
-        .filter(b => b)
-
-    const queryData = StatisticsQuery(triggerObject$, kill$)(sources)
+    const queryData = StatisticsQuery(triggerObject$)(sources)
 
     const data$ = queryData.data$.map((result) => result.data)
 
@@ -114,6 +109,7 @@ function Statistics(sources) {
     return {
         DOM: vdom$,
         HTTP: queryData.HTTP,
+        asyncQueryStatus: queryData.asyncQueryStatus,
         onion: xs.merge(
             defaultReducer$,
             stateReducer$,

@@ -95,12 +95,7 @@ function CorrelationPlot(sources) {
             filter: (typeof state.core.input.filter !== 'undefined') ? state.core.input.filter : ''
         }))
     
-    const kill$ = state$
-        .map(s => s.kill)
-        .compose(dropRepeats())
-        .filter(b => b)
-
-    const queryData = CorrelationQuery(triggerObject$, kill$)(sources)
+    const queryData = CorrelationQuery(triggerObject$)(sources)
 
     const data$ = queryData.data$.map((res) => res.data)
 
@@ -231,6 +226,7 @@ function CorrelationPlot(sources) {
         ),
         DOM: vdom$,
         HTTP: queryData.HTTP,
+        asyncQueryStatus: queryData.asyncQueryStatus,
         vega: runtime$,
         onion: xs.merge(
             defaultReducer$,

@@ -342,6 +342,13 @@ export default function GenericTreatmentWorkflow(sources) {
       headTable.HTTP,
       tailTable.HTTP
     ),
+    asyncQueryStatus: xs.merge(
+      TreatmentFormSink.asyncQueryStatus,
+      filterForm.asyncQueryStatus,
+      binnedPlots.asyncQueryStatus,
+      headTable.asyncQueryStatus,
+      tailTable.asyncQueryStatus,
+    ),
     vega: binnedPlots.vega,
     popup: scenarioPopup$,
     modal: xs.merge(TreatmentFormSink.modal, exporter.modal),

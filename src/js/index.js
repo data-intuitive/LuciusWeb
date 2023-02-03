@@ -68,6 +68,8 @@ export default function Index(sources) {
 
   const state$ = sources.onion.state$
 
+  const kill$ = xs.create()
+
   const page$ = router.routedComponent({
     "/": Home,
     "/disease": DiseaseWorkflow,
@@ -87,7 +89,7 @@ export default function Index(sources) {
     "/admin": IsolatedAdminSettings,
     "/init": Init,
     "*": Home,
-  })(sources)
+  })({ ...sources, kill: kill$ })
 
   // TODO: Add a visual reference for ghost mode
   // const ghost$ = state$
@@ -277,7 +279,7 @@ export default function Index(sources) {
     ])
   )
 
-  const view$ = page$.map(prop("DOM")).flatten().remember()
+  const view$ = page$.debug("page$").map(prop("DOM")).flatten().remember()
 
   const pageName$ = state$.map((state) => {
       const pageName = state.routerInformation.pathname.substr(1)
@@ -492,18 +494,18 @@ export default function Index(sources) {
 
   const forcefulRouting$ = routerPre$
     .compose(delay(500))
-    .map((url) => { window.location.href = url; return url} )
-    .addListener({ })
+  forcefulRouting$.addListener({ next: (url) => window.location.href = url})
 
   const killUser$ = sources.DOM.select(".kill-switch")
     .events("click")
 
-  const killQueries$ = xs.merge(routerPre$, killUser$)
-  const killStart$ = killQueries$.mapTo(true)
-  const killStop$ = killQueries$.compose(delay(100)).mapTo(false)
-  const kill$ = xs.merge(killStart$, killStop$).startWith(false)
-  const killReducer$ = kill$.map((kill) => (prevState) => ({ ...prevState, kill: kill }))
+  const asyncQueryStatus$ = page$.map(prop("asyncQueryStatus")).filter(Boolean).flatten().debug("asyncQueryStatus$")
 
+  const killQueries$ = xs.merge(routerPre$, killUser$).compose(sampleCombine(asyncQueryStatus$)).mapTo(0)
+  kill$.imitate(killQueries$)
+
+  // const asyncQueryStatus$ = page$.map(prop("asyncQueryStatus")).debug("foo").filter(Boolean).debug("bar").flatten().debug("meh")
+  
   // All clicks on links should be sent to the preventDefault driver
   const prevent$ = sources.DOM.select("a")
     .events("click")
@@ -535,7 +537,7 @@ export default function Index(sources) {
       routerReducer$,
       pageStateReducer$,
       page$.map(prop("onion")).filter(Boolean).flatten(),
-      killReducer$
+      // killReducer$
     ),
     DOM: vdom$,
     router: xs

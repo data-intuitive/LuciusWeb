@@ -68,6 +68,7 @@ function Home(sources) {
     return {
         DOM: vdom$,
         HTTP: CheckSink.HTTP,
+        asyncQueryStatus: CheckSink.asyncQueryStatus,
         onion: CheckSink.onion,
         alert: CheckSink.alert,
         popup: CheckSink.popup

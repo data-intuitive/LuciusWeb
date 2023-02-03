@@ -118,12 +118,7 @@ function TreatmentCheck(sources) {
     like: state.settings.treatmentLike
   }))
 
-  const kill$ = state$
-    .map(s => s.kill)
-    .compose(dropRepeats())
-    .filter(b => b)
-
-  const queryData = treatmentsQuery(triggerObject$, kill$)(sources)
+  const queryData = treatmentsQuery(triggerObject$)(sources)
 
   const data$ = queryData.data$
     .map((res) => res.data)
@@ -328,6 +323,7 @@ function TreatmentCheck(sources) {
       // logger(history$, 'history$'),
     ),
     HTTP: queryData.HTTP,
+    asyncQueryStatus: queryData.asyncQueryStatus,
     DOM: vdom$,
     onion: xs.merge(
       defaultReducer$,

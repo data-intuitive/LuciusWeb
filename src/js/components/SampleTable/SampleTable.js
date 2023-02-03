@@ -53,6 +53,7 @@ function SampleTable(sources) {
    */
   const composedChildrenDOMSinks$ = childrenSinks$.compose(pick('DOM')).compose(mix(xs.combine))
   const composedChildrenHttpSinks$ = childrenSinks$.compose(pick('HTTP')).compose(mix(xs.merge))
+  const composedChildrenAsyncQueryStatusSinks$ = childrenSinks$.compose(pick('asyncQueryStatus')).compose(mix(xs.merge))
 
   const vdom$ = xs.combine(sampleInfoHeader$, composedChildrenDOMSinks$)
                   .map(([header, itemVNodes]) => 
@@ -72,6 +73,7 @@ function SampleTable(sources) {
   return {
     DOM: vdom$,
     HTTP: composedChildrenHttpSinks$,
+    asyncQueryStatus: composedChildrenAsyncQueryStatusSinks$,
   };
 
 }

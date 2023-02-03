@@ -3,91 +3,91 @@ import dropRepeats from "xstream/extra/dropRepeats"
 import fromDiagram from "xstream/extra/fromDiagram"
 import sampleCombine from "xstream/extra/sampleCombine"
 
-export function filtersQuery(trigger$, kill$) {
+export function filtersQuery(trigger$) {
   const errorResult = { data: {} }
   return function (sources) {
-    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.filters', 'filters', errorResult, sources, trigger$, kill$)
+    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.filters', 'filters', errorResult, sources, trigger$)
   }
 }
 
-export function treatmentsQuery(trigger$, kill$) {
+export function treatmentsQuery(trigger$) {
   const errorResult = { data: [] }
   return function (sources) {
-    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.treatments', 'treatments', errorResult, sources, trigger$, kill$)
+    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.treatments', 'treatments', errorResult, sources, trigger$)
   }
 }
 
-export function treatmentToPerturbationsQuery(trigger$, kill$) {
+export function treatmentToPerturbationsQuery(trigger$) {
   const errorResult = { data: [] }
   return function (sources) {
-    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.treatmentToPerturbations', 'treatmentToPerturbations', errorResult, sources, trigger$, kill$)
+    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.treatmentToPerturbations', 'treatmentToPerturbations', errorResult, sources, trigger$)
   }
 }
 
-export function SignatureGeneratorQuery(trigger$, kill$) {
+export function SignatureGeneratorQuery(trigger$) {
   const errorResult = []
   return function (sources) {
-    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.generateSignature', 'generateSignature', errorResult, sources, trigger$, kill$)
+    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.generateSignature', 'generateSignature', errorResult, sources, trigger$)
   }
 }
 
-export function BinnedZhangQuery(trigger$, kill$) {
+export function BinnedZhangQuery(trigger$) {
   const errorResult = { data: [] }
   return function (sources) {
-    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.binnedZhang', 'binnedZhang', errorResult, sources, trigger$, kill$)
+    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.binnedZhang', 'binnedZhang', errorResult, sources, trigger$)
   }
 }
 
-export function TopTableQuery(trigger$, kill$) {
+export function TopTableQuery(trigger$) {
   const errorResult = { data: [] }
   return function (sources) {
-    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.topTable', 'topTable', errorResult, sources, trigger$, kill$)
+    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.topTable', 'topTable', errorResult, sources, trigger$)
   }
 }
 
-export function TargetToCompoundsQuery(trigger$, kill$) {
+export function TargetToCompoundsQuery(trigger$) {
   const errorResult = { data: [] }
   return function (sources) {
-    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.targetToCompounds', 'targetToCompounds', errorResult, sources, trigger$, kill$)
+    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.targetToCompounds', 'targetToCompounds', errorResult, sources, trigger$)
   }
 }
 
-export function PerturbationInformationDetailsQuery(trigger$, kill$) {
+export function PerturbationInformationDetailsQuery(trigger$) {
   const errorResult = { data: [] }
   return function (sources) {
-    return asyncQueryProps('&classPath=com.dataintuitive.luciusapi.perturbationInformationDetails', 'perturbationInformationDetails', errorResult, sources, trigger$, kill$)
+    return asyncQueryProps('&classPath=com.dataintuitive.luciusapi.perturbationInformationDetails', 'perturbationInformationDetails', errorResult, sources, trigger$)
   }
 }
 
-export function StatisticsQuery(trigger$, kill$) {
+export function StatisticsQuery(trigger$) {
   const errorResult = { data: {} }
   return function (sources) {
-    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.statistics', 'statistics', errorResult, sources, trigger$, kill$)
+    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.statistics', 'statistics', errorResult, sources, trigger$)
   }
 }
 
-export function CheckSignatureQuery(trigger$, kill$) {
+export function CheckSignatureQuery(trigger$) {
   const errorResult = { data: {} }
   return function (sources) {
-    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.checkSignature', 'checkSignature', errorResult, sources, trigger$, kill$)
+    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.checkSignature', 'checkSignature', errorResult, sources, trigger$)
   }
 }
 
-export function CorrelationQuery(trigger$, kill$) {
+export function CorrelationQuery(trigger$) {
   const errorResult = { data: [] }
   return function (sources) {
-    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.correlation', 'correlation', errorResult, sources, trigger$, kill$)
+    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.correlation', 'correlation', errorResult, sources, trigger$)
   }
 }
 
-function asyncQuerySettings(classPath, category, errorResult, sources, trigger$, kill$) {
+function asyncQuerySettings(classPath, category, errorResult, sources, trigger$) {
   const apiInfo$ = sources.onion.state$.map((state) => state.settings.api)
-  return asyncQuery(classPath, category, errorResult, apiInfo$, sources.HTTP, trigger$, kill$)
+  return asyncQuery(classPath, category, errorResult, apiInfo$, sources.HTTP, trigger$, sources.kill)
 }
 
-function asyncQueryProps(classPath, category, errorResult, sources, trigger$, kill$) {
+function asyncQueryProps(classPath, category, errorResult, sources, trigger$) {
   const apiInfo$ = sources.props.map((props) => props.api)
-  return asyncQuery(classPath, category, errorResult, apiInfo$, sources.HTTP, trigger$, kill$)
+  return asyncQuery(classPath, category, errorResult, apiInfo$, sources.HTTP, trigger$, sources.kill)
 }
 
 function asyncQuery(classPath, category, errorResult, apiInfo$, sourcesHTTP, trigger$, kill$) {
@@ -180,11 +180,18 @@ function asyncQuery(classPath, category, errorResult, apiInfo$, sourcesHTTP, tri
     )
     .flatten()
 
-  const jobStatus_late$ = xs.merge(responsePost$, responseGetDone$, responseDelete$)
+  const jobStatus_late$ = xs.merge(responsePost$, responseGet$, responseDelete$)
     .map(r => r.body.status)
     // .startWith("idle")
 
   jobStatus$.imitate(jobStatus_late$)
+
+  ///////////////////////////////
+  const requestTime$ = trigger$.map(_ => new Date().getTime())
+  const responseTime$ = jobStatus$.map(_ => new Date().getTime())
+  const timeDifference$ = responseTime$.compose(sampleCombine(requestTime$))
+    .map(([response, request]) => (response - request) )
+  //////////////////////////////
 
   const data$ = responseGetDone$
     .filter(r => r.body.status != "error")
@@ -206,12 +213,23 @@ function asyncQuery(classPath, category, errorResult, apiInfo$, sourcesHTTP, tri
   // Add jobStatus from job response
   const jobStatusReducer$ = jobStatus$.map(status => prevState => ({ ...prevState, core: { ...prevState.core, jobStatus: status } }))
 
+  const status$ = xs.combine(jobId$, jobStatus$, requestPost$, timeDifference$)
+    .map(([jobId, jobStatus, request, time]) => ({
+      [category]: {
+        jobId: jobId,
+        jobStatus: jobStatus,
+        request: request,
+        elapsedTime: time,
+      }
+    }))
+
   return {
     HTTP: xs.merge(requestPost$, requestGet$, requestDelete$),
     onion: xs.of(_ => _),//xs.merge(requestReducer$, jobIdReducer$, jobStatusReducer$),
+    asyncQueryStatus: status$,
     data$: data$,
     invalidData$: invalidData$,
     jobDeleted$: jobDeleted$,
-    error$: error$
+    error$: error$,
   }
 }

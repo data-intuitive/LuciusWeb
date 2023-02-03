@@ -260,6 +260,10 @@ function CorrelationForm(sources) {
           signatureCheck1.HTTP,
           signatureCheck2.HTTP,
         ),
+        asyncQueryStatus: xs.merge(
+            signatureCheck1.asyncQueryStatus,
+            signatureCheck2.asyncQueryStatus,
+        ),
         output: query$
     };
 

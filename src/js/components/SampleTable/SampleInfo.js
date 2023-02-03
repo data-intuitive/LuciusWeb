@@ -124,12 +124,7 @@ export function SampleInfo(sources) {
       'query': state.id
     }))
 
-  const kill$ = state$
-    .map(s => s.kill)
-    .compose(dropRepeats())
-    .filter(b => b)
-
-  const queryData = PerturbationInformationDetailsQuery(triggerObject$, kill$)(sources)
+  const queryData = PerturbationInformationDetailsQuery(triggerObject$)(sources)
   const informationDetails$ = queryData.data$.map((res) => res.data).startWith({ })
 
   function entry(key, value) {
@@ -603,6 +598,7 @@ export function SampleInfo(sources) {
   return {
     DOM: vdom$,
     HTTP: queryData.HTTP,
+    asyncQueryStatus: queryData.asyncQueryStatus,
     onion: queryData.onion,
   }
 }

@@ -273,6 +273,13 @@ function DiseaseWorkflow(sources) {
       headTable.HTTP,
       tailTable.HTTP
     ),
+    asyncQueryStatus: xs.merge(
+      signatureForm.asyncQueryStatus,
+      filterForm.asyncQueryStatus,
+      binnedPlots.asyncQueryStatus,
+      headTable.asyncQueryStatus,
+      tailTable.asyncQueryStatus,
+    ),
     popup: scenarioPopup$,
     modal: exporter.modal,
     fab: exporter.fab,

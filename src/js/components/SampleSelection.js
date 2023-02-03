@@ -272,12 +272,7 @@ function SampleSelection(sources) {
       pvalue: state.settings.common.pvalue,
     }))
 
-  const kill$ = state$
-    .map(s => s.kill)
-    .compose(dropRepeats())
-    .filter(b => b)
-
-  const queryData = treatmentToPerturbationsQuery(triggerObject$, kill$)(sources)
+  const queryData = treatmentToPerturbationsQuery(triggerObject$)(sources)
 
   const getSingleCell = (input) => input.split('|')[0] ?? "N/A"
 
@@ -658,6 +653,7 @@ function SampleSelection(sources) {
     log: xs.merge(logger(state$, "state$")),
     DOM: vdom$,
     HTTP: xs.merge(queryData.HTTP, treatmentAnnotations.HTTP),
+    asyncQueryStatus: queryData.asyncQueryStatus,
     onion: xs.merge(
       defaultReducer$,
       inputReducer$,

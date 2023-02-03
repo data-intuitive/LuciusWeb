@@ -499,9 +499,11 @@ export default function Index(sources) {
   const killUser$ = sources.DOM.select(".kill-switch")
     .events("click")
 
-  const asyncQueryStatus$ = page$.map(prop("asyncQueryStatus")).filter(Boolean).flatten().debug("asyncQueryStatus$")
+  const asyncQueryStatus$ = page$.map(prop("asyncQueryStatus")).filter(Boolean).flatten()
+  const foldedAsyncQueryStatus$ = asyncQueryStatus$.fold((acc, x) => ({...acc, ...x}), {}).debug("foldedAsyncQueryStatus$")
 
-  const killQueries$ = xs.merge(routerPre$, killUser$).compose(sampleCombine(asyncQueryStatus$)).mapTo(0)
+  // TODO added foldedAsyncQueryStatus to this stream but it's not needed. Doing this to actually consume the stream.
+  const killQueries$ = xs.merge(routerPre$, killUser$).compose(sampleCombine(foldedAsyncQueryStatus$)).mapTo(0)
   kill$.imitate(killQueries$)
 
   // const asyncQueryStatus$ = page$.map(prop("asyncQueryStatus")).debug("foo").filter(Boolean).debug("bar").flatten().debug("meh")

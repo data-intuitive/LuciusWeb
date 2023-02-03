@@ -1,4 +1,4 @@
-import { div } from "@cycle/dom"
+import { div, span, i } from "@cycle/dom"
 import xs from "xstream"
 import isolate from "@cycle/isolate"
 import dropRepeats from "xstream/extra/dropRepeats"
@@ -242,6 +242,9 @@ function DiseaseWorkflow(sources) {
             div(".row", [displayPlots === "after tables" ? plots : div()]),
           ]),
           exporter,
+          div(".kill-switch .fixed-action-btn", [
+            span(".btn-floating .btn-large", i(".large .material-icons", "cancel")),
+          ]),
         ])
     )
 

@@ -1,4 +1,4 @@
-import { a, div, br, label, input, p, button, code, pre } from '@cycle/dom'
+import { div, span, i } from '@cycle/dom'
 import xs from 'xstream'
 import isolate from '@cycle/isolate'
 
@@ -136,6 +136,9 @@ function CorrelationWorkflow(sources) {
                     // div('.row', [])
                 ]),
                 exporter,
+                div(".kill-switch .fixed-action-btn", [
+                    span(".btn-floating .btn-large", i(".large .material-icons", "cancel")),
+                ]),
             ])
         );
 

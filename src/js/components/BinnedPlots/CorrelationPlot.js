@@ -189,7 +189,7 @@ function CorrelationPlot(sources) {
         .mapTo(
             div('.red .white-text', [p('An error occured !!!')]))
 
-    const killedVdom$ = kill$
+    const killedVdom$ = queryData.jobDeleted$
         .mapTo(
             div('.red .white-text', [p('JOB KILLED')]))
 

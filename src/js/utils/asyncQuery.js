@@ -193,6 +193,9 @@ function asyncQuery(classPath, category, errorResult, apiInfo$, sourcesHTTP, tri
   const invalidData$ = xs.merge(responsePost$, responseGetDone$, responseDelete$)
     .filter((r) => r.body.status == "error")
 
+  const jobDeleted$ = responseDelete$
+    .filter((r) => r.body.status == "KILLED")
+
   const error$ = invalidData$
     .mapTo(generateError("Generic HTTP error", 0, 0))
 
@@ -205,9 +208,10 @@ function asyncQuery(classPath, category, errorResult, apiInfo$, sourcesHTTP, tri
 
   return {
     HTTP: xs.merge(requestPost$, requestGet$, requestDelete$),
-    onion: xs.merge(requestReducer$, jobIdReducer$, jobStatusReducer$),
+    onion: xs.of(_ => _),//xs.merge(requestReducer$, jobIdReducer$, jobStatusReducer$),
     data$: data$,
     invalidData$: invalidData$,
+    jobDeleted$: jobDeleted$,
     error$: error$
   }
 }

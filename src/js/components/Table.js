@@ -801,7 +801,7 @@ function makeTable(tableComponent, tableLens, scope = "scope1", tableApiName = "
       div(".red .white-text", [p("An error occured !!!")])
     )
 
-    const killedVdom$ = kill$.mapTo(
+    const killedVdom$ = queryData.jobDeleted$.mapTo(
       div('.orange .lighten-3 .orange-text .text-darken-4', [p('JOB KILLED')])
     )
 

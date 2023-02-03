@@ -51,7 +51,7 @@ function Check(sources) {
       )
 
     const errorVdom$ = queryData.invalidData$.mapTo(i('.material-icons .red-text .medium .result-down', 'trending_down'))
-    const killedVdom$ = kill$.mapTo(i('.material-icons .orange-text .medium .result-down', 'cancel'))
+    const killedVdom$ = queryData.jobDeleted$.mapTo(i('.material-icons .orange-text .medium .result-down', 'cancel'))
 
     const vdom$ = xs.merge(
       initVdom$,

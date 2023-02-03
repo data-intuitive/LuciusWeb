@@ -221,7 +221,7 @@ function BinnedPlots(sources) {
         return div({ style: { opacity: 0.0 } }, [makeVega(el)])
     }
 
-    const killedVdom$ = kill$
+    const killedVdom$ = queryData.jobDeleted$
         .mapTo(plotsContainerDifferent(
             div('.orange .lighten-3 .orange-text .text-darken-4', [p('JOB KILLED')]),
             div('.orange .lighten-3 .orange-text .text-darken-4', [p('JOB KILLED')])))

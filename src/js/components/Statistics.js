@@ -90,11 +90,14 @@ function Statistics(sources) {
 
     const errorVdom$ = queryData.invalidData$.mapTo(div([p('An error occured !!!')]))
 
+    const killedVdom$ = queryData.jobDeleted$.mapTo(div([p('JOB KILLED')]))
+
     const vdom$ = xs.merge(
         initVdom$,
         loadingVdom$,
         loadedVdom$,
         errorVdom$,
+        killedVdom$,
     )
 
     // This is needed in order to get the onion stream active!

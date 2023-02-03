@@ -457,7 +457,7 @@ function SampleSelection(sources) {
     )
     .remember()
 
-  const deleteVdom$ = kill$
+  const deleteVdom$ = queryData.jobDeleted$
     .mapTo(
       div(".col.s10.offset-s1.l10.offset-l1", [
         div('.card .orange .lighten-3', [

@@ -320,7 +320,7 @@ function SignatureGenerator(sources) {
 
     const reducers$ = model(newInput$, queryData.data$, actions.showMore$)
 
-    const views = view(state$, queryData.data$, queryData.invalidData$, triggerObject$, kill$, geneAnnotationQuery)
+    const views = view(state$, queryData.data$, queryData.invalidData$, triggerObject$, queryData.jobDeleted$, geneAnnotationQuery)
 
 
     return {

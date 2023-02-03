@@ -25,7 +25,9 @@ import img_ctl_vector_cns  from "/images/treatmentTypes/CTL_VECTOR.png"
 import img_ctl_untrt_cns   from "/images/treatmentTypes/CTL_UNTRT.CNS.png"
 import img_ctl_untrt       from "/images/treatmentTypes/CTL_UNTRT.png"
 import { maxLengthValueUnit } from "../../utils/utils"
-import { InformationDetails } from "../InformationDetails"
+import { PerturbationInformationDetailsQuery } from "../../utils/asyncQuery"
+import dropRepeats from "xstream/extra/dropRepeats"
+import sampleCombine from "xstream/extra/sampleCombine"
 
 /**
  * @module components/SampleTable/SampleInfo
@@ -68,6 +70,7 @@ export function SampleInfoHeader(bgcolor, color) {
  */
 export function SampleInfo(sources) {
   const state$ = sources.onion.state$
+  
   const props$ = sources.props
 
   // click events to open or close parts of the SampleInfo
@@ -113,9 +116,21 @@ export function SampleInfo(sources) {
     )
 
   const zoomedInfoDetails$ = zoomInfo$.map(z => z.infoDetails)
-  const informationDetailsQuery = InformationDetails({...sources, trigger: zoomedInfoDetails$})
-  const informationDetailsHTTP$ = informationDetailsQuery.HTTP
-  const informationDetails$ = informationDetailsQuery.informationDetails.map(i => i.body.result.data).startWith({})
+
+  const triggerObject$ = zoomedInfoDetails$
+    .filter(t => t)
+    .compose(sampleCombine(state$))
+    .map(([_, state]) => ({
+      'query': state.id
+    }))
+
+  const kill$ = state$
+    .map(s => s.kill)
+    .compose(dropRepeats())
+    .filter(b => b)
+
+  const queryData = PerturbationInformationDetailsQuery(triggerObject$, kill$)(sources)
+  const informationDetails$ = queryData.data$.map((res) => res.data).startWith({ })
 
   function entry(key, value) {
     // Feature not found => LuciusCore doesn't have the value in the model, so this will never be available. Unlikely string to be present in the normal data.
@@ -587,6 +602,7 @@ export function SampleInfo(sources) {
 
   return {
     DOM: vdom$,
-    HTTP: informationDetailsHTTP$,
+    HTTP: queryData.HTTP,
+    onion: queryData.onion,
   }
 }

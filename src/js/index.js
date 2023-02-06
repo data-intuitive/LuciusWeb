@@ -68,6 +68,8 @@ export default function Index(sources) {
 
   const state$ = sources.onion.state$
 
+  const kill$ = xs.create()
+
   const page$ = router.routedComponent({
     "/": Home,
     "/disease": DiseaseWorkflow,
@@ -87,7 +89,7 @@ export default function Index(sources) {
     "/admin": IsolatedAdminSettings,
     "/init": Init,
     "*": Home,
-  })(sources)
+  })({ ...sources, kill: kill$ })
 
   // TODO: Add a visual reference for ghost mode
   // const ghost$ = state$
@@ -277,7 +279,7 @@ export default function Index(sources) {
     ])
   )
 
-  const view$ = page$.map(prop("DOM")).flatten().remember()
+  const view$ = page$.debug("page$").map(prop("DOM")).flatten().remember()
 
   const pageName$ = state$.map((state) => {
       const pageName = state.routerInformation.pathname.substr(1)
@@ -474,16 +476,43 @@ export default function Index(sources) {
   })
 
   // Capture link targets and send to router driver
-  const router$ = sources.DOM.select("a")
+  const routerPre$ = sources.DOM.select("a")
     .events("click")
     .filter((ev) => !ev.ownerTarget.classList.contains("do-not-route"))
-    .map((ev) => ev.target.pathname)
+    .map((ev) => {
+      var target = ev.target
+      while (target != undefined && target.pathname == undefined) {
+        target = target.parentElement
+      }
+      return target?.pathname
+    })
     .remember()
+    .debug("router$")
 
+  const router$ = routerPre$
+    .compose(delay(1000))
+
+  const forcefulRouting$ = routerPre$
+    .compose(delay(500))
+  forcefulRouting$.addListener({ next: (url) => window.location.href = url})
+
+  const killUser$ = sources.DOM.select(".kill-switch")
+    .events("click")
+
+  const asyncQueryStatus$ = page$.map(prop("asyncQueryStatus")).filter(Boolean).flatten()
+  const foldedAsyncQueryStatus$ = asyncQueryStatus$.fold((acc, x) => ({...acc, ...x}), {}).debug("foldedAsyncQueryStatus$")
+
+  // TODO added foldedAsyncQueryStatus to this stream but it's not needed. Doing this to actually consume the stream.
+  const killQueries$ = xs.merge(routerPre$, killUser$).compose(sampleCombine(foldedAsyncQueryStatus$)).mapTo(0)
+  kill$.imitate(killQueries$)
+
+  // const asyncQueryStatus$ = page$.map(prop("asyncQueryStatus")).debug("foo").filter(Boolean).debug("bar").flatten().debug("meh")
+  
   // All clicks on links should be sent to the preventDefault driver
   const prevent$ = sources.DOM.select("a")
     .events("click")
-    .filter((ev) => ev.target.pathname == "/debug")
+    .debug("prevent$")
+    // .filter((ev) => ev.target.pathname == "/debug")
 
   const history$ = sources.onion.state$.fold((acc, x) => acc.concat([x]), [{}])
 
@@ -509,7 +538,8 @@ export default function Index(sources) {
       deploymentsReducer$,
       routerReducer$,
       pageStateReducer$,
-      page$.map(prop("onion")).filter(Boolean).flatten()
+      page$.map(prop("onion")).filter(Boolean).flatten(),
+      // killReducer$
     ),
     DOM: vdom$,
     router: xs

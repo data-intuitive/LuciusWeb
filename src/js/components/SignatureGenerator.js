@@ -7,18 +7,11 @@ import { loggerFactory } from '../utils/logger'
 import { GeneAnnotationQuery } from './GeneAnnotationQuery'
 import { absGene } from '../utils/utils'
 import { busyUiReducer, dirtyWrapperStream } from "../utils/ui"
+import { SignatureGeneratorQuery } from '../utils/asyncQuery';
 
 /**
  * @module components/SignatureGenerator
  */
-
-const emptyData = {
-    body: {
-        result: {
-            data: []
-        }
-    }
-}
 
 const signatureLens = {
     get: state => ({ core: state.form.signature, settings: state.settings,
@@ -27,14 +20,12 @@ const signatureLens = {
     set: (state, childState) => ({ ...state, form: { ...state.form, signature: childState.core } })
 };
 
-function model(newInput$, request$, data$, showMore$) {
+function model(newInput$, data$, showMore$) {
 
     // Initialization
     const defaultReducer$ = xs.of(prevState => ({ ...prevState, core: { input: '' } }))
     // Add input to state
     const inputReducer$ = newInput$.map(i => prevState => ({ ...prevState, core: { ...prevState.core, input: i.core.input } }))
-    // Add request body to state
-    const requestReducer$ = request$.map(req => prevState => ({ ...prevState, core: { ...prevState.core, request: req } }))
     // Add data from API to state, update output key when relevant
     const dataReducer$ = data$.map(newData => prevState => ({ ...prevState, core: { ...prevState.core, data: newData, output: newData.join(" ") } }))
     // Logic and reducer stream that monitors if this component is busy
@@ -53,7 +44,6 @@ function model(newInput$, request$, data$, showMore$) {
         defaultReducer$,
         inputReducer$,
         dataReducer$,
-        requestReducer$,
         busyReducer$,
         limitReducer$,
     )
@@ -70,15 +60,12 @@ function model(newInput$, request$, data$, showMore$) {
  *          - vdom$: VNodes object
  *          - signature$: stream of the processed signature
  */
-function view(state$, request$, response$, geneAnnotationQuery) {
+function view(state$, data$, invalidData$, request$, delete$, geneAnnotationQuery) {
 
-    const validSignature$ = response$
-        .map(r => r.body.result.join(" "))
-        .filter(s => s != '')
+    const validSignature$ = data$
+        .map(d => d.join(" "))
 
-    const invalidSignature$ = response$
-        .map(r => r.body.result.join(" "))
-        .filter(s => s == '')
+    const invalidSignature$ = invalidData$.mapTo('')
 
     const amountOfInputs$ = state$.map((state) => (state.core?.input?.length)).compose(dropRepeats(equals)).remember()
 
@@ -219,21 +206,30 @@ function view(state$, request$, response$, geneAnnotationQuery) {
         ]))
         .startWith(div('.card .orange .lighten-3', []))
 
-    const loadingVdom$ = request$.compose(sampleCombine(state$))
+    const loadingVdom$ = request$
         .mapTo(
             div('.card .orange .lighten-3', [
                 div('.card-content .orange-text .text-darken-4', [
-                span('.card-title', 'Signature:'),
-                div('.progress.orange.lighten-3.yellow-text', { style: { margin: '2px 0px 2px 0px'} }, [
-                    div('.indeterminate', {style : { "background-color" : 'orange' }})
-                ])
+                    span('.card-title', 'Signature:'),
+                    div('.progress.orange.lighten-3.yellow-text', { style: { margin: '2px 0px 2px 0px'} }, [
+                        div('.indeterminate', {style : { "background-color" : 'orange' }})
+                    ]),
                 ])
             ]))
         .startWith(div('.card .orange .lighten-3', []))
         .remember()
 
+    const deleteVdom$ = delete$
+        .mapTo(
+            div('.card .orange .lighten-3', [
+                div('.card-content .orange-text .text-darken-4', [
+                    span('.card-title', 'JOB KILLED'),
+                ])
+            ]))
+        .remember()
+
     // Wrap component vdom with an extra div that handles being dirty
-    const vdom$ = dirtyWrapperStream( state$, xs.merge(loadingVdom$, invalidVdom$, validVdom$) )
+    const vdom$ = dirtyWrapperStream( state$, xs.merge(loadingVdom$, invalidVdom$, validVdom$, deleteVdom$) )
 
     return {
         vdom$: vdom$,
@@ -261,8 +257,14 @@ function intent(domSource$) {
         .startWith(false)
         .remember()
 
+    const delete$ = domSource$
+        .select(".delete")
+        .events("click")
+        .debug("delete$")
+
     return {
         showMore$: showMore$,
+        delete$: delete$,
     }
 }
 
@@ -298,37 +300,21 @@ function SignatureGenerator(sources) {
         .map(([newinput, state]) => ({ ...state, core: { ...state.core, input: newinput } }))
         .compose(dropRepeats((x, y) => equals(x.core.input, y.core.input)))
 
-    const triggerRequest$ = newInput$
-
-    const request$ = triggerRequest$
-        .map(state => {
-            return {
-                url: state.settings.api.url + '&classPath=com.dataintuitive.luciusapi.generateSignature',
-                method: 'POST',
-                send: {
-                    version: 'v2',
-                    samples: state.core.input.join(" "),
-                    pvalue: state.settings.common.pvalue
-                },
-                'category': 'generateSignature'
-            }
+    const triggerObject$ = newInput$.map((state) =>
+        ({
+            version: 'v2',
+            samples: state.core.input.join(" "),
+            pvalue: state.settings.common.pvalue
         })
-
-    const response$ = sources.HTTP
-        .select('generateSignature')
-        .map((response$) =>
-            response$.replaceError(() => xs.of(emptyData))
-        )
-        .flatten()
-
-    const data$ = response$
-        .map(r => r.body.result)
+    )
 
     const actions = intent(sources.DOM)
 
-    const reducers$ = model(newInput$, request$, data$, actions.showMore$)
+    const queryData = SignatureGeneratorQuery(triggerObject$)(sources)
 
-    const views = view(state$, request$, response$, geneAnnotationQuery)
+    const reducers$ = model(newInput$, queryData.data$, actions.showMore$)
+
+    const views = view(state$, queryData.data$, queryData.invalidData$, triggerObject$, queryData.jobDeleted$, geneAnnotationQuery)
 
 
     return {
@@ -339,10 +325,14 @@ function SignatureGenerator(sources) {
         DOM: views.vdom$,
         output: views.signature$,
         HTTP: xs.merge(
-            request$,
+            queryData.HTTP,
             geneAnnotationQuery.HTTP
         ),
-        onion: reducers$,
+        asyncQueryStatus: queryData.asyncQueryStatus,
+        onion: xs.merge(
+            reducers$,
+            queryData.onion,
+        ),
         modal: geneAnnotationQuery.modal
     }
 

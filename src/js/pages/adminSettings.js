@@ -78,6 +78,20 @@ export function AdminSettings(sources) {
           title: "LuciusAPI URL",
           props: {},
         },
+        {
+          field: "asyncUrlStart",
+          class: ".input-field",
+          type: "text",
+          title: "LuciusAPI URL async job start",
+          props: {},
+        },
+        {
+          field: "asyncUrlStatus",
+          class: ".input-field",
+          type: "text",
+          title: "LuciusAPI URL async job status",
+          props: {},
+        },
       ],
     },
     {

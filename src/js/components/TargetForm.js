@@ -42,6 +42,9 @@ function TargetForm(sources) {
         HTTP: xs.merge(
             TargetCheckSink.HTTP,
         ),
+        asyncQueryStatus: xs.merge(
+            TargetCheckSink.asyncQueryStatus,  
+        ),
         output: targetQuery$,
         ac: TargetCheckSink.ac
     }

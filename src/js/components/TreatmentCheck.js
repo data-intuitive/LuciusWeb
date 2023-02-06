@@ -7,6 +7,7 @@ import debounce from "xstream/extra/debounce"
 import { loggerFactory } from "../utils/logger"
 import { dirtyUiReducer } from "../utils/ui"
 import { typer } from "../utils/searchUtils"
+import { treatmentsQuery } from "../utils/asyncQuery"
 
 const checkLens = {
   get: (state) => ({
@@ -109,31 +110,19 @@ function TreatmentCheck(sources) {
     .filter((state) => state.core.input.length >= 1)
     .filter((state) => state.core.showSuggestions)
     .compose(debounce(200))
-    
-  const request$ = triggerRequest$.map((state) => {
-    return {
-      url:
-        state.settings.api.url +
-        "&classPath=com.dataintuitive.luciusapi.treatments",
-      method: "POST",
-      send: {
-        version: "v2",
-        query: state.core.input,
-        like: state.settings.treatmentLike
-      },
-      category: "treatments",
-    }
-  })
 
-  const response$ = sources.HTTP.select("treatments")
-    .map((response$) => response$.replaceError(() => xs.of([])))
-    .flatten()
+  const triggerObject$ = triggerRequest$.map((state) =>({
+    version: "v2",
+    query: state.core.input,
+    like: state.settings.treatmentLike
+  }))
 
-  const data$ = response$
-    .map((res) => res.body.result.data)
+  const queryData = treatmentsQuery(triggerObject$)(sources)
+
+  const data$ = queryData.data$
+    .map((res) => res.data)
     .map((data) => data ?? [])
-    .remember()
-
+    
   const initVdom$ = emptyState$.mapTo(div())
 
   const loadedVdom$ = modifiedState$.map((state) => {
@@ -227,12 +216,6 @@ function TreatmentCheck(sources) {
         input: prop(state.settings.treatmentLike, state.settings.common.example)
       },
     }))
-
-  // Add request body to state
-  const requestReducer$ = request$.map((req) => (prevState) => ({
-    ...prevState,
-    core: { ...prevState.core, request: req },
-  }))
 
   // Add data from API to state, update output key when relevant
   const dataReducer$ = data$.map((newData) => (prevState) => ({
@@ -338,17 +321,18 @@ function TreatmentCheck(sources) {
       logger(state$, "state$")
       // logger(history$, 'history$'),
     ),
-    HTTP: request$,
+    HTTP: queryData.HTTP,
+    asyncQueryStatus: queryData.asyncQueryStatus,
     DOM: vdom$,
     onion: xs.merge(
       defaultReducer$,
       inputReducer$,
       dataReducer$,
-      requestReducer$,
       setDefaultReducer$,
       autocompleteReducer$,
       fullInputValidationReducer$,
       dirtyReducer$,
+      queryData.onion,
     ),
     output: query$,
     ac: ac$

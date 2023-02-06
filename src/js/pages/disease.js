@@ -1,4 +1,4 @@
-import { div } from "@cycle/dom"
+import { div, span, i } from "@cycle/dom"
 import xs from "xstream"
 import isolate from "@cycle/isolate"
 import dropRepeats from "xstream/extra/dropRepeats"
@@ -242,6 +242,9 @@ function DiseaseWorkflow(sources) {
             div(".row", [displayPlots === "after tables" ? plots : div()]),
           ]),
           exporter,
+          div(".kill-switch .fixed-action-btn", [
+            span(".btn-floating .btn-large", i(".large .material-icons", "cancel")),
+          ]),
         ])
     )
 
@@ -272,6 +275,13 @@ function DiseaseWorkflow(sources) {
       binnedPlots.HTTP,
       headTable.HTTP,
       tailTable.HTTP
+    ),
+    asyncQueryStatus: xs.merge(
+      signatureForm.asyncQueryStatus,
+      filterForm.asyncQueryStatus,
+      binnedPlots.asyncQueryStatus,
+      headTable.asyncQueryStatus,
+      tailTable.asyncQueryStatus,
     ),
     popup: scenarioPopup$,
     modal: exporter.modal,

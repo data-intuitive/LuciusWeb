@@ -617,7 +617,8 @@ function Filter(sources) {
     log: xs.merge(logger(state$, "state$")),
     DOM: vdom$,
     HTTP: filterQuery.HTTP,
-    onion: reducers$,
+    asyncQueryStatus: filterQuery.asyncQueryStatus,
+    onion: xs.merge(reducers$, filterQuery.onion),
     output: outputTrigger$
   }
 }

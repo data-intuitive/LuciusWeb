@@ -8,10 +8,14 @@ import { CorrelationVegaSpec } from './CorrelationSpec.js'
 import { widthStream, widthHeightStream } from '../../utils/utils'
 import { loggerFactory } from '../../utils/logger'
 import { parse } from 'vega-parser'
+import { CorrelationQuery } from '../../utils/asyncQuery.js';
 
 // Granular access to the settings, only api and sim keys
 const correlationPlotsLens = {
-    get: state => ({ core: state.plots, settings: { plots: state.settings.plots, api: state.settings.api } }),
+    get: state => ({
+        core: state.plots,
+        settings: { plots: state.settings.plots, api: state.settings.api },
+    }),
     set: (state, childState) => ({...state, plots: childState.core })
 };
 
@@ -82,43 +86,19 @@ function CorrelationPlot(sources) {
         .filter(state => state.core.input.signature != '')
         .remember()
 
-    const request$ = triggerRequest$
-        .map(state => {
-            return {
-                url: state.settings.api.url + '&classPath=com.dataintuitive.luciusapi.correlation',
-                method: 'POST',
-                send: {
-                    query1: state.core.input.query1,
-                    query2: state.core.input.query2,
-                    binsX: state.settings.plots.bins,
-                    filter: (typeof state.core.input.filter !== 'undefined') ? state.core.input.filter : ''
-                },
-                'category': 'plot'
-            }
-        })
+    const triggerObject$ = triggerRequest$
+        .map((state) => ({
+            query1: state.core.input.query1,
+            query2: state.core.input.query2,
+            binsX: state.settings.plots.bins,
+            filter: (typeof state.core.input.filter !== 'undefined') ? state.core.input.filter : ''
+        }))
+    
+    const queryData = CorrelationQuery(triggerObject$)(sources)
 
-    const response$$ = sources.HTTP
-        .select('plot')
-
-    const invalidResponse$ = response$$
-        .map(response$ =>
-            response$
-            .filter(response => false) // ignore regular event
-            .replaceError(error => xs.of(error)) // emit error
-        )
-        .flatten()
-
-    const validResponse$ = response$$
-        .map(response$ =>
-            response$
-            .replaceError(error => xs.empty())
-        )
-        .flatten()
+    const data$ = queryData.data$.map((res) => res.data)
 
     // ========================================================================
-
-    const data$ = validResponse$
-        .map(result => result.body.result.data)
 
     // Split the data$ stream in a stream of empty result sets and non-empty
     // Note: We only pad the zero-counts when the data is non-empty!
@@ -169,7 +149,7 @@ function CorrelationPlot(sources) {
     }
 
     // A spinner while the data is loading...
-    const loadingVdom$ = request$
+    const loadingVdom$ = triggerObject$
         .mapTo(
                 plotContainer(loadingWrapper('#corrplot'))
             )
@@ -199,14 +179,19 @@ function CorrelationPlot(sources) {
     }
 
     // In case of error, show this
-    const errorVdom$ = invalidResponse$
+    const errorVdom$ = queryData.invalidData$
         .mapTo(
             div('.red .white-text', [p('An error occured !!!')]))
+
+    const killedVdom$ = queryData.jobDeleted$
+        .mapTo(
+            div('.red .white-text', [p('JOB KILLED')]))
 
     // Merge the streams, last event is shown...
     const vdom$ = xs.merge(
         initVdom$,
         errorVdom$,
+        killedVdom$,
         loadingVdom$,
         emptyLoadedVdom$,
         nonEmptyLoadedVdom$
@@ -221,10 +206,6 @@ function CorrelationPlot(sources) {
         // Add input to state
     const inputReducer$ = input$.map(i => prevState =>
             ({...prevState, core: {...prevState.core, input: i } })
-        )
-        // Add request body to state
-    const requestReducer$ = request$.map(req => prevState =>
-            ({...prevState, core: {...prevState.core, request: req } })
         )
         // Add data from API to state, update output key when relevant
     const dataReducer$ = nonEmptyData$.map(newData => prevState =>
@@ -243,14 +224,15 @@ function CorrelationPlot(sources) {
             // logger(emptyState$, 'empty State')
         ),
         DOM: vdom$,
-        HTTP: request$,
+        HTTP: queryData.HTTP,
+        asyncQueryStatus: queryData.asyncQueryStatus,
         vega: runtime$,
         onion: xs.merge(
             defaultReducer$,
             inputReducer$,
-            requestReducer$,
             dataReducer$,
-            specReducer$
+            specReducer$,
+            queryData.onion
         )
     };
 

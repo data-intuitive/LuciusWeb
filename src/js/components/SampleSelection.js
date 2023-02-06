@@ -33,7 +33,6 @@ const sampleSelectionLens = {
     ui: (state.ui??{}).sampleSelection ?? {dirty: false}, // Get state.ui.sampleSelection in a safe way or else get a default
     search: state.params?.samples,
     searchAutoRun: state.params?.autorun,
-    kill: state.kill,
   }),
   // get: state => ({core: state.form.sampleSelection, settings: state.settings}),
   set: (state, childState) => ({

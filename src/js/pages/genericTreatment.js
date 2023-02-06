@@ -74,7 +74,6 @@ export default function GenericTreatmentWorkflow(sources) {
       },
       ui: state.ui?.form ?? {},
       params: state.routerInformation.params,
-      kill: state.kill,
     }),
     set: (state, childState) => ({
       ...state, 

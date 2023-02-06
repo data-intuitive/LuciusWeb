@@ -19,7 +19,6 @@ import { BinnedZhangQuery } from '../../utils/asyncQuery.js';
 const plotsLens = {
     get: state => ({ core: state.plots, settings: { plots: state.settings.plots, api: state.settings.api }, 
         ui: (state.ui??{}).plots ?? {dirty: false}, // Get state.ui.prots in a safe way or else get a default
-        kill: state.kill,
     }),
     set: (state, childState) => ({...state, plots: childState.core })
 };

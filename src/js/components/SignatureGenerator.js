@@ -16,7 +16,6 @@ import { SignatureGeneratorQuery } from '../utils/asyncQuery';
 const signatureLens = {
     get: state => ({ core: state.form.signature, settings: state.settings,
         ui: (state.ui??{}).signature ?? {dirty: false}, // Get state.ui.signature in a safe way or else get a default
-        kill: state.kill
      }),
     set: (state, childState) => ({ ...state, form: { ...state.form, signature: childState.core } })
 };

@@ -24,7 +24,6 @@ const formLens = {
     search: state.routerInformation.params?.signature,
     searchAutoRun: state.routerInformation.params?.autorun,
     searchTyper: state.routerInformation.params?.typer,
-    kill: state.kill,
   }),
   set: (state, childState) => ({
     ...state,

@@ -41,7 +41,8 @@ export function BinnedZhangQuery(trigger$) {
 export function TopTableQuery(trigger$) {
   const errorResult = { data: [] }
   return function (sources) {
-    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.topTable', 'topTable', errorResult, sources, trigger$)
+    const statusName$ = sources.onion.state$.map((state) => 'topTable-' + state.settings.table.type).compose(dropRepeats())
+    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.topTable', 'topTable', errorResult, sources, trigger$, statusName$)
   }
 }
 
@@ -55,7 +56,8 @@ export function TargetToCompoundsQuery(trigger$) {
 export function PerturbationInformationDetailsQuery(trigger$) {
   const errorResult = { data: [] }
   return function (sources) {
-    return asyncQueryProps('&classPath=com.dataintuitive.luciusapi.perturbationInformationDetails', 'perturbationInformationDetails', errorResult, sources, trigger$)
+    const statusName$ = sources.props.map((props) => 'perturbationInformationDetails-' + props.table.type + '-' + sources.index).compose(dropRepeats())
+    return asyncQueryProps('&classPath=com.dataintuitive.luciusapi.perturbationInformationDetails', 'perturbationInformationDetails', errorResult, sources, trigger$, statusName$)
   }
 }
 
@@ -69,7 +71,8 @@ export function StatisticsQuery(trigger$) {
 export function CheckSignatureQuery(trigger$) {
   const errorResult = { data: {} }
   return function (sources) {
-    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.checkSignature', 'checkSignature', errorResult, sources, trigger$)
+    const statusName$ = xs.of('checkSignature' + (sources.index ?? ''))
+    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.checkSignature', 'checkSignature', errorResult, sources, trigger$, statusName$)
   }
 }
 
@@ -80,17 +83,17 @@ export function CorrelationQuery(trigger$) {
   }
 }
 
-function asyncQuerySettings(classPath, category, errorResult, sources, trigger$) {
+function asyncQuerySettings(classPath, category, errorResult, sources, trigger$, statusName$ = xs.of(category)) {
   const apiInfo$ = sources.onion.state$.map((state) => state.settings.api)
-  return asyncQuery(classPath, category, errorResult, apiInfo$, sources.HTTP, trigger$, sources.kill)
+  return asyncQuery(classPath, category, errorResult, apiInfo$, sources.HTTP, trigger$, sources.kill, statusName$)
 }
 
-function asyncQueryProps(classPath, category, errorResult, sources, trigger$) {
+function asyncQueryProps(classPath, category, errorResult, sources, trigger$, statusName$) {
   const apiInfo$ = sources.props.map((props) => props.api)
-  return asyncQuery(classPath, category, errorResult, apiInfo$, sources.HTTP, trigger$, sources.kill)
+  return asyncQuery(classPath, category, errorResult, apiInfo$, sources.HTTP, trigger$, sources.kill, statusName$)
 }
 
-function asyncQuery(classPath, category, errorResult, apiInfo$, sourcesHTTP, trigger$, kill$) {
+function asyncQuery(classPath, category, errorResult, apiInfo$, sourcesHTTP, trigger$, kill$, statusName$) {
 
   const emptyData = {
     body: {
@@ -194,7 +197,7 @@ function asyncQuery(classPath, category, errorResult, apiInfo$, sourcesHTTP, tri
   //////////////////////////////
 
   const data$ = responseGetDone$
-    .filter(r => r.body.status != "error")
+    .filter(r => r.body.status != "error" && r.body.status != "KILLED")
     .map(r => r.body.result)
 
   const invalidData$ = xs.merge(responsePost$, responseGetDone$, responseDelete$)
@@ -213,9 +216,9 @@ function asyncQuery(classPath, category, errorResult, apiInfo$, sourcesHTTP, tri
   // Add jobStatus from job response
   const jobStatusReducer$ = jobStatus$.map(status => prevState => ({ ...prevState, core: { ...prevState.core, jobStatus: status } }))
 
-  const status$ = xs.combine(jobId$, jobStatus$, requestPost$, timeDifference$)
-    .map(([jobId, jobStatus, request, time]) => ({
-      [category]: {
+  const status$ = jobStatus$.compose(sampleCombine(jobId$, requestPost$, timeDifference$, statusName$))
+    .map(([jobStatus, jobId, request, time, statusName]) => ({
+      [statusName]: {
         jobId: jobId,
         jobStatus: jobStatus,
         request: request,

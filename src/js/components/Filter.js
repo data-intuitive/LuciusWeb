@@ -55,7 +55,6 @@ export const filterLens = {
       core: state.filter,
       settings: { filter: state.settings.filter, api: state.settings.api, modelTranslations: state.settings.common.modelTranslations},
       search: searchObj,
-      kill: state.kill
     }
   },
   set: (state, childState) => {

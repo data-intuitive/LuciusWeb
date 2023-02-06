@@ -25,7 +25,6 @@ const checkLens = {
       searchAutoRun: state.searchAutoRun,
     },
     settings: state.settings,
-    kill: state.kill,
   }),
   set: (state, childState) => ({...state, core : { ...state.core, ...childState.core, query: childState.core.query}})
 };
@@ -41,7 +40,6 @@ const checkLens1 = {
       searchAutoRun: state.searchAutoRun,
     },
     settings: state.settings,
-    kill: state.kill,
   }),
   set: (state, childState) => ({...state, core : { ...state.core, ...childState.core, query1: childState.core.query}})
 };
@@ -57,7 +55,6 @@ const checkLens2 = {
       searchAutoRun: state.searchAutoRun,
     },
     settings: state.settings,
-    kill: state.kill,
   }),
   set: (state, childState) => ({...state, core : { ...state.core, ...childState.core, query2: childState.core.query}})
 };

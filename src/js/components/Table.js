@@ -73,7 +73,6 @@ const headTableLens = {
       filter: state.settings.filter,
     },
     ui: state.ui?.headTable ?? {dirty: false}, // Get state.ui.headTable in a safe way or else get a default
-    kill: state.kill,
     numEntries: state.routerInformation?.params?.numTableHead,
   }),
   set: (state, childState) => {
@@ -114,7 +113,6 @@ const tailTableLens = {
       filter: state.settings.filter,
     },
     ui: state.ui?.tailTable ?? {dirty: false}, // Get state.ui.tailTable in a safe way or else get a default
-    kill: state.kill,
     numEntries: state.routerInformation?.params?.numTableTail,
   }),
   set: (state, childState) => {
@@ -155,7 +153,6 @@ const compoundContainerTableLens = {
       filter: state.settings.filter,
     },
     ui: state.ui?.compoundTable ?? {dirty: false}, // Get state.ui.compoundTable in a safe way or else get a default
-    kill: state.kill,
   }),
   set: (state, childState) => ({
     ...state,

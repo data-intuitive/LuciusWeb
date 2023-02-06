@@ -16,7 +16,6 @@ const checkLens = {
     search: state.params?.treatment,
     searchAutoRun: state.params?.autorun,
     searchTyper: state.params?.typer,
-    kill: state.kill,
   }),
   set: (state, childState) => ({
     ...state,

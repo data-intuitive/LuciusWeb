@@ -33,8 +33,9 @@ function SampleTable(sources) {
   const props$ = sources.props
 
   // isolate each line so that it separates clicks
+  // Add array index into the sources object
   const childrenSinks$ = array$.map(array => {
-      return array.map((_, index) => isolate(SampleInfo, index)(sources))
+      return array.map((_, index) => isolate(SampleInfo, index)({ ...sources, index: index }))
   })
 
   const listStyle = {style : {'margin-top' : '0px', 'margin-bottom':'0px'}}

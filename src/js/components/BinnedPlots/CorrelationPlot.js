@@ -15,7 +15,6 @@ const correlationPlotsLens = {
     get: state => ({
         core: state.plots,
         settings: { plots: state.settings.plots, api: state.settings.api },
-        kill: state.kill,
     }),
     set: (state, childState) => ({...state, plots: childState.core })
 };

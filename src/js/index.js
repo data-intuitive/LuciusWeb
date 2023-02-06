@@ -56,6 +56,7 @@ import {
   settingsSVG,
 } from "./svg"
 import sampleCombine from "xstream/extra/sampleCombine"
+import { RouterConfirmation } from "./components/RoutingConfirmation"
 
 export default function Index(sources) {
   const { router } = sources
@@ -288,9 +289,12 @@ export default function Index(sources) {
     })
     .compose(dropRepeats())
 
+  const routerConfirmation = RouterConfirmation(sources)
+  routerConfirmation.switch$.debug("switch").addListener({}) // TODO do actually useful stuff with the switch$ stream
+
   const vdom$ = xs
-    .combine(pageName$, nav$, view$, footer$)
-    .map(([pageName, navDom, viewDom, footerDom]) =>
+    .combine(pageName$, nav$, view$, footer$, routerConfirmation.DOM)
+    .map(([pageName, navDom, viewDom, footerDom, routerConfirmation]) =>
       div(
         pageName,
         {
@@ -301,7 +305,7 @@ export default function Index(sources) {
             height: "100%",
           },
         },
-        [navDom, main([viewDom]), footerDom]
+        [navDom, main([viewDom]), footerDom, routerConfirmation]
       )
     )
     .remember()
@@ -526,7 +530,10 @@ export default function Index(sources) {
       ghostModeWarning$,
       page$.map(prop("popup")).filter(Boolean).flatten(),
     ),
-    modal: page$.map(prop("modal")).filter(Boolean).flatten(),
+    modal: xs.merge(
+      routerConfirmation.modal,
+      page$.map(prop("modal")).filter(Boolean).flatten(),
+    ),
     ac: page$.map(prop("ac")).filter(Boolean).flatten(),
     sidenav: sidenavEvent$,
     slider: page$.map(prop("slider")).filter(Boolean).flatten(),

@@ -885,7 +885,6 @@ function makeTable(tableComponent, tableLens, scope = "scope1", tableApiName = "
         dataReducer$,
         switchReducer$,
         amountOfDisplayedLinesReducer$,
-        queryData.onion,
       ),
       log: xs.merge(
         logger(modifiedState$, "state$")

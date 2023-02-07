@@ -332,7 +332,6 @@ function TreatmentCheck(sources) {
       autocompleteReducer$,
       fullInputValidationReducer$,
       dirtyReducer$,
-      queryData.onion,
     ),
     output: query$,
     ac: ac$

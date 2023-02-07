@@ -23,7 +23,7 @@ function FetchFilters(sources) {
     filters: validResponse$.compose(delay(2000)),
     HTTP: queryData.HTTP,
     asyncQueryStatus: queryData.asyncQueryStatus,
-    onion: queryData.onion,
+    onion: xs.empty(),
   }
 }
 

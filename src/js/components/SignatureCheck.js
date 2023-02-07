@@ -182,10 +182,7 @@ function SignatureCheck(sources) {
     HTTP: queryData.HTTP,
     asyncQueryStatus: queryData.asyncQueryStatus,
     DOM: vdom$,
-    onion: xs.merge(
-      collapseUpdateReducer$,
-      queryData.onion,
-    ),
+    onion: collapseUpdateReducer$,
     validated : validated$
   }
 

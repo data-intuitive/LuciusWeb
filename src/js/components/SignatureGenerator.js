@@ -329,10 +329,7 @@ function SignatureGenerator(sources) {
             geneAnnotationQuery.HTTP
         ),
         asyncQueryStatus: queryData.asyncQueryStatus,
-        onion: xs.merge(
-            reducers$,
-            queryData.onion,
-        ),
+        onion: reducers$,
         modal: geneAnnotationQuery.modal
     }
 

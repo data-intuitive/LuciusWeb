@@ -72,10 +72,7 @@ function Check(sources) {
         DOM: vdom$,
         HTTP: queryData.HTTP,
         asyncQueryStatus: queryData.asyncQueryStatus,
-        onion: xs.merge(
-            defaultReducer$,
-            queryData.onion,
-        ),
+        onion: defaultReducer$,
         alert: alert$,
         popup: delay$
     }

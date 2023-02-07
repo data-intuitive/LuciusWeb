@@ -232,7 +232,6 @@ function CorrelationPlot(sources) {
             inputReducer$,
             dataReducer$,
             specReducer$,
-            queryData.onion
         )
     };
 

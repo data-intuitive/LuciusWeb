@@ -113,7 +113,6 @@ function Statistics(sources) {
         onion: xs.merge(
             defaultReducer$,
             stateReducer$,
-            queryData.onion,
         )
 
     }

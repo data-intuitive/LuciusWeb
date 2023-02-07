@@ -599,6 +599,6 @@ export function SampleInfo(sources) {
     DOM: vdom$,
     HTTP: queryData.HTTP,
     asyncQueryStatus: queryData.asyncQueryStatus,
-    onion: queryData.onion,
+    onion: xs.empty(),
   }
 }

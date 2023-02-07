@@ -275,7 +275,6 @@ function BinnedPlots(sources) {
             inputReducer$,
             dataReducer$,
             specReducer$,
-            queryData.onion,
         )
     };
 

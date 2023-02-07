@@ -210,13 +210,6 @@ function asyncQuery(classPath, category, errorResult, apiInfo$, sourcesHTTP, tri
   const error$ = invalidData$
     .mapTo(generateError("Generic HTTP error", 0, 0))
 
-  // Add request body to state
-  const requestReducer$ = requestPost$.map(req => prevState => ({ ...prevState, core: { ...prevState.core, request: req } }))
-  // Add jobId from request response
-  const jobIdReducer$ = jobId$.map(id => prevState => ({ ...prevState, core: { ...prevState.core, jobId: id } }))
-  // Add jobStatus from job response
-  const jobStatusReducer$ = jobStatus$.map(status => prevState => ({ ...prevState, core: { ...prevState.core, jobStatus: status } }))
-
   const status$ = jobStatus$.compose(sampleCombine(jobId$, requestPost$, timeDifference$, statusName$))
     .map(([jobStatus, jobId, request, time, statusName]) => ({
       [statusName]: {
@@ -229,7 +222,6 @@ function asyncQuery(classPath, category, errorResult, apiInfo$, sourcesHTTP, tri
 
   return {
     HTTP: xs.merge(requestPost$, requestGet$, requestDelete$),
-    onion: xs.of(_ => _),//xs.merge(requestReducer$, jobIdReducer$, jobStatusReducer$),
     asyncQueryStatus: status$,
     data$: data$,
     invalidData$: invalidData$,

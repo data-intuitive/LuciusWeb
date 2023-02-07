@@ -1,0 +1,17 @@
+
+div #modal-routerConfirmation {
+    
+    div.title {
+        font-size: 1.5rem;
+    }
+
+    div.modal-footer {
+        > div span.routerConfirmation-stay{
+            background-color: color('blue-grey', 'base')
+        }
+        > div span.routerConfirmation-switch{
+            background-color: color('orange', 'base')
+        }
+    }
+
+}

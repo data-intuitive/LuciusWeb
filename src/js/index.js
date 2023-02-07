@@ -280,7 +280,7 @@ export default function Index(sources) {
     ])
   )
 
-  const view$ = page$.debug("page$").map(prop("DOM")).flatten().remember()
+  const view$ = page$.map(prop("DOM")).flatten().remember()
 
   const pageName$ = state$.map((state) => {
       const pageName = state.routerInformation.pathname.substr(1)
@@ -291,8 +291,8 @@ export default function Index(sources) {
     })
     .compose(dropRepeats())
 
-  const routingConfirmation = RoutingConfirmation(sources)
-  routingConfirmation.switch$.debug("switch").addListener({}) // TODO do actually useful stuff with the switch$ stream
+  const routingConfirmationShow$ = xs.create()
+  const routingConfirmation = RoutingConfirmation({ ...sources, show$: routingConfirmationShow$ })
 
   const vdom$ = xs
     .combine(pageName$, nav$, view$, footer$, routingConfirmation.DOM)
@@ -480,43 +480,67 @@ export default function Index(sources) {
   })
 
   // Capture link targets and send to router driver
-  const routerPre$ = sources.DOM.select("a")
+  const domClicksWithFullPathname$ = sources.DOM.select("a")
     .events("click")
-    .filter((ev) => !ev.ownerTarget.classList.contains("do-not-route"))
     .map((ev) => {
       var target = ev.target
       while (target != undefined && target.pathname == undefined) {
         target = target.parentElement
       }
-      return target?.pathname
+      return [ev, target?.pathname]
     })
-    .remember()
-    .debug("router$")
 
-  const router$ = routerPre$
-    .compose(delay(1000))
-
-  const forcefulRouting$ = routerPre$
-    .compose(delay(500))
-  forcefulRouting$.addListener({ next: (url) => window.location.href = url})
+  const router$ = domClicksWithFullPathname$
+    .filter(([ev, _]) => !ev.ownerTarget.classList.contains("do-not-route"))
+    .map(([_, pathname]) => pathname)
 
   const killUser$ = sources.DOM.select(".kill-switch")
     .events("click")
 
   const asyncQueryStatus$ = page$.map(prop("asyncQueryStatus")).filter(Boolean).flatten()
-  const foldedAsyncQueryStatus$ = asyncQueryStatus$.fold((acc, x) => ({...acc, ...x}), {}).debug("foldedAsyncQueryStatus$")
+  const foldedAsyncQueryStatus$ = asyncQueryStatus$.fold((acc, x) => ({...acc, ...x}), {})
 
-  // TODO added foldedAsyncQueryStatus to this stream but it's not needed. Doing this to actually consume the stream.
-  const killQueries$ = xs.merge(routerPre$, killUser$).compose(sampleCombine(foldedAsyncQueryStatus$)).mapTo(0)
+  const isRunningFilter = (obj) => obj.jobStatus == "RUNNING" || obj.jobStatus == "STARTED"
+
+  const activeJobs$ = foldedAsyncQueryStatus$
+    .map((obj) => R.filter(isRunningFilter, obj))
+
+  const longestActiveJob$ = activeJobs$
+    .map((obj) => R.toPairs(obj))
+    .map((arr) => R.reduce(R.maxBy(([key, el]) => el.elapsedTime), ['', { elapsedTime: 0 }], arr))
+
+  const hasActiveJobs$ = activeJobs$
+    .map((obj) => R.length(R.keys(obj)))
+    .map((len) => len > 0)
+
+  const routingConfirmationShow_$ = router$.compose(sampleCombine(hasActiveJobs$))
+    .filter(([_, hasActiveJobs]) => hasActiveJobs)
+
+  routingConfirmationShow$.imitate(routingConfirmationShow_$)
+
+  const killQueries$ = xs
+    .merge(routingConfirmation.switch$, killUser$)
+    .compose(sampleCombine(hasActiveJobs$))
+    .filter(([router, hasActiveJobs]) => hasActiveJobs)
+    .mapTo(0)
   kill$.imitate(killQueries$)
 
-  // const asyncQueryStatus$ = page$.map(prop("asyncQueryStatus")).debug("foo").filter(Boolean).debug("bar").flatten().debug("meh")
+  // Routing in case there is no active job => do directly
+  const forcefulRouting1$ = router$
+    .compose(sampleCombine(hasActiveJobs$))
+    .filter(([router, hasActiveJobs]) => !hasActiveJobs)
+    .map(([router, _]) => router)
+  // Routing in case there is an active job => use confirmation from modal
+  const forcefulRouting2$ = routingConfirmation.switch$
+    .compose(sampleCombine(router$))
+    .map(([_, router]) => router)
+    .compose(delay(500))
+  const forcefulRouting$ = xs.merge(forcefulRouting1$, forcefulRouting2$)
   
-  // All clicks on links should be sent to the preventDefault driver
-  const prevent$ = sources.DOM.select("a")
-    .events("click")
-    .debug("prevent$")
-    // .filter((ev) => ev.target.pathname == "/debug")
+  //prevent all a-clicks except those required for downloading files from the exporter
+  const prevent$ = domClicksWithFullPathname$
+    .filter(([ev, pathname]) => !(pathname.startsWith("text/plain;") || pathname.startsWith("text/tsv;") || pathname.startsWith("image/png;")))
+    .map(([ev, _]) => ev)
 
   const history$ = sources.onion.state$.fold((acc, x) => acc.concat([x]), [{}])
 
@@ -546,9 +570,7 @@ export default function Index(sources) {
       // killReducer$
     ),
     DOM: vdom$,
-    router: xs
-      .merge(router$, page$.map(prop("router")).filter(Boolean).flatten())
-      .remember(),
+    router: page$.map(prop("router")).filter(Boolean).flatten(),
     HTTP: page$.map(prop("HTTP")).filter(Boolean).flatten(),
     vega: page$.map(prop("vega")).filter(Boolean).flatten(),
     alert: page$.map(prop("alert")).filter(Boolean).flatten(),
@@ -576,6 +598,7 @@ export default function Index(sources) {
       .debug("deployments"),
     history: historyDriver$,
     clipboard: page$.map(prop("clipboard")).filter(Boolean).flatten(),
+    windowRelocation: forcefulRouting$,
   }
 }
 

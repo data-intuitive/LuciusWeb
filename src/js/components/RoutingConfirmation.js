@@ -24,9 +24,9 @@ function intent(domSource$) {
   }
 }
 
-function model(actions) {
+function model(actions, show$, state$) {
   
-  const openModal$ = actions.modalTrigger$
+  const openModal$ = xs.merge(actions.modalTrigger$, show$)
     .map(_ => ({ el: '#modal-routingConfirmation', state: 'open' }))
   const closeModal$ = xs.merge(actions.modalStayTrigger$, actions.modalSwitchTrigger$)
     .map(_ => ({ el: '#modal-routingConfirmation', state: 'close' }))
@@ -41,8 +41,8 @@ function model(actions) {
 
 function view(state$) {
 
-    const modal$ = xs.of(div(".row", [
-          span(".routingConfirmation-show", "show routingConfirmation"),
+    const modal$ = xs.of(div([
+          // span(".routingConfirmation-show", "show routingConfirmation"),
           div("#modal-routingConfirmation.modal", [
             div(".modal-content", [
               div(".row .title", [
@@ -80,7 +80,7 @@ function RoutingConfirmation(sources) {
 
   const actions = intent(sources.DOM)
 
-  const model_ = model(actions, state$)
+  const model_ = model(actions, sources.show$, state$)
 
   const vdom$ = view(state$)
 

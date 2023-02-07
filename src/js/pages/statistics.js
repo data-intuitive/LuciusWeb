@@ -56,6 +56,7 @@ function StatisticsWorkflow(sources) {
     HTTP: xs.merge(
       statsSinks.HTTP,
     ),
+    asyncQueryStatus: statsSinks.asyncQueryStatus,
   };
 }
 

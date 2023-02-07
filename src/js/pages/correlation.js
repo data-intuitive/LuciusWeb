@@ -136,9 +136,6 @@ function CorrelationWorkflow(sources) {
                     // div('.row', [])
                 ]),
                 exporter,
-                div(".kill-switch .fixed-action-btn", [
-                    span(".btn-floating .btn-large", i(".large .material-icons", "cancel")),
-                ]),
             ])
         );
 

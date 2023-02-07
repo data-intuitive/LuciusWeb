@@ -293,23 +293,34 @@ export default function Index(sources) {
 
   const routingConfirmationShow$ = xs.create()
   const routingConfirmation = RoutingConfirmation({ ...sources, show$: routingConfirmationShow$ })
+  const displayKillUser$ = xs.create()
 
   const vdom$ = xs
-    .combine(pageName$, nav$, view$, footer$, routingConfirmation.DOM)
-    .map(([pageName, navDom, viewDom, footerDom, routerConfirmation]) =>
-      div(
-        pageName,
-        {
-          style: {
-            display: "flex",
-            "min-height": "100vh",
-            "flex-direction": "column",
-            height: "100%",
+    .combine(pageName$, nav$, view$, footer$, routingConfirmation.DOM, displayKillUser$)
+    .map(([pageName, navDom, viewDom, footerDom, routerConfirmation, displayKillUser]) =>
+      {
+        const hide = displayKillUser ? "" : " .hide"
+        return div(
+          pageName,
+          {
+            style: {
+              display: "flex",
+              "min-height": "100vh",
+              "flex-direction": "column",
+              height: "100%",
+            },
           },
-        },
-        [navDom, main([viewDom]), footerDom, routerConfirmation]
-      )
-    )
+          [
+            navDom,
+            main([viewDom]),
+            footerDom,
+            routerConfirmation,
+            div(".kill-switch .fixed-action-btn" + hide, [
+              span(".btn-floating .btn-large .pulse", i(".large .material-icons", "cancel")),
+            ]),
+          ]
+        )
+      })
     .remember()
 
   // Initialize state
@@ -516,7 +527,12 @@ export default function Index(sources) {
   const routingConfirmationShow_$ = router$.compose(sampleCombine(hasActiveJobs$))
     .filter(([_, hasActiveJobs]) => hasActiveJobs)
 
+  const displayKillUser_$ = longestActiveJob$
+    .map(([key, el]) => el.elapsedTime >= 5000)
+    .compose(dropRepeats())
+
   routingConfirmationShow$.imitate(routingConfirmationShow_$)
+  displayKillUser$.imitate(displayKillUser_$.filter(_ => true)) // force MemoryStream => Stream
 
   const killQueries$ = xs
     .merge(routingConfirmation.switch$, killUser$)

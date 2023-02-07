@@ -242,9 +242,6 @@ function DiseaseWorkflow(sources) {
             div(".row", [displayPlots === "after tables" ? plots : div()]),
           ]),
           exporter,
-          div(".kill-switch .fixed-action-btn", [
-            span(".btn-floating .btn-large", i(".large .material-icons", "cancel")),
-          ]),
         ])
     )
 

@@ -13,9 +13,9 @@ import { loggerFactory } from "../utils/logger"
  * @returns object containing trigger streams
  */
 function intent(domSource$) {
-  const modalTrigger$ = domSource$.select(".routerConfirmation-show").events("click")
-  const modalStayTrigger$ = domSource$.select(".routerConfirmation-stay").events("click")
-  const modalSwitchTrigger$ = domSource$.select(".routerConfirmation-switch").events("click")
+  const modalTrigger$ = domSource$.select(".routingConfirmation-show").events("click")
+  const modalStayTrigger$ = domSource$.select(".routingConfirmation-stay").events("click")
+  const modalSwitchTrigger$ = domSource$.select(".routingConfirmation-switch").events("click")
 
   return {
     modalTrigger$: modalTrigger$,
@@ -27,9 +27,9 @@ function intent(domSource$) {
 function model(actions) {
   
   const openModal$ = actions.modalTrigger$
-    .map(_ => ({ el: '#modal-routerConfirmation', state: 'open' }))
+    .map(_ => ({ el: '#modal-routingConfirmation', state: 'open' }))
   const closeModal$ = xs.merge(actions.modalStayTrigger$, actions.modalSwitchTrigger$)
-    .map(_ => ({ el: '#modal-routerConfirmation', state: 'close' }))
+    .map(_ => ({ el: '#modal-routingConfirmation', state: 'close' }))
   const switch$ = actions.modalSwitchTrigger$.mapTo(0)
   
   return {
@@ -42,8 +42,8 @@ function model(actions) {
 function view(state$) {
 
     const modal$ = xs.of(div(".row", [
-          span(".routerConfirmation-show", "show routerConfirmation"),
-          div("#modal-routerConfirmation.modal", [
+          span(".routingConfirmation-show", "show routingConfirmation"),
+          div("#modal-routingConfirmation.modal", [
             div(".modal-content", [
               div(".row .title", [
                 p(".col .s12", "Interrupt workflow?"),
@@ -54,10 +54,10 @@ function view(state$) {
             ]),
             div(".modal-footer .row", [
                 div(".col .s4 .offset-s1", [
-                  span(".btn .waves-effect .waves-light .col .s12 .routerConfirmation-stay", "Wait"),
+                  span(".btn .waves-effect .waves-light .col .s12 .routingConfirmation-stay", "Wait"),
                 ]),
                 div(".col .s4 .offset-s1", [
-                  span(".btn .waves-effect .waves-light .col .s12 .routerConfirmation-switch", "Interrupt and switch"),
+                  span(".btn .waves-effect .waves-light .col .s12 .routingConfirmation-switch", "Interrupt and switch"),
                 ]),
             ]),
           ]),
@@ -68,7 +68,7 @@ function view(state$) {
 
 
 
-function RouterConfirmation(sources) {
+function RoutingConfirmation(sources) {
 
   const logger = loggerFactory(
     "exporter",
@@ -94,4 +94,4 @@ function RouterConfirmation(sources) {
   }
 }
 
-export {RouterConfirmation}
+export {RoutingConfirmation}

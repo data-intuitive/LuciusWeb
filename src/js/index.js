@@ -56,7 +56,7 @@ import {
   settingsSVG,
 } from "./svg"
 import sampleCombine from "xstream/extra/sampleCombine"
-import { RouterConfirmation } from "./components/RoutingConfirmation"
+import { RoutingConfirmation } from "./components/RoutingConfirmation"
 
 export default function Index(sources) {
   const { router } = sources
@@ -291,11 +291,11 @@ export default function Index(sources) {
     })
     .compose(dropRepeats())
 
-  const routerConfirmation = RouterConfirmation(sources)
-  routerConfirmation.switch$.debug("switch").addListener({}) // TODO do actually useful stuff with the switch$ stream
+  const routingConfirmation = RoutingConfirmation(sources)
+  routingConfirmation.switch$.debug("switch").addListener({}) // TODO do actually useful stuff with the switch$ stream
 
   const vdom$ = xs
-    .combine(pageName$, nav$, view$, footer$, routerConfirmation.DOM)
+    .combine(pageName$, nav$, view$, footer$, routingConfirmation.DOM)
     .map(([pageName, navDom, viewDom, footerDom, routerConfirmation]) =>
       div(
         pageName,
@@ -561,7 +561,7 @@ export default function Index(sources) {
       page$.map(prop("popup")).filter(Boolean).flatten(),
     ),
     modal: xs.merge(
-      routerConfirmation.modal,
+      routingConfirmation.modal,
       page$.map(prop("modal")).filter(Boolean).flatten(),
     ),
     ac: page$.map(prop("ac")).filter(Boolean).flatten(),

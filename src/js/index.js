@@ -527,8 +527,8 @@ export default function Index(sources) {
   const routingConfirmationShow_$ = router$.compose(sampleCombine(hasActiveJobs$))
     .filter(([_, hasActiveJobs]) => hasActiveJobs)
 
-  const displayKillUser_$ = longestActiveJob$
-    .map(([key, el]) => el.elapsedTime >= 5000)
+  const displayKillUser_$ = longestActiveJob$.compose(sampleCombine(state$))
+    .map(([[key, el], state]) => el.elapsedTime >= state.settings.api.asyncKillableTime * 1000)
     .compose(dropRepeats())
 
   routingConfirmationShow$.imitate(routingConfirmationShow_$)

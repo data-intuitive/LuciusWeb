@@ -92,6 +92,20 @@ export function AdminSettings(sources) {
           title: "LuciusAPI URL async job status",
           props: {},
         },
+        {
+          field: "asyncStatusInterval",
+          class: ".input-field",
+          type: "text",
+          title: "LuciusAPI async job poll interval",
+          props: { type: "text" },
+        },
+        {
+          field: "asyncKillableTime",
+          class: ".input-field",
+          type: "text",
+          title: "Time before showing the 'kill user' button",
+          props: { type: "text" },
+        },
       ],
     },
     {

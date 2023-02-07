@@ -1,6 +1,6 @@
 import xs from "xstream"
+import delay from "xstream/extra/delay"
 import dropRepeats from "xstream/extra/dropRepeats"
-import fromDiagram from "xstream/extra/fromDiagram"
 import sampleCombine from "xstream/extra/sampleCombine"
 
 export function filtersQuery(trigger$) {
@@ -156,8 +156,9 @@ function asyncQuery(classPath, category, errorResult, apiInfo$, sourcesHTTP, tri
   // Poll after initial POST reply was received or after a GET reply indicated that the code is still running
   const pollTimer2$ = xs
     .merge(responsePost$, responseGet$)
-    .filter(r => r.body.status == "STARTED" || r.body.status == "RUNNING")
-    .map(_ => fromDiagram("---------1"))
+    .compose(sampleCombine(apiInfo$))
+    .filter(([r, _]) => r.body.status == "STARTED" || r.body.status == "RUNNING")
+    .map(([_, api]) => xs.of(1).compose(delay(api.asyncStatusInterval * 1000)))
     .flatten()
   
   pollTimer$.imitate(pollTimer2$)
@@ -227,7 +228,7 @@ function asyncQuery(classPath, category, errorResult, apiInfo$, sourcesHTTP, tri
     }))
 
   return {
-    HTTP: xs.merge(requestPost$, requestGet$, requestDelete$),
+    HTTP: xs.merge(requestPost$, requestGet$, requestDelete$).debug("async-HTTP"),
     onion: xs.of(_ => _),//xs.merge(requestReducer$, jobIdReducer$, jobStatusReducer$),
     asyncQueryStatus: status$,
     data$: data$,

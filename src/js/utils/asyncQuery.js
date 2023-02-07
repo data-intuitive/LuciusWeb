@@ -228,7 +228,7 @@ function asyncQuery(classPath, category, errorResult, apiInfo$, sourcesHTTP, tri
     }))
 
   return {
-    HTTP: xs.merge(requestPost$, requestGet$, requestDelete$).debug("async-HTTP"),
+    HTTP: xs.merge(requestPost$, requestGet$, requestDelete$),
     onion: xs.of(_ => _),//xs.merge(requestReducer$, jobIdReducer$, jobStatusReducer$),
     asyncQueryStatus: status$,
     data$: data$,

@@ -568,6 +568,19 @@ export default function Index(sources) {
       state: search,
     }))
 
+  // Create a session id and add it to all jobserver requests, GET, POST & DELETE
+  // Useful for load balancers
+  const session_id = Math.floor(Math.random() * 65535).toString(16) + "-" + Math.floor(Math.random() * 65535).toString(16)
+  const add_session_id_param = (httpRequest) => {
+    const url = httpRequest.url
+    const category = httpRequest.category
+    // Strip the suffix as we want one id for a given component
+    const cleanCategory = category.replace(/(GET|POST|DELETE)$/,'')
+    const param = "session_id=" + session_id + "-" + cleanCategory
+    const newUrl = url.includes("?") ? url + "&" + param : url + "?" + param // add extra parameter or create new parameter string
+    return { ...httpRequest, url: newUrl }
+  }
+
   return {
     log: xs.merge(
       // logger(page$, 'page$', '>> ', ' > ', ''),
@@ -587,7 +600,8 @@ export default function Index(sources) {
     ),
     DOM: vdom$,
     router: page$.map(prop("router")).filter(Boolean).flatten(),
-    HTTP: page$.map(prop("HTTP")).filter(Boolean).flatten(),
+    HTTP: page$.map(prop("HTTP")).filter(Boolean).flatten()
+      .map((req) => add_session_id_param(req)), // add a session_id parameter to all requests
     vega: page$.map(prop("vega")).filter(Boolean).flatten(),
     alert: page$.map(prop("alert")).filter(Boolean).flatten(),
     preventDefault: xs.merge(

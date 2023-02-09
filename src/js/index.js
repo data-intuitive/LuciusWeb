@@ -580,6 +580,18 @@ export default function Index(sources) {
     const newUrl = url.includes("?") ? url + "&" + param : url + "?" + param // add extra parameter or create new parameter string
     return { ...httpRequest, url: newUrl }
   }
+  // if there is a send object, aka post request, add session_id
+  const add_session_id_post = (httpRequest) => {
+    if (httpRequest.send == undefined)
+      return httpRequest
+    else {
+      const category = httpRequest.category
+      // Strip the suffix as we want one id for a given component
+      const cleanCategory = category.replace(/(GET|POST|DELETE)$/,'')
+      const sessionString = session_id + "-" + cleanCategory
+      return { ...httpRequest, send: { ...httpRequest.send, session_id: sessionString } }
+    }
+  }
 
   return {
     log: xs.merge(
@@ -601,7 +613,8 @@ export default function Index(sources) {
     DOM: vdom$,
     router: page$.map(prop("router")).filter(Boolean).flatten(),
     HTTP: page$.map(prop("HTTP")).filter(Boolean).flatten()
-      .map((req) => add_session_id_param(req)), // add a session_id parameter to all requests
+      .map((req) => add_session_id_param(req)) // add a session_id parameter to all requests
+      .map((req) => add_session_id_post(req)), // add a session_id value to post requests
     vega: page$.map(prop("vega")).filter(Boolean).flatten(),
     alert: page$.map(prop("alert")).filter(Boolean).flatten(),
     preventDefault: xs.merge(

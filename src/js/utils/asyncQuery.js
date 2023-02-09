@@ -1,3 +1,4 @@
+import { equals } from "ramda"
 import xs from "xstream"
 import delay from "xstream/extra/delay"
 import dropRepeats from "xstream/extra/dropRepeats"
@@ -6,94 +7,123 @@ import sampleCombine from "xstream/extra/sampleCombine"
 export function filtersQuery(trigger$) {
   const errorResult = { data: {} }
   return function (sources) {
-    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.filters', 'filters', errorResult, sources, trigger$)
+    return asyncQuerySettings('filters', errorResult, sources, trigger$)
   }
 }
 
 export function treatmentsQuery(trigger$) {
   const errorResult = { data: [] }
   return function (sources) {
-    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.treatments', 'treatments', errorResult, sources, trigger$)
+    return asyncQuerySettings('treatments', errorResult, sources, trigger$)
   }
 }
 
 export function treatmentToPerturbationsQuery(trigger$) {
   const errorResult = { data: [] }
   return function (sources) {
-    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.treatmentToPerturbations', 'treatmentToPerturbations', errorResult, sources, trigger$)
+    return asyncQuerySettings('treatmentToPerturbations', errorResult, sources, trigger$)
   }
 }
 
 export function SignatureGeneratorQuery(trigger$) {
   const errorResult = []
   return function (sources) {
-    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.generateSignature', 'generateSignature', errorResult, sources, trigger$)
+    return asyncQuerySettings('generateSignature', errorResult, sources, trigger$)
   }
 }
 
 export function BinnedZhangQuery(trigger$) {
   const errorResult = { data: [] }
   return function (sources) {
-    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.binnedZhang', 'binnedZhang', errorResult, sources, trigger$)
-  }
-}
-
-export function TopTableQuery(trigger$) {
-  const errorResult = { data: [] }
-  return function (sources) {
-    const statusName$ = sources.onion.state$.map((state) => 'topTable-' + state.settings.table.type).compose(dropRepeats())
-    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.topTable', 'topTable', errorResult, sources, trigger$, statusName$)
+    return asyncQuerySettings('binnedZhang', errorResult, sources, trigger$)
   }
 }
 
 export function TargetToCompoundsQuery(trigger$) {
   const errorResult = { data: [] }
   return function (sources) {
-    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.targetToCompounds', 'targetToCompounds', errorResult, sources, trigger$)
-  }
-}
-
-export function PerturbationInformationDetailsQuery(trigger$) {
-  const errorResult = { data: [] }
-  return function (sources) {
-    const statusName$ = sources.props.map((props) => 'perturbationInformationDetails-' + props.table.type + '-' + sources.index).compose(dropRepeats())
-    return asyncQueryProps('&classPath=com.dataintuitive.luciusapi.perturbationInformationDetails', 'perturbationInformationDetails', errorResult, sources, trigger$, statusName$)
+    return asyncQuerySettings('targetToCompounds', errorResult, sources, trigger$)
   }
 }
 
 export function StatisticsQuery(trigger$) {
   const errorResult = { data: {} }
   return function (sources) {
-    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.statistics', 'statistics', errorResult, sources, trigger$)
-  }
-}
-
-export function CheckSignatureQuery(trigger$) {
-  const errorResult = { data: {} }
-  return function (sources) {
-    const statusName$ = xs.of('checkSignature' + (sources.index ?? ''))
-    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.checkSignature', 'checkSignature', errorResult, sources, trigger$, statusName$)
+    return asyncQuerySettings('statistics', errorResult, sources, trigger$)
   }
 }
 
 export function CorrelationQuery(trigger$) {
   const errorResult = { data: [] }
   return function (sources) {
-    return asyncQuerySettings('&classPath=com.dataintuitive.luciusapi.correlation', 'correlation', errorResult, sources, trigger$)
+    return asyncQuerySettings('correlation', errorResult, sources, trigger$)
   }
 }
 
-function asyncQuerySettings(classPath, category, errorResult, sources, trigger$, statusName$ = xs.of(category)) {
+// Wrapper for topTable to use actual table (ie. topTable, bottomTable, compoundTable) as status name and category
+export function TopTableQuery(trigger$) {
+  const errorResult = { data: [] }
+  return function (sources) {
+    const config$ = sources.onion.state$
+      .map((state) => ({
+        classPath: '&classPath=com.dataintuitive.luciusapi.topTable',
+        category: state.settings.table.type,
+        statusName: state.settings.table.type,
+      }))
+      .compose(dropRepeats(equals))
+      .remember()
+    const apiInfo$ = sources.onion.state$.map((state) => state.settings.api)
+    return asyncQuery(config$, errorResult, apiInfo$, sources.HTTP, trigger$, sources.kill)
+  }
+}
+
+// Wrapper for perturbationInformationDetails to add the table name and index behind the status name
+// Also uses props instead of state.settings to get the api information
+export function PerturbationInformationDetailsQuery(trigger$) {
+  const errorResult = { data: [] }
+  return function (sources) {
+    const config$ = sources.props
+      .map((props) => ({
+        classPath: '&classPath=com.dataintuitive.luciusapi.perturbationInformationDetails',
+        category: 'perturbationInformationDetails',
+        statusName: 'perturbationInformationDetails-' + props.table.type + '-' + sources.index,
+      }))
+      .compose(dropRepeats(equals))
+      .remember()
+    const apiInfo$ = sources.props.map((props) => props.api)
+    return asyncQuery(config$, errorResult, apiInfo$, sources.HTTP, trigger$, sources.kill)
+  }
+}
+
+// Wrapper for checkSignature to add an index behind the status name
+export function CheckSignatureQuery(trigger$) {
+  const errorResult = { data: {} }
+  return function (sources) {
+    const config$ = xs.of({
+        classPath: '&classPath=com.dataintuitive.luciusapi.checkSignature',
+        category: 'checkSignature',
+        statusName: 'checkSignature' + (sources.index ?? ''),
+      })
+      .remember()
+    const apiInfo$ = sources.onion.state$.map((state) => state.settings.api)
+    return asyncQuery(config$, errorResult, apiInfo$, sources.HTTP, trigger$, sources.kill)
+  }
+}
+
+// light weight help-wrapper for most constructors which use default settings derived from a static 'category' string
+function asyncQuerySettings(category, errorResult, sources, trigger$) {
   const apiInfo$ = sources.onion.state$.map((state) => state.settings.api)
-  return asyncQuery(classPath, category, errorResult, apiInfo$, sources.HTTP, trigger$, sources.kill, statusName$)
+  const config$ = xs.of({
+    classPath: '&classPath=com.dataintuitive.luciusapi.' + category,
+    category: category,
+    statusName: category,
+  })
+  .remember()
+  return asyncQuery(config$, errorResult, apiInfo$, sources.HTTP, trigger$, sources.kill)
 }
 
-function asyncQueryProps(classPath, category, errorResult, sources, trigger$, statusName$) {
-  const apiInfo$ = sources.props.map((props) => props.api)
-  return asyncQuery(classPath, category, errorResult, apiInfo$, sources.HTTP, trigger$, sources.kill, statusName$)
-}
-
-function asyncQuery(classPath, category, errorResult, apiInfo$, sourcesHTTP, trigger$, kill$, statusName$) {
+// main function, requires quite a bit of inputs so using construction wrappers is more user friendly
+function asyncQuery(config$, errorResult, apiInfo$, sourcesHTTP, trigger$, kill$) {
 
   const emptyData = {
     body: {
@@ -111,21 +141,24 @@ function asyncQuery(classPath, category, errorResult, apiInfo$, sourcesHTTP, tri
     }
   }
 
-  const requestPost$ = trigger$.compose(sampleCombine(apiInfo$))
-    .map(([data, api]) => {
+  const requestPost$ = trigger$.compose(sampleCombine(apiInfo$, config$))
+    .map(([data, api, config]) => {
       return {
-        url: api.asyncUrlStart + classPath,
+        url: api.asyncUrlStart + config.classPath,
         method: 'POST',
         send: data,
-        'category': category + 'POST'
+        'category': config.category + 'POST'
       }
     })
     .remember()
 
-  const responsePost$ = sourcesHTTP
-    .select(category + 'POST')
-    .map((response$) =>
-        response$.replaceError(() => xs.of(emptyData))
+  const responsePost$ = config$
+    .map(c => sourcesHTTP
+      .select(c.category + 'POST')
+      .map((response$) =>
+          response$.replaceError(() => xs.of(emptyData))
+      )
+      .flatten()
     )
     .flatten()
 
@@ -136,20 +169,23 @@ function asyncQuery(classPath, category, errorResult, apiInfo$, sourcesHTTP, tri
   const jobStatus$ = xs.create()
   const pollTimer$ = xs.create()
 
-  const requestGet$ = pollTimer$.compose(sampleCombine(apiInfo$, jobId$, jobStatus$))
-    .filter(([_, api, jobId, jobStatus]) => jobStatus == "STARTED" || jobStatus == "RUNNING")
-    .map(([_, api, jobId, jobStatus]) => {
+  const requestGet$ = pollTimer$.compose(sampleCombine(apiInfo$, config$, jobId$, jobStatus$))
+    .filter(([_, api, config, jobId, jobStatus]) => jobStatus == "STARTED" || jobStatus == "RUNNING")
+    .map(([_, api,config, jobId, jobStatus]) => {
         return {
             url: api.asyncUrlStatus + jobId,
             method: 'GET',
-            'category': category + 'GET'
+            'category': config.category + 'GET'
         }
     })
 
-  const responseGet$ = sourcesHTTP
-    .select(category + 'GET')
-    .map((response$) =>
-        response$.replaceError(() => xs.of(emptyData))
+  const responseGet$ = config$
+    .map(c => sourcesHTTP
+      .select(c.category + 'GET')
+      .map((response$) =>
+          response$.replaceError(() => xs.of(emptyData))
+      )
+      .flatten()
     )
     .flatten()
   
@@ -167,20 +203,23 @@ function asyncQuery(classPath, category, errorResult, apiInfo$, sourcesHTTP, tri
     .filter(r => r.body.status != "STARTED" && r.body.status != "RUNNING")
 
   const requestDelete$ = kill$
-    .compose(sampleCombine(apiInfo$, jobId$, jobStatus$))
-    .filter(([_, api, jobId, jobStatus]) => jobId != undefined && ( jobStatus == "STARTED" || jobStatus == "RUNNING" ))
-    .map(([_, api, jobId, jobStatus]) => {
+    .compose(sampleCombine(apiInfo$, config$, jobId$, jobStatus$))
+    .filter(([_, api, config, jobId, jobStatus]) => jobId != undefined && ( jobStatus == "STARTED" || jobStatus == "RUNNING" ))
+    .map(([_, api, config, jobId, jobStatus]) => {
         return {
             url: api.asyncUrlStatus + jobId,
             method: 'DELETE',
-            'category': category + 'DELETE'
+            'category': config.category + 'DELETE'
         }
     })
 
-  const responseDelete$ = sourcesHTTP
-    .select(category + 'DELETE')
-    .map((response$) =>
-        response$.replaceError(() => xs.of(emptyData))
+  const responseDelete$ = config$
+    .map(c => sourcesHTTP
+      .select(c.category + 'DELETE')
+      .map((response$) =>
+          response$.replaceError(() => xs.of(emptyData))
+      )
+      .flatten()
     )
     .flatten()
 
@@ -210,9 +249,9 @@ function asyncQuery(classPath, category, errorResult, apiInfo$, sourcesHTTP, tri
   const error$ = invalidData$
     .mapTo(generateError("Generic HTTP error", 0, 0))
 
-  const status$ = jobStatus$.compose(sampleCombine(jobId$, requestPost$, timeDifference$, statusName$))
-    .map(([jobStatus, jobId, request, time, statusName]) => ({
-      [statusName]: {
+  const status$ = jobStatus$.compose(sampleCombine(jobId$, requestPost$, timeDifference$, config$))
+    .map(([jobStatus, jobId, request, time, config]) => ({
+      [config.statusName]: {
         jobId: jobId,
         jobStatus: jobStatus,
         request: request,

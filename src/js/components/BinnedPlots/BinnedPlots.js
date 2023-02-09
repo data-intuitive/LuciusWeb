@@ -215,10 +215,21 @@ function BinnedPlots(sources) {
         return div({ style: { opacity: 0.0 } }, [makeVega(el)])
     }
 
+    const killedWrapper = (el) => {
+        return div([
+            div('.small .active .valign-wrapper .center-align', { style: { 'z-index': 1, position: 'absolute', margin: '20px' } }, [
+                div('Job terminated by user')
+            ]),
+            div({ style: { opacity: 0.2 } }, [makeVega(el)]),
+        ])
+    }
+
     const killedVdom$ = queryData.jobDeleted$
-        .mapTo(plotsContainerDifferent(
-            div('.orange .lighten-3 .orange-text .text-darken-4', [p('JOB KILLED')]),
-            div('.orange .lighten-3 .orange-text .text-darken-4', [p('JOB KILLED')])))
+        .mapTo(
+            plotsContainerDifferent(
+                killedWrapper('#simplot'),
+                killedWrapper('#hist')
+            ))
 
     // In case of error, show this
     const errorVdom$ = queryData.invalidData$

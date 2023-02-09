@@ -223,7 +223,7 @@ function view(state$, data$, invalidData$, request$, delete$, geneAnnotationQuer
         .mapTo(
             div('.card .orange .lighten-3', [
                 div('.card-content .orange-text .text-darken-4', [
-                    span('.card-title', 'JOB KILLED'),
+                    span('.card-title', 'Job terminated by user'),
                 ])
             ]))
         .remember()

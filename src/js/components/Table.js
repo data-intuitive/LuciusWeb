@@ -793,9 +793,39 @@ function makeTable(tableComponent, tableLens, scope = "scope1", tableApiName = "
       div(".red .white-text", [p("An error occured !!!")])
     )
 
-    const killedVdom$ = queryData.jobDeleted$.mapTo(
-      div('.orange .lighten-3 .orange-text .text-darken-4', [p('JOB KILLED')])
-    )
+    const killedVdom$ = queryData.jobDeleted$
+      .compose(sampleCombine(filterDom$, modifiedState$))
+      .map(([r, filterText, state]) =>
+        div([
+          div(
+            ".row .valign-wrapper",
+            {
+              style: {
+                "margin-bottom": "0px",
+                "padding-top": "5px",
+                "background-color": state.settings.table.color,
+              },
+            },
+            [
+              h5(".white-text .col .s5 .valign", state.settings.table.title),
+              div(".white-text .col .s7 .valign .right-align", filterText),
+            ]
+          ),
+          div(
+            ".row .valign-wrapper",
+            {
+              style: {
+                "margin-bottom": "0px",
+                "padding-left": "10px",
+                "padding-top": "0px",
+                "background-color": state.settings.table.bgcolor,
+              },
+            },
+            p('Job terminated by user')
+          ),
+        ])
+      )
+      .remember()
 
     /**
      * Wrap component vdom with an extra div that handles being dirty

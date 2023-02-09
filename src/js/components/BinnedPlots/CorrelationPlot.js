@@ -183,9 +183,18 @@ function CorrelationPlot(sources) {
         .mapTo(
             div('.red .white-text', [p('An error occured !!!')]))
 
+    const killedWrapper = (el) => {
+        return div([
+            div('.small .active .valign-wrapper .center-align', { style: { 'z-index': 1, position: 'absolute', margin: '20px' } }, [
+                div('Job terminated by user')
+            ]),
+            div({ style: { opacity: 0.2 } }, [makeVega(el)]),
+        ])
+    }
+
     const killedVdom$ = queryData.jobDeleted$
         .mapTo(
-            div('.red .white-text', [p('JOB KILLED')]))
+            plotContainer(killedWrapper('#corrplot')))
 
     // Merge the streams, last event is shown...
     const vdom$ = xs.merge(

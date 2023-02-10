@@ -181,9 +181,44 @@ div.fixed-action-btn {
     bottom: 120px;
 }
 
+div.kill-switch {
+    bottom: 60px;
+    > span.btn-floating{
+        &.idle {
+            background-color: color('blue', 'base');
+        }
+        &.busy {
+            background-color: color('green', 'base');
+        }
+        &.long {
+            background-color: color('orange', 'base');
+        }
+        &.verylong {
+            background-color: color('red', 'base');
+        }
+    }
+
+    div.spinner-layer {
+        &.idle {
+            border-color: color('blue', 'darken-3');
+        }
+        &.busy {
+            border-color: color('green', 'darken-3');
+        }
+        &.long {
+            border-color: color('orange', 'darken-3');
+        }
+        &.verylong {
+            border-color: color('red', 'darken-3');
+        }
+    }
+    
+}
+
 @import 'exporter';
 @import 'sample_selection_filters';
 @import 'init';
+@import 'routing_confirmation';
 
 /* home svg styling and hover */
 

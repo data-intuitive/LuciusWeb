@@ -1,4 +1,4 @@
-import { div, button } from "@cycle/dom"
+import { div, span, i } from "@cycle/dom"
 import xs from "xstream"
 import isolate from "@cycle/isolate"
 import { TreatmentForm, treatmentLikeFilter } from "../components/TreatmentForm"
@@ -337,6 +337,13 @@ export default function GenericTreatmentWorkflow(sources) {
       binnedPlots.HTTP,
       headTable.HTTP,
       tailTable.HTTP
+    ),
+    asyncQueryStatus: xs.merge(
+      TreatmentFormSink.asyncQueryStatus,
+      filterForm.asyncQueryStatus,
+      binnedPlots.asyncQueryStatus,
+      headTable.asyncQueryStatus,
+      tailTable.asyncQueryStatus,
     ),
     vega: binnedPlots.vega,
     popup: scenarioPopup$,

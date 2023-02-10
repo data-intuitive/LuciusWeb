@@ -24,14 +24,7 @@ import { SampleSelectionFilters, SampleSelectionFiltersLens } from "./SampleSele
 import { safeModelToUi } from "../modelTranslations"
 import { dirtyUiReducer, dirtyWrapperStream, busyUiReducer } from "../utils/ui"
 import { maxLengthValueUnit } from "../utils/utils"
-
-const emptyData = {
-  body: {
-    result: {
-      data: [],
-    },
-  },
-}
+import { treatmentToPerturbationsQuery } from "../utils/asyncQuery"
 
 const sampleSelectionLens = {
   get: (state) => ({
@@ -271,30 +264,19 @@ function SampleSelection(sources) {
       core: { ...state.core, data: [], usageData: [] }
     }))
 
-  const request$ = newInput$.map((state) => {
-    return {
-      url:
-        state.settings.api.url +
-        "&classPath=com.dataintuitive.luciusapi.treatmentToPerturbations",
-      method: "POST",
-      send: {
-        version: "v2",
-        query: state.core.input,
-        pvalue: state.settings.common.pvalue,
-      },
-      category: "samples",
-    }
-  })
+  const triggerObject$ = newInput$
+    .map((state) => ({
+      version: "v2",
+      query: state.core.input,
+      pvalue: state.settings.common.pvalue,
+    }))
 
-  const response$ = sources.HTTP.select("samples")
-    .map((response$) => response$.replaceError(() => xs.of(emptyData)))
-    .flatten()
+  const queryData = treatmentToPerturbationsQuery(triggerObject$)(sources)
 
   const getSingleCell = (input) => input.split('|')[0] ?? "N/A"
 
-  const data$ = response$
-    .map((res) => res.body)
-    .map((json) => json.result.data)
+  const data$ = queryData.data$
+    .map(result => result.data)
     .map(array => {
       return array.map(val => { return { ...val, cell: getSingleCell(val.cell) } })
     })
@@ -434,7 +416,7 @@ function SampleSelection(sources) {
 
   const initVdom$ = emptyState$.mapTo(div())
 
-  const loadingVdom$ = request$
+  const loadingVdom$ = triggerObject$
     .compose(sampleCombine(loadingState$))
     .map(([_, state]) =>
       // Use the same makeTable function, pass a initialization=true parameter and a body DOM with preloading
@@ -458,8 +440,30 @@ function SampleSelection(sources) {
     .filter(([state, _1, _2]) => state.core.busy == false)
     .map(([state, annotation, filtersDom]) => makeFiltersAndTable(state, annotation, false, filtersDom))
 
+  const invalidVdom$ = queryData.invalidData$
+    .mapTo(
+      div(".col.s10.offset-s1.l10.offset-l1", [
+        div('.card .orange .lighten-3', [
+          div('.card-content .orange-text .text-darken-4', [
+            span('.card-title', 'No Valid Data Received'),
+          ])
+        ])])
+    )
+    .remember()
+
+  const deleteVdom$ = queryData.jobDeleted$
+    .mapTo(
+      div(".col.s10.offset-s1.l10.offset-l1", [
+        div('.card .orange .lighten-3', [
+          div('.card-content .orange-text .text-darken-4', [
+            span('.card-title', 'Job terminated by user'),
+          ])
+        ])])
+    )
+    .remember()
+
   // Wrap component vdom with an extra div that handles being dirty
-  const vdom$ = dirtyWrapperStream( state$, xs.merge(initVdom$, loadingVdom$, loadedVdom$))
+  const vdom$ = dirtyWrapperStream( state$, xs.merge(initVdom$, loadingVdom$, loadedVdom$, invalidVdom$, deleteVdom$))
 
   const dataReducer$ = data$.map((data) => (prevState) => {
     const newData = data.map((el) => mergeRight(el, { use: true, hide: false }))
@@ -605,10 +609,6 @@ function SampleSelection(sources) {
     ...prevState,
     core: { ...prevState.core, input: i },
   }))
-  const requestReducer$ = request$.map((req) => (prevState) => ({
-    ...prevState,
-    core: { ...prevState.core, request: req },
-  }))
 
   const sortReducer$ = sortClick$.map((sort) => (prevState) => ({
     ...prevState,
@@ -651,11 +651,11 @@ function SampleSelection(sources) {
   return {
     log: xs.merge(logger(state$, "state$")),
     DOM: vdom$,
-    HTTP: xs.merge(request$, treatmentAnnotations.HTTP),
+    HTTP: xs.merge(queryData.HTTP, treatmentAnnotations.HTTP),
+    asyncQueryStatus: queryData.asyncQueryStatus,
     onion: xs.merge(
       defaultReducer$,
       inputReducer$,
-      requestReducer$,
       dataReducer$,
       filtersObjectReducer$,
       selectReducer$,

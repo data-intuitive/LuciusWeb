@@ -3,49 +3,26 @@ import xs from 'xstream'
 import { equals, mergeRight, omit } from 'ramda';
 import dropRepeats from 'xstream/extra/dropRepeats'
 import debounce from 'xstream/extra/debounce'
+import { StatisticsQuery } from '../utils/asyncQuery';
+import delay from 'xstream/extra/delay';
+
+const statisticsLens = {
+    get: state => ({ core: state.stats, settings: { api: state.settings.api } }),
+    set: (state, childState) => ({...state, stats: childState.core })
+  }
 
 function Statistics(sources) {
 
-    const state$ = sources.onion.state$
+    const state$ = sources.onion.state$.debug("state$")
 
-    // Check when the state has changed, omit the result key
-    const modifiedState$ = state$
-        .compose(dropRepeats((x, y) => equals(omit(['result'], x), omit(['result'], y))))
-        .compose(debounce(100))
+    const triggerObject$ = state$
+        .take(1)
+        .mapTo({ })
+        .compose(delay(100))
 
-    const props$ = sources.props
+    const queryData = StatisticsQuery(triggerObject$)(sources)
 
-    const request$ = xs.combine(modifiedState$, props$)
-        .map(([state, props]) => {
-            return {
-                url: props.url + '&classPath=com.dataintuitive.luciusapi.statistics',
-                method: 'POST',
-                send: {},
-                'category': 'statistics'
-            }
-        })
-
-    const response$$ = sources.HTTP
-        .select('statistics')
-
-    const invalidResponse$ = response$$
-        .map(response$ =>
-            response$
-                .filter(response => false) // ignore regular event
-                .replaceError(error => xs.of(error)) // emit error
-        )
-        .flatten()
-
-    const validResponse$ = response$$
-        .map(response$ =>
-            response$
-                .replaceError(error => xs.empty())
-        )
-        .flatten()
-
-    const data$ = validResponse$
-        .map(result => result.body.result.data)
-
+    const data$ = queryData.data$.map((result) => result.data)
 
     const container = (el) => div([
         div('.row', [
@@ -60,7 +37,7 @@ function Statistics(sources) {
 
     const initVdom$ = xs.of(container([p('Initializing...')]))
 
-    const loadingVdom$ = request$
+    const loadingVdom$ = triggerObject$
         .mapTo(container([p('Loading...')]))
 
     const extracts = (els) => els.map(x => span(x + " "))
@@ -106,36 +83,39 @@ function Statistics(sources) {
         ])
         )
 
-    const errorVdom$ = invalidResponse$.mapTo(div([p('An error occured !!!')]))
+    const errorVdom$ = queryData.invalidData$.mapTo(div([p('An error occured !!!')]))
+
+    const killedVdom$ = queryData.jobDeleted$.mapTo(div([p('Job terminated by user')]))
 
     const vdom$ = xs.merge(
         initVdom$,
         loadingVdom$,
         loadedVdom$,
         errorVdom$,
+        killedVdom$,
     )
 
     // This is needed in order to get the onion stream active!
-    const defaultReducer$ = xs.of(prevState => {
-        if (typeof prevState === 'undefined') {
-            return {}
-        } else {
-            return prevState
-        }
-    });
+    const defaultReducer$ = xs.of((prevState) => ({
+        ...prevState,
+        core: {
+          stats: {},
+        },
+      }))
 
     // Add the result to the state
-    const stateReducer$ = data$.map(data => prevState => mergeRight(prevState, { result: data }))
+    const stateReducer$ = data$.map(data => prevState => ({ ...prevState, core: { result: data } }))
 
     return {
         DOM: vdom$,
-        HTTP: request$,
+        HTTP: queryData.HTTP,
+        asyncQueryStatus: queryData.asyncQueryStatus,
         onion: xs.merge(
             defaultReducer$,
-            stateReducer$
+            stateReducer$,
         )
 
     }
 }
 
-export { Statistics }
+export { Statistics, statisticsLens }

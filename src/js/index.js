@@ -293,13 +293,36 @@ export default function Index(sources) {
 
   const routingConfirmationShow$ = xs.create()
   const routingConfirmation = RoutingConfirmation({ ...sources, show$: routingConfirmationShow$ })
-  const displayKillUser$ = xs.create()
+  const displayJobStatus$ = xs.create()
+  const queryStatusDom$ = displayJobStatus$.map((displayJobStatus) => {
+    // "idle"
+    // "busy"
+    // "long"
+    // "verylong"
+    const hide = displayJobStatus == "idle" ? " .hide" : ""
+
+    return div(".kill-switch .fixed-action-btn" + hide, [
+
+      div('.preloader-wrapper .big .active', { style: { 'z-index': 2, position: 'absolute', width: '56px', height: '56px' } }, [
+        div('.spinner-layer .' + displayJobStatus, [
+            div('.circle-clipper .left', [
+                div('.circle', { style: { borderWidth: '5px' } }),                  
+            ]),
+        ]),        
+      ]),
+
+      span(".btn-floating .btn-large ." + displayJobStatus, [
+        i(".large .material-icons", "cancel"),
+      ]),      
+
+    ])
+  })
 
   const vdom$ = xs
-    .combine(pageName$, nav$, view$, footer$, routingConfirmation.DOM, displayKillUser$)
-    .map(([pageName, navDom, viewDom, footerDom, routerConfirmation, displayKillUser]) =>
+    .combine(pageName$, nav$, view$, footer$, routingConfirmation.DOM, queryStatusDom$)
+    .map(([pageName, navDom, viewDom, footerDom, routerConfirmation, queryStatusDom]) =>
       {
-        const hide = displayKillUser ? "" : " .hide"
+        
         return div(
           pageName,
           {
@@ -315,9 +338,7 @@ export default function Index(sources) {
             main([viewDom]),
             footerDom,
             routerConfirmation,
-            div(".kill-switch .fixed-action-btn" + hide, [
-              span(".btn-floating .btn-large .pulse", i(".large .material-icons", "cancel")),
-            ]),
+            queryStatusDom,
           ]
         )
       })
@@ -507,6 +528,7 @@ export default function Index(sources) {
 
   const killUser$ = sources.DOM.select(".kill-switch")
     .events("click")
+    .debug("killUser$")
 
   const asyncQueryStatus$ = page$.map(prop("asyncQueryStatus")).filter(Boolean).flatten()
   const foldedAsyncQueryStatus$ = asyncQueryStatus$.fold((acc, x) => ({...acc, ...x}), {})
@@ -527,12 +549,21 @@ export default function Index(sources) {
   const routingConfirmationShow_$ = router$.compose(sampleCombine(hasActiveJobs$))
     .filter(([_, hasActiveJobs]) => hasActiveJobs)
 
-  const displayKillUser_$ = longestActiveJob$.compose(sampleCombine(state$))
-    .map(([[key, el], state]) => el.elapsedTime >= state.settings.api.asyncKillableTime * 1000)
+  const displayJobStatus_$ = longestActiveJob$.compose(sampleCombine(state$))
+    .map(([[key, el], state]) => {
+      if (el.elapsedTime == 0)
+        return "idle"
+      else if (el.elapsedTime < state.settings.api.asyncKillableTime * 1000)
+        return "busy"
+      else if (el.elapsedTime < state.settings.api.asyncKillableTime * 2000)
+        return "long"
+      else
+        return "verylong"
+    })
     .compose(dropRepeats())
 
   routingConfirmationShow$.imitate(routingConfirmationShow_$)
-  displayKillUser$.imitate(displayKillUser_$.filter(_ => true)) // force MemoryStream => Stream
+  displayJobStatus$.imitate(displayJobStatus_$.filter(_ => true)) // force MemoryStream => Stream
 
   const killQueries$ = xs
     .merge(routingConfirmation.switch$, killUser$)

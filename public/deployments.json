@@ -92,8 +92,8 @@
         "asyncUrlStart": "http://localhost:8090/jobs?context=luciusapi&appName=luciusapi",
         "asyncUrlStatus": "http://localhost:8090/jobs/",
         "asyncStatusInterval": 0.5,
-        "longRunningTime": 5,
-        "veryLongRunningTime": 10
+        "longRunningTime": 10,
+        "veryLongRunningTime": 30
       },
       "init": {
         "url": "http://localhost:8090/",
@@ -182,8 +182,8 @@
         "asyncUrlStart": "https://compass.data-intuitive.app:445/jobs?context=luciusapi&appName=luciusapi",
         "asyncUrlStatus": "https://compass.data-intuitive.app:445/jobs/",
         "asyncStatusInterval": 0.5,
-        "longRunningTime": 5,
-        "veryLongRunningTime": 10
+        "longRunningTime": 10,
+        "veryLongRunningTime": 30
       },
       "sourire": {
         "url": "https://compass.data-intuitive.app/molecule/"
@@ -235,8 +235,8 @@
         "asyncUrlStart": "http://localhost-test:8090/jobs?context=luciusapi&appName=luciusapi",
         "asyncUrlStatus": "http://localhost-test:8090/jobs/",
         "asyncStatusInterval": 0.5,
-        "longRunningTime": 5,
-        "veryLongRunningTime": 10
+        "longRunningTime": 10,
+        "veryLongRunningTime": 30
       },
       "sourire": {
         "url": "http://localhost:9999/molecule/"

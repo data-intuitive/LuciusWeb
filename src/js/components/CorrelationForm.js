@@ -54,8 +54,8 @@ function CorrelationForm(sources) {
     const state$ = sources.onion.state$
 
     // Check Signature subcomponent, via isolation
-    const signatureCheck1 = isolate(SignatureCheck, { onion: checkLens1 })(sources)
-    const signatureCheck2 = isolate(SignatureCheck, { onion: checkLens2 })(sources)
+    const signatureCheck1 = isolate(SignatureCheck, { onion: checkLens1 })({ ...sources, index: 1 })
+    const signatureCheck2 = isolate(SignatureCheck, { onion: checkLens2 })({ ...sources, index: 2 })
 
     // Valid query?
     const validated1$ = state$.map(state => state.core.validated1)
@@ -259,6 +259,10 @@ function CorrelationForm(sources) {
         HTTP: xs.merge(
           signatureCheck1.HTTP,
           signatureCheck2.HTTP,
+        ),
+        asyncQueryStatus: xs.merge(
+            signatureCheck1.asyncQueryStatus,
+            signatureCheck2.asyncQueryStatus,
         ),
         output: query$
     };

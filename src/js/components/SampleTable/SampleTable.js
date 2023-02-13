@@ -33,8 +33,9 @@ function SampleTable(sources) {
   const props$ = sources.props
 
   // isolate each line so that it separates clicks
+  // Add array index into the sources object
   const childrenSinks$ = array$.map(array => {
-      return array.map((_, index) => isolate(SampleInfo, index)(sources))
+      return array.map((_, index) => isolate(SampleInfo, index)({ ...sources, index: index }))
   })
 
   const listStyle = {style : {'margin-top' : '0px', 'margin-bottom':'0px'}}
@@ -53,6 +54,7 @@ function SampleTable(sources) {
    */
   const composedChildrenDOMSinks$ = childrenSinks$.compose(pick('DOM')).compose(mix(xs.combine))
   const composedChildrenHttpSinks$ = childrenSinks$.compose(pick('HTTP')).compose(mix(xs.merge))
+  const composedChildrenAsyncQueryStatusSinks$ = childrenSinks$.compose(pick('asyncQueryStatus')).compose(mix(xs.merge))
 
   const vdom$ = xs.combine(sampleInfoHeader$, composedChildrenDOMSinks$)
                   .map(([header, itemVNodes]) => 
@@ -72,6 +74,7 @@ function SampleTable(sources) {
   return {
     DOM: vdom$,
     HTTP: composedChildrenHttpSinks$,
+    asyncQueryStatus: composedChildrenAsyncQueryStatusSinks$,
   };
 
 }

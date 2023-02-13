@@ -1,13 +1,11 @@
-import { a, div, br, label, input, p, button, code, pre } from '@cycle/dom'
+import { div } from '@cycle/dom'
 import xs from 'xstream'
 import isolate from '@cycle/isolate'
-import { equals, mergeRight, mergeAll, prop, props } from 'ramda';
-import dropRepeats from 'xstream/extra/dropRepeats'
 
 import { initSettings } from '../configuration.js'
 
 // Components
-import { Statistics } from '../components/Statistics'
+import { Statistics, statisticsLens } from '../components/Statistics'
 
 function StatisticsWorkflow(sources) {
 
@@ -22,19 +20,7 @@ function StatisticsWorkflow(sources) {
     }
   })
 
-  // Create a stream with settings and properties based on the
-  // settings keys provided. settings lives under state.
-  function selectKeysFromSettings(thisState$, keys) {
-    return state$
-      .map(prop('settings'))
-      .map(props(keys))
-      .map(mergeAll)
-      .compose(dropRepeats((x, y) => equals(x, y)))
-  }
-
-  // Add properties to the child component, based on what we need
-  const statsProps$ = selectKeysFromSettings(state$, ['stats', 'api'])
-  const statsSinks = isolate(Statistics, 'stats')(mergeRight(sources, { props: statsProps$ }));
+  const statsSinks = isolate(Statistics, { onion: statisticsLens })(sources);
 
   const pageStyle = {
     style:
@@ -70,6 +56,7 @@ function StatisticsWorkflow(sources) {
     HTTP: xs.merge(
       statsSinks.HTTP,
     ),
+    asyncQueryStatus: statsSinks.asyncQueryStatus,
   };
 }
 

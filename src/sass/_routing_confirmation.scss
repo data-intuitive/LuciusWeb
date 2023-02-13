@@ -1,0 +1,17 @@
+
+div #modal-routingConfirmation {
+    
+    div.title {
+        font-size: 1.5rem;
+    }
+
+    div.modal-footer {
+        > div span.routingConfirmation-stay{
+            background-color: color('blue-grey', 'base')
+        }
+        > div span.routingConfirmation-switch{
+            background-color: color('orange', 'base')
+        }
+    }
+
+}

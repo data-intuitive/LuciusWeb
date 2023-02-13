@@ -1,5 +1,7 @@
 import xs from 'xstream'
 import delay from 'xstream/extra/delay'
+import dropRepeats from 'xstream/extra/dropRepeats'
+import { filtersQuery } from '../utils/asyncQuery'
 
 function FetchFilters(sources) {
 
@@ -8,31 +10,20 @@ function FetchFilters(sources) {
   // Combine with deployments to the up-to-date endpoint config
   const triggerQuery$ = state$.take(1)
 
-  const request$ = triggerQuery$
-    .map(state => ({
-      url: state.settings.api.url + '&classPath=com.dataintuitive.luciusapi.filters',
-      method: 'POST',
-      send: {},
-      'category': 'filters'
-    })
-  )
+  const triggerObject$ = triggerQuery$.mapTo({})
 
-  const response$$ = sources.HTTP
-    .select('filters')
+  const queryData = filtersQuery(triggerObject$)(sources)
 
-  // TODO: fall back to default filters set in config file
-  const validResponse$ = response$$
-    .map(response$ =>
-      response$.replaceError(_ => xs.empty())
-    )
-    .flatten()
-    .map(result => result.body.result.data)
+  const validResponse$ = queryData.data$
+    .map((result) => result.data)
 
   return {
     // We don't initialize the stream here so we know exactly when the
     // information is available.
     filters: validResponse$.compose(delay(2000)),
-    HTTP: request$
+    HTTP: queryData.HTTP,
+    asyncQueryStatus: queryData.asyncQueryStatus,
+    onion: xs.empty(),
   }
 }
 

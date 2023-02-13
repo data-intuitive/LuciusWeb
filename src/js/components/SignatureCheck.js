@@ -7,14 +7,7 @@ import {ENTER_KEYCODE} from '../utils/keycodes.js'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import debounce from 'xstream/extra/debounce'
 import { loggerFactory } from '../utils/logger'
-
-const emptyData = {
-  body: {
-    result: {
-      data : []
-    }
-  }
-}
+import { CheckSignatureQuery } from '../utils/asyncQuery';
 
 const stateTemplate = {
   query: 'The query to send to the checkSignature endpoint',
@@ -23,38 +16,47 @@ const stateTemplate = {
 
 const checkLens = { 
   get: state => ({
-    query: state.core.query,
-    ghostUpdate: state.core.ghostUpdate,
+    core: {
+      ...state.core,
+      query: state.core.query,
+      validated: state.core.validated,
+      ghostUpdate: state.core.ghostUpdate,
+      search: state.search,
+      searchAutoRun: state.searchAutoRun,
+    },
     settings: state.settings,
-    search: state.search,
-    searchAutoRun: state.searchAutoRun,
-    validated: state.core.validated
   }),
-  set: (state, childState) => ({...state, core : {...state.core, query: childState.query}})
+  set: (state, childState) => ({...state, core : { ...state.core, ...childState.core, query: childState.core.query}})
 };
 
 const checkLens1 = { 
   get: state => ({
-    query: state.core.query1,
-    ghostUpdate: state.core.ghostUpdate1,
+    core: {
+      ...state.core,
+      query: state.core.query1,
+      validated: state.core.validated1,
+      ghostUpdate: state.core.ghostUpdate1,
+      search: state.search1,
+      searchAutoRun: state.searchAutoRun,
+    },
     settings: state.settings,
-    search: state.search1,
-    searchAutoRun: state.searchAutoRun,
-    validated: state.core.validated1
   }),
-  set: (state, childState) => ({...state, core : {...state.core, query1: childState.query}})
+  set: (state, childState) => ({...state, core : { ...state.core, ...childState.core, query1: childState.core.query}})
 };
 
 const checkLens2 = { 
   get: state => ({
-    query: state.core.query2,
-    ghostUpdate: state.core.ghostUpdate2,
+    core: {
+      ...state.core,
+      query: state.core.query2,
+      validated: state.core.validated2,
+      ghostUpdate: state.core.ghostUpdate2,
+      search: state.search2,
+      searchAutoRun: state.searchAutoRun,
+    },
     settings: state.settings,
-    search: state.search2,
-    searchAutoRun: state.searchAutoRun,
-    validated: state.core.validated2
   }),
-  set: (state, childState) => ({...state, core : {...state.core, query2: childState.query}})
+  set: (state, childState) => ({...state, core : { ...state.core, ...childState.core, query2: childState.core.query}})
 };
 
 function SignatureCheck(sources) {
@@ -65,34 +67,18 @@ function SignatureCheck(sources) {
   const httpSource$ = sources.HTTP;
   const state$ = sources.onion.state$
 
-  const request$ = state$
-    .filter((state) => state.query !== '')
+  const triggerObject$ = state$
+    .filter((state) => state.core.query !== '')
     .compose(debounce(200))
-    .map(state =>  {
-      return {
-        url : state.settings.api.url + '&classPath=com.dataintuitive.luciusapi.checkSignature',
-        method : 'POST',
-        send : {
-          version : 'v2',
-          query : state.query
-        },
-        'category' : 'checkSignature'
-      }})
-    .remember()
+    .map((state) => ({
+      version : 'v2',
+      query : state.core.query
+    }))
+    .compose(dropRepeats(equals))
 
-  // Catch the response in a stream
-  // Handle errors by returning an empty object
-  const response$ = httpSource$
-    .select('checkSignature')
-    .map((response$) =>
-      response$.replaceError(() => xs.of(emptyData))
-    )
-    .flatten()
-    .remember()
+  const queryData = CheckSignatureQuery(triggerObject$)(sources)
 
-  const data$ = response$
-    .map(res => res.body)
-    .map(json => json.result.data)
+  const data$ = queryData.data$.map((result) => result.data)
 
   // Helper function for rendering the table, based on the state
   const makeTable = (data) => {
@@ -154,16 +140,16 @@ function SignatureCheck(sources) {
     .compose(sampleCombine(state$))
     .filter(
       ([_, state]) =>
-        state.searchAutoRun == "" || state.searchAutoRun == "yes" // autorun enabled?
+        state.core.searchAutoRun == "" || state.core.searchAutoRun == "yes" // autorun enabled?
     )
     .filter(([data, _]) => all((x) => x.found ?? x.inL1000)(data)) // all entered data is valid?
     //.filter(([_, state]) => state.query == state.search)
-    .filter(([_, state]) => state.validated == false) // not yet validated?
+    .filter(([_, state]) => state.core.validated == false) // not yet validated?
     .mapTo(true)
     .compose(dropRepeats(equals))
 
   const ghostUpdate$ = sources.onion.state$
-    .map((state) => state.ghostUpdate)
+    .map((state) => state.core.ghostUpdate)
     .filter((ghost) => ghost)
     .compose(dropRepeats())
 
@@ -175,7 +161,7 @@ function SignatureCheck(sources) {
     )
     .compose(sampleCombine(data$))
     .map(([collapse, data]) => prevState => {
-      return ({...prevState, query : data.map(x => (x.found ?? x.inL1000) ? x.symbol : '').join(" ").replace(/\s\s+/g, ' ').trim()});
+      return ({...prevState, core: {...prevState, query : data.map(x => (x.found ?? x.inL1000) ? x.symbol : '').join(" ").replace(/\s\s+/g, ' ').trim()} });
     });
 
   // The result of this component is an event when valid
@@ -190,14 +176,13 @@ function SignatureCheck(sources) {
   return { 
     log: xs.merge(
       logger(state$, 'state$'),
-      logger(request$, 'request$'),
-      logger(response$, 'response$')
+      // logger(request$, 'request$'),
+      // logger(response$, 'response$')
     ),
-    HTTP: request$,
+    HTTP: queryData.HTTP,
+    asyncQueryStatus: queryData.asyncQueryStatus,
     DOM: vdom$,
-    onion: xs.merge(
-      collapseUpdateReducer$, 
-    ),
+    onion: collapseUpdateReducer$,
     validated : validated$
   }
 

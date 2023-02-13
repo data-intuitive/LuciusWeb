@@ -5,11 +5,11 @@
 ### Minor changes
 
 - Modify all calls to LuciusApi to use asynchronous calls
-- Add a utility function to provide the asynchronous HTTP calls to LuciusAPI with polling for results and functionality to kill the job if running
-- Add a factory constructors to wrap the asynchronous HTTP for each endpoint
-- Add modal to warn the user when leaving the page that all job results will be lost
-- Add killing of running jobs when leaving the page and confirmed by the user
-- Add option to interrupt the running workflow by killing outstanding jobs
+- Add a utility function to provide the asynchronous HTTP calls to LuciusAPI with polling for results and functionality to interrupt the job if running
+- Add a factory constructor to wrap the asynchronous HTTP for each endpoint
+- Add a modal to warn the user when leaving the page that all job results will be lost
+- Add interrupting of running jobs when leaving the page and confirmed by the user
+- Add option to interrupt the running workflow by interrupting outstanding jobs
 
 ### Deployment changes
 

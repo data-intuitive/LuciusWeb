@@ -553,9 +553,9 @@ export default function Index(sources) {
     .map(([[key, el], state]) => {
       if (el.elapsedTime == 0)
         return "idle"
-      else if (el.elapsedTime < state.settings.api.asyncKillableTime * 1000)
+      else if (el.elapsedTime < state.settings.api.longRunningTime * 1000)
         return "busy"
-      else if (el.elapsedTime < state.settings.api.asyncKillableTime * 2000)
+      else if (el.elapsedTime < state.settings.api.veryLongRunningTime * 1000)
         return "long"
       else
         return "verylong"

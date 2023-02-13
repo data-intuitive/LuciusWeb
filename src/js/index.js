@@ -56,6 +56,7 @@ import {
   settingsSVG,
 } from "./svg"
 import sampleCombine from "xstream/extra/sampleCombine"
+import { RoutingConfirmation } from "./components/RoutingConfirmation"
 
 export default function Index(sources) {
   const { router } = sources
@@ -67,6 +68,8 @@ export default function Index(sources) {
   )
 
   const state$ = sources.onion.state$
+
+  const kill$ = xs.create()
 
   const page$ = router.routedComponent({
     "/": Home,
@@ -87,7 +90,7 @@ export default function Index(sources) {
     "/admin": IsolatedAdminSettings,
     "/init": Init,
     "*": Home,
-  })(sources)
+  })({ ...sources, kill: kill$ })
 
   // TODO: Add a visual reference for ghost mode
   // const ghost$ = state$
@@ -288,22 +291,57 @@ export default function Index(sources) {
     })
     .compose(dropRepeats())
 
+  const routingConfirmationShow$ = xs.create()
+  const routingConfirmation = RoutingConfirmation({ ...sources, show$: routingConfirmationShow$ })
+  const displayJobStatus$ = xs.create()
+  const queryStatusDom$ = displayJobStatus$.map((displayJobStatus) => {
+    // "idle"
+    // "busy"
+    // "long"
+    // "verylong"
+    const hide = displayJobStatus == "idle" ? " .hide" : ""
+
+    return div(".kill-switch .fixed-action-btn" + hide, [
+
+      div('.preloader-wrapper .big .active', { style: { 'z-index': 2, position: 'absolute', width: '56px', height: '56px' } }, [
+        div('.spinner-layer .' + displayJobStatus, [
+            div('.circle-clipper .left', [
+                div('.circle', { style: { borderWidth: '5px' } }),                  
+            ]),
+        ]),        
+      ]),
+
+      span(".btn-floating .btn-large ." + displayJobStatus, [
+        i(".large .material-icons", "cancel"),
+      ]),      
+
+    ])
+  })
+
   const vdom$ = xs
-    .combine(pageName$, nav$, view$, footer$)
-    .map(([pageName, navDom, viewDom, footerDom]) =>
-      div(
-        pageName,
-        {
-          style: {
-            display: "flex",
-            "min-height": "100vh",
-            "flex-direction": "column",
-            height: "100%",
+    .combine(pageName$, nav$, view$, footer$, routingConfirmation.DOM, queryStatusDom$)
+    .map(([pageName, navDom, viewDom, footerDom, routerConfirmation, queryStatusDom]) =>
+      {
+        
+        return div(
+          pageName,
+          {
+            style: {
+              display: "flex",
+              "min-height": "100vh",
+              "flex-direction": "column",
+              height: "100%",
+            },
           },
-        },
-        [navDom, main([viewDom]), footerDom]
-      )
-    )
+          [
+            navDom,
+            main([viewDom]),
+            footerDom,
+            routerConfirmation,
+            queryStatusDom,
+          ]
+        )
+      })
     .remember()
 
   // Initialize state
@@ -474,16 +512,82 @@ export default function Index(sources) {
   })
 
   // Capture link targets and send to router driver
-  const router$ = sources.DOM.select("a")
+  const domClicksWithFullPathname$ = sources.DOM.select("a")
     .events("click")
-    .filter((ev) => !ev.ownerTarget.classList.contains("do-not-route"))
-    .map((ev) => ev.target.pathname)
-    .remember()
+    .map((ev) => {
+      var target = ev.target
+      while (target != undefined && target.pathname == undefined) {
+        target = target.parentElement
+      }
+      return [ev, target?.pathname]
+    })
 
-  // All clicks on links should be sent to the preventDefault driver
-  const prevent$ = sources.DOM.select("a")
+  const router$ = domClicksWithFullPathname$
+    .filter(([ev, _]) => !ev.ownerTarget.classList.contains("do-not-route"))
+    .map(([_, pathname]) => pathname)
+
+  const killUser$ = sources.DOM.select(".kill-switch")
     .events("click")
-    .filter((ev) => ev.target.pathname == "/debug")
+    .debug("killUser$")
+
+  const asyncQueryStatus$ = page$.map(prop("asyncQueryStatus")).filter(Boolean).flatten()
+  const foldedAsyncQueryStatus$ = asyncQueryStatus$.fold((acc, x) => ({...acc, ...x}), {})
+
+  const isRunningFilter = (obj) => obj.jobStatus == "RUNNING" || obj.jobStatus == "STARTED"
+
+  const activeJobs$ = foldedAsyncQueryStatus$
+    .map((obj) => R.filter(isRunningFilter, obj))
+
+  const longestActiveJob$ = activeJobs$
+    .map((obj) => R.toPairs(obj))
+    .map((arr) => R.reduce(R.maxBy(([key, el]) => el.elapsedTime), ['', { elapsedTime: 0 }], arr))
+
+  const hasActiveJobs$ = activeJobs$
+    .map((obj) => R.length(R.keys(obj)))
+    .map((len) => len > 0)
+
+  const routingConfirmationShow_$ = router$.compose(sampleCombine(hasActiveJobs$))
+    .filter(([_, hasActiveJobs]) => hasActiveJobs)
+
+  const displayJobStatus_$ = longestActiveJob$.compose(sampleCombine(state$))
+    .map(([[key, el], state]) => {
+      if (el.elapsedTime == 0)
+        return "idle"
+      else if (el.elapsedTime < state.settings.api.longRunningTime * 1000)
+        return "busy"
+      else if (el.elapsedTime < state.settings.api.veryLongRunningTime * 1000)
+        return "long"
+      else
+        return "verylong"
+    })
+    .compose(dropRepeats())
+
+  routingConfirmationShow$.imitate(routingConfirmationShow_$)
+  displayJobStatus$.imitate(displayJobStatus_$.filter(_ => true)) // force MemoryStream => Stream
+
+  const killQueries$ = xs
+    .merge(routingConfirmation.switch$, killUser$)
+    .compose(sampleCombine(hasActiveJobs$))
+    .filter(([router, hasActiveJobs]) => hasActiveJobs)
+    .mapTo(0)
+  kill$.imitate(killQueries$)
+
+  // Routing in case there is no active job => do directly
+  const forcefulRouting1$ = router$
+    .compose(sampleCombine(hasActiveJobs$))
+    .filter(([router, hasActiveJobs]) => !hasActiveJobs)
+    .map(([router, _]) => router)
+  // Routing in case there is an active job => use confirmation from modal
+  const forcefulRouting2$ = routingConfirmation.switch$
+    .compose(sampleCombine(router$))
+    .map(([_, router]) => router)
+    .compose(delay(500))
+  const forcefulRouting$ = xs.merge(forcefulRouting1$, forcefulRouting2$)
+  
+  //prevent all a-clicks except those required for downloading files from the exporter
+  const prevent$ = domClicksWithFullPathname$
+    .filter(([ev, pathname]) => !(pathname.startsWith("text/plain;") || pathname.startsWith("text/tsv;") || pathname.startsWith("image/png;")))
+    .map(([ev, _]) => ev)
 
   const history$ = sources.onion.state$.fold((acc, x) => acc.concat([x]), [{}])
 
@@ -494,6 +598,31 @@ export default function Index(sources) {
       type: 'push',
       state: search,
     }))
+
+  // Create a session id and add it to all jobserver requests, GET, POST & DELETE
+  // Useful for load balancers
+  const session_id = Math.floor(Math.random() * 65535).toString(16) + "-" + Math.floor(Math.random() * 65535).toString(16)
+  const add_session_id_param = (httpRequest) => {
+    const url = httpRequest.url
+    const category = httpRequest.category
+    // Strip the suffix as we want one id for a given component
+    const cleanCategory = category.replace(/(GET|POST|DELETE)$/,'')
+    const param = "session_id=" + session_id + "-" + cleanCategory
+    const newUrl = url.includes("?") ? url + "&" + param : url + "?" + param // add extra parameter or create new parameter string
+    return { ...httpRequest, url: newUrl }
+  }
+  // if there is a send object, aka post request, add session_id
+  const add_session_id_post = (httpRequest) => {
+    if (httpRequest.send == undefined)
+      return httpRequest
+    else {
+      const category = httpRequest.category
+      // Strip the suffix as we want one id for a given component
+      const cleanCategory = category.replace(/(GET|POST|DELETE)$/,'')
+      const sessionString = session_id + "-" + cleanCategory
+      return { ...httpRequest, send: { ...httpRequest.send, session_id: sessionString } }
+    }
+  }
 
   return {
     log: xs.merge(
@@ -509,13 +638,14 @@ export default function Index(sources) {
       deploymentsReducer$,
       routerReducer$,
       pageStateReducer$,
-      page$.map(prop("onion")).filter(Boolean).flatten()
+      page$.map(prop("onion")).filter(Boolean).flatten(),
+      // killReducer$
     ),
     DOM: vdom$,
-    router: xs
-      .merge(router$, page$.map(prop("router")).filter(Boolean).flatten())
-      .remember(),
-    HTTP: page$.map(prop("HTTP")).filter(Boolean).flatten(),
+    router: page$.map(prop("router")).filter(Boolean).flatten(),
+    HTTP: page$.map(prop("HTTP")).filter(Boolean).flatten()
+      .map((req) => add_session_id_param(req)) // add a session_id parameter to all requests
+      .map((req) => add_session_id_post(req)), // add a session_id value to post requests
     vega: page$.map(prop("vega")).filter(Boolean).flatten(),
     alert: page$.map(prop("alert")).filter(Boolean).flatten(),
     preventDefault: xs.merge(
@@ -526,7 +656,10 @@ export default function Index(sources) {
       ghostModeWarning$,
       page$.map(prop("popup")).filter(Boolean).flatten(),
     ),
-    modal: page$.map(prop("modal")).filter(Boolean).flatten(),
+    modal: xs.merge(
+      routingConfirmation.modal,
+      page$.map(prop("modal")).filter(Boolean).flatten(),
+    ),
     ac: page$.map(prop("ac")).filter(Boolean).flatten(),
     sidenav: sidenavEvent$,
     slider: page$.map(prop("slider")).filter(Boolean).flatten(),
@@ -539,6 +672,7 @@ export default function Index(sources) {
       .debug("deployments"),
     history: historyDriver$,
     clipboard: page$.map(prop("clipboard")).filter(Boolean).flatten(),
+    windowRelocation: forcefulRouting$,
   }
 }
 

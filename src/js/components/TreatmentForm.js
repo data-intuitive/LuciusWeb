@@ -70,6 +70,11 @@ function TreatmentForm(sources) {
       SampleSelectionSink.HTTP,
       SignatureGeneratorSink.HTTP
     ),
+    asyncQueryStatus: xs.merge(
+      TreatmentCheckSink.asyncQueryStatus,
+      SampleSelectionSink.asyncQueryStatus,
+      SignatureGeneratorSink.asyncQueryStatus
+    ),
     output: signature$,
     modal: xs.merge(SignatureGeneratorSink.modal, SampleSelectionSink.modal),
     ac: TreatmentCheckSink.ac,

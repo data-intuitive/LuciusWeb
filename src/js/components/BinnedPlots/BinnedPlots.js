@@ -10,6 +10,7 @@ import { widthStream } from '../../utils/utils'
 import { loggerFactory } from '../../utils/logger'
 import { parse } from 'vega-parser'
 import { dirtyWrapperStream } from "../../utils/ui"
+import { BinnedZhangQuery } from '../../utils/asyncQuery.js';
 
 // const elementID = '#hist'
 // const component = 'histogram'
@@ -89,38 +90,15 @@ function BinnedPlots(sources) {
         .filter(state => state.core.input.signature != '')
         .remember()
 
-    const request$ = triggerRequest$
-        .map(state => {
-            return {
-                url: state.settings.api.url + '&classPath=com.dataintuitive.luciusapi.binnedZhang',
-                method: 'POST',
-                send: {
-                    query: state.core.input.signature,
-                    binsX: state.settings.plots.bins,
-                    binsY: state.settings.plots.binsX,
-                    filter: (typeof state.core.input.filter !== 'undefined') ? state.core.input.filter : ''
-                },
-                'category': 'plot'
-            }
-        })
+    const triggerObject$ = triggerRequest$
+        .map(state => ({
+            query: state.core.input.signature,
+            binsX: state.settings.plots.bins,
+            binsY: state.settings.plots.binsX,
+            filter: (typeof state.core.input.filter !== 'undefined') ? state.core.input.filter : ''
+        }))
 
-    const response$$ = sources.HTTP
-        .select('plot')
-
-    const invalidResponse$ = response$$
-        .map(response$ =>
-            response$
-            .filter(response => false) // ignore regular event
-            .replaceError(error => xs.of(error)) // emit error
-        )
-        .flatten()
-
-    const validResponse$ = response$$
-        .map(response$ =>
-            response$
-            .replaceError(error => xs.empty())
-        )
-        .flatten()
+    const queryData = BinnedZhangQuery(triggerObject$)(sources)
 
     // ========================================================================
 
@@ -138,14 +116,13 @@ function BinnedPlots(sources) {
         }))
     }).remember()
 
-    const data$ = validResponse$
-        .map(result => result.body.result.data)
-
     // Split the data$ stream in a stream of empty result sets and non-empty
     // Note: We only pad the zero-counts when the data is non-empty!
-    const emptyData$ = data$
+    const emptyData$ = queryData.data$
+        .map(data => data.data)
         .filter(data => isEmptyData(data))
-    const nonEmptyData$ = data$
+    const nonEmptyData$ = queryData.data$
+        .map(data => data.data)
         .filter(data => !isEmptyData(data))
         .compose(sampleCombine(baseGrid$))
         .map(([data, baseGrid]) => (data.concat(baseGrid)))
@@ -202,7 +179,7 @@ function BinnedPlots(sources) {
     }
 
     // A spinner while the data is loading...
-    const loadingVdom$ = request$
+    const loadingVdom$ = triggerObject$
         .mapTo(
             plotsContainerDifferent(
                 loadingWrapper('#simplot'),
@@ -238,8 +215,24 @@ function BinnedPlots(sources) {
         return div({ style: { opacity: 0.0 } }, [makeVega(el)])
     }
 
+    const killedWrapper = (el) => {
+        return div([
+            div('.small .active .valign-wrapper .center-align', { style: { 'z-index': 1, position: 'absolute', margin: '20px' } }, [
+                div('Job terminated by user')
+            ]),
+            div({ style: { opacity: 0.2 } }, [makeVega(el)]),
+        ])
+    }
+
+    const killedVdom$ = queryData.jobDeleted$
+        .mapTo(
+            plotsContainerDifferent(
+                killedWrapper('#simplot'),
+                killedWrapper('#hist')
+            ))
+
     // In case of error, show this
-    const errorVdom$ = invalidResponse$
+    const errorVdom$ = queryData.invalidData$
         .mapTo(plotsContainerDifferent(
             div('.red .white-text', [p('An error occured !!!')]),
             div('.red .white-text', [p('An error occured !!!')])))
@@ -252,6 +245,7 @@ function BinnedPlots(sources) {
             initVdom$,
             errorVdom$,
             loadingVdom$,
+            killedVdom$,
             emptyLoadedVdom$,
             nonEmptyLoadedVdom$
         ) )
@@ -262,19 +256,15 @@ function BinnedPlots(sources) {
     const defaultReducer$ = xs.of(prevState =>
             ({...prevState, core: {...prevState.core, input: { signature: '' } } })
         )
-        // Add input to state
+    // Add input to state
     const inputReducer$ = input$.map(i => prevState =>
             ({...prevState, core: {...prevState.core, input: i } })
         )
-        // Add request body to state
-    const requestReducer$ = request$.map(req => prevState =>
-            ({...prevState, core: {...prevState.core, request: req } })
-        )
-        // Add data from API to state, update output key when relevant
+    // Add data from API to state, update output key when relevant
     const dataReducer$ = nonEmptyData$.map(newData => prevState =>
             ({...prevState, core: {...prevState.core, data: newData } })
         )
-        // Add Vega spec (including data) to state
+    // Add Vega spec (including data) to state
     const specReducer$ = specs$.map(specInfo => prevState =>
         ({...prevState, core: {...prevState.core, vegaSpec: specInfo.spec } })
     )
@@ -288,14 +278,14 @@ function BinnedPlots(sources) {
             logger(baseGrid$, 'padding grid$')
         ),
         DOM: vdom$,
-        HTTP: request$,
+        HTTP: queryData.HTTP,
+        asyncQueryStatus: queryData.asyncQueryStatus,
         vega: runtimes$,
         onion: xs.merge(
             defaultReducer$,
             inputReducer$,
-            requestReducer$,
             dataReducer$,
-            specReducer$
+            specReducer$,
         )
     };
 

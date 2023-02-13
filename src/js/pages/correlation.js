@@ -1,4 +1,4 @@
-import { a, div, br, label, input, p, button, code, pre } from '@cycle/dom'
+import { div, span, i } from '@cycle/dom'
 import xs from 'xstream'
 import isolate from '@cycle/isolate'
 
@@ -164,6 +164,11 @@ function CorrelationWorkflow(sources) {
             correlationPlot.HTTP,
             // headTable.HTTP,
             // tailTable.HTTP
+        ),
+        asyncQueryStatus: xs.merge(
+            correlationForm.asyncQueryStatus,
+            filterForm.asyncQueryStatus,
+            correlationPlot.asyncQueryStatus,  
         ),
         popup: scenarioPopup$,
         modal: exporter.modal,

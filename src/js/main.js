@@ -28,6 +28,7 @@ import { makeSidenavDriver } from './drivers/makeSidenavDriver';
 import { makeSliderDriver } from './drivers/makeSliderDriver'
 import { makeFloatingActionButtonDriver } from './drivers/makeFloatingActionButtonDriver';
 import { makeClipboardDriver } from './drivers/makeClipboardDriver'
+import { windowRelocationDriver } from './drivers/windowRelocationDriver';
 import '../sass/main.scss'
 
 import fromEvent from 'xstream/extra/fromEvent'
@@ -53,6 +54,7 @@ const drivers = {
     slider: makeSliderDriver(),
     fab: makeFloatingActionButtonDriver(),
     clipboard: makeClipboardDriver(),
+    windowRelocation: windowRelocationDriver,
     deployments: () => xs.fromPromise(fetch('/deployments.json').then(m => m.json()))
 };
 

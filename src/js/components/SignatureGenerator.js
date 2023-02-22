@@ -257,14 +257,8 @@ function intent(domSource$) {
         .startWith(false)
         .remember()
 
-    const delete$ = domSource$
-        .select(".delete")
-        .events("click")
-        .debug("delete$")
-
     return {
         showMore$: showMore$,
-        delete$: delete$,
     }
 }
 

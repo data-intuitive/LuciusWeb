@@ -528,7 +528,6 @@ export default function Index(sources) {
 
   const killUser$ = sources.DOM.select(".kill-switch")
     .events("click")
-    .debug("killUser$")
 
   const asyncQueryStatus$ = page$.map(prop("asyncQueryStatus")).filter(Boolean).flatten()
   const foldedAsyncQueryStatus$ = asyncQueryStatus$.fold((acc, x) => ({...acc, ...x}), {})

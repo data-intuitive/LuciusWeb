@@ -13,7 +13,7 @@ const statisticsLens = {
 
 function Statistics(sources) {
 
-    const state$ = sources.onion.state$.debug("state$")
+    const state$ = sources.onion.state$
 
     const triggerObject$ = state$
         .take(1)

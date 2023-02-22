@@ -215,6 +215,21 @@ div.kill-switch {
     
 }
 
+div.component-error-state {
+    border-color: color('red', 'darken-2');
+    border-style: solid;
+    border-width: 5px;
+    background-color: color('red', 'lighten-4');
+    padding: 1em;
+    > p.header {
+        font-size: 1.5rem;
+        color: color('red', 'darken-4');
+    }
+    > p.text {
+        color: color('red', 'darken-4');
+    }
+}
+
 @import 'exporter';
 @import 'sample_selection_filters';
 @import 'init';

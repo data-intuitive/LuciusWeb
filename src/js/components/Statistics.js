@@ -83,7 +83,13 @@ function Statistics(sources) {
         ])
         )
 
-    const errorVdom$ = queryData.invalidData$.mapTo(div([p('An error occured !!!')]))
+    const errorVdom$ = queryData.invalidData$
+      .mapTo(
+        div(".component-error-state", [
+          p(".header", "An error occured!"),
+          p(".text", "Please try again in 5 minutes. If the issue persists please contact support.")
+        ])
+      )
 
     const killedVdom$ = queryData.jobDeleted$.mapTo(div([p('Job terminated by user')]))
 

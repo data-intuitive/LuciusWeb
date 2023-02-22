@@ -234,8 +234,15 @@ function BinnedPlots(sources) {
     // In case of error, show this
     const errorVdom$ = queryData.invalidData$
         .mapTo(plotsContainerDifferent(
-            div('.red .white-text', [p('An error occured !!!')]),
-            div('.red .white-text', [p('An error occured !!!')])))
+            div(".component-error-state", [
+                p(".header", "An error occured!"),
+                p(".text", "Please try again in 5 minutes. If the issue persists please contact support.")
+              ]),
+              div(".component-error-state", [
+                p(".header", "An error occured!"),
+                p(".text", "Please try again in 5 minutes. If the issue persists please contact support.")
+              ])
+        ))
 
     
     // Merge the streams, last event is shown...

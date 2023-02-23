@@ -824,7 +824,7 @@ function makeTable(tableComponent, tableLens, scope = "scope1", tableApiName = "
                 "background-color": state.settings.table.bgcolor,
               },
             },
-            p('Job terminated by user')
+            p('Job interrupted by user')
           ),
         ])
       )

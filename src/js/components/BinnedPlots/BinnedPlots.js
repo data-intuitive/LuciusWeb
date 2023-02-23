@@ -218,7 +218,7 @@ function BinnedPlots(sources) {
     const killedWrapper = (el) => {
         return div([
             div('.small .active .valign-wrapper .center-align', { style: { 'z-index': 1, position: 'absolute', margin: '20px' } }, [
-                div('Job terminated by user')
+                div('Job interrupted by user')
             ]),
             div({ style: { opacity: 0.2 } }, [makeVega(el)]),
         ])

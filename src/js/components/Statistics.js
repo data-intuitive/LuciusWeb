@@ -91,7 +91,7 @@ function Statistics(sources) {
         ])
       )
 
-    const killedVdom$ = queryData.jobDeleted$.mapTo(div([p('Job terminated by user')]))
+    const killedVdom$ = queryData.jobDeleted$.mapTo(div([p('Job interrupted by user')]))
 
     const vdom$ = xs.merge(
         initVdom$,

@@ -456,7 +456,7 @@ function SampleSelection(sources) {
       div(".col.s10.offset-s1.l10.offset-l1", [
         div('.card .orange .lighten-3', [
           div('.card-content .orange-text .text-darken-4', [
-            span('.card-title', 'Job terminated by user'),
+            span('.card-title', 'Job interrupted by user'),
           ])
         ])])
     )

@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## Version 5.4.5
+
+### Minor changes
+
+- Adapted the displayed message when the user interrupts a job
+- Improve the error message to be more informative and tweak the styling
+- Add some basic sanity checks on the API settings configuration
+
 ## Version 5.4.4
 
 ### Minor changes

@@ -790,7 +790,10 @@ function makeTable(tableComponent, tableLens, scope = "scope1", tableApiName = "
      * @type {Stream}
      */
     const errorVdom$ = queryData.invalidData$.mapTo(
-      div(".red .white-text", [p("An error occured !!!")])
+      div(".component-error-state", [
+        p(".header", "An error occured!"),
+        p(".text", "Please try again in 5 minutes. If the issue persists please contact support.")
+      ])
     )
 
     const killedVdom$ = queryData.jobDeleted$
@@ -821,7 +824,7 @@ function makeTable(tableComponent, tableLens, scope = "scope1", tableApiName = "
                 "background-color": state.settings.table.bgcolor,
               },
             },
-            p('Job terminated by user')
+            p('Job interrupted by user')
           ),
         ])
       )

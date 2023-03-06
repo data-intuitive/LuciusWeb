@@ -511,6 +511,28 @@ export default function Index(sources) {
 
   })
 
+  // Perform a brief cursory check on the API settings
+  const apiValues$ = state$
+    .map((state) => state.settings.api)
+    .compose(dropRepeats(equals))
+
+  apiValues$.addListener({
+    next: (values) => {
+      if (!values.url.includes("/jobs?"))
+        console.warn("Unexpected value for 'settings.api.url'; expected to contain '/jobs?'.")
+      if (!values.asyncUrlStart.includes("/jobs?"))
+        console.warn("Unexpected value for 'settings.api.asyncUrlStart'; expected to contain '/jobs?'.")
+      if (!values.asyncUrlStatus.includes("/jobs/"))
+        console.warn("Unexpected value for 'settings.api.asyncUrlStatus'; expected to end with '/jobs/'.")
+      if (isNaN(values.asyncStatusInterval))
+        console.warn("Unexpected value for 'settings.api.asyncStatusInterval'; should be a float.")
+      if (isNaN(values.longRunningTime))
+        console.warn("Unexpected value for 'settings.api.longRunningTime'; should be a float.")
+      if (isNaN(values.veryLongRunningTime))
+        console.warn("Unexpected value for 'settings.api.veryLongRunningTime'; should be a float.")
+    }
+  })
+
   // Capture link targets and send to router driver
   const domClicksWithFullPathname$ = sources.DOM.select("a")
     .events("click")
@@ -528,7 +550,6 @@ export default function Index(sources) {
 
   const killUser$ = sources.DOM.select(".kill-switch")
     .events("click")
-    .debug("killUser$")
 
   const asyncQueryStatus$ = page$.map(prop("asyncQueryStatus")).filter(Boolean).flatten()
   const foldedAsyncQueryStatus$ = asyncQueryStatus$.fold((acc, x) => ({...acc, ...x}), {})

@@ -13,7 +13,7 @@ const statisticsLens = {
 
 function Statistics(sources) {
 
-    const state$ = sources.onion.state$.debug("state$")
+    const state$ = sources.onion.state$
 
     const triggerObject$ = state$
         .take(1)
@@ -83,9 +83,15 @@ function Statistics(sources) {
         ])
         )
 
-    const errorVdom$ = queryData.invalidData$.mapTo(div([p('An error occured !!!')]))
+    const errorVdom$ = queryData.invalidData$
+      .mapTo(
+        div(".component-error-state", [
+          p(".header", "An error occured!"),
+          p(".text", "Please try again in 5 minutes. If the issue persists please contact support.")
+        ])
+      )
 
-    const killedVdom$ = queryData.jobDeleted$.mapTo(div([p('Job terminated by user')]))
+    const killedVdom$ = queryData.jobDeleted$.mapTo(div([p('Job interrupted by user')]))
 
     const vdom$ = xs.merge(
         initVdom$,

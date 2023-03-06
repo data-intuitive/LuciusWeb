@@ -181,12 +181,16 @@ function CorrelationPlot(sources) {
     // In case of error, show this
     const errorVdom$ = queryData.invalidData$
         .mapTo(
-            div('.red .white-text', [p('An error occured !!!')]))
+            div(".component-error-state", [
+                p(".header", "An error occured!"),
+                p(".text", "Please try again in 5 minutes. If the issue persists please contact support.")
+            ])
+        )
 
     const killedWrapper = (el) => {
         return div([
             div('.small .active .valign-wrapper .center-align', { style: { 'z-index': 1, position: 'absolute', margin: '20px' } }, [
-                div('Job terminated by user')
+                div('Job interrupted by user')
             ]),
             div({ style: { opacity: 0.2 } }, [makeVega(el)]),
         ])

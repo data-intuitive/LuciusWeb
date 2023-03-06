@@ -63,13 +63,16 @@ function model(newInput$, data$, showMore$) {
 function view(state$, data$, invalidData$, request$, delete$, geneAnnotationQuery) {
 
     const validSignature$ = data$
+        .filter(d => d.length != 0)
         .map(d => d.join(" "))
 
-    const invalidSignature$ = invalidData$.mapTo('')
+    const emptySignature$ = data$
+        .filter(d => d.length == 0)
+        .mapTo('')
 
     const amountOfInputs$ = state$.map((state) => (state.core?.input?.length)).compose(dropRepeats(equals)).remember()
 
-    const signature$ = xs.merge(validSignature$, invalidSignature$).remember()
+    const signature$ = xs.merge(validSignature$, emptySignature$).remember()
 
     const geneStyle = {
         style: {
@@ -187,7 +190,7 @@ function view(state$, data$, invalidData$, request$, delete$, geneAnnotationQuer
         })
         .startWith(div('.card .orange .lighten-3', []))
 
-    const invalidVdom$ = xs.combine(invalidSignature$, amountOfInputs$)
+    const emptyVdom$ = xs.combine(emptySignature$, amountOfInputs$)
         .map(([_, amount]) => div('.card .orange .lighten-3', [
             div('.card-content .red-text .text-darken-1', [
                 div('.row', { style: { fontSize: "16px", fontStyle: 'bold' } }, [
@@ -206,6 +209,13 @@ function view(state$, data$, invalidData$, request$, delete$, geneAnnotationQuer
         ]))
         .startWith(div('.card .orange .lighten-3', []))
 
+    const invalidVdom$ = invalidData$.mapTo(
+        div(".component-error-state", [
+            p(".header", "An error occured!"),
+            p(".text", "Please try again in 5 minutes. If the issue persists please contact support.")
+          ])
+    )
+
     const loadingVdom$ = request$
         .mapTo(
             div('.card .orange .lighten-3', [
@@ -223,13 +233,13 @@ function view(state$, data$, invalidData$, request$, delete$, geneAnnotationQuer
         .mapTo(
             div('.card .orange .lighten-3', [
                 div('.card-content .orange-text .text-darken-4', [
-                    span('.card-title', 'Job terminated by user'),
+                    span('.card-title', 'Job interrupted by user'),
                 ])
             ]))
         .remember()
 
     // Wrap component vdom with an extra div that handles being dirty
-    const vdom$ = dirtyWrapperStream( state$, xs.merge(loadingVdom$, invalidVdom$, validVdom$, deleteVdom$) )
+    const vdom$ = dirtyWrapperStream( state$, xs.merge(loadingVdom$, emptyVdom$, validVdom$, invalidVdom$, deleteVdom$) )
 
     return {
         vdom$: vdom$,
@@ -257,14 +267,8 @@ function intent(domSource$) {
         .startWith(false)
         .remember()
 
-    const delete$ = domSource$
-        .select(".delete")
-        .events("click")
-        .debug("delete$")
-
     return {
         showMore$: showMore$,
-        delete$: delete$,
     }
 }
 
